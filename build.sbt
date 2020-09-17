@@ -1,49 +1,37 @@
-import Dependencies._
+import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport.jsEnv
+import sbt.Keys.testFrameworks
 
-enablePlugins(ScalaJSPlugin,ScalaJSBundlerPlugin)
-
-// ECMAScript
-scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.ESModule) }
-// CommonJS
-scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.CommonJSModule) }
-
-
-ThisBuild / scalaVersion     := "2.13.1"
-ThisBuild / version          := "0.1.0-SNAPSHOT"
-ThisBuild / organization     := "com.example"
-ThisBuild / organizationName := "example"
+ThisBuild / organization := "org.inrae"
+ThisBuild / scalaVersion := "2.13.3"
+ThisBuild / version      := "0.1"
+ThisBuild / name         := "Easy Sparql"
 
 val playJson   = "com.typesafe.play" %% "play-json" % "2.8.1"
-val jena       = "org.apache.jena" % "apache-jena" % "3.14.0" pomOnly()
 val pprint     = "com.lihaoyi" %% "pprint" % "0.5.6"
 
 lazy val root = (project in file("."))
-  .aggregate(lib.js, lib.jvm)
+  .aggregate(es.js, es.jvm)
   .settings(
-    publish := {},
-    publishLocal := {},
+    // crossScalaVersions must be set to Nil on the aggregating project
+    crossScalaVersions := Nil,
+    publish / skip := true
   )
 
-lazy val lib = crossProject(JSPlatform, JVMPlatform).in(file(".")).
-  settings(
-    name := "HelloWorld",
-    version := "0.1-SNAPSHOT",
-    libraryDependencies ++= Seq(playJson,pprint),
-    libraryDependencies += scalaTest % Test,
-    scalacOptions ++= Seq("-deprecation", "-feature")
-  ).
-  jvmSettings(
-    // Add JVM-specific settings here
-    libraryDependencies += "org.scala-js" %% "scalajs-stubs" % "1.0.0" % "provided",
-    libraryDependencies ++= Seq(jena),
-  ).
-  jsSettings(
-    // Add JS-specific settings her
-    /*npmDependencies in Compile ++= Seq(
-      "@comunica/actor-init-sparql" -> "last",
-    ) ,*/
-    scalaJSUseMainModuleInitializer := true,
-    
-  )
-
-// See https://www.scala-sbt.org/1.x/docs/Using-Sonatype.html for instructions on how to publish to Sonatype.
+// cross-project , documentation : https://github.com/portable-scala/sbt-crossproject
+lazy val es =
+// select supported platforms
+  crossProject(JSPlatform, JVMPlatform).in(file("."))
+    .settings(
+      libraryDependencies ++= Seq(playJson,pprint),
+      libraryDependencies += "com.lihaoyi" %%% "scalatags" % "0.8.5",
+      libraryDependencies += "com.lihaoyi" %%% "utest" % "0.7.4" % "test",
+      testFrameworks += new TestFramework("utest.runner.Framework"),
+    )
+    .jsSettings(
+      scalaJSUseMainModuleInitializer := true,
+      libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "1.1.0",
+      jsEnv := new org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv(),
+      ) // defined in sbt-scalajs-crossproject
+    .jvmSettings(
+      libraryDependencies += "org.scala-js" %% "scalajs-stubs" % "1.0.0" % "provided",
+    )

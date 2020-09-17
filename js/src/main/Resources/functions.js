@@ -1,1 +1,0 @@
-module.exports = (first, second) => `Konrad says ${first} plus ${second} is ${first + second}`;
