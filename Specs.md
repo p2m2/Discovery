@@ -32,13 +32,16 @@ https://madewithsvelte.com/sveltestrap
 
 ```javascript=
 query = SW({
-   endpoints : [ "http://...." ],
-   request : {
-       method   : POST,
-       login    : ...,
-       password : ...,
-   },
-   
+   sources : [
+    {
+        id : "idEnpd",
+        type : "endpoint", 
+        url : "http://...." ],
+        method   : POST,
+        login    : ...,
+        password : ...
+   }],
+
    prefixes : {
        owl : 'http://www.w3.org/2002/07/owl#',
        foaf: 'http://xmlns.com/foaf/0.1/',
@@ -67,6 +70,11 @@ query = SW({
           function fallBack(uri) => { /* *something /}]
    }
 })
+```
+### source definition
+
+```
+type : endpoint | ldfragment | csv
 ```
 
 ### Natives decorations all URI

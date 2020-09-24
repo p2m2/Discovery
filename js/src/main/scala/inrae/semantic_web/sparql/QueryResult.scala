@@ -1,12 +1,12 @@
 package inrae.semantic_web.sparql
 
-case class QueryResult(executor: Any , query: Any) {
+case class QueryResult(executor: Any, query: Any) {
   def print(): Unit = {
-    None : Option[String]
+    None: Option[String]
   }
 
   def asJson(): Option[String] = {
-    None : Option[String]
+    None: Option[String]
   }
 
   def asJsonOrError(): String = {
@@ -14,7 +14,7 @@ case class QueryResult(executor: Any , query: Any) {
   }
 
   def asXML(): Option[String] = {
-    None : Option[String]
+    None: Option[String]
   }
 
   def asXMLOrError(): String = {
@@ -22,7 +22,7 @@ case class QueryResult(executor: Any , query: Any) {
   }
 
   def asCSV(): Option[String] = {
-    None : Option[String]
+    None: Option[String]
   }
 
   def asCSVOrError(): String = {

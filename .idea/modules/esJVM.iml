@@ -17,8 +17,9 @@
     <orderEntry type="library" name="sbt: com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.10.1:jar" level="project" />
     <orderEntry type="library" name="sbt: com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.10.1:jar" level="project" />
     <orderEntry type="library" name="sbt: com.lihaoyi:fansi_2.13:0.2.7:jar" level="project" />
-    <orderEntry type="library" name="sbt: com.lihaoyi:geny_2.13:0.5.1:jar" level="project" />
+    <orderEntry type="library" name="sbt: com.lihaoyi:geny_2.13:0.6.2:jar" level="project" />
     <orderEntry type="library" name="sbt: com.lihaoyi:pprint_2.13:0.5.6:jar" level="project" />
+    <orderEntry type="library" name="sbt: com.lihaoyi:requests_2.13:0.6.5:jar" level="project" />
     <orderEntry type="library" name="sbt: com.lihaoyi:scalatags_2.13:0.8.5:jar" level="project" />
     <orderEntry type="library" name="sbt: com.lihaoyi:sourcecode_2.13:0.2.1:jar" level="project" />
     <orderEntry type="library" scope="TEST" name="sbt: com.lihaoyi:utest_2.13:0.7.4:jar" level="project" />

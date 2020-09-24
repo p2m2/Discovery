@@ -6,7 +6,7 @@ import inrae.semantic_web.rdf._
 import inrae.semantic_web.internal._
 import inrae.semantic_web.sparql.QueryRunner
 
-class SW( var config: Config = null ) {
+class SW( var config: StatementConfiguration = null ) {
 
   /* root node */
   private var rootNode   : Root = new Root()
@@ -89,8 +89,7 @@ class SW( var config: Config = null ) {
     println(query)
     println(" ------------------------------- RESULT ----------------------------- ")
 
-
-    val dbpediaRunner = QueryRunner("http://dbpedia.org/sparql")
+    val dbpediaRunner = QueryRunner("http://dbpedia.org/sparql",config)
     val result = dbpediaRunner
       .query(query)
     result.asJson()

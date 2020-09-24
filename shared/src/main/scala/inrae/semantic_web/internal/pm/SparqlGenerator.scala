@@ -1,6 +1,6 @@
 package inrae.semantic_web.pm
 
-import inrae.semantic_web.Config
+import inrae.semantic_web.StatementConfiguration
 import inrae.semantic_web.internal._
 
 /**
@@ -8,15 +8,15 @@ import inrae.semantic_web.internal._
  */
 class SparqlGenerator  {
 
-    def prolog( sw: Config, n: Root ) : String = {
+    def prolog(sw: StatementConfiguration, n: Root ) : String = {
         "SELECT * { "
     }
 
-    def solutionModifier ( sw: Config, n: Root ) : String = {
+    def solutionModifier (sw: StatementConfiguration, n: Root ) : String = {
         "}"
     } 
 
-    def body( sw: Config, n: Node, varIdSire : String = "" , ms : Map[String,Int] = Map[String,Int]())  : String = {
+    def body(sw: StatementConfiguration, n: Node, varIdSire : String = "", ms : Map[String,Int] = Map[String,Int]())  : String = {
         
         val k : String = n match {      
             case node : Something          => "something"  
