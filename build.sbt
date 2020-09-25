@@ -25,7 +25,7 @@ lazy val es =
       libraryDependencies ++= Seq(playJson,pprint),
       libraryDependencies += "com.lihaoyi" %%% "scalatags" % "0.8.5",
       libraryDependencies += "com.lihaoyi" %%% "utest" % "0.7.4" % "test",
-      libraryDependencies += "org.scalaj" %% "scalaj-http" % "2.4.2",
+      libraryDependencies += "com.lihaoyi" %%% "upickle" % "1.2.0",
       testFrameworks += new TestFramework("utest.runner.Framework")
     )
     .jsSettings(
@@ -35,5 +35,6 @@ lazy val es =
       ) // defined in sbt-scalajs-crossproject
     .jvmSettings(
       libraryDependencies += "org.scala-js" %% "scalajs-stubs" % "1.0.0" % "provided",
-      libraryDependencies += "org.dispatchhttp" %% "dispatch-core" % "1.2.0"
+      libraryDependencies += "org.dispatchhttp" %% "dispatch-core" % "1.2.0",
+      libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.2.3"
     )

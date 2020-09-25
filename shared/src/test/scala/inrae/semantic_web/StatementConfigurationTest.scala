@@ -34,7 +34,7 @@ object StatementConfigurationTest extends TestSuite {
             | "sources" : [{
             |   "id"  : "dbpedia",
             |   "url" : "https://dbpedia.org/sparql",
-            |   "type" : "tps",
+            |   "typ" : "tps",
             |   "method" : "POST"
             | }]}
             |""".stripMargin)
@@ -42,13 +42,26 @@ object StatementConfigurationTest extends TestSuite {
 
     test("Create a simple source") {
       val configDbpediaBasic: StatementConfiguration = new StatementConfiguration()
-      configDbpediaBasic.setConfig(StatementConfigurationJson(Seq(Source("dbpedia","http://test","tps"))))
+      val dbname = "dbpedia"
+      val url= "http://test"
+      val typ = "tps"
+      configDbpediaBasic.setConfig(configDbpediaBasic.StatementConfigurationJson(Seq(configDbpediaBasic.Source(dbname,url,typ))))
+      val source = configDbpediaBasic.source("dbpedia")
 
-      println(configDbpediaBasic.source("dbpedia"))
+      assert( source.id == dbname )
+      assert( source.url == url )
+      assert( source.typ == typ )
     }
 
-    test("Create a query finding a subject") {
+    test("Create a config with a bad tag ") {
 
+      val configDbpediaBasic: StatementConfiguration = new StatementConfiguration()
+      configDbpediaBasic.setConfigString(
+        """
+          |{
+          | "hello" : [{
+          | }]}
+          |""".stripMargin)
     }
   }
 }
