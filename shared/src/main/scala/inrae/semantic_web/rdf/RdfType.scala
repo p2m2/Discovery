@@ -6,11 +6,22 @@ case class Triple(s: RdfType, p: RdfType, o: RdfType)
 
 trait RdfType
 
-case class URI (var value : String) extends RdfType {
+case class URI (var localName : String,var nameSpace : String = "") extends RdfType {
   override def toString() : String = {
-    return "<"+value+">"
+    nameSpace match {
+      case "" => "<"+localName+">"
+      case _ => "<"+nameSpace + "/" + localName+">"
+    }
+  }
+
+}
+
+case class Anonymous(var id: String) extends RdfType {
+  override def toString() : String = {
+    return "anonymous:"+id
   }
 }
+
 case class PropertyPath(var value : String) extends RdfType {
   override def toString() : String = {
     return value

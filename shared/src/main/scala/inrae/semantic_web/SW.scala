@@ -4,9 +4,9 @@ import java.util.UUID.randomUUID
 
 import inrae.semantic_web.rdf._
 import inrae.semantic_web.internal._
-import inrae.semantic_web.sparql.QueryRunner
+import inrae.semantic_web.sparql._
 
-class SW( var config: StatementConfiguration = null ) {
+class SW(var config: StatementConfiguration) {
 
   /* root node */
   private var rootNode   : Root = new Root()
@@ -82,17 +82,20 @@ class SW( var config: StatementConfiguration = null ) {
     return sg.body(config, rootNode)
   }
 
-  def select() : Option[String] = {
+  def select() : QueryResult = {
     val sg = new pm.SparqlGenerator()
     val query = sg.prolog(config, rootNode ) + sg.body(config, rootNode ) +sg.solutionModifier(config, rootNode)
     println(" ------------------------------- SPARQL ----------------------------- ")
     println(query)
     println(" ------------------------------- RESULT ----------------------------- ")
 
-    val dbpediaRunner = QueryRunner("http://dbpedia.org/sparql",config)
-    val result = dbpediaRunner
-      .query(query)
-    result.asJson()
-    None : Option[String]
+    //try {
+      config.conf.sources
+        .map(source => QueryRunner(source))
+        .map(runner => runner.query(query))
+        .reduce((a, b) => a)
+    //} catch {
+     // case e : Exception => { println(" ---- **  None source are defined ** ----- ") ;  }
+    //}
   }
 }

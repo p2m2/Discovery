@@ -9,8 +9,7 @@ import upickle.default.{macroRW, ReadWriter => RW}
  * @param json_conf
  */
 
-class StatementConfiguration() {
-
+object ConfigurationObject {
   case class Source(
                      id:String, /* identify the source endpoint */
                      url: String, /* url access */
@@ -32,22 +31,17 @@ class StatementConfiguration() {
   object StatementConfigurationJson{
     implicit val rw: RW[StatementConfigurationJson] = macroRW
   }
-  /*
-  implicit val StatementConfigurationJsonReadWrite: ReadWriter[StatementConfigurationJson] =
-    readwriter[Seq[Source]].bimap[StatementConfigurationJson](_.sources, StatementConfigurationJson(_))
+}
 
-  implicit val SourceReadWrite: ReadWriter[Source] =
-    ReadWriter.merge(
-      macroRW[Source]
-    )
-*/
-  var conf: StatementConfigurationJson = new StatementConfigurationJson(Seq[Source]())
+class StatementConfiguration {
+
+  var conf: ConfigurationObject.StatementConfigurationJson = new ConfigurationObject.StatementConfigurationJson(Seq[ConfigurationObject.Source]())
 
   /**
    * Set a config using class definition
    * @param conf
    */
-  def setConfig(conf_ext : StatementConfigurationJson) : Unit = {
+  def setConfig(conf_ext : ConfigurationObject.StatementConfigurationJson) : Unit = {
       conf = conf_ext
   }
 
@@ -57,17 +51,17 @@ class StatementConfiguration() {
    */
   def setConfigString(json_conf: String) : Unit = {
     try {
-      conf = upickle.default.read[StatementConfigurationJson](json_conf)
+      conf = upickle.default.read[ConfigurationObject.StatementConfigurationJson](json_conf)
     } catch {
       case e1: upickle.core.AbortException => System.err.println(e1)
     }
   }
 
-  def source(idname : String) : Source = {
+  def source(idname : String) : ConfigurationObject.Source = {
     //(json \ "sources").as[Seq[Source]].find( source => source.id == idname )
 
     conf.sources.find(source => source.id == idname ) match {
-      case Some(v : Source) => v
+      case Some(v : ConfigurationObject.Source) => v
       //case Some(lv : Seq[Source]) => lv[0]
       case None => throw new Exception("Unknown source id:"+idname )
     }

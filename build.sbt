@@ -7,6 +7,7 @@ ThisBuild / version      := "0.1"
 ThisBuild / name         := "Easy Sparql"
 
 val playJson   = "com.typesafe.play" %% "play-json" % "2.8.1"
+val jena       = "org.apache.jena" % "apache-jena" % "3.14.0" pomOnly()
 val pprint     = "com.lihaoyi" %% "pprint" % "0.5.6"
 
 lazy val root = (project in file("."))
@@ -35,6 +36,6 @@ lazy val es =
       ) // defined in sbt-scalajs-crossproject
     .jvmSettings(
       libraryDependencies += "org.scala-js" %% "scalajs-stubs" % "1.0.0" % "provided",
-      libraryDependencies += "org.dispatchhttp" %% "dispatch-core" % "1.2.0",
-      libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.2.3"
+      libraryDependencies += "ch.qos.logback"          %  "logback-classic" % "1.2.3",
+      libraryDependencies ++= Seq(jena)
     )

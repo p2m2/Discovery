@@ -1,23 +1,36 @@
 package inrae.semantic_web.sparql
-import inrae.semantic_web.StatementConfiguration
-import dispatch._, Defaults._
 
-case class QueryRunner(service: String, config: StatementConfiguration) {
+import inrae.semantic_web._
+import org.apache.jena.query._
+import org.apache.jena.rdf.model._
+
+case class QueryRunner(source: ConfigurationObject.Source) {
 
   def setServiceUrlRequest() : Unit = {
     println("")
   }
 
   def query(queryStr: String): QueryResult = {
-    //val r: String = "nothing"
+    /* Graph equiv Model => defined in configuration */
+    val model = ModelFactory.createDefaultModel
+    val query = QueryFactory.create(queryStr)
 
-    val svc = url("http://api.hostip.info/country.php")
-    val country = Http.default(svc OK as.String)
+    //val authenticator = new Nothing("user", "password".toCharArray)
+    val qexec : QueryExecution = QueryExecutionFactory.sparqlService(source.url,query)
+    val results : ResultSet = qexec.execSelect()
 
-    for (c <- country)
-      println(c)
+    QueryResult(ResultSetFactory.copyResults(results))
+  }
 
+  def ask(): Unit = {
 
-    QueryResult("","")
+  }
+
+  def construct() : Unit = {
+
+  }
+
+  def describe() : Unit = {
+
   }
 }
