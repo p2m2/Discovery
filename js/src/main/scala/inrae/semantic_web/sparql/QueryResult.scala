@@ -1,35 +1,18 @@
 package inrae.semantic_web.sparql
 
-case class QueryResult(executor: Any, query: Any) {
+import inrae.http.ResultSet
+
+case class QueryResult(results : ResultSet) {
   def print(): Unit = {
     None: Option[String]
   }
 
-  def asJson(): Option[String] = {
-    None: Option[String]
+  def get(): ResultsFormat = {
+
+    ResultsFormat()
   }
 
-  def asJsonOrError(): String = {
-    ""
-  }
-
-  def asXML(): Option[String] = {
-    None: Option[String]
-  }
-
-  def asXMLOrError(): String = {
-    ""
-  }
-
-  def asCSV(): Option[String] = {
-    None: Option[String]
-  }
-
-  def asCSVOrError(): String = {
-    ""
-  }
-
-  def asTextOrError(): String = {
-    ""
+  def getString() : String = {
+    "---"
   }
 }

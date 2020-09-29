@@ -40,7 +40,7 @@ case class QueryResult(results : ResultSet) {
 
       rf.rows = rf.rows :+ rf.ResultsRow(values)
     }
-    
+
     return rf
   }
 }

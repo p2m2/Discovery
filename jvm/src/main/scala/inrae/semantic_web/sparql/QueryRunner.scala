@@ -6,10 +6,6 @@ import org.apache.jena.rdf.model._
 
 case class QueryRunner(source: ConfigurationObject.Source) {
 
-  def setServiceUrlRequest() : Unit = {
-    println("")
-  }
-
   def query(queryStr: String): QueryResult = {
     /* Graph equiv Model => defined in configuration */
     val model = ModelFactory.createDefaultModel

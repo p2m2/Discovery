@@ -32,7 +32,7 @@ object SWTest extends TestSuite {
         .isSubjectOf(URI("http://www.w3.org/2002/07/owl#sameAs"))
         .select
         .get
-      pprint.pprintln(r)
+     // pprint.pprintln(r)
     }
   }
 }
