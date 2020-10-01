@@ -15,6 +15,8 @@ case class Request(var url : String) {
     xhr.onload = { (e: dom.Event) =>
       if (xhr.status == 200) {
           println(xhr.responseText)
+      } else {
+        println(e);
       }
     }
 
@@ -34,6 +36,8 @@ case class Request(var url : String) {
     xhr.onload = { (e: dom.Event) =>
       if (xhr.status == 200) {
         println(xhr.responseText)
+      } else {
+        println(e);
       }
     }
 

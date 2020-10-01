@@ -21,6 +21,7 @@ lazy val root = (project in file("."))
 lazy val es =
 // select supported platforms
   crossProject(JSPlatform, JVMPlatform).in(file("."))
+    .jsConfigure(_.enablePlugins(ScalaJSBundlerPlugin))
     .settings(
       libraryDependencies ++= Seq(playJson),
       libraryDependencies += "com.lihaoyi" %%% "scalatags" % "0.8.5",
@@ -30,10 +31,11 @@ lazy val es =
       testFrameworks += new TestFramework("utest.runner.Framework")
     )
     .jsSettings(
-      scalaJSUseMainModuleInitializer := true,
+      //scalaJSUseMainModuleInitializer := true,
+      requireJsDomEnv in Test := true,
+      npmDependencies in Compile += "jsdom" -> "16.4.0",
       libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "1.1.0",
       libraryDependencies +=  "org.scalaj" %% "scalaj-http" % "2.4.2",
-      libraryDependencies += "com.softwaremill.sttp.client" %%% "core" % "2.2.9",
       jsEnv := new org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv(),
       ) // defined in sbt-scalajs-crossproject
     .jvmSettings(

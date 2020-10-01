@@ -7,6 +7,7 @@
     <content url="file://$MODULE_DIR$/../../js">
       <sourceFolder url="file://$MODULE_DIR$/../../js/src/main/scala" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/../../js/src/test/scala" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../../js/src/main/resources" type="java-resource" />
       <excludeFolder url="file://$MODULE_DIR$/../../js/target" />
     </content>
     <orderEntry type="inheritedJdk" />
@@ -29,6 +30,8 @@
     <orderEntry type="library" name="sbt: com.lihaoyi:upickle-implicits_sjs1_2.13:1.2.0:jar" level="project" />
     <orderEntry type="library" name="sbt: com.lihaoyi:upickle_sjs1_2.13:1.2.0:jar" level="project" />
     <orderEntry type="library" scope="TEST" name="sbt: com.lihaoyi:utest_sjs1_2.13:0.7.4:jar" level="project" />
+    <orderEntry type="library" name="sbt: com.softwaremill.sttp.client:core_sjs1_2.13:2.2.9:jar" level="project" />
+    <orderEntry type="library" name="sbt: com.softwaremill.sttp.model:core_sjs1_2.13:1.1.4:jar" level="project" />
     <orderEntry type="library" name="sbt: com.typesafe.play:play-functional_2.13:2.8.1:jar" level="project" />
     <orderEntry type="library" name="sbt: com.typesafe.play:play-json_2.13:2.8.1:jar" level="project" />
     <orderEntry type="library" name="sbt: joda-time:joda-time:2.10.5:jar" level="project" />
@@ -40,5 +43,6 @@
     <orderEntry type="library" name="sbt: org.scala-lang.modules:scala-collection-compat_sjs1_2.13:2.1.4:jar" level="project" />
     <orderEntry type="library" name="sbt: org.scala-lang:scala-library:2.13.3:jar" level="project" />
     <orderEntry type="library" name="sbt: org.scala-lang:scala-reflect:2.13.3:jar" level="project" />
+    <orderEntry type="library" name="sbt: org.scalaj:scalaj-http_2.13:2.4.2:jar" level="project" />
   </component>
 </module>
