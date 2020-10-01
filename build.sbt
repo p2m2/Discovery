@@ -21,19 +21,18 @@ lazy val root = (project in file("."))
 lazy val es =
 // select supported platforms
   crossProject(JSPlatform, JVMPlatform).in(file("."))
-    .jsConfigure(_.enablePlugins(ScalaJSBundlerPlugin))
+    //.jsConfigure(_.enablePlugins(ScalaJSBundlerPlugin))
     .settings(
       libraryDependencies ++= Seq(playJson),
       libraryDependencies += "com.lihaoyi" %%% "scalatags" % "0.8.5",
       libraryDependencies += "com.lihaoyi" %%% "utest" % "0.7.4" % "test",
       libraryDependencies += "com.lihaoyi" %%% "upickle" % "1.2.0",
-      libraryDependencies += "com.lihaoyi" %% "pprint" % "0.5.6",
       testFrameworks += new TestFramework("utest.runner.Framework")
     )
     .jsSettings(
       //scalaJSUseMainModuleInitializer := true,
-      requireJsDomEnv in Test := true,
-      npmDependencies in Compile += "jsdom" -> "16.4.0",
+      //requireJsDomEnv in Test := true,
+      //npmDependencies in Compile += "jsdom" -> "16.4.0",
       libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "1.1.0",
       libraryDependencies +=  "org.scalaj" %% "scalaj-http" % "2.4.2",
       jsEnv := new org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv(),

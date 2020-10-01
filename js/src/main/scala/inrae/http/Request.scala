@@ -3,6 +3,7 @@ import inrae.semantic_web.sparql.QueryResult
 import org.scalajs.dom
 
 import scala.concurrent.Future
+import scala.scalajs.js.URIUtils
 
 case class Request(var url : String) {
   var fd = new dom.FormData()
@@ -10,7 +11,7 @@ case class Request(var url : String) {
   def queryViaGet(query : String, mimetype : String) : dom.XMLHttpRequest = {
     val xhr = new dom.XMLHttpRequest()
 
-    xhr.open("GET", url, false);
+    xhr.open("GET", url);
     xhr.setRequestHeader("Content-Type", "application/sparql-query")
     xhr.setRequestHeader("Accept", mime(mimetype))
     fd.append("query",query)
@@ -31,39 +32,47 @@ case class Request(var url : String) {
   def queryViaPost(query : String, mimetype : String) : Future[QueryResult] = {
     val xhr = new dom.XMLHttpRequest()
 
-    xhr.open("POST", url, false);
+    xhr.open("POST", url);
     xhr.setRequestHeader("Content-Type", "application/sparql-query")
     xhr.setRequestHeader("Accept", mime(mimetype))
     fd.append("query",query)
 
     import scala.concurrent.ExecutionContext.Implicits.global
 
-    Future {
-      var qr_sub : QueryResult = QueryResult(" ** future not completed ** ", mimetype)
-      xhr.onload = { (e: dom.Event) =>
 
+
+    Future {
+      var qr_sub : Option[QueryResult] = None
+
+      xhr.onload = { (e: dom.Event) =>
+        print(xhr.responseText)
         if (xhr.status == 200) {
           val qr2 = mimetype match {
-            case "json" => qr_sub = QueryResult(xhr.responseText, mimetype)
-            case _ => qr_sub =  QueryResult(" ** not managed **",mimetype)
+            case "json" => qr_sub = Some(QueryResult(xhr.responseText, mimetype))
+            case _ => throw new Exception("Unknown formatter : "+mimetype)
           }
           //println(xhr.responseText)
-        } else {
-          qr_sub = QueryResult(" ** XMLHttpRequest status : "+xhr.status+" **",mimetype)
-        }
+        } else
+            throw new Exception("Error : "+xhr.status)
       }
+
       xhr.send(fd)
-      qr_sub
+
+      qr_sub match {
+        case Some(v) => v
+        case None => throw new Exception("********************************  Error Http Request ")
+      }
+
     }
   }
 
   def queryViaUrlEncodedPost(query : String, mimetype : String) : dom.XMLHttpRequest = {
     val xhr = new dom.XMLHttpRequest()
 
-    xhr.open("POST", url, false);
+    xhr.open("POST", url, true);
     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded")
     xhr.setRequestHeader("Accept", mime(mimetype))
-    fd.append("query",query)
+    fd.append("query",URIUtils.encodeURIComponent(query))
     xhr.send(fd)
     return xhr
   }

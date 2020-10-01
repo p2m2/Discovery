@@ -9,7 +9,7 @@ import inrae.semantic_web.internal._
 class SparqlGenerator  {
 
     def prolog(sw: StatementConfiguration, n: Root ) : String = {
-        "SELECT * { "
+        "SELECT * WHERE {"
     }
 
     def solutionModifier (sw: StatementConfiguration, n: Root ) : String = {
@@ -31,14 +31,17 @@ class SparqlGenerator  {
         val variableName : String = if (k != "" ) k+v.toString() else varIdSire
 
         val triplet : String = n match {
-            case node : SubjectOf          => "?" + varIdSire + " " + node.uri.toString() + " " + " ?"+ variableName 
-            case node : ObjectOf           => "?" + variableName + " " + node.uri.toString() + " " + "?"+ varIdSire
-            case node : Attribute          => "?" + variableName + " " + node.uri.toString() + " " + "?"+ varIdSire 
-            case node : Value              => "VALUES ?" +varIdSire+ " { " + node.uri.toString() + " }"
+            case node : SubjectOf          => "?" + varIdSire + " " +
+                                                    node.uri.toString() + " " + " ?"+ variableName +"\n"
+            case node : ObjectOf           => "?" + variableName + " " +
+                                                    node.uri.toString() + " " + "?"+ varIdSire+"\n"
+            case node : Attribute          => "?" + variableName + " " +
+                                                    node.uri.toString() + " " + "?"+ varIdSire +"\n"
+            case node : Value              => "VALUES ?" +varIdSire+ " { " + node.uri.toString() + " }\n"
             case _                         => ""
         }
        
-        triplet + "\n" + n.children.map( child => body( sw, child, variableName ,ms + (k -> (v+1) ))).mkString(" .")
+        triplet + n.children.map( child => body( sw, child, variableName ,ms + (k -> (v+1) ))).mkString(" .")
     } 
 }
 

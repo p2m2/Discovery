@@ -2,12 +2,15 @@ package inrae.semantic_web
 
 import upickle.default.{macroRW, ReadWriter => RW}
 
+import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
+
 /**
  * using doc to validate JSON config:
  * see https://www.playframework.com/documentation/2.8.x/ScalaJson
  *
  * @param json_conf
  */
+
 
 object ConfigurationObject {
   case class Source(
@@ -33,6 +36,7 @@ object ConfigurationObject {
   }
 }
 
+@JSExportTopLevel(name="EasySparqlStatementConfiguration")
 class StatementConfiguration {
 
   var conf: ConfigurationObject.StatementConfigurationJson = new ConfigurationObject.StatementConfigurationJson(Seq[ConfigurationObject.Source]())
@@ -41,6 +45,7 @@ class StatementConfiguration {
    * Set a config using class definition
    * @param conf
    */
+  @JSExport
   def setConfig(conf_ext : ConfigurationObject.StatementConfigurationJson) : Unit = {
       conf = conf_ext
   }
@@ -49,6 +54,7 @@ class StatementConfiguration {
    * set a config using string configuration
    * @param json_conf
    */
+  @JSExport
   def setConfigString(json_conf: String) : Unit = {
     try {
       conf = upickle.default.read[ConfigurationObject.StatementConfigurationJson](json_conf)
