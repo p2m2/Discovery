@@ -4,6 +4,9 @@ import inrae.semantic_web.{SW, StatementConfiguration}
 import inrae.semantic_web.rdf._
 import utest._
 
+import scala.util.{Failure, Success}
+import scala.concurrent.ExecutionContext.Implicits.global
+
 object SWTest extends TestSuite {
 
   def tests = Tests {
@@ -31,7 +34,12 @@ object SWTest extends TestSuite {
         .set(URI("http://dbpedia.org/resource/%C3%84lvdalen"))
         .isSubjectOf(URI("http://www.w3.org/2002/07/owl#sameAs"))
         .select
-        .get
+
+
+      r.onComplete {
+        case Success(result) => println(result.get)
+        case Failure(exception) => println(exception)
+      }
      // pprint.pprintln(r)
     }
   }

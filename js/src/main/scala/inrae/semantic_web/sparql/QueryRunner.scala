@@ -1,6 +1,8 @@
 package inrae.semantic_web.sparql
-import inrae.http.{Request, ResultSet}
+import inrae.http.Request
 import inrae.semantic_web.ConfigurationObject
+
+import scala.concurrent.Future
 
 /**
  *
@@ -8,10 +10,9 @@ import inrae.semantic_web.ConfigurationObject
  */
 case class QueryRunner(source: ConfigurationObject.Source) {
 
-  def query(queryStr: String): QueryResult = {
+  def query(queryStr: String): Future[QueryResult] = {
     val r = Request(source.url)
     r.queryViaPost(queryStr,"json")
-    QueryResult(ResultSet())
   }
 
   def ask(): Unit = {

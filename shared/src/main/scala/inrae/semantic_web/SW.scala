@@ -5,6 +5,7 @@ import java.util.UUID.randomUUID
 import inrae.semantic_web.rdf._
 import inrae.semantic_web.internal._
 import inrae.semantic_web.sparql._
+import scala.concurrent.{Future}
 
 class SW(var config: StatementConfiguration) {
 
@@ -82,7 +83,7 @@ class SW(var config: StatementConfiguration) {
     return sg.body(config, rootNode)
   }
 
-  def select() : QueryResult = {
+  def select() : Future[QueryResult] = {
     val sg = new pm.SparqlGenerator()
     val query = sg.prolog(config, rootNode ) + sg.body(config, rootNode ) +sg.solutionModifier(config, rootNode)
     println(" ------------------------------- SPARQL ----------------------------- ")
@@ -90,10 +91,13 @@ class SW(var config: StatementConfiguration) {
     println(" ------------------------------- RESULT ----------------------------- ")
 
     //try {
-      config.conf.sources
+    val futuresResults = config.conf.sources
         .map(source => QueryRunner(source))
         .map(runner => runner.query(query))
-        .reduce((a, b) => a)
+
+    import scala.concurrent.ExecutionContext.Implicits.global
+
+    Future.reduceLeft(futuresResults)((a, b) => a)
     //} catch {
      // case e : Exception => { println(" ---- **  None source are defined ** ----- ") ;  }
     //}

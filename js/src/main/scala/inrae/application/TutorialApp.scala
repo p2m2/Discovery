@@ -27,7 +27,7 @@ object TutorialApp {
       .set(URI("http://dbpedia.org/resource/%C3%84lvdalen"))
       .isSubjectOf(URI("http://www.w3.org/2002/07/owl#sameAs"))
       .select
-      .get
+
     print(r)
     //appendPar(document.body, "Hello World")
   }
