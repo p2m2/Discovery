@@ -1,7 +1,7 @@
 package inrae.semantic_web
 import scala.scalajs.js.annotation._
 import java.util.UUID.randomUUID
-//import scala.scalajs.js.JSConverters._
+import scala.scalajs.js.JSConverters._
 import scala.scalajs.js._
 
 import inrae.semantic_web.rdf._
@@ -112,12 +112,10 @@ class SW(var config: StatementConfiguration) {
      // case e : Exception => { println(" ---- **  None source are defined ** ----- ") ;  }
     //}
   }
-/*
+
   @JSExport("select")
   def selectJS(): Promise[QueryResult] = {
     implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
     select().toJSPromise
   }
-
- */
 }

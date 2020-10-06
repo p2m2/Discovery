@@ -40,5 +40,6 @@ lazy val es =
     .jvmSettings(
       libraryDependencies += "org.scala-js" %% "scalajs-stubs" % "1.0.0" % "provided",
       libraryDependencies += "ch.qos.logback"          %  "logback-classic" % "1.2.3",
+      libraryDependencies += "org.scala-js" %% "scalajs-stubs" % "1.0.0" % "provided",
       libraryDependencies ++= Seq(jena)
     )

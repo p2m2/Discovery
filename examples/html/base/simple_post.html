@@ -6,9 +6,9 @@
   </head>
   <body>
     <!-- Include Scala.js compiled code /scalajs-bundler/main/ -->
-    <script type="text/javascript" src="../../js/target/scala-2.13/es-fastopt.js"></script>
+    <script type="text/javascript" src="../../../js/target/scala-2.13/es-fastopt.js"></script>
 	
-
+    <pre id="demo"></pre>
   </body>
   <script>
       let config = new EasySparqlStatementConfiguration()
@@ -19,7 +19,7 @@
           "id"  : "dbpedia",
           "url" : "https://dbpedia.org/sparql",
           "typ" : "tps",
-          "method" : "GET"
+          "method" : "POST"
            }]}
           `)
         let query = new EasySparqlEngine(config);
@@ -31,6 +31,7 @@
 
         r.then((value) => {
           console.log(value);
+          document.getElementById("demo").appendChild(document.createTextNode(value));
         });
 
     </script>

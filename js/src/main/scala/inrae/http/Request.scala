@@ -4,31 +4,47 @@ import org.scalajs.dom
 
 import scala.concurrent.{Future,Promise}
 import scala.scalajs.js.URIUtils
+import scala.scalajs.js
 
 case class Request(var url : String) {
 
-  var fd = new dom.FormData()
+  def addData(keyname: String,value: String) = {
+    URIUtils.encodeURIComponent(keyname)+"="+URIUtils.encodeURIComponent(value)
+  }
 
+  def addQueryAsData(query : String) = {
+    addData("query",query)
+  }
 
-  def queryViaGet(query : String, mimetype : String) : dom.XMLHttpRequest = {
-    val xhr = new dom.XMLHttpRequest()
+  def addDefaultGraph(graphs : Seq[String]) = {
+    graphs.reduce( (g1,g2) => addData("default-graph-uri",g1)+"&"+addData("default-graph-uri",g2))
+  }
 
-    xhr.open("GET", url);
-    xhr.setRequestHeader("Content-Type", "application/sparql-query")
-    xhr.setRequestHeader("Accept", mime(mimetype))
-    fd.append("query",query)
+  def addNamedGraphUri(graphs : Seq[String]) = {
+    graphs.reduce( (g1,g2) => addData("named-graph-uri",g1)+"&"+addData("named-graph-uri",g2))
+  }
+
+  def send(xhr : dom.XMLHttpRequest, data: scala.scalajs.js.Any, mimetype : String) : Future[QueryResult] = {
+    val p = Promise[QueryResult]()
 
     xhr.onload = { (e: dom.Event) =>
+      print(xhr.responseText)
       if (xhr.status == 200) {
-          println(xhr.responseText)
-      } else {
-        println(e);
-      }
+        val qr2 = mimetype match {
+          case "json" => p success QueryResult(xhr.responseText, mimetype)
+          case _ => p.failure(new js.JavaScriptException("Unknown formatter : "+mimetype))
+        }
+        //println(xhr.responseText)
+      } else
+        throw new Exception("Error : "+xhr.responseText)
     }
 
-    xhr.send(fd)
+    xhr.onerror = { e: dom.ErrorEvent =>
+      p.failure(new js.JavaScriptException(xhr))
+    }
 
-    return xhr
+    xhr.send(data)
+    p.future
   }
 
   def queryViaPost(query : String, mimetype : String) : Future[QueryResult] = {
@@ -37,44 +53,32 @@ case class Request(var url : String) {
     xhr.open("POST", url);
     xhr.setRequestHeader("Content-Type", "application/sparql-query")
     xhr.setRequestHeader("Accept", mime(mimetype))
-    fd.append("query",query)
-
-    val p = Promise[QueryResult]()
-
-    xhr.onload = { (e: dom.Event) =>
-      print(xhr.responseText)
-      if (xhr.status == 200) {
-        val qr2 = mimetype match {
-          case "json" => p success QueryResult(xhr.responseText, mimetype)
-          case _ => throw new Exception("Unknown formatter : "+mimetype)
-        }
-        //println(xhr.responseText)
-      } else
-          throw new Exception("Error : "+xhr.responseText)
-    }
-    xhr.send(fd)
-    p.future
-
+    val data = addQueryAsData(query)
+    send(xhr,data,mimetype)
   }
 
-  def queryViaUrlEncodedPost(query : String, mimetype : String) : dom.XMLHttpRequest = {
+  def queryViaGet(query : String, mimetype : String) : Future[QueryResult] = {
+    val xhr = new dom.XMLHttpRequest()
+
+    xhr.open("GET", url+"?"+addQueryAsData(query));
+    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded")
+    xhr.setRequestHeader("Accept", mime(mimetype))
+
+    send(xhr,"",mimetype)
+  }
+
+
+
+  def queryViaUrlEncodedPost(query : String, mimetype : String) : Future[QueryResult] = {
     val xhr = new dom.XMLHttpRequest()
 
     xhr.open("POST", url, true);
     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded")
-    xhr.setRequestHeader("Accept", mime(mimetype))
-    fd.append("query",URIUtils.encodeURIComponent(query))
-    xhr.send(fd)
-    return xhr
+    val data = addQueryAsData(query)
+    send(xhr,data,mimetype)
   }
 
-  def setDefaultGraph(graphs : Seq[String]) = {
-    fd.append("default-graph-uri",graphs)
-  }
 
-  def setNamedGraphUri(graphs : Seq[String]) = {
-    fd.append("named-graph-uri",graphs)
-  }
 
   def mime(idx : String) : String = {
     idx match {

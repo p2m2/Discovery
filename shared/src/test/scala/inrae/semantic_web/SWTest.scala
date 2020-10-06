@@ -50,6 +50,15 @@ object SWTest extends TestSuite {
           case Failure(exception) => println(exception); assert(false)
         }
 
+      val query2 = new SW(config)
+
+      query2.something("h1")
+        .isSubjectOf(URI("http://www.w3.org/2002/07/owl#sameAs"))
+        .select
+        .onComplete {
+          case Success(result) => println(result.get); assert(true)
+          case Failure(exception) => println(exception); assert(false)
+        }
     }
   }
 }
