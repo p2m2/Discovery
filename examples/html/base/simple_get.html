@@ -12,13 +12,14 @@
   </body>
   <script>
       let config = new EasySparqlStatementConfiguration()
+
       config.setConfigString(`
           {
           "sources" : [{
           "id"  : "dbpedia",
           "url" : "https://dbpedia.org/sparql",
           "typ" : "tps",
-          "method" : "POST"
+          "method" : "GET"
            }]}
           `)
         let query = new EasySparqlEngine(config);
