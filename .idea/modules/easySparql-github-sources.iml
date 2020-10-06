@@ -20,9 +20,7 @@
     <orderEntry type="library" name="sbt: com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.10.1:jar" level="project" />
     <orderEntry type="library" name="sbt: com.github.andrewoma.dexx:collection:0.7:jar" level="project" />
     <orderEntry type="library" name="sbt: com.github.jsonld-java:jsonld-java:0.12.5:jar" level="project" />
-    <orderEntry type="library" name="sbt: com.lihaoyi:fansi_2.13:0.2.7:jar" level="project" />
     <orderEntry type="library" name="sbt: com.lihaoyi:geny_2.13:0.6.2:jar" level="project" />
-    <orderEntry type="library" name="sbt: com.lihaoyi:pprint_2.13:0.5.6:jar" level="project" />
     <orderEntry type="library" name="sbt: com.lihaoyi:scalatags_2.13:0.8.5:jar" level="project" />
     <orderEntry type="library" name="sbt: com.lihaoyi:sourcecode_2.13:0.2.1:jar" level="project" />
     <orderEntry type="library" name="sbt: com.lihaoyi:ujson_2.13:1.2.0:jar" level="project" />

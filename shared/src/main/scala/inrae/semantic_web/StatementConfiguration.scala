@@ -72,4 +72,8 @@ class StatementConfiguration {
       case None => throw new Exception("Unknown source id:"+idname )
     }
   }
+
+  def sources() : Seq[ConfigurationObject.Source] = {
+    conf.sources
+  }
 }

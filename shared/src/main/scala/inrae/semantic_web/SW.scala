@@ -94,23 +94,20 @@ class SW(var config: StatementConfiguration) {
   }
 
   def select() : Future[QueryResult] = {
-    val sg = new pm.SparqlGenerator()
-    val query = sg.prolog(config, rootNode ) + "\n" + sg.body(config, rootNode ) + sg.solutionModifier(config, rootNode)
-    println(" ------------------------------- SPARQL ----------------------------- ")
-    println(query)
-    println(" ------------------------------- RESULT ----------------------------- ")
 
-    //try {
-    val futuresResults = config.conf.sources
-        .map(source => QueryRunner(source))
-        .map(runner => runner.query(query))
+    //val sg = new pm.SparqlGenerator()
+    //val query = sg.prolog(config, rootNode ) + "\n" + sg.body(config, rootNode ) + sg.solutionModifier(config, rootNode)
+    //println(" ------------------------------- SPARQL ----------------------------- ")
+    //println(query)
+    //println(" ------------------------------- RESULT ----------------------------- ")
 
-    import scala.concurrent.ExecutionContext.Implicits.global
+    //val futuresResults = config.conf.sources
+    //    .map(source => QueryRunner(source))
+    //    .map(runner => runner.query(query))
 
-    Future.reduceLeft(futuresResults)((a, b) => a)
+    //Future.reduceLeft(futuresResults)((a, b) => a)
     //} catch {
-     // case e : Exception => { println(" ---- **  None source are defined ** ----- ") ;  }
-    //}
+
   }
 /*
   @JSExport("select")

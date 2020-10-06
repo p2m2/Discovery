@@ -18,11 +18,8 @@
     <orderEntry type="library" name="sbt: com.fasterxml.jackson.core:jackson-databind:2.10.1:jar" level="project" />
     <orderEntry type="library" name="sbt: com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.10.1:jar" level="project" />
     <orderEntry type="library" name="sbt: com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.10.1:jar" level="project" />
-    <orderEntry type="library" name="sbt: com.lihaoyi:fansi_2.13:0.2.7:jar" level="project" />
     <orderEntry type="library" name="sbt: com.lihaoyi:geny_sjs1_2.13:0.6.2:jar" level="project" />
-    <orderEntry type="library" name="sbt: com.lihaoyi:pprint_2.13:0.5.6:jar" level="project" />
     <orderEntry type="library" name="sbt: com.lihaoyi:scalatags_sjs1_2.13:0.8.5:jar" level="project" />
-    <orderEntry type="library" name="sbt: com.lihaoyi:sourcecode_2.13:0.1.8:jar" level="project" />
     <orderEntry type="library" name="sbt: com.lihaoyi:sourcecode_sjs1_2.13:0.2.1:jar" level="project" />
     <orderEntry type="library" name="sbt: com.lihaoyi:ujson_sjs1_2.13:1.2.0:jar" level="project" />
     <orderEntry type="library" name="sbt: com.lihaoyi:upack_sjs1_2.13:1.2.0:jar" level="project" />
@@ -30,8 +27,6 @@
     <orderEntry type="library" name="sbt: com.lihaoyi:upickle-implicits_sjs1_2.13:1.2.0:jar" level="project" />
     <orderEntry type="library" name="sbt: com.lihaoyi:upickle_sjs1_2.13:1.2.0:jar" level="project" />
     <orderEntry type="library" scope="TEST" name="sbt: com.lihaoyi:utest_sjs1_2.13:0.7.4:jar" level="project" />
-    <orderEntry type="library" name="sbt: com.softwaremill.sttp.client:core_sjs1_2.13:2.2.9:jar" level="project" />
-    <orderEntry type="library" name="sbt: com.softwaremill.sttp.model:core_sjs1_2.13:1.1.4:jar" level="project" />
     <orderEntry type="library" name="sbt: com.typesafe.play:play-functional_2.13:2.8.1:jar" level="project" />
     <orderEntry type="library" name="sbt: com.typesafe.play:play-json_2.13:2.8.1:jar" level="project" />
     <orderEntry type="library" name="sbt: joda-time:joda-time:2.10.5:jar" level="project" />

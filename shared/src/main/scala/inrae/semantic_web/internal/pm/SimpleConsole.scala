@@ -5,7 +5,7 @@ import inrae.semantic_web.internal._
 /**
  * 
  */
-class SimpleConsole  {
+object SimpleConsole  {
 
     def get( n: Node, marge : String = "" ) : String = {
         val libelle : String = n match {
