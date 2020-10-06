@@ -2,11 +2,13 @@ package inrae.http
 import inrae.semantic_web.sparql.QueryResult
 import org.scalajs.dom
 
-import scala.concurrent.Future
+import scala.concurrent.{Future,Promise}
 import scala.scalajs.js.URIUtils
 
 case class Request(var url : String) {
+
   var fd = new dom.FormData()
+
 
   def queryViaGet(query : String, mimetype : String) : dom.XMLHttpRequest = {
     val xhr = new dom.XMLHttpRequest()
@@ -37,33 +39,22 @@ case class Request(var url : String) {
     xhr.setRequestHeader("Accept", mime(mimetype))
     fd.append("query",query)
 
-    import scala.concurrent.ExecutionContext.Implicits.global
+    val p = Promise[QueryResult]()
 
-
-
-    Future {
-      var qr_sub : Option[QueryResult] = None
-
-      xhr.onload = { (e: dom.Event) =>
-        print(xhr.responseText)
-        if (xhr.status == 200) {
-          val qr2 = mimetype match {
-            case "json" => qr_sub = Some(QueryResult(xhr.responseText, mimetype))
-            case _ => throw new Exception("Unknown formatter : "+mimetype)
-          }
-          //println(xhr.responseText)
-        } else
-            throw new Exception("Error : "+xhr.status)
-      }
-
-      xhr.send(fd)
-
-      qr_sub match {
-        case Some(v) => v
-        case None => throw new Exception("********************************  Error Http Request ")
-      }
-
+    xhr.onload = { (e: dom.Event) =>
+      print(xhr.responseText)
+      if (xhr.status == 200) {
+        val qr2 = mimetype match {
+          case "json" => p success QueryResult(xhr.responseText, mimetype)
+          case _ => throw new Exception("Unknown formatter : "+mimetype)
+        }
+        //println(xhr.responseText)
+      } else
+          throw new Exception("Error : "+xhr.responseText)
     }
+    xhr.send(fd)
+    p.future
+
   }
 
   def queryViaUrlEncodedPost(query : String, mimetype : String) : dom.XMLHttpRequest = {

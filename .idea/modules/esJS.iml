@@ -10,9 +10,12 @@
       <sourceFolder url="file://$MODULE_DIR$/../../js/src/main/resources" type="java-resource" />
       <excludeFolder url="file://$MODULE_DIR$/../../js/target" />
     </content>
+    <content url="file://$MODULE_DIR$/../../shared">
+      <sourceFolder url="file://$MODULE_DIR$/../../shared/src/main/scala" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/../../shared/src/test/scala/inrae/semantic_web" isTestSource="false" />
+    </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="module" module-name="easySparql-github-sources" exported="" />
     <orderEntry type="library" name="sbt: com.fasterxml.jackson.core:jackson-annotations:2.10.1:jar" level="project" />
     <orderEntry type="library" name="sbt: com.fasterxml.jackson.core:jackson-core:2.10.1:jar" level="project" />
     <orderEntry type="library" name="sbt: com.fasterxml.jackson.core:jackson-databind:2.10.1:jar" level="project" />
