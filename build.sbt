@@ -27,6 +27,7 @@ lazy val es =
       libraryDependencies += "com.lihaoyi" %%% "scalatags" % "0.8.5",
       libraryDependencies += "com.lihaoyi" %%% "utest" % "0.7.4" % "test",
       libraryDependencies += "com.lihaoyi" %%% "upickle" % "1.2.0",
+      libraryDependencies += "com.outr" %%% "scribe" % "2.7.13",  /* logging */
       testFrameworks += new TestFramework("utest.runner.Framework")
     )
     .jsSettings(
@@ -39,7 +40,7 @@ lazy val es =
       ) // defined in sbt-scalajs-crossproject
     .jvmSettings(
       libraryDependencies += "org.scala-js" %% "scalajs-stubs" % "1.0.0" % "provided",
-      libraryDependencies += "ch.qos.logback"          %  "logback-classic" % "1.2.3",
+      //libraryDependencies += "ch.qos.logback"          %  "logback-classic" % "1.2.3",
       libraryDependencies += "org.scala-js" %% "scalajs-stubs" % "1.0.0" % "provided",
       libraryDependencies ++= Seq(jena)
     )

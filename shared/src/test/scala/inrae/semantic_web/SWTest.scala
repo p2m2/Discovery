@@ -29,8 +29,8 @@ object SWTest extends TestSuite {
           |   "id"  : "dbpedia",
           |   "url" : "https://dbpedia.org/sparql",
           |   "typ" : "tps",
-          |   "method" : "POST",
-          |   "mimetype" : "xml"
+          |   "method" : "GET",
+          |   "mimetype" : "json"
           | }]}
           |""".stripMargin)
       val query = new SW(config)

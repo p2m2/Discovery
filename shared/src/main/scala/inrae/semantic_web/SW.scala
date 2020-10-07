@@ -7,6 +7,7 @@ import inrae.semantic_web.internal._
 import inrae.semantic_web.sparql._
 
 import scala.concurrent.{Future}
+import scribe._
 
 class SW(var config: StatementConfiguration) {
 
@@ -85,6 +86,7 @@ class SW(var config: StatementConfiguration) {
   }
 
   def select() : Future[QueryResult] = {
+    info("select")
     val sg = new pm.SparqlGenerator()
     val query = sg.prolog(config, rootNode ) + "\n" + sg.body(config, rootNode ) + sg.solutionModifier(config, rootNode)
     println(" ------------------------------- SPARQL ----------------------------- ")
