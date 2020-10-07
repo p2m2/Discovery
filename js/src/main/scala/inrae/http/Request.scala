@@ -32,11 +32,12 @@ case class Request(var url : String) {
       if (xhr.status == 200) {
         val qr2 = mimetype match {
           case "json" => p success QueryResult(xhr.responseText, mimetype)
-          case _ => p.failure(new js.JavaScriptException("Unknown formatter : "+mimetype))
+          case _ =>
+            p.failure(new js.JavaScriptException("[Configuration] Parser not available for this MIME type : "+mimetype))
         }
         //println(xhr.responseText)
       } else
-        throw new Exception("Error : "+xhr.responseText)
+        p.failure(new js.JavaScriptException(xhr))
     }
 
     xhr.onerror = { e: dom.ErrorEvent =>
@@ -67,13 +68,13 @@ case class Request(var url : String) {
     send(xhr,"",mimetype)
   }
 
-
-
   def queryViaUrlEncodedPost(query : String, mimetype : String) : Future[QueryResult] = {
     val xhr = new dom.XMLHttpRequest()
 
     xhr.open("POST", url, true);
     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded")
+    xhr.setRequestHeader("Accept", mime(mimetype))
+
     val data = addQueryAsData(query)
     send(xhr,data,mimetype)
   }
@@ -90,6 +91,7 @@ case class Request(var url : String) {
       case "n3" => "text/rdf+n3"
       case "plain" => "text/plain"
       case "turtle" => "application/x-turtle"
+      case _ => "text/plain"
     };
   }
 

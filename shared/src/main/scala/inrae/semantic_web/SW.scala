@@ -99,9 +99,5 @@ class SW(var config: StatementConfiguration) {
     import scala.concurrent.ExecutionContext.Implicits.global
 
     Future.reduceLeft(futuresResults)((a, b) => a)
-    //} catch {
-     // case e : Exception => { println(" ---- **  None source are defined ** ----- ") ;  }
-    //}
   }
-
 }

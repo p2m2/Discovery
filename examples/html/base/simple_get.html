@@ -32,7 +32,10 @@
         r.then((value) => {
           console.log(value);
           document.getElementById("demo").appendChild(document.createTextNode(value));
-        });
+        }).catch( (error) => {
+          console.error(" -- catch exception --")
+          console.error(error)
+        } );
 
     </script>
 </html>

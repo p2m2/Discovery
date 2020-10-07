@@ -29,30 +29,14 @@ object SWTest extends TestSuite {
           |   "id"  : "dbpedia",
           |   "url" : "https://dbpedia.org/sparql",
           |   "typ" : "tps",
-          |   "method" : "POST"
+          |   "method" : "POST",
+          |   "mimetype" : "xml"
           | }]}
           |""".stripMargin)
       val query = new SW(config)
 
       query.something("h1")
         .set(URI("http://dbpedia.org/resource/%C3%84lvdalen"))
-        .isSubjectOf(URI("http://www.w3.org/2002/07/owl#sameAs"))
-        .select
-        .onComplete {
-          case Success(result) => println(result.get); assert(true)
-          case Failure(exception) => println(exception); assert(false)
-        }
-
-      query
-        .select
-        .onComplete {
-          case Success(result) => println(result.get); assert(true)
-          case Failure(exception) => println(exception); assert(false)
-        }
-
-      val query2 = new SW(config)
-
-      query2.something("h1")
         .isSubjectOf(URI("http://www.w3.org/2002/07/owl#sameAs"))
         .select
         .onComplete {

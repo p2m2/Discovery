@@ -19,7 +19,8 @@
           "id"  : "dbpedia",
           "url" : "https://dbpedia.org/sparql",
           "typ" : "tps",
-          "method" : "POST"
+          "method" : "POST_ENCODED",
+          "mimetype" : "json"
            }]}
           `)
         let query = new EasySparqlEngine(config);
@@ -33,7 +34,10 @@
         r.then((value) => {
           console.log(value);
           document.getElementById("demo").appendChild(document.createTextNode(value));
-        });
+        }).catch( (error) => {
+          console.error(" -- catch exception --")
+          console.error(error)
+        } );
 
     </script>
 </html>

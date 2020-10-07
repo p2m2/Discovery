@@ -17,15 +17,15 @@ object ConfigurationObject {
                      id:String, /* identify the source endpoint */
                      url: String, /* url access */
                      typ: String,  /* ldfragment, csv, tps */
-                     method: String = "POST", /* POST, GET*/
+                     method: String = "POST", /* POST, POST_ENCODED, GET */
                      auth : String = "none", /* basic, digest, none */
                      login : String = "none" ,
-                     password : String = "none"
+                     password : String = "none",
+                     mimetype : String = "json",
                    )
 
-  case class StatementConfigurationJson(
-                                         sources : Seq[Source]  /* sources configuration */
-                                       )
+  /* sources configuration */
+  case class StatementConfigurationJson(sources : Seq[Source])
 
   object Source{
     implicit val rw: RW[Source] = macroRW
