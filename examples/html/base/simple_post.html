@@ -24,10 +24,11 @@
           `)
         let query = new EasySparqlEngine(config);
 
+        console.log(query)
         let r = query.something("h1")
                      .set(URI("http://dbpedia.org/resource/%C3%84lvdalen"))
                      .isSubjectOf(URI("http://www.w3.org/2002/07/owl#sameAs"))
-                     .select()
+                     .select() ;
 
         r.then((value) => {
           console.log(value);

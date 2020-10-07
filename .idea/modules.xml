@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/easySparql-sources.iml" filepath="$PROJECT_DIR$/.idea/modules/easySparql-sources.iml" group="es" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/esJS.iml" filepath="$PROJECT_DIR$/.idea/modules/esJS.iml" group="es" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/esJVM.iml" filepath="$PROJECT_DIR$/.idea/modules/esJVM.iml" group="es" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/root.iml" filepath="$PROJECT_DIR$/.idea/modules/root.iml" />
