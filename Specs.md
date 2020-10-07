@@ -37,7 +37,8 @@ query = SW({
         id : "idEnpd",
         type : "endpoint", 
         url : "http://...." ],
-        method   : POST,
+        method   : <POST,POST_ENCODED, GET>
+        mimetype : json,xml,...
         login    : ...,
         password : ...
    }],

@@ -2,6 +2,8 @@ package inrae.semantic_web
 
 import upickle.default.{macroRW, ReadWriter => RW}
 
+import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
+
 /**
  * using doc to validate JSON config:
  * see https://www.playframework.com/documentation/2.8.x/ScalaJson
@@ -9,20 +11,21 @@ import upickle.default.{macroRW, ReadWriter => RW}
  * @param json_conf
  */
 
+
 object ConfigurationObject {
   case class Source(
                      id:String, /* identify the source endpoint */
                      url: String, /* url access */
                      typ: String,  /* ldfragment, csv, tps */
-                     method: String = "POST", /* POST, GET*/
+                     method: String = "POST", /* POST, POST_ENCODED, GET */
                      auth : String = "none", /* basic, digest, none */
                      login : String = "none" ,
-                     password : String = "none"
+                     password : String = "none",
+                     mimetype : String = "json",
                    )
 
-  case class StatementConfigurationJson(
-                                         sources : Seq[Source]  /* sources configuration */
-                                       )
+  /* sources configuration */
+  case class StatementConfigurationJson(sources : Seq[Source])
 
   object Source{
     implicit val rw: RW[Source] = macroRW
@@ -33,6 +36,7 @@ object ConfigurationObject {
   }
 }
 
+@JSExportTopLevel(name="EasySparqlStatementConfiguration")
 class StatementConfiguration {
 
   var conf: ConfigurationObject.StatementConfigurationJson = new ConfigurationObject.StatementConfigurationJson(Seq[ConfigurationObject.Source]())
@@ -41,6 +45,7 @@ class StatementConfiguration {
    * Set a config using class definition
    * @param conf
    */
+  @JSExport
   def setConfig(conf_ext : ConfigurationObject.StatementConfigurationJson) : Unit = {
       conf = conf_ext
   }
@@ -49,6 +54,7 @@ class StatementConfiguration {
    * set a config using string configuration
    * @param json_conf
    */
+  @JSExport
   def setConfigString(json_conf: String) : Unit = {
     try {
       conf = upickle.default.read[ConfigurationObject.StatementConfigurationJson](json_conf)

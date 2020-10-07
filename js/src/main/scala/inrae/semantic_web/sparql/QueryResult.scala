@@ -2,13 +2,17 @@ package inrae.semantic_web.sparql
 
 import inrae.semantic_web.rdf.{Anonymous, Literal, RdfType, URI}
 
+import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
+
+@JSExportTopLevel(name="QueryResult")
 case class QueryResult(results : String, mimetype : String) {
   def print(): Unit = {
     None: Option[String]
   }
 
   def json() : ResultsFormat = {
-
+    println("=========== JSON ===================");
+    println(results);
     val data = ujson.read(results)
 
     val rf = ResultsFormat()
@@ -31,6 +35,7 @@ case class QueryResult(results : String, mimetype : String) {
     //rf.rows = rf.rows :+ rf.ResultsRow(values)
   }
 
+  @JSExport
   def get(): Option[ResultsFormat] = {
       mimetype match {
         case "json" => Some(json())

@@ -1,10 +1,11 @@
 package inrae.semantic_web
-
+import scala.scalajs.js.annotation._
 import java.util.UUID.randomUUID
 
 import inrae.semantic_web.rdf._
 import inrae.semantic_web.internal._
 import inrae.semantic_web.sparql._
+
 import scala.concurrent.{Future}
 
 class SW(var config: StatementConfiguration) {
@@ -17,9 +18,9 @@ class SW(var config: StatementConfiguration) {
   def print() : Unit = {
     println(" - SW -");
     println(" -- root --");
-    pprint.pprintln(rootNode.children)
+    //pprint.pprintln(rootNode.children)
     println(" -- focusNode --");
-    pprint.pprintln(focusNode.children)
+    //pprint.pprintln(focusNode.children)
   }
 
   /* manage the creation of an unique ref */
@@ -71,8 +72,8 @@ class SW(var config: StatementConfiguration) {
     //println( pprint.tokenize(rootNode).mkString )
     //pprint.pprintln(rootNode.children)
     println("--focus--")
-    pprint.pprintln(focusNode)
-    pprint.pprintln(focusNode.children)
+    //pprint.pprintln(focusNode)
+    //pprint.pprintln(focusNode.children)
     //rootNode.accept(sc)
     println(sc.get(rootNode))
     return this
@@ -85,7 +86,7 @@ class SW(var config: StatementConfiguration) {
 
   def select() : Future[QueryResult] = {
     val sg = new pm.SparqlGenerator()
-    val query = sg.prolog(config, rootNode ) + sg.body(config, rootNode ) +sg.solutionModifier(config, rootNode)
+    val query = sg.prolog(config, rootNode ) + "\n" + sg.body(config, rootNode ) + sg.solutionModifier(config, rootNode)
     println(" ------------------------------- SPARQL ----------------------------- ")
     println(query)
     println(" ------------------------------- RESULT ----------------------------- ")
@@ -98,8 +99,5 @@ class SW(var config: StatementConfiguration) {
     import scala.concurrent.ExecutionContext.Implicits.global
 
     Future.reduceLeft(futuresResults)((a, b) => a)
-    //} catch {
-     // case e : Exception => { println(" ---- **  None source are defined ** ----- ") ;  }
-    //}
   }
 }

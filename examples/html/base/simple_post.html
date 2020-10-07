@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>The Scala.js Tutorial</title>
+  </head>
+  <body>
+    <!-- Include Scala.js compiled code /scalajs-bundler/main/ -->
+    <script type="text/javascript" src="../../../js/target/scala-2.13/es-fastopt.js"></script>
+	
+    <pre id="demo"></pre>
+  </body>
+  <script>
+      let config = new EasySparqlStatementConfiguration()
+
+      config.setConfigString(`
+          {
+          "sources" : [{
+          "id"  : "dbpedia",
+          "url" : "https://dbpedia.org/sparql",
+          "typ" : "tps",
+          "method" : "POST_ENCODED",
+          "mimetype" : "json"
+           }]}
+          `)
+        let query = new EasySparqlEngine(config);
+
+        console.log(query)
+        let r = query.something("h1")
+                     .set(URI("http://dbpedia.org/resource/%C3%84lvdalen"))
+                     .isSubjectOf(URI("http://www.w3.org/2002/07/owl#sameAs"))
+                     .select() ;
+
+        r.then((value) => {
+          console.log(value);
+          document.getElementById("demo").appendChild(document.createTextNode(value));
+        }).catch( (error) => {
+          console.error(" -- catch exception --")
+          console.error(error)
+        } );
+
+    </script>
+</html>
