@@ -1,7 +1,7 @@
 package inrae.semantic_web.internal
 
 import inrae.semantic_web.rdf._
-
+/*
 sealed trait Node {
   var children : Seq[ReferenceNode] = Seq[ReferenceNode]()
   var sources : Seq[String] = Seq[String]()
@@ -15,27 +15,42 @@ sealed trait Node {
     sources = sources :+ s
     this
   }
-}
+}*/
 
-class ReferenceNode(var uniqRef : Option[String]) extends None {
+class Node(var uniqRef : Option[String]) {
+
+  var children: Seq[Node] = Seq[Node]()
+  var sources: Seq[String] = Seq[String]()
+
+  def addChildren(n: Node): Node = {
+    children = children :+ n
+    return n
+  }
+
+  def addSource(s: String): Node = {
+    sources = sources :+ s
+    this
+  }
+
   def references(): Seq[String] = {
-    val l = uniqRef match {
-      case Some(v) => v.toList
+
+    val l: Seq[String] = uniqRef match {
+      case Some(v) => Seq[String](v)
       case None => Seq[String]()
     }
-    l ::: children.flatMap( c => c.references())
+
+    l ++: children.flatMap(c => c.references())
   }
-  def reference(): String = {
-    uniqRef
-  }
+
+  def reference(): Option[String] = uniqRef
 }
 
 /* Node case */
-class Root() extends ReferenceNode(None)
+class Root() extends Node(None)
 
 
-class Something(uniqRef : String) extends ReferenceNode(Some(uniqRef))
-class SubjectOf(uniqRef : String, var uri : URI) extends ReferenceNode(Some(uniqRef))
-class ObjectOf(uniqRef : String, var uri : URI) extends ReferenceNode(Some(uniqRef))
-class Attribute(uniqRef : String, var uri : URI) extends ReferenceNode(Some(uniqRef))
-class Value(var uri : RdfType) extends ReferenceNode(None)
+class Something(uniqRef : String) extends Node(Some(uniqRef))
+class SubjectOf(uniqRef : String, var uri : URI) extends Node(Some(uniqRef))
+class ObjectOf(uniqRef : String, var uri : URI) extends Node(Some(uniqRef))
+class Attribute(uniqRef : String, var uri : URI) extends Node(Some(uniqRef))
+class Value(var uri : RdfType) extends Node(None)

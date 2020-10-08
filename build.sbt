@@ -39,6 +39,5 @@ lazy val es =
       ) // defined in sbt-scalajs-crossproject
     .jvmSettings(
       libraryDependencies += "org.scala-js" %% "scalajs-stubs" % "1.0.0" % "provided",
-      libraryDependencies += "ch.qos.logback"          %  "logback-classic" % "1.2.3",
       libraryDependencies ++= Seq(jena)
     )

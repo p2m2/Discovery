@@ -11,7 +11,6 @@ object SourcesSelection  {
 
     implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
 
-
     def selectSourcesNode(n: Node,config: StatementConfiguration) : Future[Seq[ConfigurationObject.Source]] = {
         val sources = config.sources()
           Future.sequence(sources.map(s => QueryManager.testNode(n,s))).map {
@@ -20,8 +19,6 @@ object SourcesSelection  {
     }
 
     def get( n: Node,config: StatementConfiguration ) : Future[Seq[ConfigurationObject.Source]] = {
-        val sg = new pm.SparqlGenerator()
-
         n match {
             case node : Something          => Future { config.sources() } // all sources is available
             case node : SubjectOf          => selectSourcesNode(node,config)// detect if relation exist

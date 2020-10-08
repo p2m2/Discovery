@@ -4,7 +4,7 @@ import org.apache.jena.query._
 
 import scala.collection.JavaConverters._
 
-case class QueryResult(results : ResultSet) {
+case class QueryResult(results : ResultSet, mimetype : String="") {
   def print(): Unit = {
     println("================================= QueryResult ===========================================")
     println(ResultSetFormatter.asText(results))

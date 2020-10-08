@@ -10,6 +10,8 @@ case class QueryRunner(source: ConfigurationObject.Source) {
   implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
 
   def query(queryStr: String): Future[QueryResult] = {
+    println("-------  query -----------")
+    println(queryStr)
     Future {
       /* Graph equiv Model => defined in configuration */
       val model = ModelFactory.createDefaultModel

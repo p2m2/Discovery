@@ -1,4 +1,4 @@
-package inrae.semantic_web.pm
+package inrae.semantic_web.internal.pm
 
 import inrae.semantic_web.internal._
 
