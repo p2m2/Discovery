@@ -8,7 +8,7 @@ import inrae.semantic_web.internal._
  */
 object SparqlGenerator  {
 
-    def prolog(listVariables : Seq[String]) : String = {
+    def prolog(listVariables : Seq[String] = Seq[String]()) : String = {
         if (listVariables.length == 0 ) {
             "SELECT * WHERE {"
         } else
@@ -19,8 +19,12 @@ object SparqlGenerator  {
         "}"
     }
 
-    def prologSourcesSelection(variableIdentifier : String) : String = {
-        "SELECT COUNT("+variableIdentifier+") WHERE {"
+    def prologSourcesSelection(variableIdentifier : String = "") : String = {
+        if ( variableIdentifier == "") {
+            "SELECT (COUNT(*) AS ?COUNT) WHERE {"
+        } else {
+            "SELECT COUNT("+variableIdentifier+") WHERE {"
+        }
     }
 
     def solutionModifierSourcesSelection () : String = {

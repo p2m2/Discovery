@@ -12,6 +12,14 @@ case class QueryResult(results : String, mimetype : String) {
     None: Option[String]
   }
 
+  def valToOption(v:ujson.Value, key: String) : Option[String] = {
+    try {
+      Some(v(key).str)
+    } catch {
+      case e: Exception => None
+    }
+  }
+
   def json() : ResultsFormat = {
     println("=========== JSON ===================");
 
@@ -25,7 +33,7 @@ case class QueryResult(results : String, mimetype : String) {
          KeyAndValue.obj.map( x  => {
            val rdfobj : RdfType = x._2("type").str match {
              case "uri" => URI(x._2("value").str, "")
-             case "literal" => Literal(x._2("value").str, x._2("datatype").str, x._2("lang").str)
+             case "literal" | "typed-literal" => Literal(x._2("value").str, x._2("datatype").str, valToOption(x._2,"lang"))
              case "bnode" => Anonymous(x._2("value").str)
              case _ => /* probleme with json format */ Literal(x._2.toString(), "unknown")
            }

@@ -27,7 +27,7 @@ case class QueryResult(results : ResultSet, mimetype : String="") {
           val t = obj.isLiteral() match {
             case true => {
               val lit = obj.asLiteral()
-              Literal(lit.getString,lit.getDatatypeURI,lit.getLanguage)
+              Literal(lit.getString,lit.getDatatypeURI,Some(lit.getLanguage))
             }
             case false => {
               val res = obj.asResource()

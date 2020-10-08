@@ -1,11 +1,13 @@
-package inrae.semantic_web.internal
+package inrae.semantic_web
 
 import inrae.semantic_web.{SW, StatementConfiguration}
 import inrae.semantic_web.rdf._
 import utest._
+
 import scala.language.postfixOps
 import scala.util.{Failure, Success}
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 //import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import scala.concurrent.{Await,blocking}
 import scala.concurrent.duration._
@@ -35,14 +37,38 @@ object SWTest extends TestSuite {
           |""".stripMargin)
       val query = new SW(config)
 
-      query.something("h1")
-        .set(URI("http://dbpedia.org/resource/%C3%84lvdalen"))
-        .isSubjectOf(URI("http://www.w3.org/2002/07/owl#sameAs"))
-        .select
-        .onComplete {
-          case Success(result) => println(result.get); assert(true)
-          case Failure(exception) => println(exception); assert(false)
-        }
+      Future {
+        query.something("h1")
+          .set(URI("http://dbpedia.org/resource/%C3%84lvdalen"))
+          .isSubjectOf(URI("http://www.w3.org/2002/07/owl#sameAs"))
+          .select
+          .onComplete {
+            case Success(result) => println(result.get); assert(true)
+            case Failure(exception) => println(exception); assert(false)
+          }
+      }
+    }
+
+    test("metabolomics") {
+      val config: StatementConfiguration = new StatementConfiguration()
+      config.setConfigString(
+        """
+          |{
+          | "sources" : [{
+          |   "id"  : "metabohub",
+          |   "url" : "http://endpoint-metabolomics.ara.inrae.fr/chembl/sparql/",
+          |   "typ" : "tps",
+          |   "method" : "GET",
+          |   "mimetype" : "json"
+          | }]}
+          |""".stripMargin)
+      val query = new SW(config)
+      query.something("h1") //http://rdf.ebi.ac.uk/terms/chembl#BioComponent
+           .isSubjectOf(URI("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"))
+      query.count().onComplete {
+        case Success(count) => println(count); assert(true)
+        case Failure(exception) => println(exception); assert(false)
+      }
     }
   }
 }
