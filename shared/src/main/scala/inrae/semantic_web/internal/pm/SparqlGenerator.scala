@@ -1,47 +1,108 @@
-package inrae.semantic_web.pm
+package inrae.semantic_web.internal.pm
 
-import inrae.semantic_web.StatementConfiguration
+import inrae.semantic_web._
 import inrae.semantic_web.internal._
 
 /**
  * 
  */
-class SparqlGenerator  {
+object SparqlGenerator  {
 
-    def prolog(sw: StatementConfiguration, n: Root ) : String = {
-        "SELECT * WHERE {"
+    def prolog(listVariables : Seq[String]) : String = {
+        if (listVariables.length == 0 ) {
+            "SELECT * WHERE {"
+        } else
+            "SELECT" + listVariables.foldLeft(" ")( (acc,identifier) => acc+"?"+identifier+" ") + "WHERE {"
     }
 
-    def solutionModifier (sw: StatementConfiguration, n: Root ) : String = {
+    def solutionModifier () : String = {
         "}"
-    } 
+    }
 
-    def body(sw: StatementConfiguration, n: Node, varIdSire : String = "", ms : Map[String,Int] = Map[String,Int]())  : String = {
-        
-        val k : String = n match {      
-            case node : Something          => "something"  
-            case node : SubjectOf          => "object"   
-            case node : ObjectOf           => "subject"
-            case node : Attribute          => "attribute"
-            case _                         => ""
-        }
+    def prologSourcesSelection(variableIdentifier : String) : String = {
+        "SELECT COUNT("+variableIdentifier+") WHERE {"
+    }
 
-        val v : Int = ms getOrElse(k,0)  
+    def solutionModifierSourcesSelection () : String = {
+        "} LIMIT 1"
+    }
 
-        val variableName : String = if (k != "" ) k+v.toString() else varIdSire
-
-        val triplet : String = n match {
+    def sparqlNode(n: Node,varIdSire : String, variableName : String) : String = {
+        n match {
             case node : SubjectOf          => "?" + varIdSire + " " +
-                                                    node.uri.toString() + " " + " ?"+ variableName +"\n"
+              node.uri.toString() + " " + "?"+ variableName
             case node : ObjectOf           => "?" + variableName + " " +
-                                                    node.uri.toString() + " " + "?"+ varIdSire+"\n"
+              node.uri.toString() + " " + "?"+ varIdSire
             case node : Attribute          => "?" + variableName + " " +
-                                                    node.uri.toString() + " " + "?"+ varIdSire +"\n"
-            case node : Value              => "VALUES ?" +varIdSire+ " { " + node.uri.toString() + " }\n"
+              node.uri.toString() + " " + "?"+ varIdSire
+            case node : Value              => "VALUES ?" +varIdSire+ " { " + node.uri.toString() + " }"
             case _                         => ""
         }
-       
-        triplet + n.children.map( child => body( sw, child, variableName ,ms + (k -> (v+1) ))).mkString(" .")
+    }
+
+    def setVariableIdentifier(
+                       n:Node,
+                       ms : Map[String,Int] = Map[String,Int](), /* map to increase id and manage new variable name */
+                     ) : Option[(String,Map[String,Int])] = {
+
+        val genericName = n match {
+            case _ : Something          => "something"
+            case _ : SubjectOf          => "object"
+            case _ : ObjectOf           => "subject"
+            case _ : Attribute          => "attribute"
+            case _                      => None
+        }
+        genericName match {
+            case s : String => {
+                val v = ms.getOrElse(s,0)
+                Some(genericName+v.toString(),ms + (s -> (v+1) ))
+            }
+        }
+    }
+
+    /* output variable : get key : referenceKeyNode, value : variable name */
+    def getAllVariablesIdentifiers(n : Node,
+                       referenceToIdentifier : Map[String,String] = Map[String,String](),
+                       genericNametoId : Map[String,Int] = Map[String,Int]() )
+    : (Map[String,String],Map[String,Int]) = {
+        println(" -- assignVariable --")
+        println(referenceToIdentifier)
+        val (ass,ms) = n.reference() match {
+            case Some(ref) => {
+                setVariableIdentifier(n,genericNametoId) match {
+                    case Some((v,ms2)) => (referenceToIdentifier + (ref -> v),ms2)
+                    case None => (referenceToIdentifier,genericNametoId)
+                }
+            }
+            case _ => (referenceToIdentifier,genericNametoId)
+        }
+        println("--reduceleft---")
+        println(n.children)
+        println(ass)
+        /* set up assVariableNode */
+        n.children.toArray.foldLeft((ass,ms)) {
+            (acc,child) =>
+                getAllVariablesIdentifiers(child,acc._1,acc._2)
+        }
+    }
+
+    def body(sw: ConfigurationObject.Source, /* user configuration*/
+             n: Node, /* current node to browse with children */
+             referenceToIdentifier : Map[String,String],
+             varIdSire : String = "" /* sire variable */
+            )  : String = {
+
+
+        val variableName : String =  n.reference()  match {
+            case Some(id) => referenceToIdentifier(id)
+            case None => varIdSire
+        }
+
+        val triplet : String = sparqlNode(n,varIdSire,variableName)
+
+        print("--***---");
+        println(variableName)
+        triplet + "\n"+ n.children.map( child => body( sw, child,referenceToIdentifier, variableName)).mkString(" .")
     } 
 }
 

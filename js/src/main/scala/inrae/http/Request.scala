@@ -1,10 +1,11 @@
 package inrae.http
-import inrae.semantic_web.sparql.QueryResult
 import org.scalajs.dom
 
+import inrae.semantic_web.sparql.QueryResult
 import scala.concurrent.{Future,Promise}
 import scala.scalajs.js.URIUtils
 import scala.scalajs.js
+
 
 case class Request(var url : String) {
 

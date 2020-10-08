@@ -1,11 +1,11 @@
-package inrae.semantic_web.pm
+package inrae.semantic_web.internal.pm
 
 import inrae.semantic_web.internal._
 
 /**
  * 
  */
-class SimpleConsole  {
+object SimpleConsole  {
 
     def get( n: Node, marge : String = "" ) : String = {
         val libelle : String = n match {

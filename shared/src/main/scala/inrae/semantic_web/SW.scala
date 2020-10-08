@@ -29,9 +29,7 @@ class SW(var config: StatementConfiguration) {
 
   /* set the current focus on the select node */
   def focus(ref : String) : SW = {
-    var sn = new pm.SelectNode();
-    focusNode = sn.setFocus(ref, rootNode)(0)
-
+    focusNode = pm.SelectNode.setFocus(ref, rootNode)(0)
     return this
   }
 
@@ -69,37 +67,21 @@ class SW(var config: StatementConfiguration) {
   }
 
   def debug() : SW = {
-    var sc = new pm.SimpleConsole();
     //println( pprint.tokenize(rootNode).mkString )
     //pprint.pprintln(rootNode.children)
     println("--focus--")
     //pprint.pprintln(focusNode)
     //pprint.pprintln(focusNode.children)
     //rootNode.accept(sc)
-    println(sc.get(rootNode))
+    println(pm.SimpleConsole.get(rootNode))
     return this
   }
 
   def sparql() : String = {
-    var sg = new pm.SparqlGenerator();
-    return sg.body(config, rootNode)
+    ""
   }
 
   def select() : Future[QueryResult] = {
-    info("select")
-    val sg = new pm.SparqlGenerator()
-    val query = sg.prolog(config, rootNode ) + "\n" + sg.body(config, rootNode ) + sg.solutionModifier(config, rootNode)
-    println(" ------------------------------- SPARQL ----------------------------- ")
-    println(query)
-    println(" ------------------------------- RESULT ----------------------------- ")
-
-    //try {
-    val futuresResults = config.conf.sources
-        .map(source => QueryRunner(source))
-        .map(runner => runner.query(query))
-
-    import scala.concurrent.ExecutionContext.Implicits.global
-
-    Future.reduceLeft(futuresResults)((a, b) => a)
+    QueryManager.queryNode(rootNode,focusNode,config)
   }
 }
