@@ -49,4 +49,9 @@ class SWFacade(var config: StatementConfiguration) {
     sw.select().toJSPromise
   }
 
+  @JSExport
+  def count(): Promise[Int] = {
+    implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
+    sw.count().toJSPromise
+  }
 }

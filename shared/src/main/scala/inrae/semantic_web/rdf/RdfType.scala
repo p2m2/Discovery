@@ -34,7 +34,7 @@ case class PropertyPath(var value : String) extends RdfType {
 }
 
 @JSExportTopLevel(name="Literal")
-case class Literal(var value : String, var datatype : String = "xsd:string", var tag : String = null) extends RdfType {
+case class Literal(var value : String, var datatype : String = "xsd:string", var tag : Option[String]=None) extends RdfType {
   override def toString() : String = {
     return value+"^^"+datatype
   }

@@ -1,10 +1,11 @@
 package inrae.semantic_web
 
-import inrae.semantic_web.internal.{pm,Node}
+import inrae.semantic_web.internal.{Node, pm}
+import inrae.semantic_web.rdf.{Literal, RdfType}
 import inrae.semantic_web.sparql._
 
 import scala.concurrent.Future
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
 
 
 object QueryManager {
@@ -19,6 +20,33 @@ object QueryManager {
 
   def queryAll(rootRequest : Node,n: Node, config : StatementConfiguration) : Future[QueryResult] = {
     queryVariables(rootRequest,rootRequest.references(),config)
+  }
+
+  def countNbSolutions(n : Node,  config : StatementConfiguration) : Future[Option[RdfType]] = {
+
+    if (config.sources().length == 0) {
+      throw new Exception(" ** None sources available ** ")
+    } else if (config.sources().length == 1) {
+      val source = config.sources()(0)
+      val (refToIdentifier, _) = pm.SparqlGenerator.getAllVariablesIdentifiers(n)
+      val query = pm.SparqlGenerator.prologSourcesSelection()  +
+        pm.SparqlGenerator.body(source, n, refToIdentifier) +
+        pm.SparqlGenerator.solutionModifier()
+      print(query)
+      val res: Future[QueryResult] = QueryRunner(source).query(query)
+    /*
+      Future {
+        val y = res.onComplete {
+          case Success(count) => count.get.row(0).key("COUNT")
+          case _ => None
+        }
+        y
+      }*/
+      res.map(v => v.get.row(0).key("COUNT"))
+    } else {
+      // todo query planner
+      throw new Exception("not manage.......")
+    }
   }
 
   def queryVariables(n: Node, listVariables : Seq[String], config : StatementConfiguration) : Future[QueryResult] = {

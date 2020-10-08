@@ -10,7 +10,7 @@ import scala.concurrent.{Future}
 import scribe._
 
 class SW(var config: StatementConfiguration) {
-
+  implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
   /* root node */
   private var rootNode   : Root = new Root()
   /* focus node */
@@ -84,4 +84,16 @@ class SW(var config: StatementConfiguration) {
   def select() : Future[QueryResult] = {
     QueryManager.queryNode(rootNode,focusNode,config)
   }
+
+  def count() : Future[Int] = {
+    QueryManager.countNbSolutions(rootNode,config)
+      .map (v => v match {
+        case Some(literal : Literal) => literal.value.toInt
+        case None => 0
+      })
+  }
+/*
+  def findOwlClass() : Future[Seq[URI]] = {
+
+  }*/
 }
