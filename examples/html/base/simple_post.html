@@ -32,8 +32,10 @@
                      .select() ;
 
         r.then((value) => {
-          console.log(value);
-          document.getElementById("demo").appendChild(document.createTextNode(value));
+          let res = value.get();
+          console.log("==js===");
+          console.log(res);
+          document.getElementById("demo").appendChild(document.createTextNode(res));
         }).catch( (error) => {
           console.error(" -- catch exception --")
           console.error(error)
