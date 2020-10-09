@@ -21,13 +21,10 @@ case class QueryResult(results : String, mimetype : String) {
   }
 
   def json() : ResultsFormat = {
-    println("=========== JSON ===================");
 
     val data = ujson.read(results)
-
     val rf = ResultsFormat()
-    val vars = data("head")("vars")
-
+    //val vars = data("head")("vars")
     data("results")("bindings").arr
        .map( KeyAndValue =>
          KeyAndValue.obj.map( x  => {
@@ -46,14 +43,9 @@ case class QueryResult(results : String, mimetype : String) {
 
   @JSExport
   def get(): ResultsFormat = {
-    println("==================================== RESULTSFORMAT:::::::::::::::::::::::::::")
     mimetype match {
         case "json" => json()
         case _ => new ResultsFormat()
     }
-  }
-
-  def getString() : String = {
-    "---"
   }
 }

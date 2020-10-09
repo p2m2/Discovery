@@ -32,7 +32,7 @@ object QueryManager {
       val query = pm.SparqlGenerator.prologSourcesSelection()  +
         pm.SparqlGenerator.body(source, n, refToIdentifier) +
         pm.SparqlGenerator.solutionModifier()
-      print(query)
+
       val res: Future[QueryResult] = QueryRunner(source).query(query)
     /*
       Future {
@@ -61,14 +61,10 @@ object QueryManager {
   }
 
   def queryOnSource(n: Node, listVariables : Seq[String],  source : ConfigurationObject.Source): Future[QueryResult] = {
-    println("------- queryOnSource -----------")
     val (refToIdentifier,_) = pm.SparqlGenerator.setAllVariablesIdentifiers(n)
     val query = pm.SparqlGenerator.prolog(listVariables) + "\n" +
                 pm.SparqlGenerator.body(source, n, refToIdentifier) +
                 pm.SparqlGenerator.solutionModifier()
-
-    println(query)
-    println("-------------------------------------------------------")
 
     QueryRunner(source).query(query)
   }
