@@ -28,8 +28,8 @@ object SparqlGeneratorTest extends TestSuite {
     }
 
     test("sparqlNode - SubjectOf") {
-      val v = SparqlGenerator.sparqlNode(new SubjectOf("id",URI("a")),"varSire","varId")
-      assert(v == "?varSire <a> ?varId")
+      val v = SparqlGenerator.sparqlNode(new SubjectOf("id",URI("http://test")),"varSire","varId")
+      assert(v.contains("?varSire <http://test> ?varId"))
     }
   }
 }

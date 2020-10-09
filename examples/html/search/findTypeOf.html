@@ -14,8 +14,8 @@
       config.setConfigString(`
           {
           "sources" : [{
-          "id"  : "metabohub",
-          "url" : "http://endpoint-metabolomics.ara.inrae.fr/chembl/sparql/",
+          "id"  : "dbpedia",
+          "url" : "https://dbpedia.org/sparql",
           "typ" : "tps",
           "method" : "POST_ENCODED",
           "mimetype" : "json"
@@ -25,9 +25,9 @@
 
         console.log(query)
         let r = query.something("h1")
-                     .isSubjectOf(URI("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"))
-                     .debug()
-                     .count() ;
+                      .set(URI("http://dbpedia.org/resource/Abbie_Hoffman"))
+                      .debug()
+                      .findClassOf(URI("http://www.w3.org/2002/07/owl#Class"));
 
         r.then((value) => {
           let res = value;

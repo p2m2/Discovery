@@ -13,7 +13,7 @@ object QueryManager {
   implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
 
   def queryNode(rootRequest : Node, n: Node, config : StatementConfiguration) : Future[QueryResult] = {
-    val (refToIdentifier,_) = pm.SparqlGenerator.getAllVariablesIdentifiers(n)
+    val (refToIdentifier,_) = pm.SparqlGenerator.setAllVariablesIdentifiers(n)
 
     queryVariables(rootRequest,refToIdentifier.values.toSeq,config)
   }
@@ -28,7 +28,7 @@ object QueryManager {
       throw new Exception(" ** None sources available ** ")
     } else if (config.sources().length == 1) {
       val source = config.sources()(0)
-      val (refToIdentifier, _) = pm.SparqlGenerator.getAllVariablesIdentifiers(n)
+      val (refToIdentifier, _) = pm.SparqlGenerator.setAllVariablesIdentifiers(n)
       val query = pm.SparqlGenerator.prologSourcesSelection()  +
         pm.SparqlGenerator.body(source, n, refToIdentifier) +
         pm.SparqlGenerator.solutionModifier()
@@ -50,7 +50,6 @@ object QueryManager {
   }
 
   def queryVariables(n: Node, listVariables : Seq[String], config : StatementConfiguration) : Future[QueryResult] = {
-    println("------- queryVariables -----------")
     if (config.sources().length == 0) {
       throw new Exception(" ** None sources available ** ")
     } else if (config.sources().length == 1) {
@@ -63,17 +62,19 @@ object QueryManager {
 
   def queryOnSource(n: Node, listVariables : Seq[String],  source : ConfigurationObject.Source): Future[QueryResult] = {
     println("------- queryOnSource -----------")
-    val (refToIdentifier,_) = pm.SparqlGenerator.getAllVariablesIdentifiers(n)
+    val (refToIdentifier,_) = pm.SparqlGenerator.setAllVariablesIdentifiers(n)
     val query = pm.SparqlGenerator.prolog(listVariables) + "\n" +
                 pm.SparqlGenerator.body(source, n, refToIdentifier) +
                 pm.SparqlGenerator.solutionModifier()
+
+    println(query)
+    println("-------------------------------------------------------")
 
     QueryRunner(source).query(query)
   }
 
   def testNode(n: Node, source : ConfigurationObject.Source): Future[Boolean] = {
-    println("------- testNode -----------")
-    val (refToIdentifier,_) = pm.SparqlGenerator.getAllVariablesIdentifiers(n)
+    val (refToIdentifier,_) = pm.SparqlGenerator.setAllVariablesIdentifiers(n)
 
 
     n.reference() match {
