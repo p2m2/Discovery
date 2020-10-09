@@ -53,7 +53,7 @@ class SWFacade(var config: StatementConfiguration) {
   }
 
   @JSExport
-  def findClassOf(uri:URI = URI("")): Promise[Seq[URI]] = {
-    sw.findClassOf().toJSPromise
+  def findClassesOf(uri:URI = URI("")): Promise[Seq[URI]] = {
+    sw.findClassesOf().toJSPromise
   }
 }

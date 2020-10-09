@@ -86,12 +86,32 @@ case class SW(var config: StatementConfiguration) {
       })
   }
 
-  def findClassOf(motherClass: URI = URI("") ) : Future[Seq[URI]] = {
+  def findClassesOf(motherClass: URI = URI("") ) : Future[Seq[URI]] = {
     (motherClass match {
       case uri : URI if uri == URI("")  => isSubjectOf(URI("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"),"_esp___type")
       case _ : URI =>  isSubjectOf(URI("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"),"_esp___type")
                   .isSubjectOf(URI("a"))
                   .set(motherClass)
+    })
+      .focus("_esp___type")
+      .select
+      .map( resultsformat =>
+        resultsformat.get.rows.map(
+          resulstrow => {
+            resulstrow.key("_esp___type")
+          }
+        ).map(option => option match {
+          case Some(uri : URI) => uri
+        })
+      )
+  }
+
+  def findPropertiesOf(motherClass: URI = URI("") ) : Future[Seq[URI]] = {
+    (motherClass match {
+      case uri : URI if uri == URI("")  => isSubjectOf(URI("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"),"_esp___type")
+      case _ : URI =>  isSubjectOf(URI("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"),"_esp___type")
+        .isSubjectOf(URI("a"))
+        .set(motherClass)
     })
       .focus("_esp___type")
       .select

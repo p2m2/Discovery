@@ -27,7 +27,7 @@
         let r = query.something("h1")
                       .set(URI("http://dbpedia.org/resource/Abbie_Hoffman"))
                       .debug()
-                      .findClassOf(URI("http://www.w3.org/2002/07/owl#Class"));
+                      .findClassesOf(URI("http://www.w3.org/2002/07/owl#Class"));
 
         r.then((value) => {
           let res = value;

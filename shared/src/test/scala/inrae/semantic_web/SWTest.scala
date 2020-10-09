@@ -89,7 +89,7 @@ object SWTest extends TestSuite {
       Future {
         query.something("h1")
           .set(URI("http://dbpedia.org/resource/Abbie_Hoffman"))
-          .findClassOf()
+          .findClassesOf()
           .onComplete {
             case Success(types) => println(types); assert(true)
             case Failure(exception) => println(exception); assert(false)
@@ -114,14 +114,14 @@ object SWTest extends TestSuite {
       Future {
         query.something("h1")
           .set(URI("http://dbpedia.org/resource/Abbie_Hoffman"))
-          .findClassOf(URI("http://www.w3.org/2002/07/owl#Class"))
+          .findClassesOf(URI("http://www.w3.org/2002/07/owl#Class"))
           .onComplete {
             case Success(types) => println(types); assert(true)
             case Failure(exception) => println(exception); assert(false)
           }
       }
     }
-    /*
+
     test("findTypeOf - rdf:type") {
       val config: StatementConfiguration = new StatementConfiguration()
       config.setConfigString(
@@ -140,12 +140,12 @@ object SWTest extends TestSuite {
       Future {
         query.something("h1")
           .set(URI("http://dbpedia.org/resource/Abbie_Hoffman"))
-          .findClassOf(URI("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"))
+          .findClassesOf(URI("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"))
           .onComplete {
             case Success(types) => println(types); assert(true)
             case Failure(exception) => println(exception); assert(false)
           }
       }
-    }*/
+    }
   }
 }
