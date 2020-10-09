@@ -29,14 +29,12 @@ case class Request(var url : String) {
     val p = Promise[QueryResult]()
 
     xhr.onload = { (e: dom.Event) =>
-      print(xhr.responseText)
       if (xhr.status == 200) {
         val qr2 = mimetype match {
           case "json" => p success QueryResult(xhr.responseText, mimetype)
           case _ =>
             p.failure(new js.JavaScriptException("[Configuration] Parser not available for this MIME type : "+mimetype))
         }
-        //println(xhr.responseText)
       } else
         p.failure(new js.JavaScriptException(xhr))
     }
@@ -79,8 +77,6 @@ case class Request(var url : String) {
     val data = addQueryAsData(query)
     send(xhr,data,mimetype)
   }
-
-
 
   def mime(idx : String) : String = {
     idx match {
