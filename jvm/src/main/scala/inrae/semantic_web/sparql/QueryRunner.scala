@@ -33,7 +33,7 @@ case class QueryRunner(source: ConfigurationObject.Source) {
   def query(queryStr: String): Future[QueryResult] = {
     println("-------  query -----------")
     println(queryStr)
-    
+    println("==================================================================")
     Future {
       /* Graph equiv Model => defined in configuration */
       //val model = ModelFactory.createDefaultModel

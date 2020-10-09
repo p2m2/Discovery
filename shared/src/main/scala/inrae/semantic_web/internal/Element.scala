@@ -1,6 +1,7 @@
 package inrae.semantic_web.internal
 
 import inrae.semantic_web.rdf._
+
 /*
 sealed trait Node {
   var children : Seq[ReferenceNode] = Seq[ReferenceNode]()
@@ -17,7 +18,7 @@ sealed trait Node {
   }
 }*/
 
-class Node(var uniqRef : Option[String]) {
+case class Node(var uniqRef : Option[String]) {
 
   var children: Seq[Node] = Seq[Node]()
   var sources: Seq[String] = Seq[String]()
@@ -53,4 +54,4 @@ class Something(uniqRef : String) extends Node(Some(uniqRef))
 class SubjectOf(uniqRef : String, var uri : URI) extends Node(Some(uniqRef))
 class ObjectOf(uniqRef : String, var uri : URI) extends Node(Some(uniqRef))
 class Attribute(uniqRef : String, var uri : URI) extends Node(Some(uniqRef))
-class Value(var uri : RdfType) extends Node(None)
+class Value(var rdfterm : RdfType) extends Node(None)

@@ -10,10 +10,9 @@ import scala.scalajs.js._
 
 @JSExportTopLevel(name="EasySparqlEngine")
 class SWFacade(var config: StatementConfiguration) {
-  var sw = new SW(config)
+  implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
 
-  @JSExport
-  def print() : Unit = sw.print()
+  var sw = new SW(config)
 
   @JSExport
   def focus(ref : String) : SWFacade = { sw.focus(ref) ; this }
@@ -45,13 +44,16 @@ class SWFacade(var config: StatementConfiguration) {
 
   @JSExport
   def select(): Promise[QueryResult] = {
-    implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
     sw.select().toJSPromise
   }
 
   @JSExport
   def count(): Promise[Int] = {
-    implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
     sw.count().toJSPromise
+  }
+
+  @JSExport
+  def findClassOf(uri:URI = URI("")): Promise[Seq[URI]] = {
+    sw.findClassOf().toJSPromise
   }
 }

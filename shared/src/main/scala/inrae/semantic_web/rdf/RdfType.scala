@@ -11,8 +11,9 @@ trait RdfType
 @JSExportTopLevel(name="URI")
 case class URI (var localName : String,var nameSpace : String = "") extends RdfType {
   override def toString() : String = {
-    nameSpace match {
-      case "" => "<"+localName+">"
+    (localName,nameSpace) match {
+      case ("a",_) => "a"
+      case (_,"") => "<"+localName+">"
       case _ => "<"+nameSpace + "/" + localName+">"
     }
   }

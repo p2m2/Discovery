@@ -34,59 +34,65 @@ object SparqlGenerator  {
     def sparqlNode(n: Node,varIdSire : String, variableName : String) : String = {
         n match {
             case node : SubjectOf          => "?" + varIdSire + " " +
-              node.uri.toString() + " " + "?"+ variableName
+              node.uri.toString() + " " + "?"+ variableName + " .\n"
             case node : ObjectOf           => "?" + variableName + " " +
-              node.uri.toString() + " " + "?"+ varIdSire
+              node.uri.toString() + " " + "?"+ varIdSire + " .\n"
             case node : Attribute          => "?" + variableName + " " +
-              node.uri.toString() + " " + "?"+ varIdSire
-            case node : Value              => "VALUES ?" +varIdSire+ " { " + node.uri.toString() + " }"
+              node.uri.toString() + " " + "?"+ varIdSire + " .\n"
+            case node : Value              => "VALUES ?" +varIdSire+ " { " + node.rdfterm.toString() + " }\n"
             case _                         => ""
         }
     }
 
-    def setVariableIdentifier(
+    /**
+     *
+     * @param n : Get variable from this Node
+     * @param ms : Construction Map to build generic variable
+     * @return Variable Name, Map [Generic name -> last index variable)
+     */
+    def getVariableIdentifier(
                        n:Node,
                        ms : Map[String,Int] = Map[String,Int](), /* map to increase id and manage new variable name */
                      ) : Option[(String,Map[String,Int])] = {
 
-        val genericName = n match {
-            case _ : Something          => "something"
-            case _ : SubjectOf          => "object"
-            case _ : ObjectOf           => "subject"
-            case _ : Attribute          => "attribute"
-            case _                      => None
-        }
-        genericName match {
-            case s : String => {
-                val v = ms.getOrElse(s,0)
-                Some(genericName+v.toString(),ms + (s -> (v+1) ))
-            }
+        n.reference() match {
+            /* case if user defined an identifier */
+            case Some(v) if !v.startsWith("_internal_") => Some(v, ms)
+            case _ =>
+                val genericName = n match {
+                    case _: Something => "something"
+                    case _: SubjectOf => "object"
+                    case _: ObjectOf => "subject"
+                    case _: Attribute => "attribute"
+                    case _ => None
+                }
+                genericName match {
+                    case s: String => {
+                        val v = ms.getOrElse(s, 0)
+                        Some(genericName + v.toString(), ms + (s -> (v + 1)))
+                    }
+                }
         }
     }
 
     /* output variable : get key : referenceKeyNode, value : variable name */
-    def getAllVariablesIdentifiers(n : Node,
-                       referenceToIdentifier : Map[String,String] = Map[String,String](),
-                       genericNametoId : Map[String,Int] = Map[String,Int]() )
+    def setAllVariablesIdentifiers(n : Node,
+                                   referenceToIdentifier : Map[String,String] = Map[String,String](),
+                                   genericNametoId : Map[String,Int] = Map[String,Int]() )
     : (Map[String,String],Map[String,Int]) = {
-        println(" -- assignVariable --")
-        println(referenceToIdentifier)
         val (ass,ms) = n.reference() match {
             case Some(ref) => {
-                setVariableIdentifier(n,genericNametoId) match {
+                getVariableIdentifier(n,genericNametoId) match {
                     case Some((v,ms2)) => (referenceToIdentifier + (ref -> v),ms2)
                     case None => (referenceToIdentifier,genericNametoId)
                 }
             }
             case _ => (referenceToIdentifier,genericNametoId)
         }
-        println("--reduceleft---")
-        println(n.children)
-        println(ass)
         /* set up assVariableNode */
         n.children.toArray.foldLeft((ass,ms)) {
             (acc,child) =>
-                getAllVariablesIdentifiers(child,acc._1,acc._2)
+                setAllVariablesIdentifiers(child,acc._1,acc._2)
         }
     }
 
@@ -103,10 +109,7 @@ object SparqlGenerator  {
         }
 
         val triplet : String = sparqlNode(n,varIdSire,variableName)
-
-        print("--***---");
-        println(variableName)
-        triplet + "\n"+ n.children.map( child => body( sw, child,referenceToIdentifier, variableName)).mkString(" .")
+        triplet + n.children.map( child => body( sw, child,referenceToIdentifier, variableName)).mkString("")
     } 
 }
 
