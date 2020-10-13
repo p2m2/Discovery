@@ -21,9 +21,9 @@ case class URI (var localName : String,var nameSpace : String = "") extends RdfT
 }
 
 @JSExportTopLevel(name="Anonymous")
-case class Anonymous(var id: String) extends RdfType {
+case class Anonymous(var value : String) extends RdfType {
   override def toString() : String = {
-    return "anonymous:"+id
+    return value
   }
 }
 

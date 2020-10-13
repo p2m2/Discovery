@@ -3,7 +3,7 @@ import scala.scalajs.js.annotation._
 import java.util.UUID.randomUUID
 
 import inrae.semantic_web.rdf._
-import inrae.semantic_web.internal._
+import inrae.semantic_web.internal.{Node, _}
 import inrae.semantic_web.sparql._
 
 import scala.concurrent.Future
@@ -19,12 +19,25 @@ case class SW(var config: StatementConfiguration) {
   private var focusNode  : Node = rootNode
 
   /* manage the creation of an unique ref */
-  def getUniqueRef() : String = "_internal_"+randomUUID.toString
+  def getUniqueRef() : String = "_internal_" + randomUUID.toString
 
   /* set the current focus on the select node */
   def focus(ref : String) : SW = {
     focusNode = pm.SelectNode.setFocus(ref, rootNode)(0)
     return this
+  }
+
+  def setupnode( n : Node ) : SW = {
+    focusManagement(n)
+
+    QueryManager.setUpSourcesNode(n,config).onComplete {
+      case Success(sourceNode : SourcesNode) => {
+        rootNode.lSourcesNodes = rootNode.lSourcesNodes :+ sourceNode
+        debug()
+      }
+      case Success( _ : Node) => None
+    }
+    this
   }
 
   def focusManagement(n : Node) : SW = {
@@ -34,40 +47,48 @@ case class SW(var config: StatementConfiguration) {
     return this
   }
 
-  /* start a request */
+  /* start a request with a variable */
   def something( ref : String = getUniqueRef() ) : SW = {
-    val lastNode = new Something(ref)
-    /* special case when "somthing" is used. become the focus */
-    focusManagement(lastNode)
+    setupnode(new Something(ref))
   }
 
   /* create node which focus is the subject : ?focusId <uri> ?target */
   def isSubjectOf( uri : URI , ref : String = getUniqueRef() ) : SW = {
-    val lastNode = new SubjectOf(ref,uri)
-    focusManagement(lastNode)
+    setupnode(new SubjectOf(ref,uri))
   }
 
 
-  /* create node which focus is the subject : ?focusId <uri> ?target */
+  /* create node which focus is the subject : ?target <uri> ?focusId */
   def isObjectOf( uri : URI , ref : String = getUniqueRef() ) : SW = {
-    val lastNode = new ObjectOf(ref,uri)
-    focusManagement(lastNode)
+    setupnode(new ObjectOf(ref,uri))
+  }
+
+  /* create node which focus is the properties :
+  ?focusId ?target <uri>|literal
+  */
+  def isLinkTo( term : RdfType , ref : String = getUniqueRef() ) : SW = {
+    setupnode(new LinkTo(ref,term))
+  }
+
+  /* create node which focus is the properties :
+     <uri> ?target ?focusId
+  */
+  def isLinkFrom( uri : URI , ref : String = getUniqueRef() ) : SW = {
+    setupnode(new LinkFrom(ref,uri))
   }
 
   /* set */
   def set( uri : URI ) : SW = {
-    val lastNode = new Value(uri)
-    focusManagement(lastNode)
+    setupnode(new Value(uri))
   }
 
   def debug() : SW = {
-    println("USER REQUEST\n")
-    println(pm.SimpleConsole.get(rootNode))
-    println("FOCUS NODE\n")
-    println(pm.SimpleConsole.get(focusNode))
-    println("QUERY PLANNER\n")
-    println("todo....")
-    return this
+      println("USER REQUEST\n" +
+        pm.SimpleConsole.get(rootNode) +
+        pm.SimpleConsole.get(focusNode) +
+        "QUERY PLANNER\n"+
+        "todo....")
+    this
   }
 
   def sparql() : String = {
@@ -86,7 +107,7 @@ case class SW(var config: StatementConfiguration) {
       })
   }
 
-  def findClassesOf(motherClass: URI = URI("") ) : Future[Seq[URI]] = {
+  def findClassesOf(motherClass: URI = URI("") ) : Future[Seq[Option[URI]]] = {
     (motherClass match {
       case uri : URI if uri == URI("")  => isSubjectOf(URI("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"),"_esp___type")
       case _ : URI =>  isSubjectOf(URI("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"),"_esp___type")
@@ -101,28 +122,23 @@ case class SW(var config: StatementConfiguration) {
             resulstrow.key("_esp___type")
           }
         ).map(option => option match {
-          case Some(uri : URI) => uri
+          case Some(uri : URI) => Some(uri)
+          case _ => None
         })
       )
   }
 
-  def findPropertiesOf(motherClass: URI = URI("") ) : Future[Seq[URI]] = {
-    (motherClass match {
-      case uri : URI if uri == URI("")  => isSubjectOf(URI("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"),"_esp___type")
-      case _ : URI =>  isSubjectOf(URI("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"),"_esp___type")
-        .isSubjectOf(URI("a"))
-        .set(motherClass)
-    })
-      .focus("_esp___type")
-      .select
-      .map( resultsformat =>
-        resultsformat.get.rows.map(
-          resulstrow => {
-            resulstrow.key("_esp___type")
-          }
-        ).map(option => option match {
-          case Some(uri : URI) => uri
-        })
-      )
+  def findObjectPropertiesOf(motherClassProperties: URI = URI("") ) : Future[Seq[URI]] = {
+    //QueryManager.queryPropertyNode(rootNode,focusNode,config)
+    Future {
+      Seq[URI]()
+    }
+  }
+  def findDatatypePropertiesOf(motherClassProperties: URI = URI("") ) : Future[Seq[URI]] = {
+    //check motherClassProperties => xsd type
+    //isLiteral
+    Future {
+      Seq[URI]()
+    }
   }
 }

@@ -3,10 +3,15 @@ package inrae.semantic_web.internal.pm
 import inrae.semantic_web.internal._
 import inrae.semantic_web.rdf.RdfType
 
+import scala.concurrent.Promise
+//import scala.concurrent.duration.Duration
+//import scala.concurrent.{Await}
+import scala.concurrent.Future
 /**
  * 
  */
 object SimpleConsole  {
+    implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
     //full block
     def fullb : String = new String(Character.toChars(0x2588))
     //left half block
@@ -33,6 +38,18 @@ object SimpleConsole  {
         case _                      => Console.RED
     }
 
+    def Libelle( n: Node ) : String = {
+        n match {
+            case _ : Root           => "Root"
+            case node : Something   => "Something ("+ node.uniqRef +")"
+            case node : SubjectOf   => "SubjectOf ("+node.uri.toString +" , " + node.uniqRef +")"
+            case node : ObjectOf    => "ObjectOf ("+node.uri.toString +" , " + node.uniqRef +")"
+            case node : SourcesNode => "SourceNode -> " + Libelle(node.n)
+            case node : Value       => "Value ("+node.rdfterm.toString +" , " + node.uniqRef +")"
+            case v                  => "--- Unkown ---"+v.toString
+        }
+    }
+
     def get( n: Node, marge : Int = 0 ) : String = {
 
         val prefix =  (marge match {
@@ -43,17 +60,23 @@ object SimpleConsole  {
         val suffix =  (marge match {
             case 0 => fullb + lowerhb * 100 + "\n"
             case _ => ""
-        })
-
-        val libelle : String = escape + item + barrehor + " " + colorize(n) + (n match {
-            case _ : Root           => "Root"
-            case node : Something   => "Something ("+ node.uniqRef +")"
-            case node : SubjectOf   => "SubjectOf ("+node.uri.toString +" , " + node.uniqRef +")"
-            case node : ObjectOf    => "ObjectOf ("+node.uri.toString +" , " + node.uniqRef +")"
-            case node : Value       => "Value ("+node.rdfterm.toString +" , " + node.uniqRef +")"
-            case v                  => "--- Unkown ---"+v.toString
         }) + Console.RESET
-        prefix + (escape+barrevert) * marge + libelle + "\n" + n.children.map( child => get( child, marge+1)).mkString("") + suffix
+
+        val label : String = escape + item + barrehor + " " + colorize(n) + (Libelle(n)) + Console.RESET
+
+        val children = prefix + (escape + barrevert) * marge + label +
+          "\n" + n.children.map(child => get(child, marge + 1)).mkString("") + suffix
+
+        val sourcesNode = n match {
+            case r : Root => {
+                prefix + (escape + barrevert) * marge + label + "\n" //+
+                  r.lSourcesNodes.map(child => get(child, marge + 1) +
+                    " * " + child.sources.mkString(",")  ).mkString("\n") + "\n" 
+            }
+            case _ => ""
+        }
+        children + "\n" + sourcesNode
+
     } 
 }
 
