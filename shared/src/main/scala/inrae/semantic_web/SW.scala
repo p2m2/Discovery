@@ -35,7 +35,7 @@ case class SW(var config: StatementConfiguration) {
         rootNode.lSourcesNodes = rootNode.lSourcesNodes :+ sourceNode
         debug()
       }
-      case Success( _ : Node) => None
+      case _  => None
     }
     this
   }

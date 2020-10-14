@@ -108,11 +108,10 @@ object QueryManager {
 
         y2.onComplete {
           case Success(lCheck) => y3 success (new SourcesNode(n, lCheck.zip(config.sources()).filter( _._1).map( _._2.id)))
+          case _ => y3 success (n)
         }
 
         y3.future
-        //val sources : Seq[(String,Int)] = config.sources().map(_.id).zip(nbRowResultsBySource)
-        //new SourcesNode(n,sources)
 
       case _ => Future(n)
     }

@@ -37,7 +37,7 @@ class SWFacade(var config: StatementConfiguration) {
   def set( uri : URI ) : SWFacade = { sw.set(uri) ; this }
 
   @JSExport
-  def debug() : Promise[String] = { sw.debug().toJSPromise  }
+  def debug() : SWFacade = { sw.debug() ; this  }
 
   @JSExport
   def sparql() : String = sw.sparql()
