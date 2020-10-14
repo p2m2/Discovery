@@ -37,7 +37,7 @@ class SWFacade(var config: StatementConfiguration) {
   def set( uri : URI ) : SWFacade = { sw.set(uri) ; this }
 
   @JSExport
-  def debug() : SWFacade = { sw.debug() ; this }
+  def debug() : SWFacade = { sw.debug() ; this  }
 
   @JSExport
   def sparql() : String = sw.sparql()
@@ -53,7 +53,7 @@ class SWFacade(var config: StatementConfiguration) {
   }
 
   @JSExport
-  def findClassOf(uri:URI = URI("")): Promise[Seq[URI]] = {
-    sw.findClassOf().toJSPromise
+  def findClassesOf(uri:URI = URI("")): Promise[Seq[Option[URI]]] = {
+    sw.findClassesOf().toJSPromise
   }
 }

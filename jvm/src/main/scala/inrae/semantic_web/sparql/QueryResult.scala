@@ -20,9 +20,8 @@ case class QueryResult(results : ResultSet, mimetype : String="") {
 
     while (results.hasNext) {
       val r = results.next()
-//: Map[String,RdfType]
       val values = vars.map(
-        varName => {
+        varName => try {
           val obj = r.get(varName)
           val t = obj.isLiteral() match {
             case true => {
@@ -35,6 +34,11 @@ case class QueryResult(results : ResultSet, mimetype : String="") {
             }
           }
           (varName -> t)
+        } catch {
+          case e : Exception => {
+            // todo : avoid this treatment
+            (varName -> URI("-- exception --"))
+          }
         }
       ).toMap
 

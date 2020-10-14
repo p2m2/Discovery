@@ -19,12 +19,8 @@ object SparqlGenerator  {
         "}"
     }
 
-    def prologSourcesSelection(variableIdentifier : String = "") : String = {
-        if ( variableIdentifier == "") {
-            "SELECT (COUNT(*) AS ?COUNT) WHERE {"
-        } else {
-            "SELECT COUNT("+variableIdentifier+") WHERE {"
-        }
+    def prologSourcesSelection() : String = {
+            "SELECT * WHERE {"
     }
 
     def solutionModifierSourcesSelection () : String = {
@@ -44,6 +40,19 @@ object SparqlGenerator  {
         }
     }
 
+    def generic_name(n:Node) : String = {
+        n match {
+            case _: Something => "something"
+            case _: SubjectOf => "object"
+            case _: ObjectOf => "subject"
+            case _: LinkTo => "linkto"
+            case _: LinkFrom => "linkfrom"
+            case sn: SourcesNode => generic_name(sn.n)
+            case _: Attribute => "attribute"
+            case _ => "unknown"
+        }
+    }
+
     /**
      *
      * @param n : Get variable from this Node
@@ -59,13 +68,7 @@ object SparqlGenerator  {
             /* case if user defined an identifier */
             case Some(v) if !v.startsWith("_internal_") => Some(v, ms)
             case _ =>
-                val genericName = n match {
-                    case _: Something => "something"
-                    case _: SubjectOf => "object"
-                    case _: ObjectOf => "subject"
-                    case _: Attribute => "attribute"
-                    case _ => None
-                }
+                val genericName = generic_name(n)
                 genericName match {
                     case s: String => {
                         val v = ms.getOrElse(s, 0)

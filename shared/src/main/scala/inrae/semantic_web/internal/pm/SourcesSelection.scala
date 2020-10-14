@@ -10,7 +10,7 @@ import scala.concurrent.Future
 object SourcesSelection  {
 
     implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
-
+/*
     def selectSourcesNode(n: Node,config: StatementConfiguration) : Future[Seq[ConfigurationObject.Source]] = {
         val sources = config.sources()
           Future.sequence(sources.map(s => QueryManager.testNode(n,s))).map {
@@ -25,6 +25,8 @@ object SourcesSelection  {
             case node : ObjectOf           => selectSourcesNode(node,config)// detect if relation exist
             case _                         => Future { Seq[ConfigurationObject.Source]() }
         }
-    } 
+    }
+
+ */
 }
 
