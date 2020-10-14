@@ -2,14 +2,9 @@ package inrae.semantic_web.sparql
 import inrae.semantic_web.rdf._
 import org.apache.jena.query._
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 case class QueryResult(results : ResultSet, mimetype : String="") {
-  def print(): Unit = {
-    println("================================= QueryResult ===========================================")
-    println(ResultSetFormatter.asText(results))
-    println("=========================================================================================")
-  }
 
   //https://jena.apache.org/documentation/javadoc/jena/org/apache/jena/rdf/model/RDFNode.html?is-external=true
   
@@ -17,9 +12,11 @@ case class QueryResult(results : ResultSet, mimetype : String="") {
 
     val rf = ResultsFormat()
     val vars = results.getResultVars.asScala
-
+    scribe.debug(" -- vars -- ")
+    scribe.debug(vars.toString())
     while (results.hasNext) {
       val r = results.next()
+      println(r)
       val values = vars.map(
         varName => try {
           val obj = r.get(varName)
@@ -44,7 +41,7 @@ case class QueryResult(results : ResultSet, mimetype : String="") {
 
       rf.rows = rf.rows :+ rf.ResultsRow(values)
     }
-
+    scribe.debug(rf.toString())
     return rf
   }
 }

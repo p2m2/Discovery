@@ -17,20 +17,38 @@ case class SW(var config: StatementConfiguration) {
   private var rootNode   : Root = new Root()
   /* focus node */
   private var focusNode  : Node = rootNode
+  /* prefix management */
+  private var prefixes : Map[String,String] = Map[String,String]()
+
+  scribe.Logger.root.clearHandlers().clearModifiers().withHandler(minimumLevel = Some(Level.Info)).replace()
 
   /* manage the creation of an unique ref */
   def getUniqueRef() : String = "_internal_" + randomUUID.toString
 
   /* set the current focus on the select node */
   def focus(ref : String) : SW = {
-    focusNode = pm.SelectNode.setFocus(ref, rootNode)(0)
+    val arrNode = pm.SelectNode.setFocus(ref, rootNode)
+
+    if ( arrNode.length > 0 ) {
+      focusNode = arrNode(0)
+    } else {
+      System.err.println("ref unknown :"+ref)
+      scribe.error("ref unknown :"+ref)
+    }
+
     return this
   }
 
+  def prefix(short : String, long : String ) : SW = {
+    prefixes = prefixes + ( short -> long )
+    this
+  }
+
   def setupnode( n : Node ) : SW = {
+
     focusManagement(n)
 
-    QueryManager.setUpSourcesNode(n,config).onComplete {
+    QueryManager.setUpSourcesNode(n,config,prefixes).onComplete {
       case Success(sourceNode : SourcesNode) => {
         rootNode.lSourcesNodes = rootNode.lSourcesNodes :+ sourceNode
         debug()
@@ -96,11 +114,11 @@ case class SW(var config: StatementConfiguration) {
   }
 
   def select() : Future[QueryResult] = {
-    QueryManager.queryNode(rootNode,focusNode,config)
+    QueryManager.queryNode(rootNode,focusNode,config,prefixes)
   }
 
   def count() : Future[Int] = {
-    QueryManager.countNbSolutions(rootNode,config)
+    QueryManager.countNbSolutions(rootNode,config,prefixes)
       .map (v => v match {
         case Some(literal : Literal) => literal.value.toInt
         case _ => 0

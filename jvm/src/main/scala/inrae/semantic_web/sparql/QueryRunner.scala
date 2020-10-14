@@ -31,16 +31,19 @@ case class QueryRunner(source: ConfigurationObject.Source) {
   }
 
   def query(queryStr: String): Future[QueryResult] = {
+
     Future {
       /* Graph equiv Model => defined in configuration */
       //val model = ModelFactory.createDefaultModel
       val query = QueryFactory.create(queryStr)
-
+      scribe.debug(source.url)
+      scribe.debug(queryStr)
       //val authenticator = new Nothing("user", "password".toCharArray)
       val qexec: QueryExecution = QueryExecutionFactory.sparqlService(source.url, query)
       val results: ResultSet = qexec.execSelect()
 
       QueryResult(ResultSetFactory.copyResults(results))
+
     }
   }
 

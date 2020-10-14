@@ -8,6 +8,12 @@ import inrae.semantic_web.internal._
  */
 object SparqlGenerator  {
 
+    def prefixes(prefixes : Map[String,String]) : String = {
+        prefixes.map {
+            case (k,v) => "PREFIX "+k+": "+"<"+v+">"
+        }.mkString("\n")
+    }
+
     def prolog(listVariables : Seq[String] = Seq[String]()) : String = {
         if (listVariables.length == 0 ) {
             "SELECT * WHERE {"

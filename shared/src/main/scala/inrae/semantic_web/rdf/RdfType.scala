@@ -14,10 +14,9 @@ case class URI (var localName : String,var nameSpace : String = "") extends RdfT
     (localName,nameSpace) match {
       case ("a",_) => "a"
       case (_,"") => "<"+localName+">"
-      case _ => "<"+nameSpace + "/" + localName+">"
+      case _ => nameSpace + ":" + localName
     }
   }
-
 }
 
 @JSExportTopLevel(name="Anonymous")

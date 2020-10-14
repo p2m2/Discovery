@@ -1,5 +1,6 @@
 package inrae.semantic_web
 
+import inrae.semantic_web.QueryPlanner
 import inrae.semantic_web.internal._
 import inrae.semantic_web.rdf.{Literal, RdfType, URI}
 import inrae.semantic_web.sparql.{QueryResult, _}
@@ -17,9 +18,9 @@ object QueryManager {
    * @param n
    */
 
-  def queryNode(rootRequest : Node, n: Node, config : StatementConfiguration) : Future[QueryResult] = {
+  def queryNode(rootRequest : Root, n: Node, config : StatementConfiguration,prefixes : Map[String,String]) : Future[QueryResult] = {
     val (refToIdentifier,_) = pm.SparqlGenerator.setAllVariablesIdentifiers(n)
-    queryVariables(rootRequest,refToIdentifier.values.toSeq,config)
+    queryVariables(rootRequest,refToIdentifier.values.toSeq,config,prefixes)
   }
 
   def queryPropertyNode(rootRequest : Node, n: Node, config : StatementConfiguration) : Future[Seq[URI]] = {
@@ -27,18 +28,22 @@ object QueryManager {
       Seq[URI]()
     }
   }
-  def queryAll(rootRequest : Node,n: Node, config : StatementConfiguration) : Future[QueryResult] = {
-    queryVariables(rootRequest,rootRequest.references(),config)
+  def queryAll(rootRequest : Root,
+               config : StatementConfiguration,
+               prefixes : Map[String,String]) : Future[QueryResult] = {
+    queryVariables(rootRequest,rootRequest.references(),config,prefixes)
   }
 
-  def countNbSolutions(n : Node,  config : StatementConfiguration) : Future[Option[RdfType]] = {
+  def countNbSolutions(n : Node,  config : StatementConfiguration,prefixes : Map[String,String]) : Future[Option[RdfType]] = {
 
     if (config.sources().length == 0) {
       throw new Exception(" ** None sources available ** ")
     } else if (config.sources().length == 1) {
       val source = config.sources()(0)
       val (refToIdentifier, _) = pm.SparqlGenerator.setAllVariablesIdentifiers(n)
-      val query = pm.SparqlGenerator.prologSourcesSelection()  +
+      val query =
+        pm.SparqlGenerator.prefixes(prefixes)
+        pm.SparqlGenerator.prologSourcesSelection()  +
         pm.SparqlGenerator.body(source, n, refToIdentifier) +
         pm.SparqlGenerator.solutionModifier()
 
@@ -54,29 +59,43 @@ object QueryManager {
       res.map(v => v.get.row(0).key("COUNT"))
     } else {
       // todo query planner
+      scribe.error("QueryPlanner is not available .")
       throw new Exception("not manage.......")
     }
   }
 
-  def queryVariables(n: Node, listVariables : Seq[String], config : StatementConfiguration) : Future[QueryResult] = {
+  def queryVariables(root: Root,
+                     listVariables : Seq[String],
+                     config : StatementConfiguration,
+                     prefixes : Map[String,String]) : Future[QueryResult] = {
     if (config.sources().length == 0) {
       throw new Exception(" ** None sources available ** ")
     } else if (config.sources().length == 1) {
-      queryOnSource(n,listVariables,config.sources()(0))
+      queryOnSource(root,listVariables,config.sources()(0),prefixes)
     } else {
-      // todo query planner
-        throw new Exception("not manage.......")
+      //
+      val plan = QueryPlanner.buildPlanning(root,listVariables,config)
+      //QueryManager.executePlan(plan)
+      throw new Exception("en cours...")
     }
   }
 
-  def queryOnSource(n: Node, listVariables : Seq[String],  source : ConfigurationObject.Source): Future[QueryResult] = {
+  def queryOnSource(n: Node,
+                    listVariables : Seq[String],
+                    source : ConfigurationObject.Source,
+                    prefixes : Map[String,String]): Future[QueryResult] = {
     val (refToIdentifier,_) = pm.SparqlGenerator.setAllVariablesIdentifiers(n)
-    val query = pm.SparqlGenerator.prolog(listVariables) + "\n" +
-                pm.SparqlGenerator.body(source, n, refToIdentifier) +
-                pm.SparqlGenerator.solutionModifier()
+    val query = pm.SparqlGenerator.prefixes(prefixes)+"\n" +
+        pm.SparqlGenerator.prolog(listVariables) + "\n" +
+        pm.SparqlGenerator.body(source, n, refToIdentifier) +
+        pm.SparqlGenerator.solutionModifier()
 
     QueryRunner(source).query(query)
   }
+
+  //def executePlan() : Future[QueryResult] = {
+
+  //}
 
   /**
    * Assign a list of source (existence of a remote persistence) if possible
@@ -84,17 +103,18 @@ object QueryManager {
    * @param source
    * @return
    */
-  def setUpSourcesNode(n: Node, config : StatementConfiguration): Future[Node] = {
-    println("---------------- setUpSourcesNode ----------------------")
+  def setUpSourcesNode(n: Node,
+                       config : StatementConfiguration,
+                       prefixes : Map[String,String]): Future[Node] = {
+
     n match {
       case _ : SubjectOf | _: ObjectOf | _: LinkTo | _: LinkFrom =>
-        val query = pm.SparqlGenerator.prologSourcesSelection() +
-                    pm.SparqlGenerator.sparqlNode(n,"varUp","varCur") +
-                    pm.SparqlGenerator.solutionModifierSourcesSelection()
+        val query = pm.SparqlGenerator.prefixes(prefixes) + "\n" +
+          pm.SparqlGenerator.prologSourcesSelection() + "\n" +
+          pm.SparqlGenerator.sparqlNode(n,"varUp","varCur") +
+          pm.SparqlGenerator.solutionModifierSourcesSelection()
 
-        //println(" ----- query --------")
-        //println(query)
-
+        scribe.debug(query)
 
         val nbRowResultsBySource : Seq[Future[Boolean]] = {
           config.sources().map(
@@ -103,12 +123,18 @@ object QueryManager {
               ( _.map(rr => rr.get.rows.length>0))
             })
           }
+
         val y2 = Future.sequence(nbRowResultsBySource)
         val y3 = Promise[Node]()
 
         y2.onComplete {
-          case Success(lCheck) => y3 success (new SourcesNode(n, lCheck.zip(config.sources()).filter( _._1).map( _._2.id)))
-          case _ => y3 success (n)
+          case Success(lCheck) => {
+            y3 success (new SourcesNode(n, lCheck.zip(config.sources()).filter( _._1).map( _._2.id)))
+          }
+          case msg => {
+            System.err.println(msg)
+            y3 success (n)
+          }
         }
 
         y3.future
