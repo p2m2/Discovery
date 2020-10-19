@@ -35,7 +35,6 @@ case class SW(var config: StatementConfiguration) {
       System.err.println("ref unknown :"+ref)
       scribe.error("ref unknown :"+ref)
     }
-
     return this
   }
 
@@ -44,17 +43,19 @@ case class SW(var config: StatementConfiguration) {
     this
   }
 
-  def setupnode( n : Node ) : SW = {
+  def setupnode( n : Node , setupsource : Boolean = false ) : SW = {
 
     focusManagement(n)
 
-    QueryManager.setUpSourcesNode(n,config,prefixes).onComplete {
-      case Success(sourceNode : SourcesNode) => {
-        rootNode.lSourcesNodes = rootNode.lSourcesNodes :+ sourceNode
-        debug()
+    if ( setupsource ) {
+      QueryManager.setUpSourcesNode(n,config,prefixes).onComplete {
+        case Success(sourceNode : SourcesNode) => {
+          rootNode.lSourcesNodes = rootNode.lSourcesNodes :+ sourceNode
+        }
+        case _  => None
       }
-      case _  => None
     }
+
     this
   }
 

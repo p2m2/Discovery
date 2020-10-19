@@ -29,6 +29,13 @@ object SparqlGenerator  {
             "SELECT * WHERE {"
     }
 
+    def prologCountSelection(varCount : String, variable :String = "") : String = {
+        variable match {
+            case "" => "SELECT ( COUNT(*) as ?"+varCount+" ) WHERE {"
+            case _ => "SELECT ( COUNT(?"+variable+") as ?"+varCount+" ) WHERE {"
+        }
+    }
+
     def solutionModifierSourcesSelection () : String = {
         "} LIMIT 1"
     }

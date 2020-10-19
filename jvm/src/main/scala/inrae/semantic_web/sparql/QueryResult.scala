@@ -16,7 +16,6 @@ case class QueryResult(results : ResultSet, mimetype : String="") {
     scribe.debug(vars.toString())
     while (results.hasNext) {
       val r = results.next()
-      println(r)
       val values = vars.map(
         varName => try {
           val obj = r.get(varName)
@@ -41,6 +40,7 @@ case class QueryResult(results : ResultSet, mimetype : String="") {
 
       rf.rows = rf.rows :+ rf.ResultsRow(values)
     }
+    scribe.debug("Size results format :"+rf.rows.length)
     scribe.debug(rf.toString())
     return rf
   }

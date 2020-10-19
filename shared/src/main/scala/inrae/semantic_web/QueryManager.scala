@@ -4,7 +4,6 @@ import inrae.semantic_web.QueryPlanner
 import inrae.semantic_web.internal._
 import inrae.semantic_web.rdf.{Literal, RdfType, URI}
 import inrae.semantic_web.sparql.{QueryResult, _}
-
 import scala.concurrent.{Future, Promise}
 import scala.util.{Failure, Success, Try}
 
@@ -41,22 +40,24 @@ object QueryManager {
     } else if (config.sources().length == 1) {
       val source = config.sources()(0)
       val (refToIdentifier, _) = pm.SparqlGenerator.setAllVariablesIdentifiers(n)
+      val varCount = "count"
+      val prolog = {
+        n.reference() match {
+          case Some(r) => pm.SparqlGenerator.prologCountSelection(varCount,refToIdentifier(r))
+          case None => pm.SparqlGenerator.prologCountSelection(varCount)
+        }
+      }
+
       val query =
-        pm.SparqlGenerator.prefixes(prefixes)
-        pm.SparqlGenerator.prologSourcesSelection()  +
+        pm.SparqlGenerator.prefixes(prefixes) +
+        prolog +
         pm.SparqlGenerator.body(source, n, refToIdentifier) +
         pm.SparqlGenerator.solutionModifier()
 
+      scribe.info(query)
+
       val res: Future[QueryResult] = QueryRunner(source).query(query)
-    /*
-      Future {
-        val y = res.onComplete {
-          case Success(count) => count.get.row(0).key("COUNT")
-          case _ => None
-        }
-        y
-      }*/
-      res.map(v => v.get.row(0).key("COUNT"))
+      res.map(v => v.get.row(0).key(varCount))
     } else {
       // todo query planner
       scribe.error("QueryPlanner is not available .")
@@ -74,9 +75,13 @@ object QueryManager {
       queryOnSource(root,listVariables,config.sources()(0),prefixes)
     } else {
       //
-      val plan = QueryPlanner.buildPlanning(root,listVariables,config)
+      val plan = QueryPlanner.buildPlanning(root)//,listVariables,config)
+      println(" ----------------------- PLAN -----------------------------")
+      println(plan)
       //QueryManager.executePlan(plan)
-      throw new Exception("en cours...")
+      Future {
+        QueryResult(null)
+      }
     }
   }
 

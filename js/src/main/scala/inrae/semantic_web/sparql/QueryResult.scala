@@ -7,7 +7,7 @@ import scala.scalajs.js
 import js.JSConverters._
 
 @JSExportTopLevel(name="QueryResult")
-case class QueryResult(results : String, mimetype : String) {
+case class QueryResult(results : String, mimetype : String="json") {
   def print(): Unit = {
     None: Option[String]
   }

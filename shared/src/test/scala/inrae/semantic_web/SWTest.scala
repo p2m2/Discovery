@@ -49,6 +49,7 @@ object SWTest extends TestSuite {
           }
       }
     }*/
+    /*
     test("debug") {
       val config: StatementConfiguration = new StatementConfiguration()
       config.setConfigString(
@@ -67,32 +68,37 @@ object SWTest extends TestSuite {
       query.something("h1")
           .set(URI("http://dbpedia.org/resource/%C3%84lvdalen"))
           .isSubjectOf(URI("http://www.w3.org/2002/07/owl#sameAs"))
-          .debug
     }
-    /*
-    test("metabolomics") {
+*/
+    test("count") {
       val config: StatementConfiguration = new StatementConfiguration()
       config.setConfigString(
         """
           |{
           | "sources" : [{
-          |   "id"  : "metabohub",
-          |   "url" : "http://endpoint-metabolomics.ara.inrae.fr/chembl/sparql/",
+          |   "id"  : "dbpedia",
+          |   "url" : "https://dbpedia.org/sparql",
           |   "typ" : "tps",
-          |   "method" : "GET",
+          |   "method" : "POST_ENCODED",
           |   "mimetype" : "json"
           | }]}
           |""".stripMargin)
       val query = new SW(config)
       query.something("h1") //http://rdf.ebi.ac.uk/terms/chembl#BioComponent
-        .isSubjectOf(URI("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"))
-        .debug()
-      query.count().onComplete {
-        case Success(count) => println(count); assert(true)
-        case Failure(exception) => println(exception); assert(false)
+        .isSubjectOf(URI("http://dbpedia.org/ontology/deathDate"))
+        .count
+        .onComplete {
+        case Success(count) => {
+          println(count)
+          assert(true)
+        }
+        case Failure(exception) => {
+          System.err.println(exception)
+          assert(false)
+        }
       }
     }
-
+/*
     test("findTypeOf") {
       val config: StatementConfiguration = new StatementConfiguration()
       config.setConfigString(
