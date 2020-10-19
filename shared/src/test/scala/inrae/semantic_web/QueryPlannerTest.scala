@@ -2,7 +2,7 @@ package inrae.semantic_web
 
 import inrae.semantic_web.rdf.URI
 import utest._
-import inrae.semantic_web.internal.{LinkFrom, LinkTo, Node, ObjectOf, Root, Something, SubjectOf, UnionBlock, Value}
+import inrae.semantic_web.internal.{LinkFrom, LinkTo, Node, ObjectOf, Root, Something, SubjectOf, UnionBlock, Value, SourcesNode}
 
 import scala.util.{Failure, Success}
 
@@ -53,6 +53,39 @@ object QueryPlannerTest extends TestSuite {
         plan == QueryPlanner.Planning(QueryPlanner.OR(
           List(QueryPlanner.BGP(List(s1,s2)),
             QueryPlanner.BGP(List(s1,s3)))))
+      )
+    }
+
+    /*
+           S1
+            OR
+         S2 S3 S4 S5
+    */
+
+    test("OR2")  {
+      val r : Root = new Root()
+      val s1 : Node = new Something("s1")
+      val u : Node = new UnionBlock(s1)
+      s1.addChildren(u)
+
+      val s2 : Node = new SubjectOf("s2",new URI("uri2"))
+      val s3 : Node = new SubjectOf("s3",new URI("uri3"))
+      val s4 : Node = new SubjectOf("s4",new URI("uri4"))
+      val s5 : Node = new SubjectOf("s5",new URI("uri5"))
+
+      r.addChildren(s1)
+      u.addChildren(s2)
+      u.addChildren(s3)
+      u.addChildren(s4)
+      u.addChildren(s5)
+
+      val plan = QueryPlanner.buildPlanning(r)
+      assert(
+        plan == QueryPlanner.Planning(QueryPlanner.OR(
+          List(QueryPlanner.BGP(List(s1,s2)),
+               QueryPlanner.BGP(List(s1,s3)),
+               QueryPlanner.BGP(List(s1,s4)),
+               QueryPlanner.BGP(List(s1,s5)))))
       )
     }
 
@@ -219,6 +252,227 @@ object QueryPlannerTest extends TestSuite {
           )))
       )
     }
+
+    /*
+                 S1
+                 S2
+               1 etp
+     */
+    test("AND - Check variable .1")  {
+      val r : Root = new Root()
+      val s1 : Node = new Something("s1")
+      val s2 : Node = new SubjectOf("s2",new URI("uri2"))
+      r.addChildren(s1)
+      s1.addChildren(s2)
+      val plan = QueryPlanner.buildPlanning(r)
+
+      assert(
+        plan == QueryPlanner.Planning(QueryPlanner.BGP(List(s1,s2)))
+      )
+
+      r.lSourcesNodes = r.lSourcesNodes ++ List(new SourcesNode(s1,List("etp1")))
+      r.lSourcesNodes = r.lSourcesNodes ++ List(new SourcesNode(s2,List("etp1")))
+
+      val y = QueryPlanner.ordonnanceBySource(plan.steps,r)
+
+      assert(
+        y == QueryPlanner.INTERSECTION_RESULTS_SET(
+          Map( "etp1" -> List(s1,s2))
+        )
+      )
+    }
+
+    /*
+                 S1
+                 S2
+               2 etp
+     */
+    test("AND - Check variable .2")  {
+      val r : Root = new Root()
+      val s1 : Node = new Something("s1")
+      val s2 : Node = new SubjectOf("s2",new URI("uri2"))
+      r.addChildren(s1)
+      s1.addChildren(s2)
+      val plan = QueryPlanner.buildPlanning(r)
+
+      assert(
+        plan == QueryPlanner.Planning(QueryPlanner.BGP(List(s1,s2)))
+      )
+
+      r.lSourcesNodes = r.lSourcesNodes ++ List(new SourcesNode(s1,List("etp1","etp2")))
+      r.lSourcesNodes = r.lSourcesNodes ++ List(new SourcesNode(s2,List("etp1","etp2")))
+
+      val y = QueryPlanner.ordonnanceBySource(plan.steps,r)
+
+      assert(
+        y == QueryPlanner.INTERSECTION_RESULTS_SET(
+          Map( "etp1" -> List(s1,s2) ,  "etp2" -> List(s1,s2))
+        )
+      )
+    }
+
+    /*
+                     S1
+                     S2
+                   2 etp on S1
+                   1 etp on S2
+         */
+    test("AND - Check variable .3")  {
+      val r : Root = new Root()
+      val s1 : Node = new Something("s1")
+      val s2 : Node = new SubjectOf("s2",new URI("uri2"))
+      r.addChildren(s1)
+      s1.addChildren(s2)
+      val plan = QueryPlanner.buildPlanning(r)
+
+      assert(
+        plan == QueryPlanner.Planning(QueryPlanner.BGP(List(s1,s2)))
+      )
+
+      r.lSourcesNodes = r.lSourcesNodes ++ List(new SourcesNode(s1,List("etp1","etp2")))
+      r.lSourcesNodes = r.lSourcesNodes ++ List(new SourcesNode(s2,List("etp1")))
+
+      val y = QueryPlanner.ordonnanceBySource(plan.steps,r)
+
+      assert(
+        y == QueryPlanner.INTERSECTION_RESULTS_SET(
+          Map( "etp1" -> List(s1,s2) ,  "etp2" -> List(s1))
+        )
+      )
+    }
+
+    /*
+                     S1
+                     S2
+                   2 etp // on S1,S2
+         */
+    test("AND - Check variable .4")  {
+      val r : Root = new Root()
+      val s1 : Node = new Something("s1")
+      val s2 : Node = new SubjectOf("s2",new URI("uri2"))
+      r.addChildren(s1)
+      s1.addChildren(s2)
+      val plan = QueryPlanner.buildPlanning(r)
+
+      assert(
+        plan == QueryPlanner.Planning(QueryPlanner.BGP(List(s1,s2)))
+      )
+
+      r.lSourcesNodes = r.lSourcesNodes ++ List(new SourcesNode(s1,List("etp1")))
+      r.lSourcesNodes = r.lSourcesNodes ++ List(new SourcesNode(s2,List("etp2")))
+
+      val y = QueryPlanner.ordonnanceBySource(plan.steps,r)
+
+      assert(
+        y == QueryPlanner.INTERSECTION_RESULTS_SET(
+          Map( "etp1" -> List(s1) ,  "etp2" -> List(s2))
+        )
+      )
+    }
+
+    /*
+                     S1
+                   S2 S3 S4
+                  S2 -> ETP1
+                  S3 -> ETP2
+                  S4 -> ETP1,ETP2
+         */
+    test("AND - Check variable .5")  {
+      val r : Root = new Root()
+      val s1 : Node = new Something("s1")
+      val s2 : Node = new SubjectOf("s2",new URI("uri2"))
+      val s3 : Node = new SubjectOf("s3",new URI("uri3"))
+      val s4 : Node = new SubjectOf("s4",new URI("uri4"))
+
+      r.addChildren(s1)
+      s1.addChildren(s2)
+      s1.addChildren(s3)
+      s1.addChildren(s4)
+
+      val plan = QueryPlanner.buildPlanning(r)
+
+      assert(
+        plan == QueryPlanner.Planning(QueryPlanner.BGP(List(s1,s2,s3,s4)))
+      )
+
+      r.lSourcesNodes = r.lSourcesNodes ++ List(new SourcesNode(s1,List("etp1","etp2")))
+      r.lSourcesNodes = r.lSourcesNodes ++ List(new SourcesNode(s2,List("etp1")))
+      r.lSourcesNodes = r.lSourcesNodes ++ List(new SourcesNode(s3,List("etp2")))
+      r.lSourcesNodes = r.lSourcesNodes ++ List(new SourcesNode(s4,List("etp1","etp2")))
+
+      val y = QueryPlanner.ordonnanceBySource(plan.steps,r)
+
+      assert(
+        y == QueryPlanner.INTERSECTION_RESULTS_SET(
+          Map( "etp1" -> List(s1,s2,s4) ,  "etp2" -> List(s1,s3,s4))
+        )
+      )
+    }
+
+
+    /*
+          S1
+           OR
+        S2 S3 S4 S5
+
+        S2,S4 -> etp1
+        S3    -> etp2
+        S5    -> etp1,etp2
+   */
+
+    test("OR - Check variable .1")  {
+      val r : Root = new Root()
+      val s1 : Node = new Something("s1")
+      val u : Node = new UnionBlock(s1)
+      s1.addChildren(u)
+
+      val s2 : Node = new SubjectOf("s2",new URI("uri2"))
+      val s3 : Node = new SubjectOf("s3",new URI("uri3"))
+      val s4 : Node = new SubjectOf("s4",new URI("uri4"))
+      val s5 : Node = new SubjectOf("s5",new URI("uri5"))
+
+      r.addChildren(s1)
+      u.addChildren(s2)
+      u.addChildren(s3)
+      u.addChildren(s4)
+      u.addChildren(s5)
+
+      val plan = QueryPlanner.buildPlanning(r)
+      assert(
+        plan == QueryPlanner.Planning(QueryPlanner.OR(
+          List(QueryPlanner.BGP(List(s1,s2)),
+            QueryPlanner.BGP(List(s1,s3)),
+            QueryPlanner.BGP(List(s1,s4)),
+            QueryPlanner.BGP(List(s1,s5)))))
+      )
+
+      r.lSourcesNodes = r.lSourcesNodes ++ List(new SourcesNode(s1,List("etp1","etp2")))
+      r.lSourcesNodes = r.lSourcesNodes ++ List(new SourcesNode(s2,List("etp1")))
+      r.lSourcesNodes = r.lSourcesNodes ++ List(new SourcesNode(s3,List("etp2")))
+      r.lSourcesNodes = r.lSourcesNodes ++ List(new SourcesNode(s4,List("etp1")))
+      r.lSourcesNodes = r.lSourcesNodes ++ List(new SourcesNode(s5,List("etp1","etp2")))
+
+      val y = QueryPlanner.ordonnanceBySource(plan.steps,r)
+     
+      assert(
+        y == QueryPlanner.OR_RESULTS_SET(List(
+             QueryPlanner.INTERSECTION_RESULTS_SET(
+                    Map( "etp1" -> List(s1,s2) ,  "etp2" -> List(s1))
+             ),
+          QueryPlanner.INTERSECTION_RESULTS_SET(
+                    Map( "etp1" -> List(s1) ,  "etp2" -> List(s1,s3))
+          ),
+          QueryPlanner.INTERSECTION_RESULTS_SET(
+            Map( "etp1" -> List(s1,s4) ,  "etp2" -> List(s1))
+          ),
+          QueryPlanner.INTERSECTION_RESULTS_SET(
+            Map( "etp1" -> List(s1,s5) ,  "etp2" -> List(s1,s5))
+          )
+        )
+      )
+      )
+    }
+
 
     /*
     test("Planning test EBI/uniprot") {

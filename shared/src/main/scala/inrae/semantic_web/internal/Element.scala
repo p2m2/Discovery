@@ -20,7 +20,7 @@ sealed trait Node {
   }
 }*/
 
-case class Node(var uniqRef : Option[String]) {
+class Node(var uniqRef : Option[String]) {
 
   var children: Seq[Node] = Seq[Node]()
 
@@ -46,14 +46,18 @@ case class Node(var uniqRef : Option[String]) {
 
 
 /* Node case */
-class Root() extends Node(None) {
+case class Root() extends Node(None) {
   var lSourcesNodes : Seq[SourcesNode] = List[SourcesNode]()
   var lOperatorsNode : Seq[OperatorNode] = List[OperatorNode]()
+
+  def sourcesNode(n : Node) : Option[SourcesNode] = {
+    lSourcesNodes.find( p => p.n == n )
+  }
 }
 
 /* triplets */
 sealed trait RdfNode
-class Something(uniqRef : String) extends Node(Some(uniqRef)) with RdfNode
+class Something(uniqRef: String) extends Node(Some(uniqRef)) with RdfNode
 class SubjectOf(uniqRef : String, var uri : URI) extends Node(Some(uniqRef)) with RdfNode
 class ObjectOf(uniqRef : String, var uri : URI) extends Node(Some(uniqRef)) with RdfNode
 class LinkTo(uniqRef : String, var term : RdfType) extends Node(Some(uniqRef)) with RdfNode
@@ -63,17 +67,17 @@ class Value(var rdfterm : RdfType) extends Node(None) with RdfNode
 
 /* Logic */
 sealed trait LogicNode
-class UnionBlock( var sire : Node ) extends Node(None) with LogicNode
-class Not( var sire : Node ) extends Node(None) with LogicNode
+case class UnionBlock( var sire : Node ) extends Node(None) with LogicNode
+case class Not( var sire : Node ) extends Node(None) with LogicNode
 
 
 /* filter */
 sealed trait FilterNode
-class isLiteral() extends Node(None) with FilterNode
-class isURI() extends Node(None) with FilterNode
+case class isLiteral() extends Node(None) with FilterNode
+case class isURI() extends Node(None) with FilterNode
 
 /* SourcesNode */
-class SourcesNode(var n : Node, var sources : Seq[String]) extends Node(n.reference())
+case class SourcesNode(var n : Node, var sources : Seq[String]) extends Node(n.reference())
 
 /* Operator */
-class OperatorNode(var operator : String ) extends Node(None)
+case class OperatorNode(var operator : String ) extends Node(None)

@@ -113,6 +113,11 @@ object QueryManager {
                        prefixes : Map[String,String]): Future[Node] = {
 
     n match {
+      case _ : Something =>
+        /* Something is Everywhere !! */
+        Future {
+          new SourcesNode(n,config.sources().map( _.id ))
+        }
       case _ : SubjectOf | _: ObjectOf | _: LinkTo | _: LinkFrom =>
         val query = pm.SparqlGenerator.prefixes(prefixes) + "\n" +
           pm.SparqlGenerator.prologSourcesSelection() + "\n" +
