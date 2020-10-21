@@ -108,13 +108,13 @@ object QueryPlanner {
   def factorize(l : LOGIC) : LOGIC = {
     scribe.debug("factorize :"+l.toString)
 
-    val newn = l match {
-      case and : AND => AND(and.lbgp.reverse.map(factorize(_)).reverse)
-      case or  : OR => OR(or.lbgp.reverse.map(factorize(_)).reverse)
-      case _ => l
-    }
-
-    val m = newn match {
+    {
+      l match {
+        case and: AND => AND(and.lbgp.reverse.map(factorize(_)).reverse)
+        case or: OR => OR(or.lbgp.reverse.map(factorize(_)).reverse)
+        case _ => l
+      }
+    } match {
       case a : AND  => {
         /* Aims : We get three children => 1) BGP List, 2) AND List, 3) OR List*/
 
@@ -164,11 +164,6 @@ object QueryPlanner {
       }
       case _ : BGP => l
     }
-    /*
-    println("============================================= END ============================================")
-    println(m)
-    println("-----------------------------------------------------------------------------------------------")*/
-    m
   }
 
   //  @tailrec
