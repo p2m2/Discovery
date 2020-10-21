@@ -1,13 +1,20 @@
 package inrae.semantic_web
-import inrae.semantic_web.QueryPlanner.{LOGIC, Planning}
 
-import scala.util.Sorting
-import scala.annotation.tailrec
 import inrae.semantic_web.internal.{LinkFrom, LinkTo, Node, ObjectOf, Root, Something, SubjectOf, UnionBlock, Value}
+import annotation.tailrec
 
 object QueryPlanner {
 
   sealed trait LOGIC {
+
+    def whois() : String = {
+      this match {
+        case _ : BGP => "BGP"
+        case _ : AND => "AND"
+        case _ : OR => "OR"
+        case _ => "UNKNOWN"
+      }
+    }
 
     def +(that: LOGIC) : LOGIC = {
       this match {
@@ -27,23 +34,41 @@ object QueryPlanner {
         }
       }
     }
+
+    def display( logiceNode: LOGIC , marge : Int ) : String = {
+      val stepMarge = 1
+
+      val start = "  "*marge + logiceNode.getClass.getSimpleName +  " ["
+      val item = "\n"+" "*(start.length+marge)
+
+      start +
+        {
+        logiceNode match {
+          case BGP(l) => l.map( _.toString ).mkString(",")
+          case OR(l)  =>  item +l.map( display(_, marge+stepMarge) ).mkString(item)
+          case AND(l) =>  item +l.map( display(_, marge+stepMarge) ).mkString(item)
+        }
+      } + "]"
+    }
+
+    override def toString = "\n"+display(this,1)
   }
 
   case class BGP(lnodes : Seq[Node]) extends LOGIC
   case class OR(lbgp   : Seq[LOGIC]) extends LOGIC
   case class AND(lbgp : Seq[LOGIC]) extends LOGIC
 
-  case class Planning(var steps : LOGIC)
 
-  sealed trait RESULTS_SET
-  case class INTERSECTION_RESULTS_SET( lns : Map[String,Seq[Node]]) extends RESULTS_SET
-  case class OR_RESULTS_SET(lbgp   : Seq[RESULTS_SET]) extends RESULTS_SET
-  case class AND_RESULTS_SET(lbgp : Seq[RESULTS_SET]) extends RESULTS_SET
+  sealed trait ORDONNANCEMENT_RESULTS_SET
+  case class INTERSECTION_RESULTS_SET( lns : Map[String,Seq[Node]]) extends ORDONNANCEMENT_RESULTS_SET
+  case class OR_RESULTS_SET(lbgp   : Seq[ORDONNANCEMENT_RESULTS_SET]) extends ORDONNANCEMENT_RESULTS_SET
+  case class AND_RESULTS_SET(lbgp : Seq[ORDONNANCEMENT_RESULTS_SET]) extends ORDONNANCEMENT_RESULTS_SET
 
 
-  def buildPlanning(root: Root) : Planning = {
+  def buildPlanning(root: Root) : LOGIC = {
+    scribe.debug("buildPlanning")
     val plan = OR(root.children.map(c => buildIndependantBGP(c)))
-    Planning(cleanPlan(plan))
+    cleanPlan(plan)
   }
 
   /*
@@ -54,7 +79,7 @@ object QueryPlanner {
        BGP([ N1 ->S1,S2, N2 ->S2 ]) => INTERSECTION_RESULTS_SET ( S1 -> [BGP(N1)], S2 -> [BGP(N1,N2)] )
    */
 //, config : StatementConfiguration
-  def ordonnanceBySource(l : LOGIC, r : Root ) : RESULTS_SET = {
+  def ordonnanceBySource(l : LOGIC, r : Root ) : ORDONNANCEMENT_RESULTS_SET = {
     l match {
       case BGP(lnodes) => {
         val lSourcesNodes = lnodes.map( n => r.sourcesNode(n) ).flatten
@@ -71,75 +96,83 @@ object QueryPlanner {
 
   }
 
-  /*
-  def checkVariable(plan : Planning, listVariables : Seq[String]) : Planning = {
-    Planning(filterBgpWithVariables(plan.steps,listVariables))
-  }
-
-  def filterBgpWithVariables(l : LOGIC, listVariables : Seq[String]) : LOGIC = {
-    l match {
-      case BGP(lnode) => BGP(lnode.filter( n => n.reference match {
-        case Some(v) => listVariables contains v
-        case None => false
-      }))
-      case OR(lbgp) => OR(lbgp.map(filterBgpWithVariables(_,listVariables)))
-      case AND(lbgp) => AND(lbgp.map(filterBgpWithVariables(_,listVariables)))
-    }
-  }
-*/
-
+  @tailrec
   def cleanPlan(plan : LOGIC) : LOGIC = {
-    normalize(factorize(plan)) match {
-      case a : LOGIC if normalize(factorize(a)) == a => a
+    scribe.debug("clean plan :"+plan.toString)
+    factorize(plan) match {
+      case a : LOGIC if factorize(a) == a => a
       case b : LOGIC => cleanPlan(b)
     }
   }
 
-
-
-  def compareLogic(a:LOGIC, b:LOGIC) = {
-    a match {
-      case _ : AND => false
-      case _ => b match {
-        case _ : AND => true
-        case _ => false
-      }
-    }
-  }
-  /*
-        groupe OR and AND LOGIC at the same children level
-        by convention, OR is at the end on the children array
-   */
-  def normalize(l : LOGIC) : LOGIC = {
-
-    l match {
-      case a: AND if a.lbgp.length <= 1 =>{
-        normalize(a.lbgp(0))
-      }
-      case a: OR if a.lbgp.length <= 1 => {
-        normalize(a.lbgp(0))
-      }
-      case a: AND => {
-        AND((a.lbgp).sortWith(compareLogic).map(normalize(_)))
-      }
-      case a: OR => {
-        OR((a.lbgp).sortWith(compareLogic).map(normalize(_)))
-      }
-      case _ => l
-    }
-  }
-
-
   def factorize(l : LOGIC) : LOGIC = {
-    l match {
-      case a : AND => a.lbgp.reduceLeft( (l1,l2) => l1 + l2 )
-      case a : OR => OR(a.lbgp.map( l => factorize(l) ))
+    scribe.debug("factorize :"+l.toString)
+
+    val newn = l match {
+      case and : AND => AND(and.lbgp.reverse.map(factorize(_)).reverse)
+      case or  : OR => OR(or.lbgp.reverse.map(factorize(_)).reverse)
       case _ => l
     }
+
+    val m = newn match {
+      case a : AND  => {
+        /* Aims : We get three children => 1) BGP List, 2) AND List, 3) OR List*/
+
+        val bgpSet = BGP(a.lbgp.filter( elt => elt.whois() == "BGP").flatMap( _ match{ case BGP(l) => l case _ => List()}))
+        val andSet = AND(a.lbgp.filter( elt => elt.whois() == "AND").flatMap( _ match{ case AND(l) => l case _ => List()}))
+        val orSet = OR(a.lbgp.filter( elt => elt.whois() == "OR").flatMap( _ match{ case OR(l) => l case _ => List()}))
+
+        if ( bgpSet.lnodes.length>0 && andSet.lbgp.length>0 && orSet.lbgp.length>0) {
+          AND(List(AND(andSet.lbgp ++ List(bgpSet)),orSet))   //OR(orSet.lbgp.map( _ + bgpSet )))
+        } else if( bgpSet.lnodes.length<=0 && andSet.lbgp.length>0 && orSet.lbgp.length>0) {
+          AND(List(andSet,orSet))
+        } else if( bgpSet.lnodes.length<=0 && andSet.lbgp.length>0 && orSet.lbgp.length<=0) {
+          andSet
+        } else if( bgpSet.lnodes.length<=0 && andSet.lbgp.length<=0 && orSet.lbgp.length>0) {
+          orSet
+        } else if( bgpSet.lnodes.length>0 && andSet.lbgp.length<=0 && orSet.lbgp.length>0) {
+          OR(orSet.lbgp.map( bgpSet + _  ))
+        } else if( bgpSet.lnodes.length>0 && andSet.lbgp.length<=0 && orSet.lbgp.length<=0) {
+          bgpSet
+        } else if( bgpSet.lnodes.length>0 && andSet.lbgp.length>0 && orSet.lbgp.length<=0) {
+          AND(List(AND(andSet.lbgp ++ List(bgpSet))))
+        } else {
+          scribe.error("non traité.....")
+          scribe.error("bgpSet.lnodes.length:"+bgpSet.lnodes.length.toString)
+          scribe.error("andSet.lbgp.length:"+andSet.lbgp.length.toString)
+          scribe.error("orSet.lbgp.length:"+orSet.lbgp.length.toString)
+          BGP(List())
+        }
+      }
+
+      case a : OR => {
+        /* Aims : We get three children => 1) BGP List, 2) AND List, 3) OR List*/
+
+        val bgpSetList = a.lbgp.filter( elt => elt.whois() == "BGP")
+        val andSetList = a.lbgp.filter( elt => elt.whois() == "AND")
+        val orSet = OR(a.lbgp.filter( elt => elt.whois() == "OR").flatMap( _ match{ case OR(l) => l case _ => List()}))
+
+        if ( bgpSetList.length <= 0 && andSetList.length <= 0 ) {
+          orSet
+        } else if (bgpSetList.length == 1 && andSetList.length <= 0 && orSet.lbgp.length <= 0) {
+          bgpSetList(0)
+        } else if (bgpSetList.length <=0 && andSetList.length == 1 && orSet.lbgp.length <= 0) {
+          andSetList(0)
+        } else {
+          OR( bgpSetList ++ andSetList ++ orSet.lbgp)
+        }
+      }
+      case _ : BGP => l
+    }
+    /*
+    println("============================================= END ============================================")
+    println(m)
+    println("-----------------------------------------------------------------------------------------------")*/
+    m
   }
 
   //  @tailrec
-  def buildIndependantBGP( n : Node ) : LOGIC = {
+  def buildIndependantBGP( n : Node , cpt : Int = 0) : LOGIC = {
 
     n match {
       case _ : ObjectOf | _: SubjectOf | _ : LinkTo | _: LinkFrom | _: Value | _: Something => {

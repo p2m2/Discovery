@@ -74,14 +74,10 @@ object QueryManager {
     } else if (config.sources().length == 1) {
       queryOnSource(root,listVariables,config.sources()(0),prefixes)
     } else {
-      //
+
       val plan = QueryPlanner.buildPlanning(root)//,listVariables,config)
-      println(" ----------------------- PLAN -----------------------------")
-      println(plan)
-      //QueryManager.executePlan(plan)
-      Future {
-        QueryResult(null)
-      }
+      val plan_results_set = QueryPlanner.ordonnanceBySource(plan,root)
+      QueryPlannerExecutor.executePlanning(plan_results_set,listVariables,config)
     }
   }
 

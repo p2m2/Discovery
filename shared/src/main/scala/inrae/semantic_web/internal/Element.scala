@@ -20,7 +20,7 @@ sealed trait Node {
   }
 }*/
 
-class Node(var uniqRef : Option[String]) {
+class Node(val uniqRef : Option[String]) {
 
   var children: Seq[Node] = Seq[Node]()
 
@@ -40,6 +40,7 @@ class Node(var uniqRef : Option[String]) {
   }
 
   def reference(): Option[String] = uniqRef
+  
 }
 
 /* Filter node */
@@ -57,13 +58,13 @@ case class Root() extends Node(None) {
 
 /* triplets */
 sealed trait RdfNode
-class Something(uniqRef: String) extends Node(Some(uniqRef)) with RdfNode
-class SubjectOf(uniqRef : String, var uri : URI) extends Node(Some(uniqRef)) with RdfNode
-class ObjectOf(uniqRef : String, var uri : URI) extends Node(Some(uniqRef)) with RdfNode
-class LinkTo(uniqRef : String, var term : RdfType) extends Node(Some(uniqRef)) with RdfNode
-class LinkFrom(uniqRef : String, var uri : URI) extends Node(Some(uniqRef)) with RdfNode
-class Attribute(uniqRef : String, var uri : URI) extends Node(Some(uniqRef)) with RdfNode
-class Value(var rdfterm : RdfType) extends Node(None) with RdfNode
+case class Something(concretUniqRef: String) extends Node(Some(concretUniqRef)) with RdfNode
+case class SubjectOf(concretUniqRef : String, var uri : URI) extends Node(Some(concretUniqRef)) with RdfNode
+case class ObjectOf(concretUniqRef : String, var uri : URI) extends Node(Some(concretUniqRef)) with RdfNode
+case class LinkTo(concretUniqRef : String, var term : RdfType) extends Node(Some(concretUniqRef)) with RdfNode
+case class LinkFrom(concretUniqRef : String, var uri : URI) extends Node(Some(concretUniqRef)) with RdfNode
+case class Attribute(concretUniqRef : String, var uri : URI) extends Node(Some(concretUniqRef)) with RdfNode
+case class Value(var rdfterm : RdfType) extends Node(None) with RdfNode
 
 /* Logic */
 sealed trait LogicNode
