@@ -49,8 +49,8 @@ case class SW(var config: StatementConfiguration) {
 
     if ( setupsource ) {
       QueryManager.setUpSourcesNode(n,config,prefixes).onComplete {
-        case Success(sourceNode : SourcesNode) => {
-          rootNode.lSourcesNodes = rootNode.lSourcesNodes :+ sourceNode
+        case Success(Some(sn)) => {
+          rootNode.lSourcesNodes = rootNode.lSourcesNodes :+ sn
         }
         case _  => None
       }

@@ -2,6 +2,7 @@ package inrae.semantic_web
 
 import inrae.semantic_web.QueryPlanner.factorize
 import inrae.semantic_web.rdf.URI
+import inrae.semantic_web.sparql.{BGP,OR,AND}
 import utest._
 import inrae.semantic_web.internal.{LinkFrom, LinkTo, Node, ObjectOf, Root, Something, SourcesNode, SubjectOf, UnionBlock, Value}
 
@@ -15,25 +16,25 @@ object QueryPlannerTest extends TestSuite {
     /*
     */
     test("factorize stability AND") {
-      val s1 : Node = Something("s1")
-      val u : Node = new UnionBlock(s1)
-      val s2 : Node = SubjectOf("s2",new URI("uri2"))
-      val s3 : Node = SubjectOf("s3",new URI("uri3"))
-      val s4 : Node = SubjectOf("s4",new URI("uri4"))
-      val logic = (QueryPlanner.BGP(List(s1,s2,s3,s4)))
+      val s1 = Something("s1")
+      val u = new UnionBlock(s1)
+      val s2 = SubjectOf("s2",new URI("uri2"))
+      val s3 = SubjectOf("s3",new URI("uri3"))
+      val s4 = SubjectOf("s4",new URI("uri4"))
+      val logic = (BGP(List(s1,s2,s3,s4)))
       //println(logic)
       assert(factorize(logic) == logic)
     }
     /*
     */
     test("factorize stability OR") {
-      val s1 : Node = Something("s1")
-      val u : Node = new UnionBlock(s1)
-      val s2 : Node = SubjectOf("s2",new URI("uri2"))
-      val s3 : Node = SubjectOf("s3",new URI("uri3"))
-      val logic = QueryPlanner.OR(
-        List(QueryPlanner.BGP(List(s1,s2)),
-          QueryPlanner.BGP(List(s1,s3))))
+      val s1 = Something("s1")
+      val u = new UnionBlock(s1)
+      val s2 = SubjectOf("s2",new URI("uri2"))
+      val s3 = SubjectOf("s3",new URI("uri3"))
+      val logic = OR(
+        List(BGP(List(s1,s2)),
+          BGP(List(s1,s3))))
 
       assert(factorize(logic) == logic)
     }
@@ -48,16 +49,16 @@ object QueryPlannerTest extends TestSuite {
 
         test("AND")  {
           val r : Root = Root()
-          val s1 : Node = Something("s1")
-          val s2 : Node = SubjectOf("s2",new URI("uri2"))
-          val s3 : Node = SubjectOf("s3",new URI("uri3"))
+          val s1 = Something("s1")
+          val s2 = SubjectOf("s2",new URI("uri2"))
+          val s3 = SubjectOf("s3",new URI("uri3"))
           r.addChildren(s1)
           s1.addChildren(s2)
           s1.addChildren(s3)
           val plan = QueryPlanner.buildPlanning(r)
         //  println(plan)
           assert(
-            (plan == QueryPlanner.BGP(List(s1,s2,s3)) )
+            (plan == BGP(List(s1,s2,s3)) )
           )
         }
 
@@ -69,20 +70,20 @@ object QueryPlannerTest extends TestSuite {
 
         test("OR")  {
           val r : Root = Root()
-          val s1 : Node = Something("s1")
-          val u : Node = new UnionBlock(s1)
+          val s1 = Something("s1")
+          val u = new UnionBlock(s1)
           s1.addChildren(u)
-          val s2 : Node = SubjectOf("s2",new URI("uri2"))
-          val s3 : Node = SubjectOf("s3",new URI("uri3"))
+          val s2 = SubjectOf("s2",new URI("uri2"))
+          val s3 = SubjectOf("s3",new URI("uri3"))
           r.addChildren(s1)
           u.addChildren(s2)
           u.addChildren(s3)
           val plan = QueryPlanner.buildPlanning(r)
          // println(plan)
           assert(
-              (plan == QueryPlanner.OR(
-                List(QueryPlanner.BGP(List(s1,s2)),
-                  QueryPlanner.BGP(List(s1,s3)))))
+              (plan == OR(
+                List(BGP(List(s1,s2)),
+                  BGP(List(s1,s3)))))
           )
         }
 
@@ -94,14 +95,14 @@ object QueryPlannerTest extends TestSuite {
 
             test("OR2")  {
               val r : Root = Root()
-              val s1 : Node = Something("s1")
-              val u : Node = new UnionBlock(s1)
+              val s1 = Something("s1")
+              val u = new UnionBlock(s1)
               s1.addChildren(u)
 
-              val s2 : Node = SubjectOf("s2",new URI("uri2"))
-              val s3 : Node = SubjectOf("s3",new URI("uri3"))
-              val s4 : Node = SubjectOf("s4",new URI("uri4"))
-              val s5 : Node = SubjectOf("s5",new URI("uri5"))
+              val s2 = SubjectOf("s2",new URI("uri2"))
+              val s3 = SubjectOf("s3",new URI("uri3"))
+              val s4 = SubjectOf("s4",new URI("uri4"))
+              val s5 = SubjectOf("s5",new URI("uri5"))
 
               r.addChildren(s1)
               u.addChildren(s2)
@@ -111,11 +112,11 @@ object QueryPlannerTest extends TestSuite {
 
               val plan = QueryPlanner.buildPlanning(r)
               assert(
-                plan == QueryPlanner.OR(
-                  List(QueryPlanner.BGP(List(s1,s2)),
-                       QueryPlanner.BGP(List(s1,s3)),
-                       QueryPlanner.BGP(List(s1,s4)),
-                       QueryPlanner.BGP(List(s1,s5))))
+                plan == OR(
+                  List(BGP(List(s1,s2)),
+                       BGP(List(s1,s3)),
+                       BGP(List(s1,s4)),
+                       BGP(List(s1,s5))))
               )
             }
 
@@ -127,16 +128,16 @@ object QueryPlannerTest extends TestSuite {
 
             test("OR2_2")  {
               val r : Root = Root()
-              val s1 : Node = Something("s1")
-              val u1 : Node = new UnionBlock(s1)
-              val u2 : Node = new UnionBlock(s1)
+              val s1 = Something("s1")
+              val u1 = new UnionBlock(s1)
+              val u2 = new UnionBlock(s1)
               s1.addChildren(u1)
               s1.addChildren(u2)
 
-              val s2 : Node = SubjectOf("s2",new URI("uri2"))
-              val s3 : Node = SubjectOf("s3",new URI("uri3"))
-              val s4 : Node = SubjectOf("s4",new URI("uri4"))
-              val s5 : Node = SubjectOf("s5",new URI("uri5"))
+              val s2 = SubjectOf("s2",new URI("uri2"))
+              val s3 = SubjectOf("s3",new URI("uri3"))
+              val s4 = SubjectOf("s4",new URI("uri4"))
+              val s5 = SubjectOf("s5",new URI("uri5"))
 
               r.addChildren(s1)
               u1.addChildren(s2)
@@ -147,11 +148,11 @@ object QueryPlannerTest extends TestSuite {
               val plan = QueryPlanner.buildPlanning(r)
              // println(plan)
               assert(
-                plan == QueryPlanner.OR(
-                  List(QueryPlanner.BGP(List(s1,s2)),
-                    QueryPlanner.BGP(List(s1,s3)),
-                    QueryPlanner.BGP(List(s1,s4)),
-                    QueryPlanner.BGP(List(s1,s5))))
+                plan == OR(
+                  List(BGP(List(s1,s2)),
+                    BGP(List(s1,s3)),
+                    BGP(List(s1,s4)),
+                    BGP(List(s1,s5))))
               )
             }
 
@@ -164,11 +165,11 @@ object QueryPlannerTest extends TestSuite {
 
             test("AND2")  {
               val r : Root = Root()
-              val s1 : Node = Something("s1")
-              val s2 : Node = SubjectOf("s2",new URI("uri2"))
-              val s3 : Node = SubjectOf("s3",new URI("uri3"))
-              val s4 : Node = SubjectOf("s4",new URI("uri4"))
-              val s5 : Node = SubjectOf("s5",new URI("uri5"))
+              val s1 = Something("s1")
+              val s2 = SubjectOf("s2",new URI("uri2"))
+              val s3 = SubjectOf("s3",new URI("uri3"))
+              val s4 = SubjectOf("s4",new URI("uri4"))
+              val s5 = SubjectOf("s5",new URI("uri5"))
               r.addChildren(s1)
               s1.addChildren(s2)
               s1.addChildren(s3)
@@ -176,7 +177,7 @@ object QueryPlannerTest extends TestSuite {
               s1.addChildren(s5)
               val plan = QueryPlanner.buildPlanning(r)
               assert(
-                plan == QueryPlanner.BGP(List(s1,s2,s3,s4,s5))
+                plan == BGP(List(s1,s2,s3,s4,s5))
               )
             }
 
@@ -191,11 +192,11 @@ object QueryPlannerTest extends TestSuite {
 
                 test("AND3")  {
                   val r : Root = Root()
-                  val s1 : Node = Something("s1")
-                  val s2 : Node = SubjectOf("s2",new URI("uri2"))
-                  val s3 : Node = SubjectOf("s3",new URI("uri3"))
-                  val s4 : Node = SubjectOf("s4",new URI("uri4"))
-                  val s5 : Node = SubjectOf("s5",new URI("uri5"))
+                  val s1 = Something("s1")
+                  val s2 = SubjectOf("s2",new URI("uri2"))
+                  val s3 = SubjectOf("s3",new URI("uri3"))
+                  val s4 = SubjectOf("s4",new URI("uri4"))
+                  val s5 = SubjectOf("s5",new URI("uri5"))
                   r.addChildren(s1)
                   s1.addChildren(s2)
                   s1.addChildren(s3)
@@ -203,7 +204,7 @@ object QueryPlannerTest extends TestSuite {
                   s3.addChildren(s5)
                   val plan = QueryPlanner.buildPlanning(r)
                   assert(
-                    plan == QueryPlanner.BGP(List(s1,s2,s3,s4,s5))
+                    plan == BGP(List(s1,s2,s3,s4,s5))
                   )
                 }
 
@@ -221,17 +222,17 @@ object QueryPlannerTest extends TestSuite {
 
                   test("AND3") {
                     val r : Root = Root()
-                    val s1 : Node = Something("s1")
-                    val s2 : Node = SubjectOf("s2",new URI("uri2"))
-                    val s3 : Node = SubjectOf("s3",new URI("uri3"))
-                    val s4 : Node = SubjectOf("s4",new URI("uri4"))
-                    val s5 : Node = SubjectOf("s5",new URI("uri5"))
-                    val s6 : Node = SubjectOf("s6",new URI("uri6"))
-                    val s7 : Node = SubjectOf("s7",new URI("uri7"))
-                    val s8 : Node = SubjectOf("s8",new URI("uri8"))
-                    val s9 : Node = SubjectOf("s9",new URI("uri9"))
-                    val s10 : Node = SubjectOf("s10",new URI("uri10"))
-                    val s11 : Node = SubjectOf("s11",new URI("uri11"))
+                    val s1 = Something("s1")
+                    val s2 = SubjectOf("s2",new URI("uri2"))
+                    val s3 = SubjectOf("s3",new URI("uri3"))
+                    val s4 = SubjectOf("s4",new URI("uri4"))
+                    val s5 = SubjectOf("s5",new URI("uri5"))
+                    val s6 = SubjectOf("s6",new URI("uri6"))
+                    val s7 = SubjectOf("s7",new URI("uri7"))
+                    val s8 = SubjectOf("s8",new URI("uri8"))
+                    val s9 = SubjectOf("s9",new URI("uri9"))
+                    val s10 = SubjectOf("s10",new URI("uri10"))
+                    val s11 = SubjectOf("s11",new URI("uri11"))
                     r.addChildren(s1)
                     s1.addChildren(s2)
                     s1.addChildren(s3)
@@ -246,7 +247,7 @@ object QueryPlannerTest extends TestSuite {
                     val plan = QueryPlanner.buildPlanning(r)
                    // println(plan)
                     assert(
-                      plan == QueryPlanner.BGP(List(s1,s2,s3,s4,s6,s7,s5,s8,s10,s11,s9))
+                      plan == BGP(List(s1,s2,s3,s4,s6,s7,s5,s8,s10,s11,s9))
                     )
                   }
 
@@ -260,11 +261,11 @@ object QueryPlannerTest extends TestSuite {
 
                      test("AND3_OR")  {
                        val r : Root = Root()
-                       val s1 : Node = Something("s1")
-                       val s2 : Node = SubjectOf("s2",new URI("uri2"))
-                       val s3 : Node = SubjectOf("s3",new URI("uri3"))
-                       val s4 : Node = SubjectOf("s4",new URI("uri4"))
-                       val s5 : Node = SubjectOf("s5",new URI("uri5"))
+                       val s1 = Something("s1")
+                       val s2 = SubjectOf("s2",new URI("uri2"))
+                       val s3 = SubjectOf("s3",new URI("uri3"))
+                       val s4 = SubjectOf("s4",new URI("uri4"))
+                       val s5 = SubjectOf("s5",new URI("uri5"))
                        val u = UnionBlock(s1)
                        r.addChildren(s1)
                        s1.addChildren(s2)
@@ -276,8 +277,8 @@ object QueryPlannerTest extends TestSuite {
                       // println(plan)
                        assert(
                            plan ==
-                             QueryPlanner.OR(
-                               List(QueryPlanner.BGP(List(s1,s2,s3,s4)),QueryPlanner.BGP(List(s1,s2,s3,s5))))
+                             OR(
+                               List(BGP(List(s1,s2,s3,s4)),BGP(List(s1,s2,s3,s5))))
                        )
                      }
 
@@ -292,11 +293,11 @@ object QueryPlannerTest extends TestSuite {
 
                      test("OR1_OR2")  {
                        val r : Root = Root()
-                       val s1 : Node = Something("s1")
-                       val s2 : Node = SubjectOf("s2",new URI("uri2"))
-                       val s3 : Node = SubjectOf("s3",new URI("uri3"))
-                       val s4 : Node = SubjectOf("s4",new URI("uri4"))
-                       val s5 : Node = SubjectOf("s5",new URI("uri5"))
+                       val s1 = Something("s1")
+                       val s2 = SubjectOf("s2",new URI("uri2"))
+                       val s3 = SubjectOf("s3",new URI("uri3"))
+                       val s4 = SubjectOf("s4",new URI("uri4"))
+                       val s5 = SubjectOf("s5",new URI("uri5"))
                        val u1 = new UnionBlock(s1)
                        val u2 = new UnionBlock(s3)
                        r.addChildren(s1)
@@ -311,10 +312,10 @@ object QueryPlannerTest extends TestSuite {
                        val plan = QueryPlanner.buildPlanning(r)
                        assert(
                          plan ==
-                           QueryPlanner.OR(List(
-                             QueryPlanner.BGP(List(s1,s2)),
-                               QueryPlanner.BGP(List(s1,s3,s4)),
-                               QueryPlanner.BGP(List(s1,s3,s5))
+                           OR(List(
+                             BGP(List(s1,s2)),
+                               BGP(List(s1,s3,s4)),
+                               BGP(List(s1,s3,s5))
                              )
                            )
                        )
@@ -327,14 +328,14 @@ object QueryPlannerTest extends TestSuite {
                       */
                      test("AND - Check variable .1")  {
                        val r : Root = Root()
-                       val s1 : Node = Something("s1")
-                       val s2 : Node = SubjectOf("s2",new URI("uri2"))
+                       val s1 = Something("s1")
+                       val s2 = SubjectOf("s2",new URI("uri2"))
                        r.addChildren(s1)
                        s1.addChildren(s2)
                        val plan = QueryPlanner.buildPlanning(r)
 
                        assert(
-                         plan == QueryPlanner.BGP(List(s1,s2))
+                         plan == BGP(List(s1,s2))
                        )
 
                        r.lSourcesNodes = r.lSourcesNodes ++ List(new SourcesNode(s1,List("etp1")))
@@ -356,14 +357,14 @@ object QueryPlannerTest extends TestSuite {
                       */
                      test("AND - Check variable .2")  {
                        val r : Root = Root()
-                       val s1 : Node = Something("s1")
-                       val s2 : Node = SubjectOf("s2",new URI("uri2"))
+                       val s1 = Something("s1")
+                       val s2 = SubjectOf("s2",new URI("uri2"))
                        r.addChildren(s1)
                        s1.addChildren(s2)
                        val plan = QueryPlanner.buildPlanning(r)
 
                        assert(
-                         plan == QueryPlanner.BGP(List(s1,s2))
+                         plan == BGP(List(s1,s2))
                        )
 
                        r.lSourcesNodes = r.lSourcesNodes ++ List(new SourcesNode(s1,List("etp1","etp2")))
@@ -386,14 +387,14 @@ object QueryPlannerTest extends TestSuite {
                           */
                      test("AND - Check variable .3")  {
                        val r : Root = Root()
-                       val s1 : Node = Something("s1")
-                       val s2 : Node = SubjectOf("s2",new URI("uri2"))
+                       val s1 = Something("s1")
+                       val s2 = SubjectOf("s2",new URI("uri2"))
                        r.addChildren(s1)
                        s1.addChildren(s2)
                        val plan = QueryPlanner.buildPlanning(r)
 
                        assert(
-                         plan == QueryPlanner.BGP(List(s1,s2))
+                         plan == BGP(List(s1,s2))
                        )
 
                        r.lSourcesNodes = r.lSourcesNodes ++ List(new SourcesNode(s1,List("etp1","etp2")))
@@ -415,14 +416,14 @@ object QueryPlannerTest extends TestSuite {
                           */
                      test("AND - Check variable .4")  {
                        val r : Root = Root()
-                       val s1 : Node = Something("s1")
-                       val s2 : Node = SubjectOf("s2",new URI("uri2"))
+                       val s1 = Something("s1")
+                       val s2 = SubjectOf("s2",new URI("uri2"))
                        r.addChildren(s1)
                        s1.addChildren(s2)
                        val plan = QueryPlanner.buildPlanning(r)
 
                        assert(
-                         plan == QueryPlanner.BGP(List(s1,s2))
+                         plan == BGP(List(s1,s2))
                        )
 
                        r.lSourcesNodes = r.lSourcesNodes ++ List(new SourcesNode(s1,List("etp1")))
@@ -446,10 +447,10 @@ object QueryPlannerTest extends TestSuite {
                           */
                      test("AND - Check variable .5")  {
                        val r : Root = Root()
-                       val s1 : Node = Something("s1")
-                       val s2 : Node = SubjectOf("s2",new URI("uri2"))
-                       val s3 : Node = SubjectOf("s3",new URI("uri3"))
-                       val s4 : Node = SubjectOf("s4",new URI("uri4"))
+                       val s1 = Something("s1")
+                       val s2 = SubjectOf("s2",new URI("uri2"))
+                       val s3 = SubjectOf("s3",new URI("uri3"))
+                       val s4 = SubjectOf("s4",new URI("uri4"))
 
                        r.addChildren(s1)
                        s1.addChildren(s2)
@@ -459,7 +460,7 @@ object QueryPlannerTest extends TestSuite {
                        val plan = QueryPlanner.buildPlanning(r)
 
                        assert(
-                         plan == QueryPlanner.BGP(List(s1,s2,s3,s4))
+                         plan == BGP(List(s1,s2,s3,s4))
                        )
 
                        r.lSourcesNodes = r.lSourcesNodes ++ List(new SourcesNode(s1,List("etp1","etp2")))
@@ -489,14 +490,14 @@ object QueryPlannerTest extends TestSuite {
 
                      test("OR - Check variable .1")  {
                        val r : Root = Root()
-                       val s1 : Node = Something("s1")
-                       val u : Node = new UnionBlock(s1)
+                       val s1 = Something("s1")
+                       val u = new UnionBlock(s1)
                        s1.addChildren(u)
 
-                       val s2 : Node = SubjectOf("s2",new URI("uri2"))
-                       val s3 : Node = SubjectOf("s3",new URI("uri3"))
-                       val s4 : Node = SubjectOf("s4",new URI("uri4"))
-                       val s5 : Node = SubjectOf("s5",new URI("uri5"))
+                       val s2 = SubjectOf("s2",new URI("uri2"))
+                       val s3 = SubjectOf("s3",new URI("uri3"))
+                       val s4 = SubjectOf("s4",new URI("uri4"))
+                       val s5 = SubjectOf("s5",new URI("uri5"))
 
                        r.addChildren(s1)
                        u.addChildren(s2)
@@ -506,11 +507,11 @@ object QueryPlannerTest extends TestSuite {
 
                        val plan = QueryPlanner.buildPlanning(r)
                        assert(
-                         plan == QueryPlanner.OR(
-                           List(QueryPlanner.BGP(List(s1,s2)),
-                             QueryPlanner.BGP(List(s1,s3)),
-                             QueryPlanner.BGP(List(s1,s4)),
-                             QueryPlanner.BGP(List(s1,s5))))
+                         plan == OR(
+                           List(BGP(List(s1,s2)),
+                             BGP(List(s1,s3)),
+                             BGP(List(s1,s4)),
+                             BGP(List(s1,s5))))
                        )
 
                        r.lSourcesNodes = r.lSourcesNodes ++ List(new SourcesNode(s1,List("etp1","etp2")))

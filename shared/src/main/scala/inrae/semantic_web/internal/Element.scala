@@ -20,65 +20,108 @@ sealed trait Node {
   }
 }*/
 
-class Node(val uniqRef : Option[String]) {
+trait Node {
 
   var children: Seq[Node] = Seq[Node]()
 
   def addChildren(n: Node): Node = {
     children = children :+ n
-    return n
+    this
   }
+  override def toString() : String = {
 
-  def references(): Seq[String] = {
+    "NODE "+ { children.length match {
+      case l if l>0 => " ["+children.toString()+"]"
+      case _ => ""
+    } }
+  }
+}
 
-    val l: Seq[String] = uniqRef match {
-      case Some(v) => Seq[String](v)
-      case None => Seq[String]()
+object Node {
+  def references(n : Node ) : List[String] = n match {
+    case rdf : RdfNode => {
+      List(rdf.reference()) ++ n.children.flatMap(c => c match {
+        case rdf: RdfNode => references(rdf)
+        case _ => List("")
+      })
     }
-
-    l ++: children.flatMap(c => c.references())
+    case _ => List("")
   }
 
-  def reference(): Option[String] = uniqRef
-  
 }
 
 /* Filter node */
 
 
 /* Node case */
-case class Root() extends Node(None) {
+case class Root() extends Node {
   var lSourcesNodes : Seq[SourcesNode] = List[SourcesNode]()
   var lOperatorsNode : Seq[OperatorNode] = List[OperatorNode]()
 
-  def sourcesNode(n : Node) : Option[SourcesNode] = {
+  def sourcesNode(n : RdfNode) : Option[SourcesNode] = {
     lSourcesNodes.find( p => p.n == n )
   }
 }
 
 /* triplets */
-sealed trait RdfNode
-case class Something(concretUniqRef: String) extends Node(Some(concretUniqRef)) with RdfNode
-case class SubjectOf(concretUniqRef : String, var uri : URI) extends Node(Some(concretUniqRef)) with RdfNode
-case class ObjectOf(concretUniqRef : String, var uri : URI) extends Node(Some(concretUniqRef)) with RdfNode
-case class LinkTo(concretUniqRef : String, var term : RdfType) extends Node(Some(concretUniqRef)) with RdfNode
-case class LinkFrom(concretUniqRef : String, var uri : URI) extends Node(Some(concretUniqRef)) with RdfNode
-case class Attribute(concretUniqRef : String, var uri : URI) extends Node(Some(concretUniqRef)) with RdfNode
-case class Value(var rdfterm : RdfType) extends Node(None) with RdfNode
+class RdfNode(uniqRef : String) extends Node {
+
+  def reference(): String = uniqRef
+
+  override def toString() : String = {
+
+    this.getClass.getSimpleName+ "@"+uniqRef.toString+ { children.length match {
+      case l if l>0 => " ["+children.toString()+"]"
+      case _ => ""
+    } }
+  }
+
+  /*
+ duplicateWithoutChildren
+*/
+  def duplicateWithoutChildren() : RdfNode = ???
+}
+
+case class Something(concretUniqRef: String) extends RdfNode(concretUniqRef) {
+  override def duplicateWithoutChildren() = Something(concretUniqRef)
+}
+
+case class SubjectOf(concretUniqRef : String,uri : URI) extends RdfNode(concretUniqRef) {
+  override def duplicateWithoutChildren() = SubjectOf(concretUniqRef,uri)
+}
+
+case class ObjectOf(concretUniqRef : String,uri : URI) extends RdfNode(concretUniqRef) {
+  override def duplicateWithoutChildren() = ObjectOf(concretUniqRef,uri)
+}
+
+case class LinkTo(concretUniqRef : String,term : RdfType) extends RdfNode(concretUniqRef) {
+  override def duplicateWithoutChildren() = LinkTo(concretUniqRef,term)
+}
+
+case class LinkFrom(concretUniqRef : String,uri : URI) extends RdfNode(concretUniqRef) {
+  override def duplicateWithoutChildren() = LinkFrom(concretUniqRef,uri)
+}
+case class Attribute(concretUniqRef : String,uri : URI) extends RdfNode(concretUniqRef) {
+  override def duplicateWithoutChildren() = Attribute(concretUniqRef,uri)
+}
+
+case class Value(var rdfterm : RdfType) extends RdfNode(rdfterm.toString) {
+  override def duplicateWithoutChildren() = Value(rdfterm)
+}
 
 /* Logic */
 sealed trait LogicNode
-case class UnionBlock( var sire : Node ) extends Node(None) with LogicNode
-case class Not( var sire : Node ) extends Node(None) with LogicNode
+case class UnionBlock(sire : Node) extends Node with LogicNode
 
+case class Not(sire : Node) extends Node with LogicNode
 
 /* filter */
 sealed trait FilterNode
-case class isLiteral() extends Node(None) with FilterNode
-case class isURI() extends Node(None) with FilterNode
+case class isLiteral() extends Node with FilterNode
+case class isURI() extends Node with FilterNode
 
 /* SourcesNode */
-case class SourcesNode(var n : Node, var sources : Seq[String]) extends Node(n.reference())
+case class SourcesNode(n : RdfNode, sources : Seq[String]) extends Node
 
 /* Operator */
-case class OperatorNode(var operator : String ) extends Node(None)
+case class OperatorNode(var operator : String) extends Node
