@@ -4,6 +4,7 @@ import java.util.UUID.randomUUID
 
 import inrae.semantic_web.internal.{Node, Root, Something}
 import inrae.semantic_web.QueryPlanner.{AND_RESULTS_SET, INTERSECTION_RESULTS_SET, ORDONNANCEMENT_RESULTS_SET, OR_RESULTS_SET}
+import inrae.semantic_web.rdf.IRI
 import inrae.semantic_web.sparql.{QueryResult, _}
 
 import scala.annotation.tailrec
@@ -16,11 +17,12 @@ object QueryPlannerExecutor {
   def executePlanning( root : Root,
                        rs : ORDONNANCEMENT_RESULTS_SET,
                        listVariables : Seq[String],
-                       config : StatementConfiguration ): Future[QueryResult] = {
+                       config : StatementConfiguration,
+                       prefixes : Map[String,IRI]): Future[QueryResult] = {
     rs match {
       //case or: OR_RESULTS_SET =>
       //case and: AND_RESULTS_SET =>
-      case bgps: INTERSECTION_RESULTS_SET =>executeSet(root,rs,listVariables,config)
+      case bgps: INTERSECTION_RESULTS_SET =>executeSet(root,rs,listVariables,config,prefixes)
       case _ => Future { QueryResult(null) }
     }
 
@@ -42,7 +44,8 @@ object QueryPlannerExecutor {
   def executeSet(root : Root,
                  rs : ORDONNANCEMENT_RESULTS_SET,
                  listVariables : Seq[String],
-                 config : StatementConfiguration ) : Future[QueryResult] = {
+                 config : StatementConfiguration,
+                 prefixes : Map[String,IRI]) : Future[QueryResult] = {
 
     val promise = Promise[QueryResult]()
 
@@ -50,7 +53,7 @@ object QueryPlannerExecutor {
       case or: OR_RESULTS_SET => {
 
         /* union des resultats */
-        Future.sequence(or.lbgp.map( executeSet(root,_,listVariables,config))).onComplete( {
+        Future.sequence(or.lbgp.map( executeSet(root,_,listVariables,config,prefixes))).onComplete( {
           case Success(lQueryResu) => {
             promise success ( lQueryResu(0)) // todo => union
           }
@@ -64,7 +67,7 @@ object QueryPlannerExecutor {
       case and: AND_RESULTS_SET => {
         /* intersection des resultats */
         //and.lbgp.map( executeSet(_,listVariables,config) )
-        Future.sequence(and.lbgp.map( executeSet(root,_,listVariables,config))).onComplete( {
+        Future.sequence(and.lbgp.map( executeSet(root,_,listVariables,config,prefixes))).onComplete( {
           case Success(lQueryResu) => {
             promise success ( lQueryResu(0)) // todo => intersection
           }
@@ -78,15 +81,19 @@ object QueryPlannerExecutor {
       case bgps: INTERSECTION_RESULTS_SET =>
         println(" === INTERSECTION_RESULTS_SET == ")
         println(bgps.lns)
+        // pour l'instant pas d'ordonnancement sur les sources
+        /* piste d optimisation : trouver les resultats les plus limitants ... */
         for ((source,lbgp) <- bgps.lns) {
           /* reconstruction d'une requete au format easySparql */
           // todo : Verifier qu'on ne casse jamais de lien de parenté
           var r :Root = Root()
           r.addChildren(buildRootNode(root,lbgp))
-          println(r)
+          scribe.info(r.toString())
+          val qr = QuerySourceExecutor.queryOnSource(r,listVariables,config.source(source),prefixes)
+          println(qr)
         }
-
-        Future{ QueryResult(null) }
+        promise success (QueryResult(null))
+        promise.future
     }
   }
 

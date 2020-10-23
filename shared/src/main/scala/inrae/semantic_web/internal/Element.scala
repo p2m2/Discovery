@@ -29,7 +29,6 @@ trait Node {
     this
   }
   override def toString() : String = {
-
     "NODE "+ { children.length match {
       case l if l>0 => " ["+children.toString()+"]"
       case _ => ""
@@ -55,11 +54,22 @@ object Node {
 
 /* Node case */
 case class Root() extends Node {
+  /* prefix management */
+  var prefixes : Map[String,IRI] = Map[String,IRI]()
+  var defaultGraph : Seq[IRI]    = List[IRI]()
+  var namedGraph : Seq[IRI]      = List[IRI]()
   var lSourcesNodes : Seq[SourcesNode] = List[SourcesNode]()
   var lOperatorsNode : Seq[OperatorNode] = List[OperatorNode]()
 
   def sourcesNode(n : RdfNode) : Option[SourcesNode] = {
     lSourcesNodes.find( p => p.n == n )
+  }
+
+  override def toString() : String = {
+    "=======================================================\n"+"ROOT "+ { children.length match {
+      case l if l>0 => " ["+children.toString()+"]"
+      case _ => ""
+    } } + "\n=======================================================\n"
   }
 }
 
@@ -82,15 +92,18 @@ class RdfNode(uniqRef : String) extends Node {
   def duplicateWithoutChildren() : RdfNode = ???
 }
 
+
+class URIRdfNode(concretUniqRef : String,val uri : URI) extends RdfNode(concretUniqRef)
+
 case class Something(concretUniqRef: String) extends RdfNode(concretUniqRef) {
   override def duplicateWithoutChildren() = Something(concretUniqRef)
 }
 
-case class SubjectOf(concretUniqRef : String,uri : URI) extends RdfNode(concretUniqRef) {
+case class SubjectOf(concretUniqRef : String,uri2 : URI) extends URIRdfNode(concretUniqRef,uri2) {
   override def duplicateWithoutChildren() = SubjectOf(concretUniqRef,uri)
 }
 
-case class ObjectOf(concretUniqRef : String,uri : URI) extends RdfNode(concretUniqRef) {
+case class ObjectOf(concretUniqRef : String,uri2 : URI) extends URIRdfNode(concretUniqRef,uri2) {
   override def duplicateWithoutChildren() = ObjectOf(concretUniqRef,uri)
 }
 
@@ -98,30 +111,25 @@ case class LinkTo(concretUniqRef : String,term : RdfType) extends RdfNode(concre
   override def duplicateWithoutChildren() = LinkTo(concretUniqRef,term)
 }
 
-case class LinkFrom(concretUniqRef : String,uri : URI) extends RdfNode(concretUniqRef) {
+case class LinkFrom(concretUniqRef : String,uri2 : URI) extends URIRdfNode(concretUniqRef,uri2) {
   override def duplicateWithoutChildren() = LinkFrom(concretUniqRef,uri)
 }
-case class Attribute(concretUniqRef : String,uri : URI) extends RdfNode(concretUniqRef) {
-  override def duplicateWithoutChildren() = Attribute(concretUniqRef,uri)
-}
 
-case class Value(var rdfterm : RdfType) extends RdfNode(rdfterm.toString) {
-  override def duplicateWithoutChildren() = Value(rdfterm)
-}
+case class Value(var term : RdfType) extends Node
 
 /* Logic */
-sealed trait LogicNode
-case class UnionBlock(sire : Node) extends Node with LogicNode
-
-case class Not(sire : Node) extends Node with LogicNode
+class LogicNode(val sire : Node) extends Node
+case class UnionBlock(s : Node) extends LogicNode(s)
+case class Not(s : Node) extends LogicNode(s)
 
 /* filter */
 sealed trait FilterNode
-case class isLiteral() extends Node with FilterNode
-case class isURI() extends Node with FilterNode
+case class isLiteral() extends FilterNode
+case class isURI() extends FilterNode
+case class contains(value :String)  extends FilterNode
 
 /* SourcesNode */
 case class SourcesNode(n : RdfNode, sources : Seq[String]) extends Node
 
-/* Operator */
+/* BIND / Operator */
 case class OperatorNode(var operator : String) extends Node

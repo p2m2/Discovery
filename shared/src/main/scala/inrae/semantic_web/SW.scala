@@ -17,8 +17,6 @@ case class SW(var config: StatementConfiguration) {
   private var rootNode   : Root = new Root()
   /* focus node */
   private var focusNode  : Node = rootNode
-  /* prefix management */
-  private var prefixes : Map[String,String] = Map[String,String]()
 
   scribe.Logger.root.clearHandlers().clearModifiers().withHandler(minimumLevel = Some(Level.Info)).replace()
 
@@ -38,17 +36,27 @@ case class SW(var config: StatementConfiguration) {
     return this
   }
 
-  def prefix(short : String, long : String ) : SW = {
-    prefixes = prefixes + ( short -> long )
+  def prefix(short : String, long : IRI ) : SW = {
+    rootNode.prefixes = rootNode.prefixes + ( short -> long )
     this
   }
 
-  def setupnode( n : Node , setupsource : Boolean = false ) : SW = {
+  def graph(graph : IRI) : SW = {
+    rootNode.defaultGraph = rootNode.defaultGraph :+ graph
+    this
+  }
+
+  def namedGraph(graph : IRI ) : SW = {
+    rootNode.namedGraph = rootNode.namedGraph :+ graph
+    this
+  }
+
+  def setupnode(n : Node, upsource : Boolean = false ) : SW = {
 
     focusManagement(n)
 
-    if ( setupsource ) {
-      QueryManager.setUpSourcesNode(n,config,prefixes).onComplete {
+    if ( upsource ) {
+      QueryManager.setUpSourcesNode(n,config,rootNode.prefixes).onComplete {
         case Success(Some(sn)) => {
           rootNode.lSourcesNodes = rootNode.lSourcesNodes :+ sn
         }
@@ -96,9 +104,12 @@ case class SW(var config: StatementConfiguration) {
     setupnode(new LinkFrom(ref,uri))
   }
 
-  /* set */
+  /*
+    Specific treatment : add value possibilities for a specific node
+    We get the
+  */
   def set( uri : URI ) : SW = {
-    setupnode(new Value(uri))
+    setupnode(Value(uri))
   }
 
   def debug() : SW = {
@@ -115,11 +126,11 @@ case class SW(var config: StatementConfiguration) {
   }
 
   def select() : Future[QueryResult] = {
-    QueryManager.queryNode(rootNode,focusNode,config,prefixes)
+    QueryManager.queryNode(rootNode,focusNode,config)
   }
 
   def count() : Future[Int] = {
-    QueryManager.countNbSolutions(rootNode,config,prefixes)
+    QueryManager.countNbSolutions(rootNode,config)
       .map (v => v match {
         case Some(literal : Literal) => literal.value.toInt
         case _ => 0

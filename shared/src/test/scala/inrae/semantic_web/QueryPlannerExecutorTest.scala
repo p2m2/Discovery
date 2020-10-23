@@ -1,12 +1,15 @@
 package inrae.semantic_web
 
 import inrae.semantic_web.internal.{Node, Root, Something, SubjectOf}
-import inrae.semantic_web.rdf.URI
+import inrae.semantic_web.rdf.{URI,IRI}
 import utest._
 
 object QueryPlannerExecutorTest extends TestSuite {
 
   implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
+
+  val mpref = Map( "rdf" -> IRI("http://www.w3.org/1999/02/22-rdf-syntax-ns#"))
+
   val configTest: StatementConfiguration = new StatementConfiguration()
   configTest.setConfigString(
     """
@@ -42,7 +45,7 @@ object QueryPlannerExecutorTest extends TestSuite {
       val plan = QueryPlanner.INTERSECTION_RESULTS_SET(
         Map( "etp1" -> List(s1,s2))
       )
-      QueryPlannerExecutor.executePlanning(r,plan,List("s1","s2"),configTest)
+      QueryPlannerExecutor.executePlanning(r,plan,List("s1","s2"),configTest,mpref)
 
     }
   }

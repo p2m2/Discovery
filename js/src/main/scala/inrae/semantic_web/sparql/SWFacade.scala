@@ -2,7 +2,7 @@ package inrae.semantic_web.sparql
 
 import inrae.semantic_web.{SW, StatementConfiguration}
 import inrae.semantic_web.internal.{Node, ObjectOf, Something, SubjectOf, Value}
-import inrae.semantic_web.rdf.URI
+import inrae.semantic_web.rdf.{IRI, URI}
 
 import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
 import scala.scalajs.js.JSConverters._
@@ -20,6 +20,14 @@ class SWFacade(var config: StatementConfiguration) {
   @JSExport
   def focusManagement(n : Node) : SWFacade = { sw.focusManagement(n) ; this }
 
+  @JSExport
+  def prefix(short : String, long : IRI ) : SWFacade = { sw.prefix(short,long) ; this }
+
+  @JSExport
+  def graph(graph : IRI) : SWFacade = { sw.graph(graph) ; this }
+
+  @JSExport
+  def namedGraph(graph : IRI ) : SWFacade = { sw.namedGraph(graph) ; this }
   /* start a request */
   @JSExport
   def something( ref : String = sw.getUniqueRef() ) : SWFacade = { sw.something(ref) ; this }

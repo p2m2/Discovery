@@ -1,6 +1,6 @@
 package inrae.semantic_web
 
-import inrae.semantic_web.sparql.{SparqlAlgebra,OR,AND,BGP}
+import inrae.semantic_web.sparql.{SparqlGroupNode,OR,AND,BGP}
 import inrae.semantic_web.internal.{Node,RdfNode, Root, UnionBlock}
 import annotation.tailrec
 
@@ -12,7 +12,7 @@ object QueryPlanner {
   case class AND_RESULTS_SET(lbgp : Seq[ORDONNANCEMENT_RESULTS_SET]) extends ORDONNANCEMENT_RESULTS_SET
 
 
-  def buildPlanning(root: Root) : SparqlAlgebra = {
+  def buildPlanning(root: Root) : SparqlGroupNode = {
     scribe.debug("buildPlanning")
     val plan = OR(root.children.map(c => buildIndependantBGP(c)))
     cleanPlan(plan)
@@ -26,7 +26,7 @@ object QueryPlanner {
        BGP([ N1 ->S1,S2, N2 ->S2 ]) => INTERSECTION_RESULTS_SET ( S1 -> [BGP(N1)], S2 -> [BGP(N1,N2)] )
    */
 //, config : StatementConfiguration
-  def ordonnanceBySource(l : SparqlAlgebra, r : Root ) : ORDONNANCEMENT_RESULTS_SET = {
+  def ordonnanceBySource(l : SparqlGroupNode, r : Root ) : ORDONNANCEMENT_RESULTS_SET = {
     l match {
       case BGP(lnodes) => {
         val lSourcesNodes = lnodes.map( n => r.sourcesNode(n) ).flatten
@@ -44,15 +44,15 @@ object QueryPlanner {
   }
 
   @tailrec
-  def cleanPlan(plan : SparqlAlgebra) : SparqlAlgebra = {
+  def cleanPlan(plan : SparqlGroupNode) : SparqlGroupNode = {
     scribe.debug("clean plan :"+plan.toString)
     factorize(plan) match {
-      case a : SparqlAlgebra if factorize(a) == a => a
-      case b : SparqlAlgebra => cleanPlan(b)
+      case a : SparqlGroupNode if factorize(a) == a => a
+      case b : SparqlGroupNode => cleanPlan(b)
     }
   }
 
-  def factorize(l : SparqlAlgebra) : SparqlAlgebra = {
+  def factorize(l : SparqlGroupNode) : SparqlGroupNode = {
     scribe.debug("factorize :"+l.toString)
 
     {
@@ -114,7 +114,7 @@ object QueryPlanner {
   }
 
   //  @tailrec
-  def buildIndependantBGP( n : Node , cpt : Int = 0) : SparqlAlgebra = {
+  def buildIndependantBGP( n : Node , cpt : Int = 0) : SparqlGroupNode = {
 
     n match {
       case r : RdfNode => {

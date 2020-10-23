@@ -45,7 +45,7 @@ object SimpleConsole  {
             case node : SubjectOf   => "SubjectOf ("+node.uri.toString +" , " + node.reference() +")"
             case node : ObjectOf    => "ObjectOf ("+node.uri.toString +" , " + node.reference() +")"
             case node : SourcesNode => "SourceNode -> " + Libelle(node.n)
-            case node : Value       => "Value ("+node.rdfterm.toString +" , " + node.reference() +")"
+            case node : Value       => "Value ("+node.term.toString +")"
             case v                  => "--- Unkown ---"+v.toString
         }
     }

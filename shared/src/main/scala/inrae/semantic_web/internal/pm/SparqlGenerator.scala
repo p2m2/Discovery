@@ -3,15 +3,16 @@ package inrae.semantic_web.internal.pm
 import inrae.semantic_web._
 import inrae.semantic_web.internal.Node.references
 import inrae.semantic_web.internal._
+import inrae.semantic_web.rdf.IRI
 
 /**
  * 
  */
 object SparqlGenerator  {
 
-    def prefixes(prefixes : Map[String,String]) : String = {
+    def prefixes(prefixes : Map[String,IRI]) : String = {
         prefixes.map {
-            case (k,v) => "PREFIX "+k+": "+"<"+v+">"
+            case (k,v) => "PREFIX "+k+": "+v.sparql()
         }.mkString("\n")
     }
 
@@ -47,9 +48,7 @@ object SparqlGenerator  {
               node.uri.toString() + " " + "?"+ variableName + " .\n"
             case node : ObjectOf           => "?" + variableName + " " +
               node.uri.toString() + " " + "?"+ varIdSire + " .\n"
-            case node : Attribute          => "?" + variableName + " " +
-              node.uri.toString() + " " + "?"+ varIdSire + " .\n"
-            case node : Value              => "VALUES ?" +varIdSire+ " { " + node.rdfterm.toString() + " }\n"
+            case node : Value              => "VALUES ?" +varIdSire+ " { " + node.term.toString() + " }\n"
             case _                         => ""
         }
     }
@@ -61,7 +60,6 @@ object SparqlGenerator  {
             case _: ObjectOf => "subject"
             case _: LinkTo => "linkto"
             case _: LinkFrom => "linkfrom"
-            case _: Attribute => "attribute"
             case _ => "unknown"
         }
     }
@@ -130,7 +128,7 @@ object SparqlGenerator  {
         }
 
         val triplet : String = sparqlNode(n,varIdSire,variableName)
-       
+
         triplet + n.children.map( child => body( sw, child,referenceToIdentifier, variableName)).mkString("")
     } 
 }

@@ -2,8 +2,9 @@ package inrae.semantic_web
 
 import inrae.semantic_web.QueryPlanner
 import inrae.semantic_web.internal._
-import inrae.semantic_web.rdf.{Literal, RdfType, URI}
+import inrae.semantic_web.rdf.{IRI, Literal, RdfType, URI}
 import inrae.semantic_web.sparql.{QueryResult, _}
+
 import scala.concurrent.{Future, Promise}
 import scala.util.{Failure, Success, Try}
 
@@ -17,9 +18,9 @@ object QueryManager {
    * @param n
    */
 
-  def queryNode(rootRequest : Root, n: Node, config : StatementConfiguration,prefixes : Map[String,String]) : Future[QueryResult] = {
+  def queryNode(rootRequest : Root, n: Node, config : StatementConfiguration) : Future[QueryResult] = {
     val (refToIdentifier,_) = pm.SparqlGenerator.correspondanceVariablesIdentifier(n)
-    queryVariables(rootRequest,refToIdentifier.values.toSeq,config,prefixes)
+    queryVariables(rootRequest,refToIdentifier.values.toSeq,config)
   }
 
   def queryPropertyNode(rootRequest : Node, n: Node, config : StatementConfiguration) : Future[Seq[URI]] = {
@@ -28,29 +29,28 @@ object QueryManager {
     }
   }
   def queryAll(rootRequest : Root,
-               config : StatementConfiguration,
-               prefixes : Map[String,String]) : Future[QueryResult] = {
-    queryVariables(rootRequest,Node.references(rootRequest),config,prefixes)
+               config : StatementConfiguration) : Future[QueryResult] = {
+    queryVariables(rootRequest,Node.references(rootRequest),config)
   }
 
-  def countNbSolutions(n : Node,  config : StatementConfiguration,prefixes : Map[String,String]) : Future[Option[RdfType]] = {
+  def countNbSolutions(root : Root,  config : StatementConfiguration) : Future[Option[RdfType]] = {
 
     if (config.sources().length == 0) {
       throw new Exception(" ** None sources available ** ")
     } else if (config.sources().length == 1) {
       val source = config.sources()(0)
-      val (refToIdentifier, _) = pm.SparqlGenerator.correspondanceVariablesIdentifier(n)
+      val (refToIdentifier, _) = pm.SparqlGenerator.correspondanceVariablesIdentifier(root)
       scribe.warn("===================================================================")
-      scribe.warn(n.toString)
+      scribe.warn(root.toString)
       val varCount = "count"
      // val prolog = pm.SparqlGenerator.prologCountSelection(varCount,refToIdentifier(Node.references(n)))
      val prolog = pm.SparqlGenerator.prologCountSelection(varCount)
 
 
       val query =
-        pm.SparqlGenerator.prefixes(prefixes) +
+        pm.SparqlGenerator.prefixes(root.prefixes) +
         prolog +
-        pm.SparqlGenerator.body(source, n, refToIdentifier) +
+        pm.SparqlGenerator.body(source, root, refToIdentifier) +
         pm.SparqlGenerator.solutionModifier()
 
       scribe.info(query)
@@ -66,17 +66,16 @@ object QueryManager {
 
   def queryVariables(root: Root,
                      listVariables : Seq[String],
-                     config : StatementConfiguration,
-                     prefixes : Map[String,String]) : Future[QueryResult] = {
+                     config : StatementConfiguration) : Future[QueryResult] = {
     if (config.sources().length == 0) {
       throw new Exception(" ** None sources available ** ")
     } else if (config.sources().length == 1) {
-      QuerySourceExecutor.queryOnSource(root,listVariables,config.sources()(0),prefixes)
+      QuerySourceExecutor.queryOnSource(root,listVariables,config.sources()(0),root.prefixes)
     } else {
 
       val plan = QueryPlanner.buildPlanning(root)//,listVariables,config)
       val plan_results_set = QueryPlanner.ordonnanceBySource(plan,root)
-      QueryPlannerExecutor.executePlanning(root,plan_results_set,listVariables,config)
+      QueryPlannerExecutor.executePlanning(root,plan_results_set,listVariables,config,root.prefixes)
     }
   }
 
@@ -93,7 +92,7 @@ object QueryManager {
    */
   def setUpSourcesNode(n: Node,
                        config : StatementConfiguration,
-                       prefixes : Map[String,String]): Future[Option[SourcesNode]] = {
+                       prefixes : Map[String,IRI]): Future[Option[SourcesNode]] = {
 
     n match {
       case s : Something =>

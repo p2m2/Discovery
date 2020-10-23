@@ -27,11 +27,6 @@ object ElementTest extends TestSuite {
       assert(true)
     }
 
-    test("Attribute creation") {
-      val v : Attribute = new Attribute("1234",new URI("test"))
-      assert(true)
-    }
-
     test("Value creation with uri") {
       val v : Value = new Value(new URI("test"))
       assert(true)
