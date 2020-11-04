@@ -4,7 +4,6 @@ import scala.language.implicitConversions
 import inrae.semantic_web.internal.{RdfNode, _}
 import inrae.semantic_web.rdf._
 import inrae.semantic_web.internal.pm.SparqlGenerator
-import org.apache.jena.rdf.model.RDFNode
 
 import scala.annotation.tailrec
 import scala.collection.mutable
