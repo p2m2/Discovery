@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Count</title>
+</head>
+<body>
+<script type="text/javascript" src="../../../js/target/scala-2.13/es-fastopt.js"></script>
+<pre id="demo"></pre>
+</body>
+<script>
+      let config = new EasySparqlStatementConfiguration()
+
+      config.setConfigString(`
+          {
+          "sources" : [{
+          "id"  : "dbpedia",
+          "url" : "http://agrold.ird.fr:8890/sparql",
+          "typ" : "tps",
+          "method" : "POST_ENCODED",
+          "mimetype" : "json"
+           }]}
+          `)
+        let query = new EasySparqlEngine(config);
+
+        console.log(query)
+        let r = query.something("entity")
+                     .isSubjectOf(URI("http://www.w3.org/2002/07/owl#Class"))
+                     .focus("entity")
+                      .debug()
+                      .findClassesOf(URI("http://www.w3.org/2002/07/owl#Class"));
+
+        r.then((value) => {
+          let res = value;
+          console.log(res);
+          document.getElementById("demo").appendChild(document.createTextNode(res));
+        }).catch( (error) => {
+          console.error(" -- catch exception --")
+          console.error(error)
+        } );
+    </script>
+</html>
