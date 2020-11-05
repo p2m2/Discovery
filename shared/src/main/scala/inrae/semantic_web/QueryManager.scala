@@ -18,9 +18,9 @@ object QueryManager {
    * @param n
    */
 
-  def queryNode(rootRequest : Root, n: Node, config : StatementConfiguration) : Future[QueryResult] = {
+  def sparql_string(root: Root, n: Node): String = {
     val (refToIdentifier,_) = pm.SparqlGenerator.correspondanceVariablesIdentifier(n)
-    queryVariables(rootRequest,refToIdentifier.values.toSeq,config)
+    SparqlQueryBuilder.queryString(root,refToIdentifier.values.toSeq,root.prefixes)
   }
 
   def queryPropertyNode(rootRequest : Node, n: Node, config : StatementConfiguration) : Future[Seq[URI]] = {
@@ -50,7 +50,7 @@ object QueryManager {
       val query =
         pm.SparqlGenerator.prefixes(root.prefixes) +
         prolog +
-        pm.SparqlGenerator.body(source, root, refToIdentifier) +
+        pm.SparqlGenerator.body(root, refToIdentifier) +
         pm.SparqlGenerator.solutionModifier()
 
       scribe.info(query)
@@ -70,7 +70,8 @@ object QueryManager {
     if (config.sources().length == 0) {
       throw new Exception(" ** None sources available ** ")
     } else if (config.sources().length == 1) {
-      QuerySourceExecutor.queryOnSource(root,listVariables,config.sources()(0),root.prefixes)
+      val query : String = SparqlQueryBuilder.queryString(root,listVariables,root.prefixes)
+      QueryRunner(config.sources()(0)).query(query)
     } else {
 
       val plan = QueryPlanner.buildPlanning(root)//,listVariables,config)
@@ -78,7 +79,6 @@ object QueryManager {
       QueryPlannerExecutor.executePlanning(root,plan_results_set,listVariables,config,root.prefixes)
     }
   }
-
 
   //def executePlan() : Future[QueryResult] = {
 

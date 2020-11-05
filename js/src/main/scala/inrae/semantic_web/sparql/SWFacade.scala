@@ -15,6 +15,9 @@ class SWFacade(var config: StatementConfiguration) {
   var sw = new SW(config)
 
   @JSExport
+  def help() : SWFacade = { sw.help() ; this }
+
+  @JSExport
   def focus(ref : String) : SWFacade = { sw.focus(ref) ; this }
 
   @JSExport
@@ -40,6 +43,11 @@ class SWFacade(var config: StatementConfiguration) {
   @JSExport
   def isObjectOf( uri : URI , ref : String = sw.getUniqueRef() ) : SWFacade = { sw.isObjectOf(uri,ref); this }
 
+  @JSExport
+  def isLinkTo( uri : URI , ref : String = sw.getUniqueRef() ) : SWFacade = { sw.isLinkTo(uri,ref); this }
+
+  @JSExport
+  def isLinkFrom( uri : URI , ref : String = sw.getUniqueRef() ) : SWFacade = { sw.isLinkFrom(uri,ref); this }
   /* set */
   @JSExport
   def set( uri : URI ) : SWFacade = { sw.set(uri) ; this }
@@ -48,20 +56,24 @@ class SWFacade(var config: StatementConfiguration) {
   def debug() : SWFacade = { sw.debug() ; this  }
 
   @JSExport
-  def sparql() : String = sw.sparql()
+  def sparql_console() : SWFacade = { sw.sparql_console() ; this }
 
   @JSExport
-  def select(): Promise[QueryResult] = {
-    sw.select().toJSPromise
+  def select(lRef: String*): Promise[QueryResult] = { sw.select(lRef).toJSPromise }
+
+  @JSExport
+  def count(): Promise[Int] = { sw.count().toJSPromise }
+
+  @JSExport
+  def findClassesOf(uri:URI = URI("")): Promise[Seq[Option[URI]]] = { sw.findClassesOf().toJSPromise }
+
+  @JSExport
+  def findObjectPropertiesOf(motherClassProperties: URI = URI("") ) : Promise[Seq[URI]] = {
+    sw.findObjectPropertiesOf().toJSPromise
   }
 
   @JSExport
-  def count(): Promise[Int] = {
-    sw.count().toJSPromise
-  }
-
-  @JSExport
-  def findClassesOf(uri:URI = URI("")): Promise[Seq[Option[URI]]] = {
-    sw.findClassesOf().toJSPromise
+  def findDatatypePropertiesOf(motherClassProperties: URI = URI("") ) : Promise[Seq[URI]] = {
+    sw.findDatatypePropertiesOf().toJSPromise
   }
 }

@@ -3,7 +3,7 @@ import scala.scalajs.js.annotation._
 import java.util.UUID.randomUUID
 
 import inrae.semantic_web.rdf._
-import inrae.semantic_web.internal.{Node, _}
+import inrae.semantic_web.internal.{Node, RdfNode, _}
 import inrae.semantic_web.sparql._
 
 import scala.concurrent.Future
@@ -18,14 +18,47 @@ case class SW(var config: StatementConfiguration) {
   /* focus node */
   private var focusNode  : Node = rootNode
 
+  private val version : String = "0.0.1"
+
   scribe.Logger.root.clearHandlers().clearModifiers().withHandler(minimumLevel = Some(Level.Info)).replace()
+
+  def help() : SW = {
+    println(" ---------------- SW "+version+" ---------------------------")
+    println("   ")
+    println("    -------------  Query Control ----------")
+    println(" something:")
+    println(" focus    :")
+    println("   ")
+    println("    -------------  Add Sparql snippet ----------")
+    println(" isSubjectOf(URI(\"http://relation\")):  ?currentFocus URI(\"http://relation\") ?newFocus")
+    println(" isObjectOf(URI(\"http://relation\")):  ?newFocus URI(\"http://relation\") ?currentFocus")
+    println(" isLinkTo(URI(\"http://object\")):  ?currentFocus ?newFocus URI(\"http://object\")")
+    println(" isLinkTo(XSD(\"type\",\"value\")):  ?currentFocus ?newFocus XSD(\"type\",\"value\")")
+    println(" isLinkFrom(URI(\"http://object\")):  URI(\"http://object\") ?newFocus ?currentFocus")
+    println("   ")
+    println("    -------------  Print information ----------")
+    println(" debug:")
+    println(" sparql_console:")
+    println("   ")
+    println("    -------------  Request ----------")
+    println(" select:")
+    println(" count:")
+    println("   ")
+    println("    -------------  Explore according the focus ----------")
+    println(" findClassesOf:")
+    println(" findObjectPropertiesOf:")
+    println(" findDatatypePropertiesOf:")
+    println("   ")
+    println("  --------------------------------------------------------------" )
+    this
+  }
 
   /* manage the creation of an unique ref */
   def getUniqueRef() : String = "_internal_" + randomUUID.toString
 
   /* set the current focus on the select node */
   def focus(ref : String) : SW = {
-    val arrNode = pm.SelectNode.setFocus(ref, rootNode)
+    val arrNode = pm.SelectNode.getNodeWithRef(ref, rootNode)
 
     if ( arrNode.length > 0 ) {
       focusNode = arrNode(0)
@@ -121,12 +154,24 @@ case class SW(var config: StatementConfiguration) {
     this
   }
 
-  def sparql() : String = {
-    ""
+  def sparql_console() : SW = {
+    println(QueryManager.sparql_string(rootNode,focusNode))
+    this
   }
 
-  def select() : Future[QueryResult] = {
-    QueryManager.queryNode(rootNode,focusNode,config)
+  def select(lRef: Seq[String] = List()) : Future[QueryResult] = {
+    val lSelectVariables = lRef match {
+      case v if v.length>0 => v.flatMap( ref => {
+        val variableNameList = pm.SelectNode.getNodeWithRef(ref, rootNode)
+          .map( pm.SparqlGenerator.correspondanceVariablesIdentifier(_)._1.getOrElse(ref,""))
+        if (variableNameList.filter(_ != "").length==0) {
+          scribe.error("Unknown reference:"+ref)
+        }
+        variableNameList
+      })
+      case _ => pm.SparqlGenerator.correspondanceVariablesIdentifier(focusNode)._1.values.toSeq
+    }
+    QueryManager.queryVariables(rootNode,lSelectVariables,config)
   }
 
   def count() : Future[Int] = {
@@ -145,7 +190,7 @@ case class SW(var config: StatementConfiguration) {
                   .set(motherClass)
     })
       .focus("_esp___type")
-      .select
+      .select()
       .map( resultsformat =>
         resultsformat.get.rows.map(
           resulstrow => {

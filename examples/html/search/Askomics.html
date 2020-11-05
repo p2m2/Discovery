@@ -15,7 +15,7 @@
           {
           "sources" : [{
           "id"  : "dbpedia",
-          "url" : "http://agrold.ird.fr:8890/sparql",
+          "url" : "http://openstack-192-168-100-31.genouest.org/sparql",
           "typ" : "tps",
           "method" : "POST_ENCODED",
           "mimetype" : "json"
@@ -25,10 +25,11 @@
 
         console.log(query)
         let r = query.something("entity")
-                     .isSubjectOf(URI("http://www.w3.org/2002/07/owl#Class"))
+                     .isLinkTo(URI("http://askomics.org/internal/entity"))
                      .focus("entity")
-                      .debug()
-                      .findClassesOf(URI("http://www.w3.org/2002/07/owl#Class"));
+                     .sparql_console()
+                     .help()
+                     .select()
 
         r.then((value) => {
           let res = value;

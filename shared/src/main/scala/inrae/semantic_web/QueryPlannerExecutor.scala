@@ -89,7 +89,9 @@ object QueryPlannerExecutor {
           var r :Root = Root()
           r.addChildren(buildRootNode(root,lbgp))
           scribe.info(r.toString())
-          val qr = QuerySourceExecutor.queryOnSource(r,listVariables,config.source(source),prefixes)
+          val qr = QueryRunner(config.source(source)).query(
+            SparqlQueryBuilder.queryString(r,listVariables,prefixes)
+          )
           println(qr)
         }
         promise success (QueryResult(null))

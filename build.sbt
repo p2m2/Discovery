@@ -14,7 +14,8 @@ lazy val root = (project in file("."))
   .settings(
     // crossScalaVersions must be set to Nil on the aggregating project
     crossScalaVersions := Nil,
-    publish / skip := true
+    publish / skip := true,
+    scalacOptions ++= Seq("-deprecation", "-feature")
   )
 //
 // cross-project , documentation : https://github.com/portable-scala/sbt-crossproject

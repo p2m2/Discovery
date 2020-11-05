@@ -48,6 +48,8 @@ object SparqlGenerator  {
               node.uri.toString() + " " + "?"+ variableName + " .\n"
             case node : ObjectOf           => "?" + variableName + " " +
               node.uri.toString() + " " + "?"+ varIdSire + " .\n"
+            case node : LinkTo           => "?"+ varIdSire + " " + "?" + variableName + " " + node.term.toString() + " .\n"
+            case node : LinkFrom           => node.uri.toString() + " " + "?" + variableName + " " + "?"+ varIdSire + " .\n"
             case node : Value              => "VALUES ?" +varIdSire+ " { " + node.term.toString() + " }\n"
             case _                         => ""
         }
@@ -88,6 +90,14 @@ object SparqlGenerator  {
         }
     }
 
+    /**
+     *
+     * @param n : Get Variable Node
+     * @param buildMap
+     * @return
+     *              Map[String,String] : Correspondence reference -> variableName
+     *              Map[String,Int] : Iterator/index to increment new variable for a RdfNode
+     */
     def correspondanceVariablesIdentifier(n:Node, buildMap : Map[String,Int]= Map[String,Int]())
                                        : (Map[String,String],Map[String,Int]) = {
         val resLoc : (Map[String,String],Map[String,Int]) = n match {
@@ -112,8 +122,7 @@ object SparqlGenerator  {
          }
     }
 
-    def body(sw: ConfigurationObject.Source, /* user configuration*/
-             n: Node, /* current node to browse with children */
+    def body(n: Node, /* current node to browse with children */
              referenceToIdentifier : Map[String,String],
              varIdSire : String = "" /* sire variable */
             )  : String = {
@@ -129,7 +138,7 @@ object SparqlGenerator  {
 
         val triplet : String = sparqlNode(n,varIdSire,variableName)
 
-        triplet + n.children.map( child => body( sw, child,referenceToIdentifier, variableName)).mkString("")
+        triplet + n.children.map( child => body( child,referenceToIdentifier, variableName)).mkString("")
     } 
 }
 

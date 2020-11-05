@@ -15,7 +15,7 @@ import scala.concurrent.duration._
 object SWTest extends TestSuite {
 
   def tests = Tests {
-    /*
+
     test("Create a simple query") {
       val config: StatementConfiguration = new StatementConfiguration()
       config.setConfigString(""" { "sources" : [] } """)
@@ -42,13 +42,13 @@ object SWTest extends TestSuite {
         query.something("h1")
           .set(URI("http://dbpedia.org/resource/%C3%84lvdalen"))
           .isSubjectOf(URI("http://www.w3.org/2002/07/owl#sameAs"))
-          .select
+          .select(List("h1"))
           .onComplete {
             case Success(result) => println(result.get); assert(true)
             case Failure(exception) => println(exception); assert(false)
           }
       }
-    }*/
+    }
     /*
     test("debug") {
       val config: StatementConfiguration = new StatementConfiguration()
