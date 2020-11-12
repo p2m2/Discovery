@@ -15,6 +15,7 @@ npm install jsdom
 sbt esJS/run
 sbt esJS/test
 sbt esJS/fastOptJS
+sbt esJS/esJS/fullOptJS
 sbt esJS/fastOptJS::webpack => bundle package
 ```
 

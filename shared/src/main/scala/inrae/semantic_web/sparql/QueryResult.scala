@@ -21,8 +21,6 @@ case class QueryResult(results: String, mimetype : String = "json") {
     )
   }
 
-
-
   def v2Ident(v2k : Map[String,String]) = {
 
     val l = json("head")("vars").arr.map(v => {
