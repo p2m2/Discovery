@@ -96,7 +96,7 @@ object QueryPlannerExecutor {
           )
           println(qr)
         }
-        promise success (QueryResult(null))
+        promise success (QueryResult("",""))
         promise.future
     }
   }
