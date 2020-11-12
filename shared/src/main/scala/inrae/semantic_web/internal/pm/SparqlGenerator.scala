@@ -1,18 +1,26 @@
 package inrae.semantic_web.internal.pm
 
 import inrae.semantic_web._
+import inrae.semantic_web.internal.Node.references
 import inrae.semantic_web.internal._
+import inrae.semantic_web.rdf.IRI
 
 /**
  * 
  */
 object SparqlGenerator  {
 
+    def prefixes(prefixes : Map[String,IRI]) : String = {
+        prefixes.map {
+            case (k,v) => "PREFIX "+k+": "+v.sparql()
+        }.mkString("\n")
+    }
+
     def prolog(listVariables : Seq[String] = Seq[String]()) : String = {
         if (listVariables.length == 0 ) {
             "SELECT * WHERE {"
         } else
-            "SELECT" + listVariables.foldLeft(" ")( (acc,identifier) => acc+"?"+identifier+" ") + "WHERE {"
+            "SELECT DISTINCT" + listVariables.foldLeft(" ")( (acc,identifier) => acc+"?"+identifier+" ") + "\nWHERE {"
     }
 
     def solutionModifier () : String = {
@@ -23,32 +31,52 @@ object SparqlGenerator  {
             "SELECT * WHERE {"
     }
 
+    def prologCountSelection(varCount : String) : String = {
+      //  variable match {
+        "SELECT ( COUNT(*) as ?"+varCount+" ) WHERE {"
+           // case _ => "SELECT ( COUNT(?"+variable+") as ?"+varCount+" ) WHERE {"
+        //}
+    }
+
     def solutionModifierSourcesSelection () : String = {
         "} LIMIT 1"
     }
 
     def sparqlNode(n: Node,varIdSire : String, variableName : String) : String = {
-        n match {
-            case node : SubjectOf          => "?" + varIdSire + " " +
+        scribe.debug(varIdSire+" - "+variableName)
+         n match {
+            case node : SubjectOf          => "\t?" + varIdSire + " " +
               node.uri.toString() + " " + "?"+ variableName + " .\n"
-            case node : ObjectOf           => "?" + variableName + " " +
+            case node : ObjectOf           => "\t?" + variableName + " " +
               node.uri.toString() + " " + "?"+ varIdSire + " .\n"
-            case node : Attribute          => "?" + variableName + " " +
-              node.uri.toString() + " " + "?"+ varIdSire + " .\n"
-            case node : Value              => "VALUES ?" +varIdSire+ " { " + node.rdfterm.toString() + " }\n"
+            case node : LinkTo           => "\t?"+ varIdSire + " " + "?" + variableName + " " + node.term.toString() + " .\n"
+            case node : LinkFrom           => node.uri.toString() + " " + "?" + variableName + " " + "?"+ varIdSire + " .\n"
+            case node : Value              => "VALUES ?" +varIdSire+ " { " + node.term.toString() + " }.\n"
+            case node : FilterNode         => "filter ( " + {
+                node.negation match {
+                    case true => "!"
+                    case false => ""
+                }
+            } + {
+                node match {
+                    case n : Contains           => "contains(str(" + "?" +varIdSire + "), \""+ n.value + "\")"
+                    case n : isBlank            => "isBlank(" + "?" +varIdSire + ")"
+                    case n : isURI              => "isURI(" + "?" +varIdSire + ")"
+                    case n : isLiteral          => "isLiteral(" + "?" +varIdSire + ")"
+                    case _ => throw new Exception("SparqlGenerator::sparqlNode . [Devel error] Node undefined ["+n.toString()+"]")
+                }
+            } + " )\n"
             case _                         => ""
         }
     }
 
-    def generic_name(n:Node) : String = {
+    def generic_name(n:RdfNode) : String = {
         n match {
             case _: Something => "something"
             case _: SubjectOf => "object"
             case _: ObjectOf => "subject"
             case _: LinkTo => "linkto"
             case _: LinkFrom => "linkfrom"
-            case sn: SourcesNode => generic_name(sn.n)
-            case _: Attribute => "attribute"
             case _ => "unknown"
         }
     }
@@ -60,59 +88,71 @@ object SparqlGenerator  {
      * @return Variable Name, Map [Generic name -> last index variable)
      */
     def getVariableIdentifier(
-                       n:Node,
+                       n:RdfNode,
                        ms : Map[String,Int] = Map[String,Int](), /* map to increase id and manage new variable name */
                      ) : Option[(String,Map[String,Int])] = {
 
-        n.reference() match {
-            /* case if user defined an identifier */
-            case Some(v) if !v.startsWith("_internal_") => Some(v, ms)
-            case _ =>
-                val genericName = generic_name(n)
-                genericName match {
-                    case s: String => {
-                        val v = ms.getOrElse(s, 0)
-                        Some(genericName + v.toString(), ms + (s -> (v + 1)))
-                    }
-                }
-        }
-    }
-
-    /* output variable : get key : referenceKeyNode, value : variable name */
-    def setAllVariablesIdentifiers(n : Node,
-                                   referenceToIdentifier : Map[String,String] = Map[String,String](),
-                                   genericNametoId : Map[String,Int] = Map[String,Int]() )
-    : (Map[String,String],Map[String,Int]) = {
-        val (ass,ms) = n.reference() match {
-            case Some(ref) => {
-                getVariableIdentifier(n,genericNametoId) match {
-                    case Some((v,ms2)) => (referenceToIdentifier + (ref -> v),ms2)
-                    case None => (referenceToIdentifier,genericNametoId)
+        if ( ! n.reference().startsWith("_internal_")) {
+            Some(n.reference(), ms)
+        } else {
+            val genericName = generic_name(n)
+            genericName match {
+                case s: String => {
+                    val v = ms.getOrElse(s, 0)
+                    Some(genericName + n.reference(), ms + (s -> (v + 1)))
                 }
             }
-            case _ => (referenceToIdentifier,genericNametoId)
-        }
-        /* set up assVariableNode */
-        n.children.toArray.foldLeft((ass,ms)) {
-            (acc,child) =>
-                setAllVariablesIdentifiers(child,acc._1,acc._2)
         }
     }
 
-    def body(sw: ConfigurationObject.Source, /* user configuration*/
-             n: Node, /* current node to browse with children */
+    /**
+     *
+     * @param n : Get Variable Node
+     * @param buildMap
+     * @return
+     *              Map[String,String] : Correspondence reference -> variableName
+     *              Map[String,Int] : Iterator/index to increment new variable for a RdfNode
+     */
+    def correspondanceVariablesIdentifier(n:Node, buildMap : Map[String,Int]= Map[String,Int]())
+                                       : (Map[String,String],Map[String,Int]) = {
+        val resLoc : (Map[String,String],Map[String,Int]) = n match {
+            case rdf : RdfNode => {
+                val name = generic_name(rdf)
+                val newBuildMap : Map[String,Int] = {
+                    buildMap.get(name) match {
+                        case Some(v: Int) => buildMap + (name -> (v + 1))
+                        case None => buildMap + (name -> 0)
+                    }
+                }
+                (Map(rdf.reference() -> (name + newBuildMap(name).toString)),newBuildMap)
+                }
+            case _ => (Map(),buildMap)
+            }
+
+        n.children.toArray.foldLeft(  resLoc ) {
+            (acc, child) => {
+                val r = correspondanceVariablesIdentifier(child,acc._2)
+                (acc._1 ++ r._1,r._2)
+            }
+         }
+    }
+
+    def body(n: Node, /* current node to browse with children */
              referenceToIdentifier : Map[String,String],
              varIdSire : String = "" /* sire variable */
             )  : String = {
 
-
-        val variableName : String =  n.reference()  match {
-            case Some(id) => referenceToIdentifier(id)
-            case None => varIdSire
+        val variableName : String = n match {
+            case rdf : RdfNode => {
+                referenceToIdentifier.get(rdf.reference()) match {
+                    case Some(value) => value
+                    case None => varIdSire
+            } }
+            case _ => varIdSire
         }
 
         val triplet : String = sparqlNode(n,varIdSire,variableName)
-        triplet + n.children.map( child => body( sw, child,referenceToIdentifier, variableName)).mkString("")
+        triplet + n.children.map( child => body( child,referenceToIdentifier, variableName)).mkString("")
     } 
 }
 

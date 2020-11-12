@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Count</title>
+</head>
+<body>
+<script type="text/javascript" src="../../../js/target/scala-2.13/es-fastopt.js"></script>
+<pre id="demo"></pre>
+</body>
+<!-- https://dbpedia.org/sparql -->
+<!-- http://openstack-192-168-100-31.genouest.org/sparql -->
+<!-- https://bbip.askomics.org/virtuoso/sparql -->
+<!-- http://endpoint-metabolomics.ara.inrae.fr/metabolights/sparql -->
+<script>
+      let config = new EasySparqlStatementConfiguration()
+
+      config.setConfigString(`
+          {
+          "sources" : [{
+          "id"  : "askomics_database",
+          "url" : "http://endpoint-metabolomics.ara.inrae.fr/metabolights/sparql",
+          "typ" : "tps",
+          "method" : "POST_ENCODED",
+          "mimetype" : "json"
+           }]}
+          `)
+
+        async function getEntities() {
+            console.log("PRINT ENTITIES")
+            let query = new EasySparqlEngine(config);
+            let entities =  query
+                             .prefix("asko",IRI("http://askomics.org/internal/"))
+                             .something("entity")
+                                .isA(URI("Class","owl"))
+                                .filter.not.contains("http://www.w3.org/2002/07/owl#")
+                                .filter.not.isBlank
+                             .debug()
+                             .sparql_console()
+                             .select("entity")
+            return entities;
+ //            console.log(entities)
+/*
+             entities.then((res) => {
+                  let json = res.json();
+                  let v1 = query.variable("entity")
+                  console.log(json.results.bindings);
+                  let h2 = document.createElement("h2");
+                  h2.appendChild(document.createTextNode("Entities"));
+                  document.getElementById("demo").appendChild(h2);
+                  let listEntities = [];
+                  for (let r of json.results.bindings) {
+                    document.getElementById("demo").appendChild(document.createTextNode(r[v1].value));
+                    listEntities.push(URI(r[v1].value))
+                  }
+                  return new Promise((resolve, reject) => {
+                        console.log('Initial');
+                            resolve(listEntities);
+                   })
+                }).catch( (error) => {
+                      console.error(" -- catch exception --")
+                      console.error(error)
+                })
+                */
+        }
+
+        getEntities().then( listEntities => {
+            console.log("Hello World !!");
+            console.log("listEntities:"+JSON.stringify(listEntities));
+            for ( entity of listEntities.results.bindings ) {
+             console.log("entity:"+JSON.stringify(entity["entity"]));
+             //   let query = new EasySparqlEngine(config);
+             //   let properties = query.something()
+
+            }
+
+         })
+        .catch( (error) => {
+          console.error(" -- catch exception --")
+          console.error(error)
+        } );
+    </script>
+</html>

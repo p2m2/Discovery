@@ -20,53 +20,160 @@ sealed trait Node {
   }
 }*/
 
-case class Node(var uniqRef : Option[String]) {
+trait Node {
 
   var children: Seq[Node] = Seq[Node]()
 
   def addChildren(n: Node): Node = {
     children = children :+ n
-    return n
+    this
   }
 
-  def references(): Seq[String] = {
+  override def toString() : String = {
+    "NODE "+ { children.length match {
+      case l if l>0 => " ["+children.toString()+"]"
+      case _ => ""
+    } }
+  }
 
-    val l: Seq[String] = uniqRef match {
-      case Some(v) => Seq[String](v)
-      case None => Seq[String]()
+  /* everything by default*/
+  def accept(n: Node): Boolean = {
+    true
+  }
+}
+
+object Node {
+  def references(n : Node ) : List[String] = n match {
+    case rdf : RdfNode => {
+      List(rdf.reference()) ++ n.children.flatMap(c => c match {
+        case rdf: RdfNode => references(rdf)
+        case _ => List("")
+      })
     }
-
-    l ++: children.flatMap(c => c.references())
+    case _ => List("")
   }
 
-  def reference(): Option[String] = uniqRef
 }
 
 /* Filter node */
-sealed trait FilterNode{}
+
 
 /* Node case */
-class Root() extends Node(None) {
+case class Root() extends Node {
+  /* prefix management */
+  var prefixes : Map[String,IRI] = Map[String,IRI]()
+  var defaultGraph : Seq[IRI]    = List[IRI]()
+  var namedGraph : Seq[IRI]      = List[IRI]()
   var lSourcesNodes : Seq[SourcesNode] = List[SourcesNode]()
   var lOperatorsNode : Seq[OperatorNode] = List[OperatorNode]()
+
+  def sourcesNode(n : RdfNode) : Option[SourcesNode] = {
+    lSourcesNodes.find( p => p.n == n )
+  }
+
+  override def toString() : String = {
+    "=======================================================\n"+"ROOT "+ { children.length match {
+      case l if l>0 => " ["+children.toString()+"]"
+      case _ => ""
+    } } + "\n=======================================================\n"
+  }
 }
 
 /* triplets */
-class Something(uniqRef : String) extends Node(Some(uniqRef))
-class SubjectOf(uniqRef : String, var uri : URI) extends Node(Some(uniqRef))
-class ObjectOf(uniqRef : String, var uri : URI) extends Node(Some(uniqRef))
-class LinkTo(uniqRef : String, var term : RdfType) extends Node(Some(uniqRef))
-class LinkFrom(uniqRef : String, var uri : URI) extends Node(Some(uniqRef))
-class Attribute(uniqRef : String, var uri : URI) extends Node(Some(uniqRef))
-class Value(var rdfterm : RdfType) extends Node(None)
+class RdfNode(uniqRef : String) extends Node {
+
+  def reference(): String = uniqRef
+
+  override def toString() : String = {
+
+    this.getClass.getSimpleName+ "@"+uniqRef.toString+ { children.length match {
+      case l if l>0 => " ["+children.toString()+"]"
+      case _ => ""
+    } }
+  }
+
+  /*
+ duplicateWithoutChildren
+*/
+  def duplicateWithoutChildren() : RdfNode = ???
+}
+
+
+class URIRdfNode(concretUniqRef : String,val uri : URI) extends RdfNode(concretUniqRef)
+
+case class Something(concretUniqRef: String) extends RdfNode(concretUniqRef) {
+  override def duplicateWithoutChildren() = Something(concretUniqRef)
+  /* everything by default*/
+  override def accept(n: Node): Boolean = n match {
+    case _ : Something  => false
+    case _ : URIRdfNode => true
+    case _ : FilterNode => true
+    case _ : Value      => true
+    case _              => false
+  }
+}
+
+case class SubjectOf(concretUniqRef : String,uri2 : URI) extends URIRdfNode(concretUniqRef,uri2) {
+  override def duplicateWithoutChildren() = SubjectOf(concretUniqRef,uri)
+}
+
+case class ObjectOf(concretUniqRef : String,uri2 : URI) extends URIRdfNode(concretUniqRef,uri2) {
+  override def duplicateWithoutChildren() = ObjectOf(concretUniqRef,uri)
+}
+
+case class LinkTo(concretUniqRef : String,term : RdfType) extends RdfNode(concretUniqRef) {
+  override def duplicateWithoutChildren() = LinkTo(concretUniqRef,term)
+}
+
+case class LinkFrom(concretUniqRef : String,uri2 : URI) extends URIRdfNode(concretUniqRef,uri2) {
+  override def duplicateWithoutChildren() = LinkFrom(concretUniqRef,uri)
+}
+
+case class Value(var term : RdfType) extends Node {
+
+  override def toString() : String = "VALUE("+term.toString+")"
+
+  override def accept(n: Node): Boolean = n match {
+    case _ : Something  => false
+    case _ : URIRdfNode => true
+    case _              => false
+  }
+}
+
+/* Logic */
+class LogicNode(val sire : Node) extends Node
+case class UnionBlock(s : Node) extends LogicNode(s)
+case class NotBlock(s : Node) extends LogicNode(s)
 
 /* filter */
-class isLiteral() extends FilterNode
-class isURI() extends FilterNode
+class FilterNode(val negation: Boolean) extends Node {
+  override def accept(n: Node): Boolean = n match {
+    case a : FilterNode => true
+    case _ => false
+  }
+}
+case class isBlank(override val negation: Boolean) extends FilterNode(negation) {
+  override def toString() : String = negation.toString() + " isBlank"
+}
 
+case class isLiteral(override val negation: Boolean) extends FilterNode(negation) {
+  override def toString() : String = negation.toString() + " isLiteral"
+}
+
+case class isURI(override val negation: Boolean) extends FilterNode(negation) {
+  override def toString() : String = negation.toString() + " isURI"
+}
+
+case class Contains(value :String,override val negation: Boolean)  extends FilterNode(negation) {
+  override def toString() : String =  negation.toString() + " Contains ("+value+")"
+}
+
+case class Equal(value :String,override val negation: Boolean)  extends FilterNode(negation) {
+  override def toString() : String = negation.toString() + " Equal ("+value+")"
+}
 
 /* SourcesNode */
-class SourcesNode(var n : Node, var sources : Seq[String]) extends Node(n.reference())
+case class SourcesNode(n : RdfNode, sources : Seq[String]) extends Node
 
-/* Operator */
-class OperatorNode(var operator : String ) extends Node(None)
+/* BIND / Operator */
+case class OperatorNode(var operator : String) extends Node

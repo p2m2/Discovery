@@ -3,8 +3,8 @@ package inrae.semantic_web.internal.pm
 import inrae.semantic_web.internal._
 
 object SelectNode  {
-    def setFocus( ref : String, n: Node ) : Array[Node] = n match {
-            case node : Node  if (node.uniqRef == Some(ref)) =>  Array[Node](node)
-            case _                                              => n.children.toArray.flatMap( child => setFocus( ref, child ))
-        }
+    def getNodeWithRef(ref : String, n: Node ) : Array[Node] = n match {
+            case node : RdfNode  if (node.reference() == ref) => Array[Node](node)
+            case _   => n.children.toArray.flatMap( child => getNodeWithRef( ref, child ))
+    }
 }

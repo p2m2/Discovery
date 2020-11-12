@@ -45,7 +45,8 @@ object StatementConfigurationTest extends TestSuite {
       val dbname = "dbpedia"
       val url= "http://test"
       val typ = "tps"
-      configDbpediaBasic.setConfig(ConfigurationObject.StatementConfigurationJson(Seq(ConfigurationObject.Source(dbname,url,typ))))
+      configDbpediaBasic.setConfig(ConfigurationObject.StatementConfigurationJson(
+        Seq(ConfigurationObject.Source(dbname,url,typ))))
       val source = configDbpediaBasic.source("dbpedia")
 
       assert( source.id == dbname )

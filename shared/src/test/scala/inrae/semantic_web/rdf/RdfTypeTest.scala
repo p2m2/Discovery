@@ -8,7 +8,7 @@ object RdfTypeTest extends TestSuite {
     test("Create URI object with localname/namespace") {
       val value: URI = URI("local","namespace")
 
-      assert( value.toString() == "<namespace/local>")
+      assert( value.toString() == "namespace:local")
     }
 
     test("Create URI object with uri form") {

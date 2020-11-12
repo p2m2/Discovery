@@ -8,19 +8,33 @@ import utest.{TestSuite, Tests, assert, test}
 object SparqlGeneratorTest extends TestSuite {
   def tests = Tests {
     test("Sparql Prolog - Variable list empty") {
-      assert(SparqlGenerator.prolog(Seq[String]()) == "SELECT * WHERE {")
+      val v = SparqlGenerator.prolog(Seq[String]()).toLowerCase()
+      assert(v.contains("*"))//assert(SparqlGenerator.prolog(Seq[String]().contains("*")) == "SELECT * WHERE {")
+      assert(v.contains("select"))
+      assert(v.contains("where"))
+      assert(v.contains("{"))
     }
 
     test("Sparql Prolog - One Variable ") {
-      assert(SparqlGenerator.prolog(Seq[String]("test")) == "SELECT ?test WHERE {")
+      val v = SparqlGenerator.prolog(Seq[String]("test")).toLowerCase()
+      assert(v.contains("?test"))
+      assert(v.contains("select"))
+      assert(v.contains("where"))
+      assert(v.contains("{"))
     }
 
     test("Sparql Prolog - Two Variables ") {
-      assert(SparqlGenerator.prolog(Seq[String]("test","test2")) == "SELECT ?test ?test2 WHERE {")
+      val v = SparqlGenerator.prolog(Seq[String]("test","test2")).toLowerCase()
+      assert(v.contains("?test"))
+      assert(v.contains("?test2"))
+      assert(v.contains("select"))
+      assert(v.contains("where"))
+      assert(v.contains("{"))
     }
 
     test("solutionModifier") {
-      assert(SparqlGenerator.solutionModifier() == "}" )
+      val v = SparqlGenerator.solutionModifier()
+      assert(v.contains("}"))
     }
 
     test("solutionModifierSourcesSelection") {

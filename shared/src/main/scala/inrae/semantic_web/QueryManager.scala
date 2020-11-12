@@ -1,7 +1,8 @@
 package inrae.semantic_web
 
+import inrae.semantic_web.QueryPlanner
 import inrae.semantic_web.internal._
-import inrae.semantic_web.rdf.{Literal, RdfType, URI}
+import inrae.semantic_web.rdf.{IRI, Literal, RdfType, URI}
 import inrae.semantic_web.sparql.{QueryResult, _}
 
 import scala.concurrent.{Future, Promise}
@@ -17,9 +18,9 @@ object QueryManager {
    * @param n
    */
 
-  def queryNode(rootRequest : Node, n: Node, config : StatementConfiguration) : Future[QueryResult] = {
-    val (refToIdentifier,_) = pm.SparqlGenerator.setAllVariablesIdentifiers(n)
-    queryVariables(rootRequest,refToIdentifier.values.toSeq,config)
+  def sparql_string(root: Root, n: Node): String = {
+    val (refToIdentifier,_) = pm.SparqlGenerator.correspondanceVariablesIdentifier(n)
+    SparqlQueryBuilder.queryString(root,refToIdentifier,refToIdentifier.values.toSeq,root.prefixes)
   }
 
   def queryPropertyNode(rootRequest : Node, n: Node, config : StatementConfiguration) : Future[Seq[URI]] = {
@@ -27,55 +28,58 @@ object QueryManager {
       Seq[URI]()
     }
   }
-  def queryAll(rootRequest : Node,n: Node, config : StatementConfiguration) : Future[QueryResult] = {
-    queryVariables(rootRequest,rootRequest.references(),config)
+  def queryAll(rootRequest : Root,
+               config : StatementConfiguration) : Future[QueryResult] = {
+    scribe.debug("queryAll")
+    queryVariables(rootRequest,Node.references(rootRequest),config)
   }
 
-  def countNbSolutions(n : Node,  config : StatementConfiguration) : Future[Option[RdfType]] = {
+  def countNbSolutions(root : Root,  config : StatementConfiguration) : Future[Int] = {
+    scribe.debug("countNbSolutions")
 
     if (config.sources().length == 0) {
       throw new Exception(" ** None sources available ** ")
     } else if (config.sources().length == 1) {
       val source = config.sources()(0)
-      val (refToIdentifier, _) = pm.SparqlGenerator.setAllVariablesIdentifiers(n)
-      val query = pm.SparqlGenerator.prologSourcesSelection()  +
-        pm.SparqlGenerator.body(source, n, refToIdentifier) +
+      val (refToIdentifier, _) = pm.SparqlGenerator.correspondanceVariablesIdentifier(root)
+      val varCount = "count"
+     // val prolog = pm.SparqlGenerator.prologCountSelection(varCount,refToIdentifier(Node.references(n)))
+     val prolog = pm.SparqlGenerator.prologCountSelection(varCount)
+
+
+      val query =
+        pm.SparqlGenerator.prefixes(root.prefixes) +
+        prolog +
+        pm.SparqlGenerator.body(root, refToIdentifier) +
         pm.SparqlGenerator.solutionModifier()
 
       val res: Future[QueryResult] = QueryRunner(source).query(query)
-    /*
-      Future {
-        val y = res.onComplete {
-          case Success(count) => count.get.row(0).key("COUNT")
-          case _ => None
-        }
-        y
-      }*/
-      res.map(v => v.get.row(0).key("COUNT"))
+      res.map(v => v.json("results")("bindings")(0)(varCount).toString().toInt)
     } else {
       // todo query planner
+      scribe.error("QueryPlanner is not available .")
       throw new Exception("not manage.......")
     }
   }
 
-  def queryVariables(n: Node, listVariables : Seq[String], config : StatementConfiguration) : Future[QueryResult] = {
+  def queryVariables(root: Root,
+                     listVariables : Seq[String],
+                     config : StatementConfiguration) : Future[QueryResult] = {
+    scribe.debug("queryVariables")
     if (config.sources().length == 0) {
       throw new Exception(" ** None sources available ** ")
     } else if (config.sources().length == 1) {
-      queryOnSource(n,listVariables,config.sources()(0))
+      val (refToIdentifier,_) = pm.SparqlGenerator.correspondanceVariablesIdentifier(root)
+
+      val query : String = SparqlQueryBuilder.queryString(root,refToIdentifier, listVariables, root.prefixes)
+      scribe.debug(query)
+      QueryRunner(config.sources()(0)).query(query)
     } else {
-      // todo query planner
-        throw new Exception("not manage.......")
+
+      val plan = QueryPlanner.buildPlanning(root)//,listVariables,config)
+      val plan_results_set = QueryPlanner.ordonnanceBySource(plan,root)
+      QueryPlannerExecutor.executePlanning(root,plan_results_set,listVariables,config,root.prefixes)
     }
-  }
-
-  def queryOnSource(n: Node, listVariables : Seq[String],  source : ConfigurationObject.Source): Future[QueryResult] = {
-    val (refToIdentifier,_) = pm.SparqlGenerator.setAllVariablesIdentifiers(n)
-    val query = pm.SparqlGenerator.prolog(listVariables) + "\n" +
-                pm.SparqlGenerator.body(source, n, refToIdentifier) +
-                pm.SparqlGenerator.solutionModifier()
-
-    QueryRunner(source).query(query)
   }
 
   /**
@@ -84,36 +88,48 @@ object QueryManager {
    * @param source
    * @return
    */
-  def setUpSourcesNode(n: Node, config : StatementConfiguration): Future[Node] = {
-    println("---------------- setUpSourcesNode ----------------------")
+  def setUpSourcesNode(n: Node,
+                       config : StatementConfiguration,
+                       prefixes : Map[String,IRI]): Future[Option[SourcesNode]] = {
+
     n match {
-      case _ : SubjectOf | _: ObjectOf | _: LinkTo | _: LinkFrom =>
-        val query = pm.SparqlGenerator.prologSourcesSelection() +
-                    pm.SparqlGenerator.sparqlNode(n,"varUp","varCur") +
-                    pm.SparqlGenerator.solutionModifierSourcesSelection()
+      case s : Something =>
+        /* Something is Everywhere !! */
+        Future {
+          Some(SourcesNode(s,config.sources().map( _.id )))
+        }
+      case r : RdfNode =>
+        val query = pm.SparqlGenerator.prefixes(prefixes) + "\n" +
+          pm.SparqlGenerator.prologSourcesSelection() + "\n" +
+          pm.SparqlGenerator.sparqlNode(r,"varUp","varCur") +
+          pm.SparqlGenerator.solutionModifierSourcesSelection()
 
-        //println(" ----- query --------")
-        //println(query)
-
+        scribe.debug(query)
 
         val nbRowResultsBySource : Seq[Future[Boolean]] = {
           config.sources().map(
               source => QueryRunner(source).query(query)
             ).map( {
-              ( _.map(rr => rr.get.rows.length>0))
+              ( _.map(rr => rr.json("results")("bindings").arr.length>0))
             })
           }
+
         val y2 = Future.sequence(nbRowResultsBySource)
-        val y3 = Promise[Node]()
+        val y3 = Promise[Option[SourcesNode]]()
 
         y2.onComplete {
-          case Success(lCheck) => y3 success (new SourcesNode(n, lCheck.zip(config.sources()).filter( _._1).map( _._2.id)))
-          case _ => y3 success (n)
+          case Success(lCheck) => {
+            y3 success Some(SourcesNode(r, lCheck.zip(config.sources()).filter( _._1).map( _._2.id)))
+          }
+          case msg => {
+            System.err.println(msg)
+            y3 success (None)
+          }
         }
 
         y3.future
 
-      case _ => Future(n)
+      case _ => Future(None)
     }
   }
 }

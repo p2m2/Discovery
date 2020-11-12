@@ -26,7 +26,9 @@ sbt run
 sbt package
 sbt test
 sbt fastOptJS => generer le JS
+sbt esJVM/testOnly inrae.semantic_web.QueryPlannerTest
 ```
 
 Vscode support : Metals plugin
 npm install source-map-support
+

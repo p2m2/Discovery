@@ -13,6 +13,11 @@ import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
 
 
 object ConfigurationObject {
+  /* sources configuration */
+  case class StatementConfigurationJson(
+                                         sources : Seq[Source]
+                                       )
+
   case class Source(
                      id:String, /* identify the source endpoint */
                      url: String, /* url access */
@@ -24,8 +29,11 @@ object ConfigurationObject {
                      mimetype : String = "json",
                    )
 
-  /* sources configuration */
-  case class StatementConfigurationJson(sources : Seq[Source])
+  case class Prefixes(list : Map[String,String])
+
+  object Prefixes{
+    implicit val rw: RW[Prefixes] = macroRW
+  }
 
   object Source{
     implicit val rw: RW[Source] = macroRW
@@ -39,7 +47,9 @@ object ConfigurationObject {
 @JSExportTopLevel(name="EasySparqlStatementConfiguration")
 class StatementConfiguration {
 
-  var conf: ConfigurationObject.StatementConfigurationJson = new ConfigurationObject.StatementConfigurationJson(Seq[ConfigurationObject.Source]())
+  var conf: ConfigurationObject.StatementConfigurationJson =
+    new ConfigurationObject.StatementConfigurationJson(
+      Seq[ConfigurationObject.Source]())
 
   /**
    * Set a config using class definition

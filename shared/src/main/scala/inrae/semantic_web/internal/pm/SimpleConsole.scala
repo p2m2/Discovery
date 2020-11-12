@@ -41,11 +41,12 @@ object SimpleConsole  {
     def Libelle( n: Node ) : String = {
         n match {
             case _ : Root           => "Root"
-            case node : Something   => "Something ("+ node.uniqRef +")"
-            case node : SubjectOf   => "SubjectOf ("+node.uri.toString +" , " + node.uniqRef +")"
-            case node : ObjectOf    => "ObjectOf ("+node.uri.toString +" , " + node.uniqRef +")"
+            case node : Something   => "Something ("+ node.reference() +")"
+            case node : SubjectOf   => "SubjectOf ("+node.uri.toString +" , " + node.reference() +")"
+            case node : ObjectOf    => "ObjectOf ("+node.uri.toString +" , " + node.reference() +")"
             case node : SourcesNode => "SourceNode -> " + Libelle(node.n)
-            case node : Value       => "Value ("+node.rdfterm.toString +" , " + node.uniqRef +")"
+            case node : Value       => "Value ("+node.term.toString +")"
+            case node : FilterNode  => "FILTER "+ node.toString()
             case v                  => "--- Unkown ---"+v.toString
         }
     }
