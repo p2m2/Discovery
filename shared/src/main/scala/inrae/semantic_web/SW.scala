@@ -21,6 +21,8 @@ case class SW(var config: StatementConfiguration) {
 
   private val version : String = "0.0.1"
 
+  println(" ---- version :"+version + " -----------" )
+
   this.prefix("owl",IRI("http://www.w3.org/2002/07/owl#"))
   this.prefix("rdf",IRI("http://www.w3.org/1999/02/22-rdf-syntax-ns#"))
   this.prefix("rdfs",IRI("http://www.w3.org/2000/01/rdf-schema#"))

@@ -3,10 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <title>Count</title>
+
+    <style>
+        body {
+          background-color: linen;
+        }
+
+        h1 {
+          color: maroon;
+          margin-left: 40px;
+        }
+
+        .boxed {
+           border: 1px solid green ;
+         }
+    </style>
 </head>
+
 <body>
-<script type="text/javascript" src="../../../js/target/scala-2.13/es-fastopt.js"></script>
+<script type="text/javascript" src="../../../js/target/scala-2.13/es-opt.js"></script>
 <pre id="demo"></pre>
+
+<div id="askomics_code" class="boxed">
+    This text is enclosed in a box.
+</div>
+
 </body>
 <!-- https://dbpedia.org/sparql -->
 <!-- http://openstack-192-168-100-31.genouest.org/sparql -->
@@ -15,6 +36,8 @@
 <script>
       let config = new EasySparqlStatementConfiguration()
 
+      document.getElementById("askomics_code").appendChild(document.createTextNode("TOTO<br/>"));
+      document.getElementById("askomics_code").appendChild(document.createTextNode("TATA<br/>"));
       config.setConfigString(`
           {
           "sources" : [{
@@ -67,6 +90,7 @@
         getEntities().then( listEntities => {
             console.log("Hello World !!");
             console.log("listEntities:"+JSON.stringify(listEntities));
+
             for ( entity of listEntities.results.bindings ) {
              console.log("entity:"+JSON.stringify(entity["entity"]));
              //   let query = new EasySparqlEngine(config);
