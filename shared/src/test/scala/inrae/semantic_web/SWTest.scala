@@ -8,7 +8,6 @@ import scala.language.postfixOps
 import scala.util.{Failure, Success}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-//import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import scala.concurrent.{Await,blocking}
 import scala.concurrent.duration._
 
@@ -36,7 +35,7 @@ object SWTest extends TestSuite {
           |   "mimetype" : "json"
           | }]}
           |""".stripMargin)
-      val query = new SW(config)
+      val query = SW(config)
 
       Future {
         query.something("h1")
@@ -44,7 +43,7 @@ object SWTest extends TestSuite {
           .isSubjectOf(URI("http://www.w3.org/2002/07/owl#sameAs"))
           .select(List("h1"))
           .onComplete {
-            case Success(result) => println(result.get); assert(true)
+            case Success(result) => println(result); assert(true)
             case Failure(exception) => println(exception); assert(false)
           }
       }

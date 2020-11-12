@@ -33,14 +33,15 @@ case class Request(var url : String) {
         val qr2 = mimetype match {
           case "json" => p success QueryResult(xhr.responseText, mimetype)
           case _ =>
-            p.failure(new js.JavaScriptException("[Configuration] Parser not available for this MIME type : "+mimetype))
+            p.failure(js.JavaScriptException("[Configuration] Parser not available for this MIME type : "+mimetype))
         }
       } else
-        p.failure(new js.JavaScriptException(xhr))
+        p.failure(js.JavaScriptException(xhr))
     }
 
     xhr.onerror = { e: dom.ErrorEvent =>
-      p.failure(new js.JavaScriptException(xhr))
+      scribe.error(e.toString)
+      p.failure(js.JavaScriptException(xhr))
     }
 
     xhr.send(data)
@@ -52,6 +53,7 @@ case class Request(var url : String) {
 
     xhr.open("POST", url);
     xhr.setRequestHeader("Content-Type", "application/sparql-query")
+    //xhr.setRequestHeader("Access-Control-Allow-Origin", "*")
     xhr.setRequestHeader("Accept", mime(mimetype))
     val data = addQueryAsData(query)
     send(xhr,data,mimetype)
@@ -62,6 +64,7 @@ case class Request(var url : String) {
 
     xhr.open("GET", url+"?"+addQueryAsData(query));
     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded")
+    //xhr.setRequestHeader("Access-Control-Allow-Origin", "*")
     xhr.setRequestHeader("Accept", mime(mimetype))
 
     send(xhr,"",mimetype)
@@ -72,6 +75,7 @@ case class Request(var url : String) {
 
     xhr.open("POST", url, true);
     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded")
+    //xhr.setRequestHeader("Access-Control-Allow-Origin", "*")
     xhr.setRequestHeader("Accept", mime(mimetype))
 
     val data = addQueryAsData(query)

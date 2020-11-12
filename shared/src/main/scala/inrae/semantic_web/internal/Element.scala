@@ -28,11 +28,17 @@ trait Node {
     children = children :+ n
     this
   }
+
   override def toString() : String = {
     "NODE "+ { children.length match {
       case l if l>0 => " ["+children.toString()+"]"
       case _ => ""
     } }
+  }
+
+  /* everything by default*/
+  def accept(n: Node): Boolean = {
+    true
   }
 }
 
@@ -97,6 +103,14 @@ class URIRdfNode(concretUniqRef : String,val uri : URI) extends RdfNode(concretU
 
 case class Something(concretUniqRef: String) extends RdfNode(concretUniqRef) {
   override def duplicateWithoutChildren() = Something(concretUniqRef)
+  /* everything by default*/
+  override def accept(n: Node): Boolean = n match {
+    case _ : Something  => false
+    case _ : URIRdfNode => true
+    case _ : FilterNode => true
+    case _ : Value      => true
+    case _              => false
+  }
 }
 
 case class SubjectOf(concretUniqRef : String,uri2 : URI) extends URIRdfNode(concretUniqRef,uri2) {
@@ -115,18 +129,48 @@ case class LinkFrom(concretUniqRef : String,uri2 : URI) extends URIRdfNode(concr
   override def duplicateWithoutChildren() = LinkFrom(concretUniqRef,uri)
 }
 
-case class Value(var term : RdfType) extends Node
+case class Value(var term : RdfType) extends Node {
+
+  override def toString() : String = "VALUE("+term.toString+")"
+
+  override def accept(n: Node): Boolean = n match {
+    case _ : Something  => false
+    case _ : URIRdfNode => true
+    case _              => false
+  }
+}
 
 /* Logic */
 class LogicNode(val sire : Node) extends Node
 case class UnionBlock(s : Node) extends LogicNode(s)
-case class Not(s : Node) extends LogicNode(s)
+case class NotBlock(s : Node) extends LogicNode(s)
 
 /* filter */
-sealed trait FilterNode
-case class isLiteral() extends FilterNode
-case class isURI() extends FilterNode
-case class contains(value :String)  extends FilterNode
+class FilterNode(val negation: Boolean) extends Node {
+  override def accept(n: Node): Boolean = n match {
+    case a : FilterNode => true
+    case _ => false
+  }
+}
+case class isBlank(override val negation: Boolean) extends FilterNode(negation) {
+  override def toString() : String = negation.toString() + " isBlank"
+}
+
+case class isLiteral(override val negation: Boolean) extends FilterNode(negation) {
+  override def toString() : String = negation.toString() + " isLiteral"
+}
+
+case class isURI(override val negation: Boolean) extends FilterNode(negation) {
+  override def toString() : String = negation.toString() + " isURI"
+}
+
+case class Contains(value :String,override val negation: Boolean)  extends FilterNode(negation) {
+  override def toString() : String =  negation.toString() + " Contains ("+value+")"
+}
+
+case class Equal(value :String,override val negation: Boolean)  extends FilterNode(negation) {
+  override def toString() : String = negation.toString() + " Equal ("+value+")"
+}
 
 /* SourcesNode */
 case class SourcesNode(n : RdfNode, sources : Seq[String]) extends Node

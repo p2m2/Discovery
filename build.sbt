@@ -35,11 +35,13 @@ lazy val es =
       //scalaJSUseMainModuleInitializer := true,
       //requireJsDomEnv in Test := true,
       //npmDependencies in Compile += "jsdom" -> "16.4.0",
+      libraryDependencies += "org.scala-lang.modules" %%% "scala-parser-combinators" % "1.1.2",
       libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "1.1.0",
       libraryDependencies +=  "org.scalaj" %% "scalaj-http" % "2.4.2",
       jsEnv := new org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv(),
       ) // defined in sbt-scalajs-crossproject
     .jvmSettings(
+      libraryDependencies += "org.scala-lang.modules" %% "scala-parser-combinators" % "1.1.2",
       libraryDependencies += "org.scala-js" %% "scalajs-stubs" % "1.0.0" % "provided",
       //libraryDependencies += "ch.qos.logback"          %  "logback-classic" % "1.2.3",
       libraryDependencies += "org.scala-js" %% "scalajs-stubs" % "1.0.0" % "provided",

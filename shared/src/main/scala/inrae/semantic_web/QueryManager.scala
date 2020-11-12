@@ -20,7 +20,7 @@ object QueryManager {
 
   def sparql_string(root: Root, n: Node): String = {
     val (refToIdentifier,_) = pm.SparqlGenerator.correspondanceVariablesIdentifier(n)
-    SparqlQueryBuilder.queryString(root,refToIdentifier.values.toSeq,root.prefixes)
+    SparqlQueryBuilder.queryString(root,refToIdentifier,refToIdentifier.values.toSeq,root.prefixes)
   }
 
   def queryPropertyNode(rootRequest : Node, n: Node, config : StatementConfiguration) : Future[Seq[URI]] = {
@@ -30,18 +30,18 @@ object QueryManager {
   }
   def queryAll(rootRequest : Root,
                config : StatementConfiguration) : Future[QueryResult] = {
+    scribe.debug("queryAll")
     queryVariables(rootRequest,Node.references(rootRequest),config)
   }
 
-  def countNbSolutions(root : Root,  config : StatementConfiguration) : Future[Option[RdfType]] = {
+  def countNbSolutions(root : Root,  config : StatementConfiguration) : Future[Int] = {
+    scribe.debug("countNbSolutions")
 
     if (config.sources().length == 0) {
       throw new Exception(" ** None sources available ** ")
     } else if (config.sources().length == 1) {
       val source = config.sources()(0)
       val (refToIdentifier, _) = pm.SparqlGenerator.correspondanceVariablesIdentifier(root)
-      scribe.warn("===================================================================")
-      scribe.warn(root.toString)
       val varCount = "count"
      // val prolog = pm.SparqlGenerator.prologCountSelection(varCount,refToIdentifier(Node.references(n)))
      val prolog = pm.SparqlGenerator.prologCountSelection(varCount)
@@ -53,10 +53,8 @@ object QueryManager {
         pm.SparqlGenerator.body(root, refToIdentifier) +
         pm.SparqlGenerator.solutionModifier()
 
-      scribe.info(query)
-
       val res: Future[QueryResult] = QueryRunner(source).query(query)
-      res.map(v => v.get.row(0).key(varCount))
+      res.map(v => v.json("results")("bindings")(0)(varCount).toString().toInt)
     } else {
       // todo query planner
       scribe.error("QueryPlanner is not available .")
@@ -67,10 +65,14 @@ object QueryManager {
   def queryVariables(root: Root,
                      listVariables : Seq[String],
                      config : StatementConfiguration) : Future[QueryResult] = {
+    scribe.debug("queryVariables")
     if (config.sources().length == 0) {
       throw new Exception(" ** None sources available ** ")
     } else if (config.sources().length == 1) {
-      val query : String = SparqlQueryBuilder.queryString(root,listVariables,root.prefixes)
+      val (refToIdentifier,_) = pm.SparqlGenerator.correspondanceVariablesIdentifier(root)
+
+      val query : String = SparqlQueryBuilder.queryString(root,refToIdentifier, listVariables, root.prefixes)
+      scribe.debug(query)
       QueryRunner(config.sources()(0)).query(query)
     } else {
 
@@ -79,10 +81,6 @@ object QueryManager {
       QueryPlannerExecutor.executePlanning(root,plan_results_set,listVariables,config,root.prefixes)
     }
   }
-
-  //def executePlan() : Future[QueryResult] = {
-
-  //}
 
   /**
    * Assign a list of source (existence of a remote persistence) if possible
@@ -112,7 +110,7 @@ object QueryManager {
           config.sources().map(
               source => QueryRunner(source).query(query)
             ).map( {
-              ( _.map(rr => rr.get.rows.length>0))
+              ( _.map(rr => rr.json("results")("bindings").arr.length>0))
             })
           }
 

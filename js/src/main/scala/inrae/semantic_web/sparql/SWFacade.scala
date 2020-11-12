@@ -3,16 +3,44 @@ package inrae.semantic_web.sparql
 import inrae.semantic_web.{SW, StatementConfiguration}
 import inrae.semantic_web.internal.{Node, ObjectOf, Something, SubjectOf, Value}
 import inrae.semantic_web.rdf.{IRI, URI}
+import ujson.IndexedValue.False
 
 import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
 import scala.scalajs.js.JSConverters._
 import scala.scalajs.js._
+import scala.scalajs._
+
+@JSExportTopLevel("FilterIncrement")
+class FilterIncrement(swf: SWFacade)  {
+  var negation = false
+
+  @JSExport
+  def isLiteral: SWFacade = { swf.sw.filter.isLiteral ; swf }
+
+  @JSExport
+  def isUri: SWFacade = { swf.sw.filter.isUri ; swf }
+
+  @JSExport
+  def isBlank: SWFacade = { swf.sw.filter.isBlank ; swf }
+
+  @JSExport
+  def contains(l:String): SWFacade = { swf.sw.filter.contains(l) ; swf }
+
+  @JSExport
+  def not : FilterIncrement = { swf.sw.filter.not ; this }
+}
 
 @JSExportTopLevel(name="EasySparqlEngine")
 class SWFacade(var config: StatementConfiguration) {
   implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
 
-  var sw = new SW(config)
+  implicit def string2Uri(uri: String) = URI(uri)
+  implicit def string2Iri(uri: String) = IRI(uri)
+
+  var sw = SW(config)
+
+  @JSExport
+  val filter = new FilterIncrement(this)
 
   @JSExport
   def help() : SWFacade = { sw.help() ; this }
@@ -47,6 +75,9 @@ class SWFacade(var config: StatementConfiguration) {
   def isLinkTo( uri : URI , ref : String = sw.getUniqueRef() ) : SWFacade = { sw.isLinkTo(uri,ref); this }
 
   @JSExport
+  def isA( uri : URI ) : SWFacade = { sw.isA(uri); this }
+
+  @JSExport
   def isLinkFrom( uri : URI , ref : String = sw.getUniqueRef() ) : SWFacade = { sw.isLinkFrom(uri,ref); this }
   /* set */
   @JSExport
@@ -59,13 +90,16 @@ class SWFacade(var config: StatementConfiguration) {
   def sparql_console() : SWFacade = { sw.sparql_console() ; this }
 
   @JSExport
-  def select(lRef: String*): Promise[QueryResult] = { sw.select(lRef).toJSPromise }
+  def variable(reference: String) : String = sw.variable(reference)
+
+  @JSExport
+  def select(lRef: String*): Promise[Dynamic] = { sw.select(lRef).map(x => scala.scalajs.js.JSON.parse(x.toString())).toJSPromise }
 
   @JSExport
   def count(): Promise[Int] = { sw.count().toJSPromise }
 
   @JSExport
-  def findClassesOf(uri:URI = URI("")): Promise[Seq[Option[URI]]] = { sw.findClassesOf().toJSPromise }
+  def findClassesOf(uri:URI = URI("")): Promise[Seq[URI]] = { sw.findClassesOf().toJSPromise }
 
   @JSExport
   def findObjectPropertiesOf(motherClassProperties: URI = URI("") ) : Promise[Seq[URI]] = {

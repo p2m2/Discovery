@@ -20,7 +20,7 @@ object SparqlGenerator  {
         if (listVariables.length == 0 ) {
             "SELECT * WHERE {"
         } else
-            "SELECT" + listVariables.foldLeft(" ")( (acc,identifier) => acc+"?"+identifier+" ") + "WHERE {"
+            "SELECT DISTINCT" + listVariables.foldLeft(" ")( (acc,identifier) => acc+"?"+identifier+" ") + "\nWHERE {"
     }
 
     def solutionModifier () : String = {
@@ -43,14 +43,29 @@ object SparqlGenerator  {
     }
 
     def sparqlNode(n: Node,varIdSire : String, variableName : String) : String = {
-        n match {
-            case node : SubjectOf          => "?" + varIdSire + " " +
+        scribe.debug(varIdSire+" - "+variableName)
+         n match {
+            case node : SubjectOf          => "\t?" + varIdSire + " " +
               node.uri.toString() + " " + "?"+ variableName + " .\n"
-            case node : ObjectOf           => "?" + variableName + " " +
+            case node : ObjectOf           => "\t?" + variableName + " " +
               node.uri.toString() + " " + "?"+ varIdSire + " .\n"
-            case node : LinkTo           => "?"+ varIdSire + " " + "?" + variableName + " " + node.term.toString() + " .\n"
+            case node : LinkTo           => "\t?"+ varIdSire + " " + "?" + variableName + " " + node.term.toString() + " .\n"
             case node : LinkFrom           => node.uri.toString() + " " + "?" + variableName + " " + "?"+ varIdSire + " .\n"
-            case node : Value              => "VALUES ?" +varIdSire+ " { " + node.term.toString() + " }\n"
+            case node : Value              => "VALUES ?" +varIdSire+ " { " + node.term.toString() + " }.\n"
+            case node : FilterNode         => "filter ( " + {
+                node.negation match {
+                    case true => "!"
+                    case false => ""
+                }
+            } + {
+                node match {
+                    case n : Contains           => "contains(str(" + "?" +varIdSire + "), \""+ n.value + "\")"
+                    case n : isBlank            => "isBlank(" + "?" +varIdSire + ")"
+                    case n : isURI              => "isURI(" + "?" +varIdSire + ")"
+                    case n : isLiteral          => "isLiteral(" + "?" +varIdSire + ")"
+                    case _ => throw new Exception("SparqlGenerator::sparqlNode . [Devel error] Node undefined ["+n.toString()+"]")
+                }
+            } + " )\n"
             case _                         => ""
         }
     }
@@ -137,7 +152,6 @@ object SparqlGenerator  {
         }
 
         val triplet : String = sparqlNode(n,varIdSire,variableName)
-
         triplet + n.children.map( child => body( child,referenceToIdentifier, variableName)).mkString("")
     } 
 }

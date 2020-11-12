@@ -2,7 +2,7 @@ package inrae.semantic_web
 
 import java.util.UUID.randomUUID
 
-import inrae.semantic_web.internal.{Node, Root, Something}
+import inrae.semantic_web.internal.{Node, Root, Something, pm}
 import inrae.semantic_web.QueryPlanner.{AND_RESULTS_SET, INTERSECTION_RESULTS_SET, ORDONNANCEMENT_RESULTS_SET, OR_RESULTS_SET}
 import inrae.semantic_web.rdf.IRI
 import inrae.semantic_web.sparql.{QueryResult, _}
@@ -89,8 +89,10 @@ object QueryPlannerExecutor {
           var r :Root = Root()
           r.addChildren(buildRootNode(root,lbgp))
           scribe.info(r.toString())
+          val refToIdentifier = pm.SparqlGenerator.correspondanceVariablesIdentifier(root)
+            ._1.view.filterKeys( k => listVariables.contains(k) ).toMap
           val qr = QueryRunner(config.source(source)).query(
-            SparqlQueryBuilder.queryString(r,listVariables,prefixes)
+            SparqlQueryBuilder.queryString(r,refToIdentifier,refToIdentifier.values.toSeq,prefixes)
           )
           println(qr)
         }
