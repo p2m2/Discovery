@@ -290,7 +290,6 @@ case class SW(var config: StatementConfiguration) {
       case _ => state
     }).select(List("_esp___property"))
       .map( json => {
-        println(json)
         json("results")("bindings").arr.map(
           row => SparqlBuilder.createUri(row("_esp___property")("value"))
         ).toSeq

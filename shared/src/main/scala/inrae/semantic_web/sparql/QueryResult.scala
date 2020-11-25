@@ -22,7 +22,7 @@ case class QueryResult(results: String, mimetype : String = "json") {
   }
 
   def v2Ident(v2k : Map[String,String]) = {
-
+    scribe.debug(v2k.toString)
     val l = json("head")("vars").arr.map(v => {
       val v2 = v.toString().replace("\"","")
       v2k.find( v2 == _._2 ).map( x => x._1 ) match {
@@ -36,17 +36,17 @@ case class QueryResult(results: String, mimetype : String = "json") {
       case a => Nil
     })
 
-    json("results")("bindings").arr.foreach(kv => kv match {
+    val records = json("results")("bindings").arr.map(kv => kv match {
       case o: ujson.Obj => o.obj.map(
         kv2 => {
-          o.obj.update(v2k.find( _._2 == kv2._1).map( _._1 ) match {
-            case Some(s) => s
-            case _ => kv2._1
-          },kv2._2)
-          o.obj.remove(kv2._1)
-        }
-      )
+            v2k.find( _._2 == kv2._1).map( _._1 ) match {
+              case Some(s) => (s,kv2._2)
+              case _ => (kv2._1,kv2._2)
+            }
+        })
       case _ => Nil
     })
+    json("results")("bindings").arr.clear()
+    records.map( r => json("results")("bindings").arr.append(r) )
   }
 }

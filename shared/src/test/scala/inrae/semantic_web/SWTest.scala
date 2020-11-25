@@ -102,7 +102,7 @@ object SWTest extends TestSuite {
     }
 
     test("findTypeOf - rdf:type") {
-      val query = new SW(config)
+      val query = SW(config)
 
       Future {
         query.something("h1")
@@ -116,7 +116,7 @@ object SWTest extends TestSuite {
     }
  */
     test("findObjectPropertiesOf") {
-      val query = new SW(config)
+      val query = SW(config)
 
       Future {
         query.something("h1")
