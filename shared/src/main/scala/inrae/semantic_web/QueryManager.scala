@@ -54,7 +54,10 @@ object QueryManager {
         pm.SparqlGenerator.solutionModifier()
 
       val res: Future[QueryResult] = QueryRunner(source).query(query)
-      res.map(v => v.json("results")("bindings")(0)(varCount).toString().toInt)
+      res.map(v => {
+        val r = v.json("results")("bindings")(0)(varCount)
+        Literal(r("value").toString,r("datatype").toString).toInt()
+      })
     } else {
       // todo query planner
       scribe.error("QueryPlanner is not available .")

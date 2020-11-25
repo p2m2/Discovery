@@ -49,7 +49,7 @@ case class SW(var config: StatementConfiguration) {
 
   val filter : FilterIncrement = new FilterIncrement()
 
-  scribe.Logger.root.clearHandlers().clearModifiers().withHandler(minimumLevel = Some(Level.Debug)).replace()
+  scribe.Logger.root.clearHandlers().clearModifiers().withHandler(minimumLevel = Some(Level.Warn)).replace()
 
   def help() : SW = {
     println(" ---------------- SW "+version+" ---------------------------")

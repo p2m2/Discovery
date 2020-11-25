@@ -64,6 +64,9 @@ case class Literal(var value : String, var datatype : String = "xsd:string", var
 
   override def toString() : String = value+"^^"+datatype
 
+  def toInt() : Int = value.toInt
+  def toBoolean() : Boolean = value.toBoolean
+
   def sparql() : String = toString
 }
 
