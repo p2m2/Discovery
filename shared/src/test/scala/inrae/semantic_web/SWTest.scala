@@ -14,6 +14,18 @@ import scala.concurrent.duration._
 object SWTest extends TestSuite {
 
   def tests = Tests {
+    val config: StatementConfiguration = new StatementConfiguration()
+    config.setConfigString(
+      """
+        |{
+        | "sources" : [{
+        |   "id"  : "dbpedia",
+        |   "url" : "https://dbpedia.org/sparql",
+        |   "typ" : "tps",
+        |   "method" : "GET",
+        |   "mimetype" : "json"
+        | }]}
+        |""".stripMargin)
 
     test("Create a simple query") {
       val config: StatementConfiguration = new StatementConfiguration()
@@ -23,18 +35,6 @@ object SWTest extends TestSuite {
     }
 
     test("Create a query finding a subject") {
-      val config: StatementConfiguration = new StatementConfiguration()
-      config.setConfigString(
-        """
-          |{
-          | "sources" : [{
-          |   "id"  : "dbpedia",
-          |   "url" : "https://dbpedia.org/sparql",
-          |   "typ" : "tps",
-          |   "method" : "GET",
-          |   "mimetype" : "json"
-          | }]}
-          |""".stripMargin)
       val query = SW(config)
 
       Future {
@@ -50,18 +50,6 @@ object SWTest extends TestSuite {
     }
     /*
     test("debug") {
-      val config: StatementConfiguration = new StatementConfiguration()
-      config.setConfigString(
-        """
-          |{
-          | "sources" : [{
-          |   "id"  : "dbpedia",
-          |   "url" : "https://dbpedia.org/sparql",
-          |   "typ" : "tps",
-          |   "method" : "GET",
-          |   "mimetype" : "json"
-          | }]}
-          |""".stripMargin)
       val query = new SW(config)
 
       query.something("h1")
@@ -70,18 +58,6 @@ object SWTest extends TestSuite {
     }
 */
     test("count") {
-      val config: StatementConfiguration = new StatementConfiguration()
-      config.setConfigString(
-        """
-          |{
-          | "sources" : [{
-          |   "id"  : "dbpedia",
-          |   "url" : "https://dbpedia.org/sparql",
-          |   "typ" : "tps",
-          |   "method" : "POST_ENCODED",
-          |   "mimetype" : "json"
-          | }]}
-          |""".stripMargin)
       val query = new SW(config)
       query.something("h1") //http://rdf.ebi.ac.uk/terms/chembl#BioComponent
         .isSubjectOf(URI("http://dbpedia.org/ontology/deathDate"))
@@ -99,18 +75,6 @@ object SWTest extends TestSuite {
     }
 /*
     test("findTypeOf") {
-      val config: StatementConfiguration = new StatementConfiguration()
-      config.setConfigString(
-        """
-          |{
-          | "sources" : [{
-          |   "id"  : "dbpedia",
-          |   "url" : "https://dbpedia.org/sparql",
-          |   "typ" : "tps",
-          |   "method" : "GET",
-          |   "mimetype" : "json"
-          | }]}
-          |""".stripMargin)
       val query = new SW(config)
 
       Future {
@@ -124,18 +88,6 @@ object SWTest extends TestSuite {
       }
     }
     test("findTypeOf - owl:Class") {
-      val config: StatementConfiguration = new StatementConfiguration()
-      config.setConfigString(
-        """
-          |{
-          | "sources" : [{
-          |   "id"  : "dbpedia",
-          |   "url" : "https://dbpedia.org/sparql",
-          |   "typ" : "tps",
-          |   "method" : "GET",
-          |   "mimetype" : "json"
-          | }]}
-          |""".stripMargin)
       val query = new SW(config)
 
       Future {
@@ -150,18 +102,6 @@ object SWTest extends TestSuite {
     }
 
     test("findTypeOf - rdf:type") {
-      val config: StatementConfiguration = new StatementConfiguration()
-      config.setConfigString(
-        """
-          |{
-          | "sources" : [{
-          |   "id"  : "dbpedia",
-          |   "url" : "https://dbpedia.org/sparql",
-          |   "typ" : "tps",
-          |   "method" : "GET",
-          |   "mimetype" : "json"
-          | }]}
-          |""".stripMargin)
       val query = new SW(config)
 
       Future {
@@ -174,30 +114,40 @@ object SWTest extends TestSuite {
           }
       }
     }
+ */
     test("findObjectPropertiesOf") {
-      val config: StatementConfiguration = new StatementConfiguration()
-      config.setConfigString(
-        """
-          |{
-          | "sources" : [{
-          |   "id"  : "dbpedia",
-          |   "url" : "https://dbpedia.org/sparql",
-          |   "typ" : "tps",
-          |   "method" : "GET",
-          |   "mimetype" : "json"
-          | }]}
-          |""".stripMargin)
       val query = new SW(config)
 
       Future {
         query.something("h1")
           .set(URI("http://dbpedia.org/resource/Abbie_Hoffman"))
-          .findObjectPropertiesOf()
+          .findObjectProperties()
           .onComplete {
-            case Success(types) => println(types); assert(true)
+            case Success(response) => {
+              println(response)
+              assert ( response.length > 3 )
+              assert(true)
+            }
             case Failure(exception) => println(exception); assert(false)
           }
       }
-    }*/
+      test("findObjectPropertiesOf inherited from ") {
+        val query = new SW(config)
+
+        Future {
+          query.something("h1")
+            .set(URI("http://dbpedia.org/resource/Abbie_Hoffman"))
+            .findObjectProperties(URI("ObjectProperty","owl"))
+            .onComplete {
+              case Success(response) => {
+                println(response)
+                assert ( response.length > 3 )
+                assert(true)
+              }
+              case Failure(exception) => println(exception); assert(false)
+            }
+        }
+      }
+    }
   }
 }

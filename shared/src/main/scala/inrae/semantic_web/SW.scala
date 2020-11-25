@@ -49,7 +49,7 @@ case class SW(var config: StatementConfiguration) {
 
   val filter : FilterIncrement = new FilterIncrement()
 
-  scribe.Logger.root.clearHandlers().clearModifiers().withHandler(minimumLevel = Some(Level.Warn)).replace()
+  scribe.Logger.root.clearHandlers().clearModifiers().withHandler(minimumLevel = Some(Level.Debug)).replace()
 
   def help() : SW = {
     println(" ---------------- SW "+version+" ---------------------------")
@@ -222,12 +222,15 @@ case class SW(var config: StatementConfiguration) {
   def variable(reference: String) : String = {
 
     val variableNameList = pm.SelectNode.getNodeWithRef(reference, rootNode)
-      .map( pm.SparqlGenerator.correspondenceVariablesIdentifier(_)._1.getOrElse(reference,""))
+      .map( v => {
+        pm.SparqlGenerator.correspondenceVariablesIdentifier(rootNode)._1.getOrElse(reference,"")
+      })
     if (variableNameList.filter(_ != "").length==0) {
       scribe.error("Unknown reference:"+reference)
+      "unknown_variable"
+    } else {
+      variableNameList(0)
     }
-    scribe.info(reference+"== VARIABLE ??????????????????????????????==>"+variableNameList(0))
-    variableNameList(0)
   }
 
   def select(lRef: Seq[String] = List()) : Future[ujson.Value] = {
@@ -250,7 +253,7 @@ case class SW(var config: StatementConfiguration) {
     QueryManager.countNbSolutions(rootNode,config)
   }
 
-  def findClassesOf(motherClass: URI = URI("") ) : Future[Seq[URI]] = {
+  def findClasses(motherClass: URI = URI("") ) : Future[Seq[URI]] = {
     (motherClass match {
       case uri : URI if uri == URI("")  => isSubjectOf(URI("a"),"_esp___type")
       case _ : URI =>  isSubjectOf(URI("a"),"_esp___type")
@@ -261,36 +264,43 @@ case class SW(var config: StatementConfiguration) {
       .select(List("_esp___type"))
       .map( json => {
         json("results")("bindings").arr.map(
-          row => URI(row("_esp___type")("value").toString())
+          row => SparqlBuilder.createUri(row("_esp___type")("value"))
         ).toSeq
       })
   }
 
-  def findObjectPropertiesOf(motherClassProperties: URI = URI("") ) : Future[Seq[URI]] = {
+  def findProperties(motherClassProperties: URI = URI("") , kind : String = "objectProperty" ) : Future[Seq[URI]] = {
     val refCurrent = ref()
 
-    root()
+    var state = root()
       .something("_esp___type")
       .focus(refCurrent)
-      .isLinkTo(QueryVariable("_esp___type"))
-      .focus("_esp___type").filter.isUri
-      .focus(refCurrent)
-      .debug()
-      //.sparql_console()
-      .select(List("_esp___type"))
+      .isLinkTo(QueryVariable("_esp___type"),"_esp___property")
 
+    /* inherited from something ??? */
+    if (motherClassProperties != URI("")) {
+      state = state.isSubjectOf(URI("a"))
+          .set(motherClassProperties)
+    }
+
+    /* object or datatype properties owl def. */
+    ( kind  match {
+      case "objectProperty" => state.focus("_esp___type").filter.isUri
+      case "datatypeProperty" => state.focus("_esp___type").filter.isLiteral
+      case _ => state
+    }).select(List("_esp___property"))
       .map( json => {
-        println(json.toString())
+        println(json)
         json("results")("bindings").arr.map(
-          row => URI(row("_esp___type")("value").toString())
+          row => SparqlBuilder.createUri(row("_esp___property")("value"))
         ).toSeq
       })
   }
-  def findDatatypePropertiesOf(motherClassProperties: URI = URI("") ) : Future[Seq[URI]] = {
-    //check motherClassProperties => xsd type
-    //isLiteral
-    Future {
-      Seq[URI]()
-    }
+
+  def findObjectProperties(motherClassProperties: URI = URI("") ) : Future[Seq[URI]] = {
+    findProperties(motherClassProperties,"objectProperty")
+  }
+  def findDatatypeProperties(motherClassProperties: URI = URI("") ) : Future[Seq[URI]] = {
+    findProperties(motherClassProperties,"datatypeProperty")
   }
 }

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Count</title>
+</head>
+<body>
+<script type="text/javascript" src="../../../js/target/scala-2.13/es-fastopt.js"></script>
+<pre id="demo"></pre>
+</body>
+<script>
+      let config = new EasySparqlStatementConfiguration()
+
+      config.setConfigString(`
+          {
+          "sources" : [{
+          "id"  : "dbpedia",
+          "url" : "https://dbpedia.org/sparql",
+          "typ" : "tps",
+          "method" : "POST_ENCODED",
+          "mimetype" : "json"
+           }]}
+          `)
+        let query = new EasySparqlEngine(config);
+
+        let r = query.something("h1")
+                      .set(URI("http://dbpedia.org/resource/Abbie_Hoffman"))
+                      .findClasses();
+
+        r.then((lUris) => {
+            let ul = document.createElement("ul")
+            document.getElementById("demo").appendChild(ul)
+
+          for (let i=0;i<lUris.length;i++) {
+            let li = document.createElement("li");
+            li.appendChild(document.createTextNode(JSON.stringify(lUris[i].toString())));
+            ul.appendChild(li);
+          }
+        }).catch( (error) => {
+          console.error(" -- catch exception --")
+          console.error(error)
+        } );
+    </script>
+</html>

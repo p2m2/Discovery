@@ -78,3 +78,13 @@ case class QueryVariable (var name : String) extends SparqlDefinition {
   }
   def sparql() : String = toString
 }
+
+object SparqlBuilder {
+  def createUri(value : ujson.Value) : URI = {
+    URI(value.value.toString)
+  }
+
+  def createLiteral(value : ujson.Value) : Literal = {
+    Literal(value("value").toString,value("datatype").toString)
+  }
+}

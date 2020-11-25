@@ -2,7 +2,7 @@ package inrae.semantic_web
 
 import inrae.semantic_web.QueryPlanner
 import inrae.semantic_web.internal._
-import inrae.semantic_web.rdf.{IRI, Literal, SparqlDefinition, URI}
+import inrae.semantic_web.rdf.{IRI, Literal, SparqlBuilder, SparqlDefinition, URI}
 import inrae.semantic_web.sparql.{QueryResult, _}
 
 import scala.concurrent.{Future, Promise}
@@ -55,8 +55,7 @@ object QueryManager {
 
       val res: Future[QueryResult] = QueryRunner(source).query(query)
       res.map(v => {
-        val r = v.json("results")("bindings")(0)(varCount)
-        Literal(r("value").toString,r("datatype").toString).toInt()
+        SparqlBuilder.createLiteral(v.json("results")("bindings")(0)(varCount)).toInt()
       })
     } else {
       // todo query planner
