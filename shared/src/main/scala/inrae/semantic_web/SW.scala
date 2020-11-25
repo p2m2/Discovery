@@ -49,7 +49,7 @@ case class SW(var config: StatementConfiguration) {
 
   val filter : FilterIncrement = new FilterIncrement()
 
-  scribe.Logger.root.clearHandlers().clearModifiers().withHandler(minimumLevel = Some(Level.Warn)).replace()
+  scribe.Logger.root.clearHandlers().clearModifiers().withHandler(minimumLevel = Some(Level.Debug)).replace()
 
   def help() : SW = {
     println(" ---------------- SW "+version+" ---------------------------")
@@ -64,6 +64,8 @@ case class SW(var config: StatementConfiguration) {
     println(" isLinkTo(URI(\"http://object\")):  ?currentFocus ?newFocus URI(\"http://object\")")
     println(" isLinkTo(XSD(\"type\",\"value\")):  ?currentFocus ?newFocus XSD(\"type\",\"value\")")
     println(" isLinkFrom(URI(\"http://object\")):  URI(\"http://object\") ?newFocus ?currentFocus")
+    println(" isA ")
+    println(" set ")
     println("   ")
     println("    -------------  Print information ----------")
     println(" debug:")
@@ -85,17 +87,28 @@ case class SW(var config: StatementConfiguration) {
   /* manage the creation of an unique ref */
   def getUniqueRef() : String = "_internal_" + randomUUID.toString
 
+  /* set focus on root */
+  def root(): SW  = {
+    focusNode = rootNode
+    this
+  }
+
   /* set the current focus on the select node */
   def focus(ref : String) : SW = {
+    scribe.info("focus")
+    if (ref == "") throw new Error("reference can not be empty !")
     val arrNode = pm.SelectNode.getNodeWithRef(ref, rootNode)
-
     if ( arrNode.length > 0 ) {
       focusNode = arrNode(0)
     } else {
-      System.err.println("ref unknown :"+ref)
-      scribe.error("ref unknown :"+ref)
+      throw new Error("ref unknown :"+ref)
     }
-    return this
+    this
+  }
+
+  /* get ref of the current focus */
+  def ref(): String = {
+    pm.SelectNode.getNodeRef(rootNode,focusNode)
   }
 
   def prefix(short : String, long : IRI ) : SW = {
@@ -113,10 +126,10 @@ case class SW(var config: StatementConfiguration) {
     this
   }
 
-  def setupnode(n : Node, upsource : Boolean = false ) : SW = {
+  def setupnode(n : Node, upsource : Boolean = false, forward : Boolean = true ) : SW = {
     scribe.info("setupnode")
 
-    focusManagement(n,true)
+    focusManagement(n,forward)
 
     if ( upsource ) {
       QueryManager.setUpSourcesNode(n,config,rootNode.prefixes).onComplete {
@@ -148,22 +161,23 @@ case class SW(var config: StatementConfiguration) {
   }
 
   /* create node which focus is the subject : ?focusId <uri> ?target */
-  def isSubjectOf( uri : URI , ref : String = getUniqueRef() ) : SW = {
-    setupnode(SubjectOf(ref,uri))
+  def isSubjectOf( term : SparqlDefinition , ref : String = getUniqueRef() ) : SW = {
+    setupnode(SubjectOf(ref,term))
   }
 
 
   /* create node which focus is the subject : ?target <uri> ?focusId */
-  def isObjectOf( uri : URI , ref : String = getUniqueRef() ) : SW = {
-    setupnode(ObjectOf(ref,uri))
+  def isObjectOf( term : SparqlDefinition , ref : String = getUniqueRef() ) : SW = {
+    setupnode(ObjectOf(ref,term))
   }
 
   /* create node which focus is the properties :
   ?focusId ?target <uri>|literal
   */
-  def isLinkTo( term : RdfType , ref : String = getUniqueRef() ) : SW = {
+  def isLinkTo(term : SparqlDefinition, ref : String = getUniqueRef() ) : SW = {
     setupnode(LinkTo(ref,term))
   }
+
 
   /* create node which focus is typed with <uri>:
   ?focusId a <uri>
@@ -172,15 +186,14 @@ case class SW(var config: StatementConfiguration) {
     val f = focusNode
     isSubjectOf(URI("a")).set(uri)
     focusNode = f
-    scribe.info("FOCUS NODE=>"+focusNode.toString())
     this
   }
 
   /* create node which focus is the properties :
      <uri> ?target ?focusId
   */
-  def isLinkFrom( uri : URI , ref : String = getUniqueRef() ) : SW = {
-    setupnode(LinkFrom(ref,uri))
+  def isLinkFrom( term : SparqlDefinition, ref : String = getUniqueRef() ) : SW = {
+    setupnode(LinkFrom(ref,term))
   }
 
   /*
@@ -188,7 +201,7 @@ case class SW(var config: StatementConfiguration) {
     We get the
   */
   def set( uri : URI ) : SW = {
-    setupnode(Value(uri))
+    setupnode(Value(uri),true,false)
   }
 
 
@@ -207,23 +220,27 @@ case class SW(var config: StatementConfiguration) {
   }
 
   def variable(reference: String) : String = {
+
     val variableNameList = pm.SelectNode.getNodeWithRef(reference, rootNode)
-      .map( pm.SparqlGenerator.correspondanceVariablesIdentifier(_)._1.getOrElse(reference,""))
+      .map( pm.SparqlGenerator.correspondenceVariablesIdentifier(_)._1.getOrElse(reference,""))
     if (variableNameList.filter(_ != "").length==0) {
       scribe.error("Unknown reference:"+reference)
     }
+    scribe.info(reference+"== VARIABLE ??????????????????????????????==>"+variableNameList(0))
     variableNameList(0)
   }
 
   def select(lRef: Seq[String] = List()) : Future[ujson.Value] = {
-    scribe.warn("select")
+    scribe.warn("select :"+lRef.toString())
     val lSelectVariables = lRef match {
       case v if v.length>0 => v.map( ref => variable(ref))
       case _ => references(focusNode).map(ref => variable(ref))
     }
+
+    scribe.warn("lSelectVariables :::"+lSelectVariables.toString())
     QueryManager.queryVariables(rootNode,lSelectVariables,config).map(
       qr => {
-        qr.v2Ident(pm.SparqlGenerator.correspondanceVariablesIdentifier(rootNode)._1)
+        qr.v2Ident(pm.SparqlGenerator.correspondenceVariablesIdentifier(rootNode)._1)
         qr.json
       }
     )
@@ -235,25 +252,39 @@ case class SW(var config: StatementConfiguration) {
 
   def findClassesOf(motherClass: URI = URI("") ) : Future[Seq[URI]] = {
     (motherClass match {
-      case uri : URI if uri == URI("")  => isSubjectOf(URI("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"),"_esp___type")
-      case _ : URI =>  isSubjectOf(URI("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"),"_esp___type")
+      case uri : URI if uri == URI("")  => isSubjectOf(URI("a"),"_esp___type")
+      case _ : URI =>  isSubjectOf(URI("a"),"_esp___type")
                   .isSubjectOf(URI("a"))
                   .set(motherClass)
     })
       .focus("_esp___type")
-      .select()
+      .select(List("_esp___type"))
       .map( json => {
-        URI(json("_esp___type").value.toString)
+        json("results")("bindings").arr.map(
+          row => URI(row("_esp___type")("value").toString())
+        ).toSeq
       })
-    // TODO
-      Future { List[URI]() }
   }
 
   def findObjectPropertiesOf(motherClassProperties: URI = URI("") ) : Future[Seq[URI]] = {
-    //QueryManager.queryPropertyNode(rootNode,focusNode,config)
-    Future {
-      Seq[URI]()
-    }
+    val refCurrent = ref()
+
+    root()
+      .something("_esp___type")
+      .focus(refCurrent)
+      .isLinkTo(QueryVariable("_esp___type"))
+      .focus("_esp___type").filter.isUri
+      .focus(refCurrent)
+      .debug()
+      //.sparql_console()
+      .select(List("_esp___type"))
+
+      .map( json => {
+        println(json.toString())
+        json("results")("bindings").arr.map(
+          row => URI(row("_esp___type")("value").toString())
+        ).toSeq
+      })
   }
   def findDatatypePropertiesOf(motherClassProperties: URI = URI("") ) : Future[Seq[URI]] = {
     //check motherClassProperties => xsd type

@@ -23,11 +23,10 @@
           `)
         let query = new EasySparqlEngine(config);
 
-        console.log(query)
         let r = query.something("h1")
                       .set(URI("http://dbpedia.org/resource/Abbie_Hoffman"))
-                      .debug()
-                      .findClassesOf(URI("http://www.w3.org/2002/07/owl#Class"));
+                      .findObjectPropertiesOf(URI("test"))
+                      //.findClassesOf(URI("http://www.w3.org/2002/07/owl#Class"));
 
         r.then((value) => {
           let res = value;

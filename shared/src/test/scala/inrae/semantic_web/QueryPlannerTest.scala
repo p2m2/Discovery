@@ -2,7 +2,7 @@ package inrae.semantic_web
 
 import inrae.semantic_web.QueryPlanner.factorize
 import inrae.semantic_web.rdf.URI
-import inrae.semantic_web.sparql.{BGP,OR,AND}
+import inrae.semantic_web.sparql.{BgpGroupe,OrGroupe,AndGroupe}
 import utest._
 import inrae.semantic_web.internal.{LinkFrom, LinkTo, Node, ObjectOf, Root, Something, SourcesNode, SubjectOf, UnionBlock, Value}
 
@@ -21,7 +21,7 @@ object QueryPlannerTest extends TestSuite {
       val s2 = SubjectOf("s2",new URI("uri2"))
       val s3 = SubjectOf("s3",new URI("uri3"))
       val s4 = SubjectOf("s4",new URI("uri4"))
-      val logic = (BGP(List(s1,s2,s3,s4)))
+      val logic = (BgpGroupe(List(s1,s2,s3,s4)))
       //println(logic)
       assert(factorize(logic) == logic)
     }
@@ -32,9 +32,9 @@ object QueryPlannerTest extends TestSuite {
       val u = new UnionBlock(s1)
       val s2 = SubjectOf("s2",new URI("uri2"))
       val s3 = SubjectOf("s3",new URI("uri3"))
-      val logic = OR(
-        List(BGP(List(s1,s2)),
-          BGP(List(s1,s3))))
+      val logic = OrGroupe(
+        List(BgpGroupe(List(s1,s2)),
+          BgpGroupe(List(s1,s3))))
 
       assert(factorize(logic) == logic)
     }
@@ -58,7 +58,7 @@ object QueryPlannerTest extends TestSuite {
           val plan = QueryPlanner.buildPlanning(r)
         //  println(plan)
           assert(
-            (plan == BGP(List(s1,s2,s3)) )
+            (plan == BgpGroupe(List(s1,s2,s3)) )
           )
         }
 
@@ -81,9 +81,9 @@ object QueryPlannerTest extends TestSuite {
           val plan = QueryPlanner.buildPlanning(r)
          // println(plan)
           assert(
-              (plan == OR(
-                List(BGP(List(s1,s2)),
-                  BGP(List(s1,s3)))))
+              (plan == OrGroupe(
+                List(BgpGroupe(List(s1,s2)),
+                  BgpGroupe(List(s1,s3)))))
           )
         }
 
@@ -112,11 +112,11 @@ object QueryPlannerTest extends TestSuite {
 
               val plan = QueryPlanner.buildPlanning(r)
               assert(
-                plan == OR(
-                  List(BGP(List(s1,s2)),
-                       BGP(List(s1,s3)),
-                       BGP(List(s1,s4)),
-                       BGP(List(s1,s5))))
+                plan == OrGroupe(
+                  List(BgpGroupe(List(s1,s2)),
+                       BgpGroupe(List(s1,s3)),
+                       BgpGroupe(List(s1,s4)),
+                       BgpGroupe(List(s1,s5))))
               )
             }
 
@@ -148,11 +148,11 @@ object QueryPlannerTest extends TestSuite {
               val plan = QueryPlanner.buildPlanning(r)
              // println(plan)
               assert(
-                plan == OR(
-                  List(BGP(List(s1,s2)),
-                    BGP(List(s1,s3)),
-                    BGP(List(s1,s4)),
-                    BGP(List(s1,s5))))
+                plan == OrGroupe(
+                  List(BgpGroupe(List(s1,s2)),
+                    BgpGroupe(List(s1,s3)),
+                    BgpGroupe(List(s1,s4)),
+                    BgpGroupe(List(s1,s5))))
               )
             }
 
@@ -177,7 +177,7 @@ object QueryPlannerTest extends TestSuite {
               s1.addChildren(s5)
               val plan = QueryPlanner.buildPlanning(r)
               assert(
-                plan == BGP(List(s1,s2,s3,s4,s5))
+                plan == BgpGroupe(List(s1,s2,s3,s4,s5))
               )
             }
 
@@ -204,7 +204,7 @@ object QueryPlannerTest extends TestSuite {
                   s3.addChildren(s5)
                   val plan = QueryPlanner.buildPlanning(r)
                   assert(
-                    plan == BGP(List(s1,s2,s3,s4,s5))
+                    plan == BgpGroupe(List(s1,s2,s3,s4,s5))
                   )
                 }
 
@@ -247,7 +247,7 @@ object QueryPlannerTest extends TestSuite {
                     val plan = QueryPlanner.buildPlanning(r)
                    // println(plan)
                     assert(
-                      plan == BGP(List(s1,s2,s3,s4,s6,s7,s5,s8,s10,s11,s9))
+                      plan == BgpGroupe(List(s1,s2,s3,s4,s6,s7,s5,s8,s10,s11,s9))
                     )
                   }
 
@@ -277,8 +277,8 @@ object QueryPlannerTest extends TestSuite {
                       // println(plan)
                        assert(
                            plan ==
-                             OR(
-                               List(BGP(List(s1,s2,s3,s4)),BGP(List(s1,s2,s3,s5))))
+                             OrGroupe(
+                               List(BgpGroupe(List(s1,s2,s3,s4)),BgpGroupe(List(s1,s2,s3,s5))))
                        )
                      }
 
@@ -312,10 +312,10 @@ object QueryPlannerTest extends TestSuite {
                        val plan = QueryPlanner.buildPlanning(r)
                        assert(
                          plan ==
-                           OR(List(
-                             BGP(List(s1,s2)),
-                               BGP(List(s1,s3,s4)),
-                               BGP(List(s1,s3,s5))
+                           OrGroupe(List(
+                             BgpGroupe(List(s1,s2)),
+                               BgpGroupe(List(s1,s3,s4)),
+                               BgpGroupe(List(s1,s3,s5))
                              )
                            )
                        )
@@ -335,7 +335,7 @@ object QueryPlannerTest extends TestSuite {
                        val plan = QueryPlanner.buildPlanning(r)
 
                        assert(
-                         plan == BGP(List(s1,s2))
+                         plan == BgpGroupe(List(s1,s2))
                        )
 
                        r.lSourcesNodes = r.lSourcesNodes ++ List(new SourcesNode(s1,List("etp1")))
@@ -364,7 +364,7 @@ object QueryPlannerTest extends TestSuite {
                        val plan = QueryPlanner.buildPlanning(r)
 
                        assert(
-                         plan == BGP(List(s1,s2))
+                         plan == BgpGroupe(List(s1,s2))
                        )
 
                        r.lSourcesNodes = r.lSourcesNodes ++ List(new SourcesNode(s1,List("etp1","etp2")))
@@ -394,7 +394,7 @@ object QueryPlannerTest extends TestSuite {
                        val plan = QueryPlanner.buildPlanning(r)
 
                        assert(
-                         plan == BGP(List(s1,s2))
+                         plan == BgpGroupe(List(s1,s2))
                        )
 
                        r.lSourcesNodes = r.lSourcesNodes ++ List(new SourcesNode(s1,List("etp1","etp2")))
@@ -423,7 +423,7 @@ object QueryPlannerTest extends TestSuite {
                        val plan = QueryPlanner.buildPlanning(r)
 
                        assert(
-                         plan == BGP(List(s1,s2))
+                         plan == BgpGroupe(List(s1,s2))
                        )
 
                        r.lSourcesNodes = r.lSourcesNodes ++ List(new SourcesNode(s1,List("etp1")))
@@ -460,7 +460,7 @@ object QueryPlannerTest extends TestSuite {
                        val plan = QueryPlanner.buildPlanning(r)
 
                        assert(
-                         plan == BGP(List(s1,s2,s3,s4))
+                         plan == BgpGroupe(List(s1,s2,s3,s4))
                        )
 
                        r.lSourcesNodes = r.lSourcesNodes ++ List(new SourcesNode(s1,List("etp1","etp2")))
@@ -507,11 +507,11 @@ object QueryPlannerTest extends TestSuite {
 
                        val plan = QueryPlanner.buildPlanning(r)
                        assert(
-                         plan == OR(
-                           List(BGP(List(s1,s2)),
-                             BGP(List(s1,s3)),
-                             BGP(List(s1,s4)),
-                             BGP(List(s1,s5))))
+                         plan == OrGroupe(
+                           List(BgpGroupe(List(s1,s2)),
+                             BgpGroupe(List(s1,s3)),
+                             BgpGroupe(List(s1,s4)),
+                             BgpGroupe(List(s1,s5))))
                        )
 
                        r.lSourcesNodes = r.lSourcesNodes ++ List(new SourcesNode(s1,List("etp1","etp2")))

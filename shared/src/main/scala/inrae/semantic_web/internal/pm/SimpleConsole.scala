@@ -1,7 +1,7 @@
 package inrae.semantic_web.internal.pm
 
 import inrae.semantic_web.internal._
-import inrae.semantic_web.rdf.RdfType
+import inrae.semantic_web.rdf.SparqlDefinition
 
 import scala.concurrent.Promise
 //import scala.concurrent.duration.Duration
@@ -31,20 +31,21 @@ object SimpleConsole  {
 
     def colorize(n : Node ) : String = n match {
         case _ : Root               => Console.MAGENTA
-        case _ : Something          => Console.BLUE
-        case _ : SubjectOf          => Console.BLUE
-        case _ : ObjectOf           => Console.BLUE
+        case _ : RdfNode            => Console.BLUE
+        case _ : FilterNode         => Console.GREEN
         case _ : Value              => Console.CYAN
         case _                      => Console.RED
     }
 
-    def Libelle( n: Node ) : String = {
+    def Labelled(n: Node ) : String = {
         n match {
             case _ : Root           => "Root"
             case node : Something   => "Something ("+ node.reference() +")"
-            case node : SubjectOf   => "SubjectOf ("+node.uri.toString +" , " + node.reference() +")"
-            case node : ObjectOf    => "ObjectOf ("+node.uri.toString +" , " + node.reference() +")"
-            case node : SourcesNode => "SourceNode -> " + Libelle(node.n)
+            case node : SubjectOf   => "SubjectOf ("+node.term.toString +" , " + node.reference() +")"
+            case node : ObjectOf    => "ObjectOf ("+node.term.toString +" , " + node.reference() +")"
+            case node : LinkTo      => "LinkTo ("+node.term.toString +" , " + node.reference() +")"
+            case node : LinkFrom    => "LinkFrom ("+node.term.toString +" , " + node.reference() +")"
+            case node : SourcesNode => "SourceNode -> " + Labelled(node.n)
             case node : Value       => "Value ("+node.term.toString +")"
             case node : FilterNode  => "FILTER "+ node.toString()
             case v                  => "--- Unkown ---"+v.toString
@@ -63,10 +64,12 @@ object SimpleConsole  {
             case _ => ""
         }) + Console.RESET
 
-        val label : String = escape + item + barrehor + " " + colorize(n) + (Libelle(n)) + Console.RESET
+        val label : String = escape + item + barrehor + " " + colorize(n) + (Labelled(n)) + Console.RESET
 
-        val children = prefix + (escape + barrevert) * marge + label +
-          "\n" + n.children.map(child => get(child, marge + 1)).mkString("") + suffix
+        val children = prefix + (escape + barrevert) * marge + label + {
+            if ( n.children.length>0)
+                "\n" + n.children.map(child => get(child, marge + 1)).mkString("") + suffix
+        }
 
         val sourcesNode = n match {
             case r : Root => {

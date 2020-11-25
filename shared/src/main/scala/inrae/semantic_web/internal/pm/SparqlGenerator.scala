@@ -3,7 +3,7 @@ package inrae.semantic_web.internal.pm
 import inrae.semantic_web._
 import inrae.semantic_web.internal.Node.references
 import inrae.semantic_web.internal._
-import inrae.semantic_web.rdf.IRI
+import inrae.semantic_web.rdf.{IRI, QueryVariable, SparqlDefinition}
 
 /**
  * 
@@ -42,16 +42,33 @@ object SparqlGenerator  {
         "} LIMIT 1"
     }
 
-    def sparqlNode(n: Node,varIdSire : String, variableName : String) : String = {
+    def termString() = {
+
+    }
+
+    def queryVariableTransform(term : SparqlDefinition,
+                               referenceToIdentifier : Map[String,String]) : SparqlDefinition = term match {
+        case v : QueryVariable =>QueryVariable(
+            { referenceToIdentifier.get(v.name) match {
+                case Some(u) => u
+                case None => throw new Error("Reference variable does not exist :"+v.name)
+            }})
+        case _ => term
+    }
+
+    def sparqlNode(n: Node,
+                   referenceToIdentifier : Map[String,String],
+                   varIdSire : String,
+                   variableName : String) : String = {
         scribe.debug(varIdSire+" - "+variableName)
          n match {
             case node : SubjectOf          => "\t?" + varIdSire + " " +
-              node.uri.toString() + " " + "?"+ variableName + " .\n"
+              queryVariableTransform(node.term,referenceToIdentifier).toString() + " " + "?"+ variableName + " .\n"
             case node : ObjectOf           => "\t?" + variableName + " " +
-              node.uri.toString() + " " + "?"+ varIdSire + " .\n"
-            case node : LinkTo           => "\t?"+ varIdSire + " " + "?" + variableName + " " + node.term.toString() + " .\n"
-            case node : LinkFrom           => node.uri.toString() + " " + "?" + variableName + " " + "?"+ varIdSire + " .\n"
-            case node : Value              => "VALUES ?" +varIdSire+ " { " + node.term.toString() + " }.\n"
+              queryVariableTransform(node.term,referenceToIdentifier).toString() + " " + "?"+ varIdSire + " .\n"
+            case node : LinkTo           => "\t?"+ varIdSire + " " + "?" + variableName + " " + queryVariableTransform(node.term,referenceToIdentifier).toString() + " .\n"
+            case node : LinkFrom           => queryVariableTransform(node.term,referenceToIdentifier).toString() + " " + "?" + variableName + " " + "?"+ varIdSire + " .\n"
+            case node : Value              => "VALUES ?" +varIdSire+ " { " + queryVariableTransform(node.term,referenceToIdentifier).toString() + " }.\n"
             case node : FilterNode         => "filter ( " + {
                 node.negation match {
                     case true => "!"
@@ -113,7 +130,7 @@ object SparqlGenerator  {
      *              Map[String,String] : Correspondence reference -> variableName
      *              Map[String,Int] : Iterator/index to increment new variable for a RdfNode
      */
-    def correspondanceVariablesIdentifier(n:Node, buildMap : Map[String,Int]= Map[String,Int]())
+    def correspondenceVariablesIdentifier(n:Node, buildMap : Map[String,Int]= Map[String,Int]())
                                        : (Map[String,String],Map[String,Int]) = {
         val resLoc : (Map[String,String],Map[String,Int]) = n match {
             case rdf : RdfNode => {
@@ -131,7 +148,7 @@ object SparqlGenerator  {
 
         n.children.toArray.foldLeft(  resLoc ) {
             (acc, child) => {
-                val r = correspondanceVariablesIdentifier(child,acc._2)
+                val r = correspondenceVariablesIdentifier(child,acc._2)
                 (acc._1 ++ r._1,r._2)
             }
          }
@@ -141,7 +158,6 @@ object SparqlGenerator  {
              referenceToIdentifier : Map[String,String],
              varIdSire : String = "" /* sire variable */
             )  : String = {
-
         val variableName : String = n match {
             case rdf : RdfNode => {
                 referenceToIdentifier.get(rdf.reference()) match {
@@ -150,8 +166,11 @@ object SparqlGenerator  {
             } }
             case _ => varIdSire
         }
-
-        val triplet : String = sparqlNode(n,varIdSire,variableName)
+        /*
+        scribe.debug("n:"+n.toString())
+        scribe.debug("varIdSire:"+varIdSire)
+        scribe.debug("variableName:"+variableName)*/
+        val triplet : String = sparqlNode(n,referenceToIdentifier,varIdSire,variableName)
         triplet + n.children.map( child => body( child,referenceToIdentifier, variableName)).mkString("")
     } 
 }

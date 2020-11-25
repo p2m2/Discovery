@@ -2,24 +2,6 @@ package inrae.semantic_web.internal
 
 import inrae.semantic_web.rdf._
 
-import scala.concurrent.Future
-
-/*
-sealed trait Node {
-  var children : Seq[ReferenceNode] = Seq[ReferenceNode]()
-  var sources : Seq[String] = Seq[String]()
-
-  def addChildren(n : Node) : Node = {
-    children = children :+ n
-    return n
-  }
-
-  def addSource(s : String) : Node = {
-    sources = sources :+ s
-    this
-  }
-}*/
-
 trait Node {
 
   var children: Seq[Node] = Seq[Node]()
@@ -47,10 +29,10 @@ object Node {
     case rdf : RdfNode => {
       List(rdf.reference()) ++ n.children.flatMap(c => c match {
         case rdf: RdfNode => references(rdf)
-        case _ => List("")
+        case _ => List()
       })
     }
-    case _ => List("")
+    case _ => List()
   }
 
 }
@@ -99,7 +81,7 @@ class RdfNode(uniqRef : String) extends Node {
 }
 
 
-class URIRdfNode(concretUniqRef : String,val uri : URI) extends RdfNode(concretUniqRef)
+class URIRdfNode(concretUniqRef : String,val term : SparqlDefinition) extends RdfNode(concretUniqRef)
 
 case class Something(concretUniqRef: String) extends RdfNode(concretUniqRef) {
   override def duplicateWithoutChildren() = Something(concretUniqRef)
@@ -113,23 +95,23 @@ case class Something(concretUniqRef: String) extends RdfNode(concretUniqRef) {
   }
 }
 
-case class SubjectOf(concretUniqRef : String,uri2 : URI) extends URIRdfNode(concretUniqRef,uri2) {
-  override def duplicateWithoutChildren() = SubjectOf(concretUniqRef,uri)
+case class SubjectOf(concretUniqRef : String, override val term : SparqlDefinition) extends URIRdfNode(concretUniqRef,term) {
+  override def duplicateWithoutChildren() = SubjectOf(concretUniqRef,term)
 }
 
-case class ObjectOf(concretUniqRef : String,uri2 : URI) extends URIRdfNode(concretUniqRef,uri2) {
-  override def duplicateWithoutChildren() = ObjectOf(concretUniqRef,uri)
+case class ObjectOf(concretUniqRef : String,override val term : SparqlDefinition) extends URIRdfNode(concretUniqRef,term) {
+  override def duplicateWithoutChildren() = ObjectOf(concretUniqRef,term)
 }
 
-case class LinkTo(concretUniqRef : String,term : RdfType) extends RdfNode(concretUniqRef) {
+case class LinkTo(concretUniqRef : String,override val term : SparqlDefinition) extends URIRdfNode(concretUniqRef,term) {
   override def duplicateWithoutChildren() = LinkTo(concretUniqRef,term)
 }
 
-case class LinkFrom(concretUniqRef : String,uri2 : URI) extends URIRdfNode(concretUniqRef,uri2) {
-  override def duplicateWithoutChildren() = LinkFrom(concretUniqRef,uri)
+case class LinkFrom(concretUniqRef : String,override val term : SparqlDefinition) extends URIRdfNode(concretUniqRef,term) {
+  override def duplicateWithoutChildren() = LinkFrom(concretUniqRef,term)
 }
 
-case class Value(var term : RdfType) extends Node {
+case class Value(var term : SparqlDefinition) extends Node {
 
   override def toString() : String = "VALUE("+term.toString+")"
 
