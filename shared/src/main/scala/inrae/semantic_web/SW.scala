@@ -5,9 +5,10 @@ import java.util.UUID.randomUUID
 import inrae.semantic_web.internal.Node.references
 import inrae.semantic_web.rdf._
 import inrae.semantic_web.internal._
+import inrae.semantic_web.internal.pm.SelectNode
 import inrae.semantic_web.sparql.QueryResult
 
-import scala.concurrent.Future
+import scala.concurrent.{Future, Promise}
 import scribe._
 
 import scala.util.{Failure, Success}
@@ -15,7 +16,7 @@ import scala.util.{Failure, Success}
 case class SW(var config: StatementConfiguration) {
   implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
   /* root node */
-  private var rootNode   : Root = new Root()
+  private var rootNode   : Root = Root()
   /* focus node */
   private var focusNode  : Node = rootNode
 
@@ -126,6 +127,18 @@ case class SW(var config: StatementConfiguration) {
     this
   }
 
+  def checkQueryVariable(term : SparqlDefinition) = {
+    /* Check if QueryVariable is referenced with Element.
+     *  add a Something element otherwise */
+    term match {
+        case qv : QueryVariable => if (SelectNode.getNodeWithRef(qv.name,rootNode).length == 0) {
+          println("QV :"+qv.name+"does not EXIST !!!!!!!!!!!!!!!!!!!!!!")
+          rootNode.addChildren(Something(qv.name))
+        }
+        case _ => None
+      }
+  }
+
   def setupnode(n : Node, upsource : Boolean = false, forward : Boolean = true ) : SW = {
     scribe.info("setupnode")
 
@@ -146,7 +159,7 @@ case class SW(var config: StatementConfiguration) {
     scribe.info("-- focusManagement --")
     if (! focusNode.accept(n)) {
       scribe.error("Can not add "+n.toString()+" with the current focus ["+focusNode.toString()+"]")
-      throw new Exception("Can not add "+n.toString()+" with the current focus ["+focusNode.toString()+"]")
+      throw new Error("Can not add "+n.toString()+" with the current focus ["+focusNode.toString()+"]")
     }
 
     focusNode.addChildren(n)
@@ -162,12 +175,14 @@ case class SW(var config: StatementConfiguration) {
 
   /* create node which focus is the subject : ?focusId <uri> ?target */
   def isSubjectOf( term : SparqlDefinition , ref : String = getUniqueRef() ) : SW = {
+    checkQueryVariable(term)
     setupnode(SubjectOf(ref,term))
   }
 
 
   /* create node which focus is the subject : ?target <uri> ?focusId */
   def isObjectOf( term : SparqlDefinition , ref : String = getUniqueRef() ) : SW = {
+    checkQueryVariable(term)
     setupnode(ObjectOf(ref,term))
   }
 
@@ -175,6 +190,7 @@ case class SW(var config: StatementConfiguration) {
   ?focusId ?target <uri>|literal
   */
   def isLinkTo(term : SparqlDefinition, ref : String = getUniqueRef() ) : SW = {
+    checkQueryVariable(term)
     setupnode(LinkTo(ref,term))
   }
 
@@ -182,9 +198,10 @@ case class SW(var config: StatementConfiguration) {
   /* create node which focus is typed with <uri>:
   ?focusId a <uri>
   */
-  def isA( uri : URI  ) : SW = {
+  def isA( term : SparqlDefinition  ) : SW = {
+    checkQueryVariable(term)
     val f = focusNode
-    isSubjectOf(URI("a")).set(uri)
+    isSubjectOf(URI("a")).set(term)
     focusNode = f
     this
   }
@@ -193,15 +210,41 @@ case class SW(var config: StatementConfiguration) {
      <uri> ?target ?focusId
   */
   def isLinkFrom( term : SparqlDefinition, ref : String = getUniqueRef() ) : SW = {
+    checkQueryVariable(term)
     setupnode(LinkFrom(ref,term))
+  }
+
+  /*
+  Get attribute value of an object.
+  return Sw with the old focus
+  Attribute value is optional
+  */
+
+  def datatype( uri : URI, ref : String ) : SW = {
+    val f = focusNode
+
+    focusNode match {
+      case n : RdfNode => {
+        rootNode.lDatatypeNode = rootNode.lDatatypeNode :+ (DatatypeNode(n.reference(),SubjectOf(ref,uri)))
+      }
+      case _ => throw new Error("Can not add datatype property with "+focusNode.getClass.toString)
+    }
+
+    focusNode = f
+    this
   }
 
   /*
     Specific treatment : add value possibilities for a specific node
     We get the
   */
-  def set( uri : URI ) : SW = {
-    setupnode(Value(uri),true,false)
+  def set( term : SparqlDefinition ) : SW = {
+    checkQueryVariable(term)
+    setupnode(Value(term),true,false)
+  }
+
+  def setList( uris : Seq[URI] ) : SW = {
+    setupnode(ListValues(uris),true,false)
   }
 
 
@@ -219,34 +262,86 @@ case class SW(var config: StatementConfiguration) {
     this
   }
 
-  def variable(reference: String) : String = {
+  def variable(reference: String) : Option[String] = {
 
     val variableNameList = pm.SelectNode.getNodeWithRef(reference, rootNode)
       .map( v => {
         pm.SparqlGenerator.correspondenceVariablesIdentifier(rootNode)._1.getOrElse(reference,"")
       })
+
     if (variableNameList.filter(_ != "").length==0) {
-      scribe.error("Unknown reference:"+reference)
-      "unknown_variable"
+     None
     } else {
-      variableNameList(0)
+      Some(variableNameList(0))
     }
   }
 
   def select(lRef: Seq[String] = List()) : Future[ujson.Value] = {
-    scribe.warn("select :"+lRef.toString())
-    val lSelectVariables = lRef match {
-      case v if v.length>0 => v.map( ref => variable(ref))
-      case _ => references(focusNode).map(ref => variable(ref))
-    }
+    scribe.debug("select :"+lRef.toString())
 
-    scribe.warn("lSelectVariables :::"+lSelectVariables.toString())
-    QueryManager.queryVariables(rootNode,lSelectVariables,config).map(
-      qr => {
-        qr.v2Ident(pm.SparqlGenerator.correspondenceVariablesIdentifier(rootNode)._1)
-        qr.json
+    val mapId2Var =  pm.SparqlGenerator.correspondenceVariablesIdentifier(rootNode)._1
+    scribe.debug("Mapping variable <-> references :" + mapId2Var.toString())
+
+    val lDatatype = rootNode.lDatatypeNode.filter(ld => lRef.contains(ld.property.reference()))
+
+    val lSelectVariables = {
+      /* select uri type ask with decoration/datatype */
+      lDatatype.map(ld => {
+        mapId2Var(ld.refNode)
+      }) ++ {
+        /* select user ask variable */
+        lRef match {
+          case v if v.length > 0 => v.flatMap(ref => variable(ref))
+          case _ => references(focusNode).flatMap(ref => variable(ref))
+        }
       }
-    )
+    }.distinct
+
+
+    scribe.debug("lSelectVariables :::"+lSelectVariables.toString())
+
+    /* manage variable name */
+    QueryManager.queryVariables(rootNode,lSelectVariables,config)
+      /* manage datatype decoration */
+       .flatMap(qr => {
+           val lPromises = lDatatype.map(datatypeNode => {
+             val p = Promise[QueryResult]()
+             val labelProperty = datatypeNode.property.reference()
+             rootNode.getRdfNode(datatypeNode.refNode) match {
+               case Some(_) => {
+                 /* find uris value inside results to decore */
+                 val lUris = qr.getValues(mapId2Var(datatypeNode.refNode))
+                 /* request using api */
+                 SW(config).something("val_uri")
+                   .setList(lUris.map(_ match { case uri: URI => uri }))
+                   .setupnode(datatypeNode.property, false, false)
+                   .select(List("val_uri", labelProperty))
+                   .map(json => {
+                     qr.setDatatype(labelProperty, json("results")("bindings").arr.map(rec => {
+                       rec("val_uri")("value").value.toString -> rec(labelProperty)
+                     }).toMap)
+                      p success qr
+                      p.future
+                    })
+               }
+               case None =>{
+                 p success qr
+                 p.future
+               }
+             }
+           })
+         val p = Promise[ujson.Value]()
+         Future.sequence(lPromises) onComplete {
+           case Success(_) => {
+             qr.v2Ident(mapId2Var)
+             p success qr.json
+           }
+           case Failure(_) => {
+             scribe.error("Promise is not completed !")
+           }
+         }
+         p.future
+      })
   }
 
   def count() : Future[Int] = {
@@ -291,7 +386,8 @@ case class SW(var config: StatementConfiguration) {
     }).select(List("_esp___property"))
       .map( json => {
         json("results")("bindings").arr.map(
-          row => SparqlBuilder.createUri(row("_esp___property")("value"))
+          row => {
+            SparqlBuilder.createUri(row("_esp___property")) }
         ).toSeq
       })
   }

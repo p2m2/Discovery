@@ -11,6 +11,12 @@ trait Node {
     this
   }
 
+  def getRdfNode(ref : String) : Option[RdfNode] = this match {
+    case  n : RdfNode if (ref == n.reference()) => Some(n)
+    case _ if children.length > 0 => Some(children.flatMap( c => c.getRdfNode(ref) ).head)
+    case _ => None
+  }
+
   override def toString() : String = {
     "NODE "+ { children.length match {
       case l if l>0 => " ["+children.toString()+"]"
@@ -46,11 +52,13 @@ case class Root() extends Node {
   var prefixes : Map[String,IRI] = Map[String,IRI]()
   var defaultGraph : Seq[IRI]    = List[IRI]()
   var namedGraph : Seq[IRI]      = List[IRI]()
+
+  var lDatatypeNode : Seq[DatatypeNode] = List[DatatypeNode]()
   var lSourcesNodes : Seq[SourcesNode] = List[SourcesNode]()
-  var lOperatorsNode : Seq[OperatorNode] = List[OperatorNode]()
+  var lOperatorNode : Seq[OperatorNode] = List[OperatorNode]()
 
   def sourcesNode(n : RdfNode) : Option[SourcesNode] = {
-    lSourcesNodes.find( p => p.n == n )
+    lSourcesNodes.find( p => p.refNode == n.reference() )
   }
 
   override def toString() : String = {
@@ -91,6 +99,7 @@ case class Something(concretUniqRef: String) extends RdfNode(concretUniqRef) {
     case _ : URIRdfNode => true
     case _ : FilterNode => true
     case _ : Value      => true
+    case _ : ListValues => true
     case _              => false
   }
 }
@@ -114,6 +123,17 @@ case class LinkFrom(concretUniqRef : String,override val term : SparqlDefinition
 case class Value(var term : SparqlDefinition) extends Node {
 
   override def toString() : String = "VALUE("+term.toString+")"
+
+  override def accept(n: Node): Boolean = n match {
+    case _ : Something  => false
+    case _ : URIRdfNode => true
+    case _              => false
+  }
+}
+
+case class ListValues(var terms : Seq[SparqlDefinition]) extends Node {
+
+  override def toString() : String = "VALUES("+terms.toString+")"
 
   override def accept(n: Node): Boolean = n match {
     case _ : Something  => false
@@ -154,8 +174,11 @@ case class Equal(value :String,override val negation: Boolean)  extends FilterNo
   override def toString() : String = negation.toString() + " Equal ("+value+")"
 }
 
+/* Datatype Node */
+case class DatatypeNode(refNode : String, property : SubjectOf) extends Node
+
 /* SourcesNode */
-case class SourcesNode(n : RdfNode, sources : Seq[String]) extends Node
+case class SourcesNode(refNode : String, sources : Seq[String]) extends Node
 
 /* BIND / Operator */
 case class OperatorNode(var operator : String) extends Node

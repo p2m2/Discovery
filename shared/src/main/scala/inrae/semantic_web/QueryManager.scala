@@ -99,7 +99,7 @@ object QueryManager {
       case s : Something =>
         /* Something is Everywhere !! */
         Future {
-          Some(SourcesNode(s,config.sources().map( _.id )))
+          Some(SourcesNode(s.reference(),config.sources().map( _.id )))
         }
       case r : RdfNode =>
         val (refToIdentifier,_) = pm.SparqlGenerator.correspondenceVariablesIdentifier(n)
@@ -123,7 +123,7 @@ object QueryManager {
 
         y2.onComplete {
           case Success(lCheck) => {
-            y3 success Some(SourcesNode(r, lCheck.zip(config.sources()).filter( _._1).map( _._2.id)))
+            y3 success Some(SourcesNode(r.reference(), lCheck.zip(config.sources()).filter( _._1).map( _._2.id)))
           }
           case msg => {
             System.err.println(msg)

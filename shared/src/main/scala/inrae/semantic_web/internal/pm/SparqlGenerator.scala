@@ -68,7 +68,10 @@ object SparqlGenerator  {
               queryVariableTransform(node.term,referenceToIdentifier).toString() + " " + "?"+ varIdSire + " .\n"
             case node : LinkTo           => "\t?"+ varIdSire + " " + "?" + variableName + " " + queryVariableTransform(node.term,referenceToIdentifier).toString() + " .\n"
             case node : LinkFrom           => queryVariableTransform(node.term,referenceToIdentifier).toString() + " " + "?" + variableName + " " + "?"+ varIdSire + " .\n"
-            case node : Value              => "VALUES ?" +varIdSire+ " { " + queryVariableTransform(node.term,referenceToIdentifier).toString() + " }.\n"
+            case node : Value              => node.term match {
+                case _ : QueryVariable => "BIND ( ?" + varIdSire +  " AS " + queryVariableTransform(node.term,referenceToIdentifier).toString() + ")"
+                case _  =>  "VALUES ?" +varIdSire+ " { " + queryVariableTransform(node.term,referenceToIdentifier).toString() + " }.\n" }
+            case node : ListValues         => "VALUES ?" +varIdSire+ " { " + node.terms.map(t => t.sparql()).mkString(" ") + " }.\n"
             case node : FilterNode         => "filter ( " + {
                 node.negation match {
                     case true => "!"
@@ -83,7 +86,8 @@ object SparqlGenerator  {
                     case _ => throw new Exception("SparqlGenerator::sparqlNode . [Devel error] Node undefined ["+n.toString()+"]")
                 }
             } + " )\n"
-            case _                         => ""
+            case _ : Root| _ : Something         => ""
+            case _                               => throw new Error("Not implemented yet :"+n.getClass.getName)
         }
     }
 

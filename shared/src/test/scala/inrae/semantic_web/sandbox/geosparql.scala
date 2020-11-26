@@ -37,12 +37,14 @@ object GeoSparql extends TestSuite {
           .isSubjectOf(URI("http://navigae.fr/ontology#hasPolygonGeometry"))
           .isSubjectOf(URI("http://www.opengis.net/ont/geosparql#asWKT"), "geometry")
           .focus("instance")
-          .isSubjectOf(URI("label", "rdfs"), "label")
-          .debug()
-          .select(List("label", "geometry"))
+          .datatype(URI("label", "rdfs"), "label")
+          .datatype(URI("http://purl.org/dc/terms/isPartOf"), "dbpedia")
+          .select(List("label", "geometry","dbpedia"))
           .onComplete {
             case Success(response) => {
-              response("results")("bindings").arr.map( rec => println("====>>"+rec.toString)  )
+              println("RESULTATS ==============================")
+              println(response("results")("datatypes")("label"))
+              println(response("results")("datatypes")("dbpedia"))
               assert(true)
             }
             case Failure(exception) => println(exception); assert(false)

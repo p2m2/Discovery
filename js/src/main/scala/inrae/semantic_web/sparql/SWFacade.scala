@@ -2,7 +2,7 @@ package inrae.semantic_web.sparql
 
 import inrae.semantic_web.{SW, StatementConfiguration}
 import inrae.semantic_web.internal.{Node, ObjectOf, Something, SubjectOf, Value}
-import inrae.semantic_web.rdf.{IRI, URI}
+import inrae.semantic_web.rdf.{IRI, SparqlDefinition, URI}
 import ujson.IndexedValue.False
 
 import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
@@ -75,7 +75,7 @@ class SWFacade(var config: StatementConfiguration) {
   def isLinkTo( uri : URI , ref : String = sw.getUniqueRef() ) : SWFacade = { sw.isLinkTo(uri,ref); this }
 
   @JSExport
-  def isA( uri : URI ) : SWFacade = { sw.isA(uri); this }
+  def isA( term : SparqlDefinition ) : SWFacade = { sw.isA(term); this }
 
   @JSExport
   def isLinkFrom( uri : URI , ref : String = sw.getUniqueRef() ) : SWFacade = { sw.isLinkFrom(uri,ref); this }
@@ -84,13 +84,13 @@ class SWFacade(var config: StatementConfiguration) {
   def set( uri : URI ) : SWFacade = { sw.set(uri) ; this }
 
   @JSExport
+  def datatype( uri : URI, ref : String ) : SWFacade = { sw.datatype(uri,ref) ; this }
+
+  @JSExport
   def debug() : SWFacade = { sw.debug() ; this  }
 
   @JSExport
   def sparql_console() : SWFacade = { sw.sparql_console() ; this }
-
-  @JSExport
-  def variable(reference: String) : String = sw.variable(reference)
 
   @JSExport
   def select(lRef: String*): Promise[Dynamic] = { sw.select(lRef).map(x => scala.scalajs.js.JSON.parse(x.toString())).toJSPromise }

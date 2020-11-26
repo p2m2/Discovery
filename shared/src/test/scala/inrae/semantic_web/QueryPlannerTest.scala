@@ -17,7 +17,7 @@ object QueryPlannerTest extends TestSuite {
     */
     test("factorize stability AND") {
       val s1 = Something("s1")
-      val u = new UnionBlock(s1)
+      val u = UnionBlock(s1)
       val s2 = SubjectOf("s2",new URI("uri2"))
       val s3 = SubjectOf("s3",new URI("uri3"))
       val s4 = SubjectOf("s4",new URI("uri4"))
@@ -338,8 +338,8 @@ object QueryPlannerTest extends TestSuite {
                          plan == BgpGroupe(List(s1,s2))
                        )
 
-                       r.lSourcesNodes = r.lSourcesNodes ++ List(new SourcesNode(s1,List("etp1")))
-                       r.lSourcesNodes = r.lSourcesNodes ++ List(new SourcesNode(s2,List("etp1")))
+                       r.lSourcesNodes = r.lSourcesNodes ++ List(new SourcesNode(s1.reference(),List("etp1")))
+                       r.lSourcesNodes = r.lSourcesNodes ++ List(new SourcesNode(s2.reference(),List("etp1")))
 
                        val y = QueryPlanner.ordonnanceBySource(plan,r)
 
@@ -367,8 +367,8 @@ object QueryPlannerTest extends TestSuite {
                          plan == BgpGroupe(List(s1,s2))
                        )
 
-                       r.lSourcesNodes = r.lSourcesNodes ++ List(new SourcesNode(s1,List("etp1","etp2")))
-                       r.lSourcesNodes = r.lSourcesNodes ++ List(new SourcesNode(s2,List("etp1","etp2")))
+                       r.lSourcesNodes = r.lSourcesNodes ++ List(new SourcesNode(s1.reference(),List("etp1","etp2")))
+                       r.lSourcesNodes = r.lSourcesNodes ++ List(new SourcesNode(s2.reference(),List("etp1","etp2")))
 
                        val y = QueryPlanner.ordonnanceBySource(plan,r)
 
@@ -397,8 +397,8 @@ object QueryPlannerTest extends TestSuite {
                          plan == BgpGroupe(List(s1,s2))
                        )
 
-                       r.lSourcesNodes = r.lSourcesNodes ++ List(new SourcesNode(s1,List("etp1","etp2")))
-                       r.lSourcesNodes = r.lSourcesNodes ++ List(new SourcesNode(s2,List("etp1")))
+                       r.lSourcesNodes = r.lSourcesNodes ++ List(new SourcesNode(s1.reference(),List("etp1","etp2")))
+                       r.lSourcesNodes = r.lSourcesNodes ++ List(new SourcesNode(s2.reference(),List("etp1")))
 
                        val y = QueryPlanner.ordonnanceBySource(plan,r)
 
@@ -426,8 +426,8 @@ object QueryPlannerTest extends TestSuite {
                          plan == BgpGroupe(List(s1,s2))
                        )
 
-                       r.lSourcesNodes = r.lSourcesNodes ++ List(new SourcesNode(s1,List("etp1")))
-                       r.lSourcesNodes = r.lSourcesNodes ++ List(new SourcesNode(s2,List("etp2")))
+                       r.lSourcesNodes = r.lSourcesNodes ++ List(new SourcesNode(s1.reference(),List("etp1")))
+                       r.lSourcesNodes = r.lSourcesNodes ++ List(new SourcesNode(s2.reference(),List("etp2")))
 
                        val y = QueryPlanner.ordonnanceBySource(plan,r)
 
@@ -463,10 +463,10 @@ object QueryPlannerTest extends TestSuite {
                          plan == BgpGroupe(List(s1,s2,s3,s4))
                        )
 
-                       r.lSourcesNodes = r.lSourcesNodes ++ List(new SourcesNode(s1,List("etp1","etp2")))
-                       r.lSourcesNodes = r.lSourcesNodes ++ List(new SourcesNode(s2,List("etp1")))
-                       r.lSourcesNodes = r.lSourcesNodes ++ List(new SourcesNode(s3,List("etp2")))
-                       r.lSourcesNodes = r.lSourcesNodes ++ List(new SourcesNode(s4,List("etp1","etp2")))
+                       r.lSourcesNodes = r.lSourcesNodes ++ List(new SourcesNode(s1.reference(),List("etp1","etp2")))
+                       r.lSourcesNodes = r.lSourcesNodes ++ List(new SourcesNode(s2.reference(),List("etp1")))
+                       r.lSourcesNodes = r.lSourcesNodes ++ List(new SourcesNode(s3.reference(),List("etp2")))
+                       r.lSourcesNodes = r.lSourcesNodes ++ List(new SourcesNode(s4.reference(),List("etp1","etp2")))
 
                        val y = QueryPlanner.ordonnanceBySource(plan,r)
 
@@ -514,11 +514,11 @@ object QueryPlannerTest extends TestSuite {
                              BgpGroupe(List(s1,s5))))
                        )
 
-                       r.lSourcesNodes = r.lSourcesNodes ++ List(new SourcesNode(s1,List("etp1","etp2")))
-                       r.lSourcesNodes = r.lSourcesNodes ++ List(new SourcesNode(s2,List("etp1")))
-                       r.lSourcesNodes = r.lSourcesNodes ++ List(new SourcesNode(s3,List("etp2")))
-                       r.lSourcesNodes = r.lSourcesNodes ++ List(new SourcesNode(s4,List("etp1")))
-                       r.lSourcesNodes = r.lSourcesNodes ++ List(new SourcesNode(s5,List("etp1","etp2")))
+                       r.lSourcesNodes = r.lSourcesNodes ++ List(new SourcesNode(s1.reference(),List("etp1","etp2")))
+                       r.lSourcesNodes = r.lSourcesNodes ++ List(new SourcesNode(s2.reference(),List("etp1")))
+                       r.lSourcesNodes = r.lSourcesNodes ++ List(new SourcesNode(s3.reference(),List("etp2")))
+                       r.lSourcesNodes = r.lSourcesNodes ++ List(new SourcesNode(s4.reference(),List("etp1")))
+                       r.lSourcesNodes = r.lSourcesNodes ++ List(new SourcesNode(s5.reference(),List("etp1","etp2")))
 
                        val y = QueryPlanner.ordonnanceBySource(plan,r)
 

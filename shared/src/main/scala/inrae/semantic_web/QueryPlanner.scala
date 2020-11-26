@@ -33,7 +33,7 @@ object QueryPlanner {
         val lbgpBySource  = lSourcesNodes.map( sn => sn.sources )
                        .flatMap( x=> x)
                        .distinct
-                       .map( source => (source -> lSourcesNodes.filter( _.sources contains source ).map( sn => sn.n )))
+                       .map( source => (source -> lSourcesNodes.filter( _.sources contains source ).map( sn => r.getRdfNode(sn.refNode).getOrElse(null)  )))
 
         INTERSECTION_RESULTS_SET(lbgpBySource.toMap)
       }

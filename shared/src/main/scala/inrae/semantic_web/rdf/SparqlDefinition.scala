@@ -80,8 +80,17 @@ case class QueryVariable (var name : String) extends SparqlDefinition {
 }
 
 object SparqlBuilder {
+
+  def create(value : ujson.Value) : SparqlDefinition = {
+    value("type").value match {
+      case "uri" => createUri(value)
+      case "literal" => createLiteral(value)
+      case _ => throw new Error("unknown type !")
+    }
+  }
+
   def createUri(value : ujson.Value) : URI = {
-    URI(value.value.toString)
+    URI(value("value").value.toString)
   }
 
   def createLiteral(value : ujson.Value) : Literal = {

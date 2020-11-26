@@ -45,9 +45,10 @@ object SimpleConsole  {
             case node : ObjectOf    => "ObjectOf ("+node.term.toString +" , " + node.reference() +")"
             case node : LinkTo      => "LinkTo ("+node.term.toString +" , " + node.reference() +")"
             case node : LinkFrom    => "LinkFrom ("+node.term.toString +" , " + node.reference() +")"
-            case node : SourcesNode => "SourceNode -> " + Labelled(node.n)
+            case node : SourcesNode => "SourceNode -> " + node.refNode
             case node : Value       => "Value ("+node.term.toString +")"
             case node : FilterNode  => "FILTER "+ node.toString()
+            case node : DatatypeNode => "DatatypeNode ("+ node.refNode  +" -> " + node.property.toString+ ") "
             case v                  => "--- Unkown ---"+v.toString
         }
     }
@@ -66,21 +67,32 @@ object SimpleConsole  {
 
         val label : String = escape + item + barrehor + " " + colorize(n) + (Labelled(n)) + Console.RESET
 
-        val children = prefix + (escape + barrevert) * marge + label + {
-            if ( n.children.length>0)
-                "\n" + n.children.map(child => get(child, marge + 1)).mkString("") + suffix
+        val labelledLine = prefix + (escape + barrevert) * marge + label + "\n"
+        val children = n.children.length match {
+            case l if l > 0 => {
+                   n.children.map (child => get (child, marge + 1) ).mkString ("") + suffix
+            }
+            case _ => ""
         }
 
         val sourcesNode = n match {
             case r : Root => {
-                prefix + (escape + barrevert) * marge + label + "\n" //+
-                  r.lSourcesNodes.map(child => get(child, marge + 1) +
-                    " * " + child.sources.mkString(",")  ).mkString("\n") + "\n" 
+                "\n" + prefix + (escape + barrevert) * marge + label + "\n"
+                  "==== SOURCESNODE === \n" + r.lSourcesNodes.map(child => get(child, marge + 1) +
+                    " * " + child.sources.mkString(",")  ).mkString("\n") + "\n"
             }
             case _ => ""
         }
-        children + "\n" + sourcesNode
 
+        val datatypeNode = n match {
+            case r : Root => {
+                "\n" +  prefix + (escape + barrevert) * marge + label + "\n"
+                "==== DATATYPE === \n" + r.lDatatypeNode.map(child => get(child, marge + 1)).mkString("\n")+ "\n"
+            }
+            case _ => ""
+        }
+
+        labelledLine + children + sourcesNode + datatypeNode
     } 
 }
 
