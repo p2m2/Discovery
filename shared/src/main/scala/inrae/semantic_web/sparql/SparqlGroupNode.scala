@@ -4,28 +4,28 @@ import inrae.semantic_web.internal.RdfNode
 class SparqlGroupNode {
   def whois() : String = {
     this match {
-      case _ : BGP => "BGP"
-      case _ : AND => "AND"
-      case _ : OR => "OR"
+      case _ : BgpGroupe => "BGP"
+      case _ : AndGroupe => "AND"
+      case _ : OrGroupe => "OR"
       case _ => "UNKNOWN"
     }
   }
 
   def +(that: SparqlGroupNode) : SparqlGroupNode = {
     this match {
-      case BGP(lnode_this) => that match {
-        case BGP(lnode_that) => BGP(lnode_this ++ lnode_that)
-        case OR(lbgp) => OR( lbgp.map( this + _ ))
-        case AND(lbgp) => AND( List(this) ++ lbgp)
+      case BgpGroupe(lnode_this) => that match {
+        case BgpGroupe(lnode_that) => BgpGroupe(lnode_this ++ lnode_that)
+        case OrGroupe(lbgp) => OrGroupe( lbgp.map( this + _ ))
+        case AndGroupe(lbgp) => AndGroupe( List(this) ++ lbgp)
       }
-      case OR(lbgp_this) => that match {
-        case OR(lbgp_that) => OR(lbgp_this ++ lbgp_that)
-        case _ => OR(lbgp_this ++ List(that))
+      case OrGroupe(lbgp_this) => that match {
+        case OrGroupe(lbgp_that) => OrGroupe(lbgp_this ++ lbgp_that)
+        case _ => OrGroupe(lbgp_this ++ List(that))
       }
-      case AND(lbgp_this) => that match {
-        case BGP(lnode_that) => AND( lbgp_this ++ List(that) )
-        case AND(lbgp) => AND( lbgp_this ++ lbgp)
-        case OR(lbgp) => OR( lbgp.map( this + _ ))
+      case AndGroupe(lbgp_this) => that match {
+        case BgpGroupe(lnode_that) => AndGroupe( lbgp_this ++ List(that) )
+        case AndGroupe(lbgp) => AndGroupe( lbgp_this ++ lbgp)
+        case OrGroupe(lbgp) => OrGroupe( lbgp.map( this + _ ))
       }
     }
   }
@@ -39,9 +39,9 @@ class SparqlGroupNode {
     start +
       {
         logiceNode match {
-          case BGP(l) => l.map( _.toString ).mkString(",")
-          case OR(l)  =>  item +l.map( display(_, marge+stepMarge) ).mkString(item)
-          case AND(l) =>  item +l.map( display(_, marge+stepMarge) ).mkString(item)
+          case BgpGroupe(l) => l.map( _.toString ).mkString(",")
+          case OrGroupe(l)  =>  item +l.map( display(_, marge+stepMarge) ).mkString(item)
+          case AndGroupe(l) =>  item +l.map( display(_, marge+stepMarge) ).mkString(item)
         }
       } + "]"
   }
@@ -49,7 +49,7 @@ class SparqlGroupNode {
   override def toString = "\n"+display(this,1)
 }
 
-case class BGP(lnodes : Seq[RdfNode]) extends SparqlGroupNode
-case class OR(lbgp   : Seq[SparqlGroupNode]) extends SparqlGroupNode
-case class AND(lbgp : Seq[SparqlGroupNode]) extends SparqlGroupNode
+case class BgpGroupe(lnodes : Seq[RdfNode]) extends SparqlGroupNode
+case class OrGroupe(lbgp   : Seq[SparqlGroupNode]) extends SparqlGroupNode
+case class AndGroupe(lbgp : Seq[SparqlGroupNode]) extends SparqlGroupNode
 

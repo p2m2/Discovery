@@ -56,8 +56,6 @@ case class QueryRunner(source: ConfigurationObject.Source) {
           QueryResult(e.getMessage,"error")
         case e : Throwable => {
           System.err.println(e.getMessage)
-          System.err.println("Stop execution")
-          System.exit(-1)
           QueryResult(e.getMessage,"error")
         }
       }

@@ -2,7 +2,7 @@ package inrae.semantic_web.sparql
 
 import inrae.semantic_web.{SW, StatementConfiguration}
 import inrae.semantic_web.internal.{Node, ObjectOf, Something, SubjectOf, Value}
-import inrae.semantic_web.rdf.{IRI, URI}
+import inrae.semantic_web.rdf.{IRI, SparqlDefinition, URI}
 import ujson.IndexedValue.False
 
 import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
@@ -75,7 +75,7 @@ class SWFacade(var config: StatementConfiguration) {
   def isLinkTo( uri : URI , ref : String = sw.getUniqueRef() ) : SWFacade = { sw.isLinkTo(uri,ref); this }
 
   @JSExport
-  def isA( uri : URI ) : SWFacade = { sw.isA(uri); this }
+  def isA( term : SparqlDefinition ) : SWFacade = { sw.isA(term); this }
 
   @JSExport
   def isLinkFrom( uri : URI , ref : String = sw.getUniqueRef() ) : SWFacade = { sw.isLinkFrom(uri,ref); this }
@@ -84,13 +84,13 @@ class SWFacade(var config: StatementConfiguration) {
   def set( uri : URI ) : SWFacade = { sw.set(uri) ; this }
 
   @JSExport
+  def datatype( uri : URI, ref : String ) : SWFacade = { sw.datatype(uri,ref) ; this }
+
+  @JSExport
   def debug() : SWFacade = { sw.debug() ; this  }
 
   @JSExport
   def sparql_console() : SWFacade = { sw.sparql_console() ; this }
-
-  @JSExport
-  def variable(reference: String) : String = sw.variable(reference)
 
   @JSExport
   def select(lRef: String*): Promise[Dynamic] = { sw.select(lRef).map(x => scala.scalajs.js.JSON.parse(x.toString())).toJSPromise }
@@ -99,15 +99,19 @@ class SWFacade(var config: StatementConfiguration) {
   def count(): Promise[Int] = { sw.count().toJSPromise }
 
   @JSExport
-  def findClassesOf(uri:URI = URI("")): Promise[Seq[URI]] = { sw.findClassesOf().toJSPromise }
+  def findClasses(uri:URI = URI("")): Promise[js.Array[URI]] = { sw.findClasses(uri).map(array => array.toJSArray).toJSPromise }
 
   @JSExport
-  def findObjectPropertiesOf(motherClassProperties: URI = URI("") ) : Promise[Seq[URI]] = {
-    sw.findObjectPropertiesOf().toJSPromise
+  def findProperties(motherClassProperties: URI = URI("") ) : Promise[js.Array[URI]] = {
+    sw.findProperties(motherClassProperties).map(array => array.toJSArray).toJSPromise
   }
 
   @JSExport
-  def findDatatypePropertiesOf(motherClassProperties: URI = URI("") ) : Promise[Seq[URI]] = {
-    sw.findDatatypePropertiesOf().toJSPromise
+  def findObjectProperties(motherClassProperties: URI = URI("") ) : Promise[js.Array[URI]] = {
+    sw.findObjectProperties(motherClassProperties).map(array => array.toJSArray).toJSPromise
+  }
+  @JSExport
+  def findDatatypeProperties(motherClassProperties: URI = URI("") ) : Promise[js.Array[URI]] = {
+    sw.findDatatypeProperties(motherClassProperties).map(array => array.toJSArray).toJSPromise
   }
 }

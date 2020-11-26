@@ -92,7 +92,7 @@ trait GraphPattern extends SparqlAlgebra
 case class Bgp(lTriples : Seq[Triple] , filters : Seq[Filter]) extends GraphPattern {
   def sparql() : String = lTriples.map( _.sparql() ).mkString(".\n") + filters.map ( _.sparql()).mkString(".\n")
 }
-case class Triple(s: Either[RdfType,Variable], p: Either[RdfType,Variable], o:Either[RdfType,Variable]) extends SparqlAlgebra {
+case class Triple(s: Either[SparqlDefinition,Variable], p: Either[SparqlDefinition,Variable], o:Either[SparqlDefinition,Variable]) extends SparqlAlgebra {
   def sparql() : String =  s.fold( _.sparql(), _.sparql() ) + " " +
                            p.fold( _.sparql(), _.sparql() ) + " " +
                            o.fold( _.sparql(), _.sparql() )
@@ -137,7 +137,7 @@ trait OperatorTernary extends Operator {
   def arity : Int = 3
 }
 
-case class Contains(left : Either[RdfType,String], right: Either[RdfType,String]) extends OperatorBinary {
+case class Contains(left : Either[SparqlDefinition,String], right: Either[SparqlDefinition,String]) extends OperatorBinary {
   def sparql() : String = "CONTAINS(" + left.fold( _.sparql(),_.toString ) + " " + right.fold( _.sparql(), _.toString ) + ")"
 }
 
@@ -193,19 +193,19 @@ object SparqlAlgebra {
 
 
   def algebra(sire : RdfNode, child : RdfNode, map : Map[String,String]) : Triple = {
-    val sireSparqlAlgebra : Either[RdfType,Variable] = sire match {
+    val sireSparqlAlgebra : Either[SparqlDefinition,Variable] = sire match {
       case r : RdfNode => Right(Variable(map(r.reference())))
     }
     child match {
-      case a : SubjectOf => Triple(sireSparqlAlgebra,Left(a.uri),Right(Variable(map(child.reference()))))
-      case a : ObjectOf =>Triple(Right(Variable(map(child.reference()))),Left(a.uri),sireSparqlAlgebra)
+      case a : SubjectOf => Triple(sireSparqlAlgebra,Left(a.term),Right(Variable(map(child.reference()))))
+      case a : ObjectOf =>Triple(Right(Variable(map(child.reference()))),Left(a.term),sireSparqlAlgebra)
       case a : LinkTo => Triple(sireSparqlAlgebra,Right(Variable(map(child.reference()))),Left(a.term))
-      case a : LinkFrom => Triple(Left(a.uri),Right(Variable(map(child.reference()))),sireSparqlAlgebra)
+      case a : LinkFrom => Triple(Left(a.term),Right(Variable(map(child.reference()))),sireSparqlAlgebra)
     }
   }
 
   def nodeToSparqlAlgebra( r : Root, n : Node, distinct : Boolean, limit : Int, offset : Int ) = {
-    val (mapIdVar,_) = SparqlGenerator.correspondanceVariablesIdentifier(n)
+    val (mapIdVar,_) = SparqlGenerator.correspondenceVariablesIdentifier(n)
     val variables = mapIdVar.values.map( Variable(_)).toSeq
 
     Base(IRI("http://www.inrae.fr/easySparql/"),

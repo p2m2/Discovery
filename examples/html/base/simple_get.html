@@ -26,12 +26,18 @@
 
         let r = query.something("h1")
                      .set(URI("http://dbpedia.org/resource/%C3%84lvdalen"))
-                     .isSubjectOf(URI("http://www.w3.org/2002/07/owl#sameAs"))
+                     .isSubjectOf(URI("http://www.w3.org/2002/07/owl#sameAs"),"sub")
                      .select()
 
-        r.then((value) => {
-          console.log(value);
-          document.getElementById("demo").appendChild(document.createTextNode(value));
+        r.then((response) => {
+          let ul = document.createElement("ul")
+          document.getElementById("demo").appendChild(ul)
+          for (let i=0;i<response.results.bindings.length;i++) {
+            console.log(response.results.bindings[i]["sub"])
+            let li = document.createElement("li");
+            li.appendChild(document.createTextNode(JSON.stringify(response.results.bindings[i]["sub"])));
+            ul.appendChild(li);
+           }
         }).catch( (error) => {
           console.error(" -- catch exception --")
           console.error(error)

@@ -46,7 +46,6 @@ object QueryPlannerExecutorTest extends TestSuite {
         Map( "etp1" -> List(s1,s2))
       )
       QueryPlannerExecutor.executePlanning(r,plan,List("s1","s2"),configTest,mpref)
-
     }
   }
 }

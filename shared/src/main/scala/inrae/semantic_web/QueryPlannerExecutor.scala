@@ -89,7 +89,7 @@ object QueryPlannerExecutor {
           var r :Root = Root()
           r.addChildren(buildRootNode(root,lbgp))
           scribe.info(r.toString())
-          val refToIdentifier = pm.SparqlGenerator.correspondanceVariablesIdentifier(root)
+          val refToIdentifier = pm.SparqlGenerator.correspondenceVariablesIdentifier(root)
             ._1.view.filterKeys( k => listVariables.contains(k) ).toMap
           val qr = QueryRunner(config.source(source)).query(
             SparqlQueryBuilder.queryString(r,refToIdentifier,refToIdentifier.values.toSeq,prefixes)

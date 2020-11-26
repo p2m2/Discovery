@@ -23,16 +23,18 @@
           `)
         let query = new EasySparqlEngine(config);
 
-        console.log(query)
         let r = query.something("h1")
                       .set(URI("http://dbpedia.org/resource/Abbie_Hoffman"))
-                      .debug()
-                      .findClassesOf(URI("http://www.w3.org/2002/07/owl#Class"));
+                      .findDatatypeProperties(URI("DatatypeProperty","owl"))
 
-        r.then((value) => {
-          let res = value;
-          console.log(res);
-          document.getElementById("demo").appendChild(document.createTextNode(res));
+        r.then((lUris) => {
+            let ul = document.createElement("ul")
+            document.getElementById("demo").appendChild(ul)
+          for (let i=0;i<lUris.length;i++) {
+            let li = document.createElement("li");
+            li.appendChild(document.createTextNode(JSON.stringify(lUris[i].toString())));
+            ul.appendChild(li);
+          }
         }).catch( (error) => {
           console.error(" -- catch exception --")
           console.error(error)

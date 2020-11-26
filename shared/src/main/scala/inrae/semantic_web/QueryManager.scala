@@ -2,7 +2,7 @@ package inrae.semantic_web
 
 import inrae.semantic_web.QueryPlanner
 import inrae.semantic_web.internal._
-import inrae.semantic_web.rdf.{IRI, Literal, RdfType, URI}
+import inrae.semantic_web.rdf.{IRI, Literal, SparqlBuilder, SparqlDefinition, URI}
 import inrae.semantic_web.sparql.{QueryResult, _}
 
 import scala.concurrent.{Future, Promise}
@@ -19,7 +19,7 @@ object QueryManager {
    */
 
   def sparql_string(root: Root, n: Node): String = {
-    val (refToIdentifier,_) = pm.SparqlGenerator.correspondanceVariablesIdentifier(n)
+    val (refToIdentifier,_) = pm.SparqlGenerator.correspondenceVariablesIdentifier(n)
     SparqlQueryBuilder.queryString(root,refToIdentifier,refToIdentifier.values.toSeq,root.prefixes)
   }
 
@@ -41,7 +41,7 @@ object QueryManager {
       throw new Exception(" ** None sources available ** ")
     } else if (config.sources().length == 1) {
       val source = config.sources()(0)
-      val (refToIdentifier, _) = pm.SparqlGenerator.correspondanceVariablesIdentifier(root)
+      val (refToIdentifier, _) = pm.SparqlGenerator.correspondenceVariablesIdentifier(root)
       val varCount = "count"
      // val prolog = pm.SparqlGenerator.prologCountSelection(varCount,refToIdentifier(Node.references(n)))
      val prolog = pm.SparqlGenerator.prologCountSelection(varCount)
@@ -54,7 +54,9 @@ object QueryManager {
         pm.SparqlGenerator.solutionModifier()
 
       val res: Future[QueryResult] = QueryRunner(source).query(query)
-      res.map(v => v.json("results")("bindings")(0)(varCount).toString().toInt)
+      res.map(v => {
+        SparqlBuilder.createLiteral(v.json("results")("bindings")(0)(varCount)).toInt()
+      })
     } else {
       // todo query planner
       scribe.error("QueryPlanner is not available .")
@@ -69,10 +71,11 @@ object QueryManager {
     if (config.sources().length == 0) {
       throw new Exception(" ** None sources available ** ")
     } else if (config.sources().length == 1) {
-      val (refToIdentifier,_) = pm.SparqlGenerator.correspondanceVariablesIdentifier(root)
+      val (refToIdentifier,_) = pm.SparqlGenerator.correspondenceVariablesIdentifier(root)
 
+      scribe.info(refToIdentifier.toString())
       val query : String = SparqlQueryBuilder.queryString(root,refToIdentifier, listVariables, root.prefixes)
-      scribe.debug(query)
+      scribe.info(query)
       QueryRunner(config.sources()(0)).query(query)
     } else {
 
@@ -96,12 +99,13 @@ object QueryManager {
       case s : Something =>
         /* Something is Everywhere !! */
         Future {
-          Some(SourcesNode(s,config.sources().map( _.id )))
+          Some(SourcesNode(s.reference(),config.sources().map( _.id )))
         }
       case r : RdfNode =>
+        val (refToIdentifier,_) = pm.SparqlGenerator.correspondenceVariablesIdentifier(n)
         val query = pm.SparqlGenerator.prefixes(prefixes) + "\n" +
           pm.SparqlGenerator.prologSourcesSelection() + "\n" +
-          pm.SparqlGenerator.sparqlNode(r,"varUp","varCur") +
+          pm.SparqlGenerator.sparqlNode(r,refToIdentifier,"varUp","varCur") +
           pm.SparqlGenerator.solutionModifierSourcesSelection()
 
         scribe.debug(query)
@@ -119,7 +123,7 @@ object QueryManager {
 
         y2.onComplete {
           case Success(lCheck) => {
-            y3 success Some(SourcesNode(r, lCheck.zip(config.sources()).filter( _._1).map( _._2.id)))
+            y3 success Some(SourcesNode(r.reference(), lCheck.zip(config.sources()).filter( _._1).map( _._2.id)))
           }
           case msg => {
             System.err.println(msg)

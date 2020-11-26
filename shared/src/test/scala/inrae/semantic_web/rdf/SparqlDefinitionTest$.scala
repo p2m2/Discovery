@@ -2,7 +2,7 @@ package inrae.semantic_web.rdf
 
 import utest._
 
-object RdfTypeTest extends TestSuite {
+object SparqlDefinitionTest$ extends TestSuite {
 
   def tests = Tests {
     test("Create URI object with localname/namespace") {

@@ -19,9 +19,9 @@
          }
     </style>
 </head>
-
+<!--https://cdn.jsdelivr.net/gh/ofilangi/easySparql@develop/ext/es-opt.js-->
 <body>
-<script type="text/javascript" src="../../../js/target/scala-2.13/es-opt.js"></script>
+<script type="text/javascript" src="../../../js/target/scala-2.13/es-fastopt.js"></script>
 <pre id="demo"></pre>
 
 <div id="askomics_code" class="boxed">
@@ -93,8 +93,11 @@
 
             for ( entity of listEntities.results.bindings ) {
              console.log("entity:"+JSON.stringify(entity["entity"]));
-             //   let query = new EasySparqlEngine(config);
-             //   let properties = query.something()
+             let query = new EasySparqlEngine(config);
+             let properties = query.something("instance")
+                                      .isA(URI(entity["entity"].value))
+                                      .isLinkTo(URI"relation")
+                                      .sparql_console()
 
             }
 

@@ -33,3 +33,9 @@ sbt esJVM/testOnly inrae.semantic_web.QueryPlannerTest
 Vscode support : Metals plugin
 npm install source-map-support
 
+### Js example
+```html
+<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/ofilangi/easySparql@develop/ext/es-opt.js"></script>
+```
+
+
