@@ -297,7 +297,6 @@ case class SW(var config: StatementConfiguration) {
       }
     }.distinct
 
-
     info("lSelectVariables :::"+lSelectVariables.toString())
 
     val p = Promise[ujson.Value]()
@@ -308,6 +307,7 @@ case class SW(var config: StatementConfiguration) {
        .map( (qr : QueryResult) => {
            val lPromises = lDatatype.map(datatypeNode => {
              val p = Promise[QueryResult]()
+
              val labelProperty = datatypeNode.property.reference()
              rootNode.getRdfNode(datatypeNode.refNode) match {
                case Some(_) => {
@@ -320,18 +320,22 @@ case class SW(var config: StatementConfiguration) {
                      List()
                    }
                  }
-                 /* request using api */
-                 SW(config).something("val_uri")
-                   .setList(lUris.map(_ match { case uri: URI => uri }))
-                   .setupnode(datatypeNode.property, false, false)
-                   .select(List("val_uri", labelProperty))
-                   .map(json => {
-                     qr.setDatatype(labelProperty, json("results")("bindings").arr.map(rec => {
-                       rec("val_uri")("value").value.toString -> rec(labelProperty)
-                     }).toMap)
-                      p success qr
-                      p.future
-                    })
+
+                 Future.sequence(lUris.grouped(config.getInt("datatype_batch_processing")).toList.map(
+                   lSubUris => {
+                     /* request using api */
+                     SW(config).something("val_uri")
+                       .setList(lSubUris.map(_ match { case uri: URI => uri }))
+                       .setupnode(datatypeNode.property, false, false)
+                       .select(List("val_uri", labelProperty))
+                       .map(json => {
+                         qr.setDatatype(labelProperty, json("results")("bindings").arr.map(rec => {
+                           rec("val_uri")("value").value.toString -> rec(labelProperty)
+                         }).toMap)
+                         Promise[QueryResult]().success(qr).future
+                       })
+                    }))
+
                }
                case None =>{
                  p success qr
@@ -350,6 +354,8 @@ case class SW(var config: StatementConfiguration) {
   def count() : Future[Int] = {
     QueryManager.countNbSolutions(rootNode,config)
   }
+
+
 
   def findClasses(motherClass: URI = URI("") ) : Future[Seq[URI]] = {
     (motherClass match {
