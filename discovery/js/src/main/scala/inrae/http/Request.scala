@@ -11,8 +11,16 @@ import scala.scalajs.js
 
 case class Request(var url : String) {
 
-  def addData(keyname: String,value: String) = {
+  def addEncodedData(keyname: String, value: String) = {
     URIUtils.encodeURIComponent(keyname)+"="+URIUtils.encodeURIComponent(value)
+  }
+
+  def addData(keyname: String, value: String) = {
+    value
+  }
+
+  def addQueryAsEncodedData(query : String) = {
+    addEncodedData("query",query)
   }
 
   def addQueryAsData(query : String) = {
@@ -20,11 +28,11 @@ case class Request(var url : String) {
   }
 
   def addDefaultGraph(graphs : Seq[String]) = {
-    graphs.reduce( (g1,g2) => addData("default-graph-uri",g1)+"&"+addData("default-graph-uri",g2))
+    graphs.reduce( (g1,g2) => addEncodedData("default-graph-uri",g1)+"&"+addEncodedData("default-graph-uri",g2))
   }
 
   def addNamedGraphUri(graphs : Seq[String]) = {
-    graphs.reduce( (g1,g2) => addData("named-graph-uri",g1)+"&"+addData("named-graph-uri",g2))
+    graphs.reduce( (g1,g2) => addEncodedData("named-graph-uri",g1)+"&"+addEncodedData("named-graph-uri",g2))
   }
 
   def send(xhr : dom.XMLHttpRequest, data: scala.scalajs.js.Any, mimetype : String) : Future[QueryResult] = {
@@ -80,7 +88,7 @@ case class Request(var url : String) {
     //xhr.setRequestHeader("Access-Control-Allow-Origin", "*")
     xhr.setRequestHeader("Accept", mime(mimetype))
 
-    val data = addQueryAsData(query)
+    val data = addQueryAsEncodedData(query)
     send(xhr,data,mimetype)
   }
 

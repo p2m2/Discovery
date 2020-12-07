@@ -1,4 +1,4 @@
-package inrae.semantic_web.sparql
+package inrae.semantic_web
 
 import inrae.semantic_web.{SW, StatementConfiguration}
 import inrae.semantic_web.internal.{Node, ObjectOf, Something, SubjectOf, Value}
@@ -11,27 +11,27 @@ import scala.scalajs.js._
 import scala.scalajs._
 
 @JSExportTopLevel("FilterIncrement")
-class FilterIncrement(swf: SWFacade)  {
+class FilterIncrement(swf: EasySparqlEngine)  {
   var negation = false
 
   @JSExport
-  def isLiteral: SWFacade = { swf.sw.filter.isLiteral ; swf }
+  def isLiteral: EasySparqlEngine = { swf.sw.filter.isLiteral ; swf }
 
   @JSExport
-  def isUri: SWFacade = { swf.sw.filter.isUri ; swf }
+  def isUri: EasySparqlEngine = { swf.sw.filter.isUri ; swf }
 
   @JSExport
-  def isBlank: SWFacade = { swf.sw.filter.isBlank ; swf }
+  def isBlank: EasySparqlEngine = { swf.sw.filter.isBlank ; swf }
 
   @JSExport
-  def contains(l:String): SWFacade = { swf.sw.filter.contains(l) ; swf }
+  def contains(l:String): EasySparqlEngine = { swf.sw.filter.contains(l) ; swf }
 
   @JSExport
   def not : FilterIncrement = { swf.sw.filter.not ; this }
 }
 
 @JSExportTopLevel(name="EasySparqlEngine")
-class SWFacade(var config: StatementConfiguration) {
+class EasySparqlEngine(var config: StatementConfiguration) {
   implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
 
   implicit def string2Uri(uri: String) = URI(uri)
@@ -43,54 +43,54 @@ class SWFacade(var config: StatementConfiguration) {
   val filter = new FilterIncrement(this)
 
   @JSExport
-  def help() : SWFacade = { sw.help() ; this }
+  def help() : EasySparqlEngine = { sw.help() ; this }
 
   @JSExport
-  def focus(ref : String) : SWFacade = { sw.focus(ref) ; this }
+  def focus(ref : String) : EasySparqlEngine = { sw.focus(ref) ; this }
 
   @JSExport
-  def focusManagement(n : Node) : SWFacade = { sw.focusManagement(n) ; this }
+  def focusManagement(n : Node) : EasySparqlEngine = { sw.focusManagement(n) ; this }
 
   @JSExport
-  def prefix(short : String, long : IRI ) : SWFacade = { sw.prefix(short,long) ; this }
+  def prefix(short : String, long : IRI ) : EasySparqlEngine = { sw.prefix(short,long) ; this }
 
   @JSExport
-  def graph(graph : IRI) : SWFacade = { sw.graph(graph) ; this }
+  def graph(graph : IRI) : EasySparqlEngine = { sw.graph(graph) ; this }
 
   @JSExport
-  def namedGraph(graph : IRI ) : SWFacade = { sw.namedGraph(graph) ; this }
+  def namedGraph(graph : IRI ) : EasySparqlEngine = { sw.namedGraph(graph) ; this }
   /* start a request */
   @JSExport
-  def something( ref : String = sw.getUniqueRef() ) : SWFacade = { sw.something(ref) ; this }
+  def something( ref : String = sw.getUniqueRef() ) : EasySparqlEngine = { sw.something(ref) ; this }
 
   /* create node which focus is the subject : ?focusId <uri> ?target */
   @JSExport
-  def isSubjectOf( uri : URI , ref : String = sw.getUniqueRef() ) : SWFacade = { sw.isSubjectOf(uri,ref) ; this }
+  def isSubjectOf( uri : URI , ref : String = sw.getUniqueRef() ) : EasySparqlEngine = { sw.isSubjectOf(uri,ref) ; this }
 
   /* create node which focus is the subject : ?focusId <uri> ?target */
   @JSExport
-  def isObjectOf( uri : URI , ref : String = sw.getUniqueRef() ) : SWFacade = { sw.isObjectOf(uri,ref); this }
+  def isObjectOf( uri : URI , ref : String = sw.getUniqueRef() ) : EasySparqlEngine = { sw.isObjectOf(uri,ref); this }
 
   @JSExport
-  def isLinkTo( uri : URI , ref : String = sw.getUniqueRef() ) : SWFacade = { sw.isLinkTo(uri,ref); this }
+  def isLinkTo( uri : URI , ref : String = sw.getUniqueRef() ) : EasySparqlEngine = { sw.isLinkTo(uri,ref); this }
 
   @JSExport
-  def isA( term : SparqlDefinition ) : SWFacade = { sw.isA(term); this }
+  def isA( term : SparqlDefinition ) : EasySparqlEngine = { sw.isA(term); this }
 
   @JSExport
-  def isLinkFrom( uri : URI , ref : String = sw.getUniqueRef() ) : SWFacade = { sw.isLinkFrom(uri,ref); this }
+  def isLinkFrom( uri : URI , ref : String = sw.getUniqueRef() ) : EasySparqlEngine = { sw.isLinkFrom(uri,ref); this }
   /* set */
   @JSExport
-  def set( uri : URI ) : SWFacade = { sw.set(uri) ; this }
+  def set( uri : URI ) : EasySparqlEngine = { sw.set(uri) ; this }
 
   @JSExport
-  def datatype( uri : URI, ref : String ) : SWFacade = { sw.datatype(uri,ref) ; this }
+  def datatype( uri : URI, ref : String ) : EasySparqlEngine = { sw.datatype(uri,ref) ; this }
 
   @JSExport
-  def debug() : SWFacade = { sw.debug() ; this  }
+  def debug() : EasySparqlEngine = { sw.console() ; this  }
 
   @JSExport
-  def sparql_console() : SWFacade = { sw.sparql_console() ; this }
+  def sparql_console() : EasySparqlEngine = { sw.sparql_console() ; this }
 
   @JSExport
   def select(lRef: String*): Promise[Dynamic] = { sw.select(lRef).map(x => scala.scalajs.js.JSON.parse(x.toString())).toJSPromise }

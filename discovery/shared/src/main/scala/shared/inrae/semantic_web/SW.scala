@@ -20,9 +20,9 @@ case class SW(var config: StatementConfiguration) {
   /* focus node */
   private var focusNode  : Node = rootNode
 
-  private val version : String = "0.0.1"
+  private val version : String = "0.0.2"
 
-  println(" ---- version :"+version + " -----------" )
+  info(" ---- version Discovery :"+ version + " -----------" )
 
   this.prefix("owl",IRI("http://www.w3.org/2002/07/owl#"))
   this.prefix("rdf",IRI("http://www.w3.org/1999/02/22-rdf-syntax-ns#"))
@@ -53,7 +53,7 @@ case class SW(var config: StatementConfiguration) {
   //Logger.root.clearHandlers().clearModifiers().withHandler(minimumLevel = Some(Level.Debug)).replace()
   private val logger = Logger.of[SW]
   // Set the root logger's log level
-  Logger.setDefaultLogLevel(LogLevel.DEBUG)
+  Logger.setDefaultLogLevel(LogLevel.INFO)
 
   def help() : SW = {
     println(" ---------------- SW "+version+" ---------------------------")
@@ -135,7 +135,6 @@ case class SW(var config: StatementConfiguration) {
      *  add a Something element otherwise */
     term match {
         case qv : QueryVariable => if (SelectNode.getNodeWithRef(qv.name,rootNode).length == 0) {
-          println("QV :"+qv.name+"does not EXIST !!!!!!!!!!!!!!!!!!!!!!")
           rootNode.addChildren(Something(qv.name))
         }
         case _ => None
@@ -251,7 +250,7 @@ case class SW(var config: StatementConfiguration) {
   }
 
 
-  def debug() : SW = {
+  def console() : SW = {
       println("USER REQUEST\n" +
         pm.SimpleConsole.get(rootNode) +
         pm.SimpleConsole.get(focusNode) +
@@ -280,7 +279,6 @@ case class SW(var config: StatementConfiguration) {
   }
 
   def select(lRef: Seq[String] = List()) : Future[ujson.Value] = {
-
     val mapId2Var =  pm.SparqlGenerator.correspondenceVariablesIdentifier(rootNode)._1
     info("Mapping variable <-> references :" + mapId2Var.toString())
 
@@ -302,17 +300,26 @@ case class SW(var config: StatementConfiguration) {
 
     info("lSelectVariables :::"+lSelectVariables.toString())
 
+    val p = Promise[ujson.Value]()
+
     /* manage variable name */
     QueryManager.queryVariables(rootNode,lSelectVariables,config)
       /* manage datatype decoration */
-       .flatMap(qr => {
+       .map( (qr : QueryResult) => {
            val lPromises = lDatatype.map(datatypeNode => {
              val p = Promise[QueryResult]()
              val labelProperty = datatypeNode.property.reference()
              rootNode.getRdfNode(datatypeNode.refNode) match {
                case Some(_) => {
-                 /* find uris value inside results to decore */
-                 val lUris = qr.getValues(mapId2Var(datatypeNode.refNode))
+                 /* find uris value inside results to decorate */
+                 val lUris : Seq[SparqlDefinition] =
+                 try {
+                   qr.getValues(mapId2Var(datatypeNode.refNode))
+                 } catch {
+                   case _ : Throwable => {
+                     List()
+                   }
+                 }
                  /* request using api */
                  SW(config).something("val_uri")
                    .setList(lUris.map(_ match { case uri: URI => uri }))
@@ -332,18 +339,12 @@ case class SW(var config: StatementConfiguration) {
                }
              }
            })
-         val p = Promise[ujson.Value]()
-         Future.sequence(lPromises) onComplete {
-           case Success(_) => {
-             qr.v2Ident(mapId2Var)
-             p success qr.json
-           }
-           case Failure(_) => {
-             error("Promise is not completed !")
-           }
-         }
-         p.future
-      })
+         Future.sequence(lPromises).map(_ => {
+           qr.v2Ident(mapId2Var)
+           p success qr.json
+         })
+       })
+    p.future
   }
 
   def count() : Future[Int] = {

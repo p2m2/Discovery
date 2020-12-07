@@ -11,10 +11,23 @@ trait Node {
     this
   }
 
-  def getRdfNode(ref : String) : Option[RdfNode] = this match {
-    case  n : RdfNode if (ref == n.reference()) => Some(n)
-    case _ if children.length > 0 => Some(children.flatMap( c => c.getRdfNode(ref) ).head)
-    case _ => None
+  def getRdfNode(ref : String,sep : String ="") : Option[RdfNode] = {
+    println(sep+" -- getRdfNode -- ")
+    val v = this match {
+      case  n : RdfNode if (ref == n.reference()) => { println("ref:"+ref+"  1"); Some(n) }
+      case _ if children.length > 0 => {
+        println("ref:" + ref + "  2");
+        val l = children.map(c => c.getRdfNode(ref, sep + "*")).flatten
+        if ( l.length > 0 ) {
+          Some(l.head)
+        } else {
+          None
+        }
+      }
+      case _ => { println("ref:"+ref+"  3"); None }
+    }
+    println(sep+"retour:"+v.toString)
+    v
   }
 
   override def toString() : String = {

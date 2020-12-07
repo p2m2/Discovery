@@ -9,9 +9,14 @@ case class Triple(s: SparqlDefinition, p: SparqlDefinition, o: SparqlDefinition)
 trait SparqlDefinition {
   def cleanString(str : String) = {
     str.replaceAll("^\"","")
-        .replaceAll("\"$","")
+      .replaceAll("\"$","")
+      .replaceAll("^<","")
+      .replaceAll(">$","")
   }
+
   def sparql() : String
+
+  def naiveLabel() : String
 }
 
 @JSExportTopLevel(name="IRI")
@@ -21,6 +26,9 @@ case class IRI (var iri : String) extends SparqlDefinition {
       "<"+iri+">"
   }
   def sparql() : String = toString
+
+  def naiveLabel() : String = iri.split("[/#]").last
+
 }
 
 @JSExportTopLevel(name="URI")
@@ -35,7 +43,10 @@ case class URI (var localName : String,var nameSpace : String = "") extends Spar
       case _ => nameSpace + ":" + localName
     }
   }
+
   def sparql() : String = toString
+
+  def naiveLabel() : String = localName.split("[/#]").last
 }
 
 @JSExportTopLevel(name="Anonymous")
@@ -46,6 +57,8 @@ case class Anonymous(var value : String) extends SparqlDefinition {
     return value
   }
   def sparql() : String = toString
+
+  def naiveLabel() : String = s"Anonymous[$value]"
 }
 
 @JSExportTopLevel(name="PropertyPath")
@@ -55,6 +68,8 @@ case class PropertyPath(var value : String) extends SparqlDefinition {
   override def toString() : String = value
 
   def sparql() : String = toString
+
+  def naiveLabel() : String = s"PropertyPath[$value]"
 }
 
 @JSExportTopLevel(name="Literal")
@@ -68,6 +83,8 @@ case class Literal(var value : String, var datatype : String = "xsd:string", var
   def toBoolean() : Boolean = value.toBoolean
 
   def sparql() : String = toString
+
+  def naiveLabel() : String = s"PropertyPath[$value]"
 }
 
 @JSExportTopLevel(name="QueryVariable")
@@ -77,6 +94,8 @@ case class QueryVariable (var name : String) extends SparqlDefinition {
     "?"+name
   }
   def sparql() : String = toString
+
+  def naiveLabel() : String = s"Variable[$name]"
 }
 
 object SparqlBuilder {
@@ -90,10 +109,18 @@ object SparqlBuilder {
   }
 
   def createUri(value : ujson.Value) : URI = {
-    URI(value("value").value.toString)
+    try {
+      URI(value("value").value.toString)
+    } catch {
+      case _ : Throwable => URI("")
+    }
   }
 
   def createLiteral(value : ujson.Value) : Literal = {
-    Literal(value("value").toString,value("datatype").toString)
+    try {
+      Literal(value("value").toString,value("datatype").toString)
+    } catch {
+      case _ : Throwable => Literal("","")
+    }
   }
 }

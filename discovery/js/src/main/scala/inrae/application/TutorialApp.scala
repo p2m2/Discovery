@@ -1,4 +1,4 @@
-package inrae.application
+package inrae.application.tutorial
 
 import inrae.semantic_web.rdf.URI
 import inrae.semantic_web.{SW, StatementConfiguration}
