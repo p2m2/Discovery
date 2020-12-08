@@ -1,3 +1,10 @@
+
+# dependencies
 target/
-node_modules/
-.idea/
+.js/
+.jvm/
+/back-end/public/images/screenshots
+.idea/*
+/mongo-data
+/node_modules
+
