@@ -69,20 +69,25 @@ object QueryManager {
                      listVariables : Seq[String],
                      config : StatementConfiguration) : Future[QueryResult] = {
     debug("queryVariables")
-    if (config.sources().length == 0) {
-      throw new Exception(" ** None sources available ** ")
-    } else if (config.sources().length == 1) {
-      val (refToIdentifier,_) = pm.SparqlGenerator.correspondenceVariablesIdentifier(root)
 
-      info(refToIdentifier.toString())
-      val query : String = SparqlQueryBuilder.queryString(root,refToIdentifier, listVariables, root.prefixes)
-      info(query)
-      QueryRunner(config.sources()(0)).query(query)
-    } else {
-
-      val plan = QueryPlanner.buildPlanning(root)//,listVariables,config)
-      val plan_results_set = QueryPlanner.ordonnanceBySource(plan,root)
-      QueryPlannerExecutor.executePlanning(root,plan_results_set,listVariables,config,root.prefixes)
+    config.sources().length match {
+      case 0 => {
+        throw new Exception(" ** None sources available ** ")
+      }
+      case 1 => {
+        val (refToIdentifier, _) = pm.SparqlGenerator.correspondenceVariablesIdentifier(root)
+        info(refToIdentifier.toString())
+        val query: String = SparqlQueryBuilder.queryString(root, refToIdentifier, listVariables, root.prefixes)
+        QueryRunner(config.sources()(0)).query(query).map( qr => {
+          println("FIN queryVariables ********************************************************************************")
+          qr
+        })
+      }
+      case _ => {
+        val plan = QueryPlanner.buildPlanning(root) //,listVariables,config)
+        val plan_results_set = QueryPlanner.ordonnanceBySource(plan, root)
+        QueryPlannerExecutor.executePlanning(root, plan_results_set, listVariables, config, root.prefixes)
+      }
     }
   }
 
@@ -137,4 +142,31 @@ object QueryManager {
       case _ => Future(None)
     }
   }
+
+  def process_datatypes(qr : QueryResult,
+                        datatypeNode : DatatypeNode,
+                        lUris : Seq[SparqlDefinition],
+                        config : StatementConfiguration) = {
+    println("lllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll")
+    info(" -- process_datatypes --")
+    val labelProperty = datatypeNode.property.reference()
+
+    lUris.grouped(config.getInt("datatype_batch_processing")).toList.map(
+      lSubUris => {
+        info( " datatypes:"+lSubUris.toString )
+        /* request using api */
+        SW(config).something("val_uri")
+          .setList(lSubUris.map(_ match { case uri: URI => uri }))
+          .setupnode(datatypeNode.property, false, false)
+          .select(List("val_uri", labelProperty))
+          .map(json => {
+            println("=====================================resultats datatype")
+            println(json("results")("bindings").toString)
+            qr.setDatatype(labelProperty, json("results")("bindings").arr.map(rec => {
+              rec("val_uri")("value").value.toString -> rec(labelProperty)
+            }).toMap)
+          })
+      })
+  }
+
 }

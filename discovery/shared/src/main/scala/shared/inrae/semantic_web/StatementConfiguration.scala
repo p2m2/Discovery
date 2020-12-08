@@ -47,6 +47,18 @@ object ConfigurationObject {
 @JSExportTopLevel(name="EasySparqlStatementConfiguration")
 class StatementConfiguration {
 
+  val __configuration : Map[String,String] = Map (
+    "datatype_batch_processing" -> "130"
+  )
+
+  def getInt(key:String) : Int = {
+    try {
+      __configuration(key).toInt
+    } catch {
+      case _ : Throwable => 0
+    }
+  }
+
   var conf: ConfigurationObject.StatementConfigurationJson =
     new ConfigurationObject.StatementConfigurationJson(
       Seq[ConfigurationObject.Source]())

@@ -15,6 +15,7 @@ case class QueryRunner(source: ConfigurationObject.Source) {
   def query(queryStr: String): Future[QueryResult] = {
       info(queryStr)
       val r = Request(source.url)
+
       source.method match {
         case "POST" => r.queryViaPost(queryStr, source.mimetype)
         case "POST_ENCODED" => r.queryViaUrlEncodedPost(queryStr, source.mimetype)

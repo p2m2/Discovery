@@ -22,6 +22,11 @@ case class QueryResult(results: String, mimetype : String = "json") {
     )
   }
 
+  /**
+   * replace all variable name by alias used by the user
+   * @param v2k
+   * @return
+   */
   def v2Ident(v2k : Map[String,String]) = {
     //scribe.debug(v2k.toString)
     val l = json("head")("vars").arr.map(v => {

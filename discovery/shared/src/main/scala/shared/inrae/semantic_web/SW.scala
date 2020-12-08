@@ -142,7 +142,7 @@ case class SW(var config: StatementConfiguration) {
   }
 
   def setupnode(n : Node, upsource : Boolean = false, forward : Boolean = true ) : SW = {
-    info("setupnode")
+    debug("setupnode")
 
     focusManagement(n,forward)
 
@@ -158,7 +158,7 @@ case class SW(var config: StatementConfiguration) {
   }
 
   def focusManagement(n : Node, forward: Boolean = true) : SW = {
-    info("-- focusManagement --")
+    debug("-- focusManagement --")
     if (! focusNode.accept(n)) {
       error("Can not add "+n.toString()+" with the current focus ["+focusNode.toString()+"]")
       throw new Error("Can not add "+n.toString()+" with the current focus ["+focusNode.toString()+"]")
@@ -279,10 +279,15 @@ case class SW(var config: StatementConfiguration) {
   }
 
   def select(lRef: Seq[String] = List()) : Future[ujson.Value] = {
+    info(" -- select -- ")
+    info("selected variables :"+lRef.toString)
+
     val mapId2Var =  pm.SparqlGenerator.correspondenceVariablesIdentifier(rootNode)._1
-    info("Mapping variable <-> references :" + mapId2Var.toString())
+
+    info("Mapping variable <-> references :\n" + mapId2Var.toString().split(",").mkString("\n"))
 
     val lDatatype = rootNode.lDatatypeNode.filter(ld => lRef.contains(ld.property.reference()))
+    info("list datatype : "+lDatatype.toString)
 
     val lSelectVariables = {
       /* select uri type ask with decoration/datatype */
@@ -298,21 +303,27 @@ case class SW(var config: StatementConfiguration) {
     }.distinct
 
     info("lSelectVariables :::"+lSelectVariables.toString())
-
     val p = Promise[ujson.Value]()
 
     /* manage variable name */
     QueryManager.queryVariables(rootNode,lSelectVariables,config)
       /* manage datatype decoration */
        .map( (qr : QueryResult) => {
-           val lPromises = lDatatype.map(datatypeNode => {
-             val p = Promise[QueryResult]()
 
-             val labelProperty = datatypeNode.property.reference()
-             rootNode.getRdfNode(datatypeNode.refNode) match {
-               case Some(_) => {
-                 /* find uris value inside results to decorate */
-                 val lUris : Seq[SparqlDefinition] =
+         /* create an empty set of datatypes */
+         qr.json("results").update("datatypes",ujson.Obj())
+         println(qr.json)
+         /* manage datatype */
+         info("  lDatatype ====> " + lDatatype.toString())
+
+         Future.sequence(lDatatype.map(datatypeNode => {
+           info("datatype node:"+datatypeNode)
+
+           rootNode.getRdfNode(datatypeNode.refNode) match {
+             case Some(_) => {
+
+               /* find uris value inside results to decorate */
+               val lUris : Seq[SparqlDefinition] =
                  try {
                    qr.getValues(mapId2Var(datatypeNode.refNode))
                  } catch {
@@ -320,34 +331,20 @@ case class SW(var config: StatementConfiguration) {
                      List()
                    }
                  }
-
-                 Future.sequence(lUris.grouped(config.getInt("datatype_batch_processing")).toList.map(
-                   lSubUris => {
-                     /* request using api */
-                     SW(config).something("val_uri")
-                       .setList(lSubUris.map(_ match { case uri: URI => uri }))
-                       .setupnode(datatypeNode.property, false, false)
-                       .select(List("val_uri", labelProperty))
-                       .map(json => {
-                         qr.setDatatype(labelProperty, json("results")("bindings").arr.map(rec => {
-                           rec("val_uri")("value").value.toString -> rec(labelProperty)
-                         }).toMap)
-                         Promise[QueryResult]().success(qr).future
-                       })
-                    }))
-
-               }
-               case None =>{
-                 p success qr
-                 p.future
-               }
+               Future.sequence(QueryManager.process_datatypes(qr,datatypeNode,lUris,config))
              }
-           })
-         Future.sequence(lPromises).map(_ => {
-           qr.v2Ident(mapId2Var)
-           p success qr.json
-         })
+             case None => {
+               Future { }
+             }
+           }
+         })) onComplete {
+           case Success(result) => {
+             qr.v2Ident(mapId2Var)
+             p success qr.json
+            }
+         }
        })
+
     p.future
   }
 

@@ -25,7 +25,7 @@ object SparqlGenerator  {
     }
 
     def solutionModifier () : String = {
-        "}"
+        "} limit 13"
     }
 
     def prologSourcesSelection() : String = {

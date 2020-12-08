@@ -84,7 +84,7 @@ case class Literal(var value : String, var datatype : String = "xsd:string", var
 
   def sparql() : String = toString
 
-  def naiveLabel() : String = s"PropertyPath[$value]"
+  def naiveLabel() : String = value
 }
 
 @JSExportTopLevel(name="QueryVariable")
