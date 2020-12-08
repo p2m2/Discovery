@@ -1,8 +1,6 @@
 package inrae.semantic_web.sparql
 
-import inrae.semantic_web.rdf.{Anonymous, Literal, SparqlBuilder, SparqlDefinition, URI}
-
-import scala.util.parsing.json
+import inrae.semantic_web.rdf.{SparqlBuilder, SparqlDefinition}
 
 case class QueryResult(results: String, mimetype : String = "json") {
 
