@@ -29,6 +29,7 @@ lazy val scalaJHttpVersion = "2.4.2"
 lazy val scalaStubVersion = "1.0.0"
 lazy val scribeVersion = "2.7.13"
 lazy val log4jVersion = "2.14.0"
+lazy val scalatagVersion = "0.9.2"
 
 def sharedSetting(pName: String) = Seq(
   name := pName,
@@ -147,5 +148,24 @@ lazy val backEnd = (project in file("back-end"))
   .dependsOn(sharedJVM)
 
 
+// Applications static
+
+lazy val table = (project in file("examples-static-discovery/html/table"))
+                .settings(
+                  sharedSetting("table"),
+                  name := "table",
+                  version := "0.1",
+                  scalaJSUseMainModuleInitializer := true,
+                  mainClass in Compile := Some("inrae.application.TableApp"),
+                  libraryDependencies ++= Seq(
+                   "com.lihaoyi" %%% "scalatags" % scalatagVersion
+                  )
+                )
+                .dependsOn(discovery.js)
+                .enablePlugins(ScalaJSPlugin)
+
+
+
 // loads the server project at sbt startup
 onLoad in Global := (onLoad in Global).value andThen {s: State => "project backEnd" :: s}
+Global / onChangedBuildSource := ReloadOnSourceChanges
