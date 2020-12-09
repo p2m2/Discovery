@@ -13,19 +13,19 @@ object QueryPlannerExecutorTest extends TestSuite {
   val configTest: StatementConfiguration = new StatementConfiguration()
   configTest.setConfigString(
     """
-      |{
-      | "sources" : [{
-      |   "id"  : "etp1",
-      |   "url" : "https://etp1/sparql",
-      |   "typ" : "tps",
-      |   "method" : "POST"
-      | },{
-      |   "id"  : "etp2",
-      |   "url" : "https://etp2/sparql",
-      |   "typ" : "tps",
-      |   "method" : "POST"
-      | }]}
-      |""".stripMargin)
+      {
+       "sources" : [{
+         "id"  : "etp1",
+         "url" : "https://etp1/sparql",
+         "type" : "tps",
+         "method" : "POST"
+       },{
+         "id"  : "etp2",
+         "url" : "https://etp2/sparql",
+         "type" : "tps",
+         "method" : "POST"
+       }]}
+      """.stripMargin)
 
   def tests = Tests {
     /*
@@ -45,7 +45,8 @@ object QueryPlannerExecutorTest extends TestSuite {
       val plan = QueryPlanner.INTERSECTION_RESULTS_SET(
         Map( "etp1" -> List(s1,s2))
       )
-      QueryPlannerExecutor.executePlanning(r,plan,List("s1","s2"),configTest,mpref)
+
+      QueryPlannerExecutor.executePlanning(r, plan, List("s1", "s2"), configTest, mpref)
     }
   }
 }

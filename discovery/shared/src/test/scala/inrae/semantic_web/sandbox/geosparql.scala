@@ -16,14 +16,14 @@ object GeoSparql extends TestSuite {
   configTest.setConfigString(
     """
       {
-      |          "sources" : [{
-      |          "id"  : "dbpedia",
-      |          "url" : "https://www.navigae.fr/repositories/Navigae",
-      |          "typ" : "Navigae",
-      |          "method" : "POST_ENCODED",
-      |          "mimetype" : "json"
-      |           }]}
-      |""".stripMargin)
+                "sources" : [{
+                "id"  : "geosparql",
+                "url" : "https://www.navigae.fr/repositories/Navigae",
+                "type" : "tps",
+                "method" : "POST",
+                "mimetype" : "json"
+                 }]}
+      """.stripMargin)
 
   def tests = Tests {
     test("GeoSparql Test") {

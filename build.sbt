@@ -22,7 +22,7 @@ lazy val scalaJsScriptsVersion = "1.1.4"
 lazy val jwtVersion = "4.2.0"
 lazy val seleniumVersion = "3.141.59"
 lazy val commonsIoVersion = "2.6"
-lazy val jenaVersion = "3.16.0"
+lazy val jenaVersion = "3.14.0" //"3.16.0"
 lazy val utestVersion = "0.7.5"
 lazy val scalaParserCombinatorVersion = "1.1.2"
 lazy val scalaJHttpVersion = "2.4.2"
@@ -30,6 +30,8 @@ lazy val scalaStubVersion = "1.0.0"
 lazy val scribeVersion = "2.7.13"
 lazy val log4jVersion = "2.14.0"
 lazy val scalatagVersion = "0.9.2"
+lazy val AkkaVersion = "2.6.8"
+lazy val AkkaHttpVersion = "10.2.1"
 
 def sharedSetting(pName: String) = Seq(
   name := pName,
@@ -103,26 +105,32 @@ lazy val discovery =crossProject(JSPlatform, JVMPlatform).in(file("discovery"))
       "com.typesafe.play" %%% "play-json" % playJsonVersion,
       "com.lihaoyi" %%% "utest" % utestVersion % "test",
       "com.lihaoyi" %%% "upickle" % upickleVersion,
+      "com.lihaoyi" %% "requests" % "0.6.5",
       "org.wvlet.airframe" %%% "airframe-log" % airframeLogVersion,
       "org.scala-lang.modules" %%% "scala-parser-combinators" % scalaParserCombinatorVersion,
+      "org.portable-scala" %%% "portable-scala-reflect" % "1.0.0"
     ),
-    testFrameworks += new TestFramework("utest.runner.Framework")
+    testFrameworks += new TestFramework("utest.runner.Framework"),
+    scalacOptions ++= Seq("-deprecation", "-feature"),
+    classLoaderLayeringStrategy := ClassLoaderLayeringStrategy.AllLibraryJars
   )
   .jsSettings(
-
-    libraryDependencies += "org.scala-js" %%% "scalajs-dom" % scalaJsDOMVersion ,
-    libraryDependencies +=  "org.scalaj" %% "scalaj-http" % scalaJHttpVersion,
-    jsEnv := new org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv(),
+    libraryDependencies ++= Seq(
+      "org.scala-js" %%% "scalajs-dom" % scalaJsDOMVersion ,
+      "org.scalaj" %% "scalaj-http" % scalaJHttpVersion,
+    ),
+    jsEnv := new org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv()
   )
   .jvmSettings(
     libraryDependencies ++= Seq(
       "org.scala-js" %% "scalajs-stubs" % scalaStubVersion % "provided",
-      "org.apache.logging.log4j" % "log4j-api" % log4jVersion,
-      "org.apache.logging.log4j" % "log4j-core" % log4jVersion,
       "org.apache.jena" % "apache-jena" % jenaVersion pomOnly(),
-      "org.apache.jena" % "apache-jena-libs" % jenaVersion pomOnly(),
-      "org.apache.jena" % "jena-core" % jenaVersion,
-      "org.apache.jena" % "jena-arq" % jenaVersion
+   //   "org.apache.jena" % "jena-arq" % jenaVersion pomOnly(),
+   //   "org.apache.logging.log4j" % "log4j-api" % log4jVersion,
+    //  "org.apache.logging.log4j" % "log4j-core" % log4jVersion,
+    //  "org.apache.jena" % "apache-jena-libs" % jenaVersion,
+    //  "org.apache.jena" % "jena-core" % jenaVersion ,
+    //  "org.apache.jena" % "jena-arq" % jenaVersion
     ))
 
 lazy val backEnd = (project in file("back-end"))
@@ -150,7 +158,7 @@ lazy val backEnd = (project in file("back-end"))
 
 // Applications static
 
-lazy val table = (project in file("examples-static-discovery/html/table"))
+lazy val table = (project in file("examples-discovery/html/table"))
                 .settings(
                   sharedSetting("table"),
                   name := "table",
@@ -158,7 +166,8 @@ lazy val table = (project in file("examples-static-discovery/html/table"))
                   scalaJSUseMainModuleInitializer := true,
                   mainClass in Compile := Some("inrae.application.TableApp"),
                   libraryDependencies ++= Seq(
-                   "com.lihaoyi" %%% "scalatags" % scalatagVersion
+                    "com.lihaoyi" %%% "scalatags" % scalatagVersion,
+                    "org.portable-scala" %%% "portable-scala-reflect" % "1.0.0"
                   )
                 )
                 .dependsOn(discovery.js)

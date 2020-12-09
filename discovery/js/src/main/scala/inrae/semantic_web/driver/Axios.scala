@@ -1,4 +1,4 @@
-package inrae.http.axios
+package inrae.semantic_web.driver
 
 import scala.scalajs.js
 import scala.scalajs.js.annotation._

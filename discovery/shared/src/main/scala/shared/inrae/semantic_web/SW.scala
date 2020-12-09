@@ -1,12 +1,11 @@
 package inrae.semantic_web
 
 import java.util.UUID.randomUUID
-
 import inrae.semantic_web.internal.Node.references
 import inrae.semantic_web.internal._
 import inrae.semantic_web.internal.pm.SelectNode
 import inrae.semantic_web.rdf._
-import inrae.semantic_web.sparql.QueryResult
+import inrae.semantic_web.sparql.{QueryResult}
 import wvlet.log.Logger.rootLogger._
 import wvlet.log.{LogLevel, Logger}
 
@@ -50,10 +49,9 @@ case class SW(var config: StatementConfiguration) {
 
   val filter : FilterIncrement = new FilterIncrement()
 
-  //Logger.root.clearHandlers().clearModifiers().withHandler(minimumLevel = Some(Level.Debug)).replace()
   private val logger = Logger.of[SW]
   // Set the root logger's log level
-  Logger.setDefaultLogLevel(LogLevel.INFO)
+  Logger.setDefaultLogLevel(config.logLevel())
 
   def help() : SW = {
     println(" ---------------- SW "+version+" ---------------------------")
@@ -147,7 +145,7 @@ case class SW(var config: StatementConfiguration) {
     focusManagement(n,forward)
 
     if ( upsource ) {
-      QueryManager.setUpSourcesNode(n,config,rootNode.prefixes).onComplete {
+      QueryManager(config).setUpSourcesNode(n,rootNode.prefixes).onComplete {
         case Success(Some(sn)) => {
           rootNode.lSourcesNodes = rootNode.lSourcesNodes :+ sn
         }
@@ -260,7 +258,7 @@ case class SW(var config: StatementConfiguration) {
   }
 
   def sparql_console() : SW = {
-    println(QueryManager.sparql_string(rootNode,focusNode))
+    println(QueryManager(config).sparql_string(rootNode,focusNode))
     this
   }
 
@@ -306,7 +304,7 @@ case class SW(var config: StatementConfiguration) {
     val p = Promise[ujson.Value]()
 
     /* manage variable name */
-    QueryManager.queryVariables(rootNode,lSelectVariables,config)
+    QueryManager(config).queryVariables(rootNode,lSelectVariables)
       /* manage datatype decoration */
        .map( (qr : QueryResult) => {
 
@@ -331,7 +329,7 @@ case class SW(var config: StatementConfiguration) {
                      List()
                    }
                  }
-               Future.sequence(QueryManager.process_datatypes(qr,datatypeNode,lUris,config))
+               Future.sequence(QueryManager(config).process_datatypes(qr,datatypeNode,lUris))
              }
              case None => {
                Future { }
@@ -342,6 +340,10 @@ case class SW(var config: StatementConfiguration) {
              qr.v2Ident(mapId2Var)
              p success qr.json
             }
+           case Failure(e) => {
+             error(e.getMessage)
+             p failure(e)
+           }
          }
        })
 
@@ -349,7 +351,7 @@ case class SW(var config: StatementConfiguration) {
   }
 
   def count() : Future[Int] = {
-    QueryManager.countNbSolutions(rootNode,config)
+    QueryManager(config).countNbSolutions(rootNode)
   }
 
 

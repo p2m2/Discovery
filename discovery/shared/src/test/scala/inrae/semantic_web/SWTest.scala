@@ -17,27 +17,32 @@ object SWTest extends TestSuite {
     val config: StatementConfiguration = new StatementConfiguration()
     config.setConfigString(
       """
-        |{
-        | "sources" : [{
-        |   "id"  : "dbpedia",
-        |   "url" : "https://dbpedia.org/sparql",
-        |   "typ" : "tps",
-        |   "method" : "GET",
-        |   "mimetype" : "json"
-        | }]}
-        |""".stripMargin)
-
+        {
+         "sources" : [{
+           "id"  : "dbpedia",
+           "url" : "https://dbpedia.org/sparql",
+           "type" : "tps",
+           "method" : "POST",
+           "mimetype" : "json"
+         }],
+         "settings" : {
+            "driver" : "inrae.semantic_web.driver.XMLHttpRequestDriver",
+            "logLevel" : "debug",
+            "sizeBatchProcessing" : 100
+          }
+         }
+        """.stripMargin)
+/*
     test("Create a simple query") {
       val config: StatementConfiguration = new StatementConfiguration()
       config.setConfigString(""" { "sources" : [] } """)
       val query = new SW(config)
       val r = query.something("h1")
     }
-
+*/
     test("Create a query finding a subject") {
       val query = SW(config)
 
-      Future {
         query.something("h1")
           .set(URI("http://dbpedia.org/resource/%C3%84lvdalen"))
           .isSubjectOf(URI("http://www.w3.org/2002/07/owl#sameAs"))
@@ -46,7 +51,6 @@ object SWTest extends TestSuite {
             case Success(result) => println(result); assert(true)
             case Failure(exception) => println(exception); assert(false)
           }
-      }
     }
     /*
     test("debug") {
@@ -56,7 +60,7 @@ object SWTest extends TestSuite {
           .set(URI("http://dbpedia.org/resource/%C3%84lvdalen"))
           .isSubjectOf(URI("http://www.w3.org/2002/07/owl#sameAs"))
     }
-*/
+
     test("count") {
       val query = new SW(config)
       query.something("h1") //http://rdf.ebi.ac.uk/terms/chembl#BioComponent
@@ -73,7 +77,7 @@ object SWTest extends TestSuite {
         }
       }
     }
-/*
+
     test("findTypeOf") {
       val query = new SW(config)
 
@@ -114,7 +118,7 @@ object SWTest extends TestSuite {
           }
       }
     }
- */
+
     test("findObjectPropertiesOf") {
       val query = SW(config)
 
@@ -148,6 +152,8 @@ object SWTest extends TestSuite {
             }
         }
       }
-    }
+
+
+    }  */
   }
 }

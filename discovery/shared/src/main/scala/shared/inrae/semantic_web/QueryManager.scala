@@ -1,16 +1,15 @@
 package inrae.semantic_web
 import wvlet.log.Logger.rootLogger._
-
 import inrae.semantic_web.internal._
 import inrae.semantic_web.rdf._
 import inrae.semantic_web.sparql.{QueryResult, _}
-
+import inrae.semantic_web.sparql.QueryRunner
 
 import scala.concurrent.{Future, Promise}
 import scala.util._
 
 
-object QueryManager {
+case class QueryManager(config : StatementConfiguration) {
 
   implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
 
@@ -24,18 +23,13 @@ object QueryManager {
     SparqlQueryBuilder.queryString(root,refToIdentifier,refToIdentifier.values.toSeq,root.prefixes)
   }
 
-  def queryPropertyNode(rootRequest : Node, n: Node, config : StatementConfiguration) : Future[Seq[URI]] = {
-    Future {
-      Seq[URI]()
-    }
-  }
-  def queryAll(rootRequest : Root,
-               config : StatementConfiguration) : Future[QueryResult] = {
+
+  def queryAll(rootRequest : Root) : Future[QueryResult] = {
     debug("queryAll")
-    queryVariables(rootRequest,Node.references(rootRequest),config)
+    queryVariables(rootRequest,Node.references(rootRequest))
   }
 
-  def countNbSolutions(root : Root,  config : StatementConfiguration) : Future[Int] = {
+  def countNbSolutions(root : Root) : Future[Int] = {
     debug("countNbSolutions")
 
     if (config.sources().length == 0) {
@@ -54,7 +48,7 @@ object QueryManager {
         pm.SparqlGenerator.body(root, refToIdentifier) +
         pm.SparqlGenerator.solutionModifier()
 
-      val res: Future[QueryResult] = QueryRunner(source).query(query)
+      val res: Future[QueryResult] = QueryRunner(source,config.getHttpDriver()).query(query)
       res.map(v => {
         SparqlBuilder.createLiteral(v.json("results")("bindings")(0)(varCount)).toInt()
       })
@@ -66,8 +60,7 @@ object QueryManager {
   }
 
   def queryVariables(root: Root,
-                     listVariables : Seq[String],
-                     config : StatementConfiguration) : Future[QueryResult] = {
+                     listVariables : Seq[String]) : Future[QueryResult] = {
     debug("queryVariables")
 
     config.sources().length match {
@@ -78,8 +71,7 @@ object QueryManager {
         val (refToIdentifier, _) = pm.SparqlGenerator.correspondenceVariablesIdentifier(root)
         info(refToIdentifier.toString())
         val query: String = SparqlQueryBuilder.queryString(root, refToIdentifier, listVariables, root.prefixes)
-        QueryRunner(config.sources()(0)).query(query).map( qr => {
-          println("FIN queryVariables ********************************************************************************")
+        QueryRunner(config.sources()(0),config.getHttpDriver()).query(query).map( qr => {
           qr
         })
       }
@@ -98,7 +90,6 @@ object QueryManager {
    * @return
    */
   def setUpSourcesNode(n: Node,
-                       config : StatementConfiguration,
                        prefixes : Map[String,IRI]): Future[Option[SourcesNode]] = {
 
     n match {
@@ -118,7 +109,7 @@ object QueryManager {
 
         val nbRowResultsBySource : Seq[Future[Boolean]] = {
           config.sources().map(
-              source => QueryRunner(source).query(query)
+              source => QueryRunner(source,config.getHttpDriver()).query(query)
             ).map( {
               ( _.map(rr => rr.json("results")("bindings").arr.length>0))
             })
@@ -145,13 +136,11 @@ object QueryManager {
 
   def process_datatypes(qr : QueryResult,
                         datatypeNode : DatatypeNode,
-                        lUris : Seq[SparqlDefinition],
-                        config : StatementConfiguration) = {
-    println("lllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll")
+                        lUris : Seq[SparqlDefinition]) = {
     info(" -- process_datatypes --")
     val labelProperty = datatypeNode.property.reference()
 
-    lUris.grouped(config.getInt("datatype_batch_processing")).toList.map(
+    lUris.grouped(config.conf.settings.sizeBatchProcessing).toList.map(
       lSubUris => {
         info( " datatypes:"+lSubUris.toString )
         /* request using api */
@@ -160,8 +149,6 @@ object QueryManager {
           .setupnode(datatypeNode.property, false, false)
           .select(List("val_uri", labelProperty))
           .map(json => {
-            println("=====================================resultats datatype")
-            println(json("results")("bindings").toString)
             qr.setDatatype(labelProperty, json("results")("bindings").arr.map(rec => {
               rec("val_uri")("value").value.toString -> rec(labelProperty)
             }).toMap)

@@ -1,8 +1,15 @@
 package inrae.semantic_web
 
+import inrae.semantic_web.sparql.HttpRequestDriver
+import inrae.semantic_web.driver._
 import upickle.default.{macroRW, ReadWriter => RW}
+import wvlet.log.LogLevel
 
 import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
+
+final case class StatementConfigurationException(private val message: String = "",
+                                            private val cause: Throwable = None.orNull) extends Exception(message,cause)
+
 
 /**
  * using doc to validate JSON config:
@@ -15,24 +22,37 @@ import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
 object ConfigurationObject {
   /* sources configuration */
   case class StatementConfigurationJson(
-                                         sources : Seq[Source]
+                                         sources : Seq[Source],
+                                         settings : GeneralSetting = new GeneralSetting(),
                                        )
 
   case class Source(
                      id:String, /* identify the source endpoint */
                      url: String, /* url access */
-                     typ: String,  /* ldfragment, csv, tps */
+                     `type`: String="tps",  /* ldfragment, csv, tps */
                      method: String = "POST", /* POST, POST_ENCODED, GET */
-                     auth : String = "none", /* basic, digest, none */
+                     auth : String = "none", /* basic, digest, bearer, proxy, none */
                      login : String = "none" ,
                      password : String = "none",
-                     mimetype : String = "json",
-                   )
+                     token : String = "",
+                     mimetype: String = "json"
+                   ) {
+  }
+
+  case class GeneralSetting(
+                      driver: String = "inrae.semantic_web.driver.XMLHttpRequestDriver",
+                      logLevel : String = "warn"          , // debug, info, warn, error
+                      sizeBatchProcessing : Int = 150
+                    )
 
   case class Prefixes(list : Map[String,String])
 
   object Prefixes{
     implicit val rw: RW[Prefixes] = macroRW
+  }
+
+  object GeneralSetting{
+    implicit val rw: RW[GeneralSetting] = macroRW
   }
 
   object Source{
@@ -47,21 +67,9 @@ object ConfigurationObject {
 @JSExportTopLevel(name="EasySparqlStatementConfiguration")
 class StatementConfiguration {
 
-  val __configuration : Map[String,String] = Map (
-    "datatype_batch_processing" -> "130"
-  )
-
-  def getInt(key:String) : Int = {
-    try {
-      __configuration(key).toInt
-    } catch {
-      case _ : Throwable => 0
-    }
-  }
-
   var conf: ConfigurationObject.StatementConfigurationJson =
     new ConfigurationObject.StatementConfigurationJson(
-      Seq[ConfigurationObject.Source]())
+      Seq[ConfigurationObject.Source](),ConfigurationObject.GeneralSetting())
 
   /**
    * Set a config using class definition
@@ -98,4 +106,47 @@ class StatementConfiguration {
   def sources() : Seq[ConfigurationObject.Source] = {
     conf.sources
   }
+
+  def getHttpDriver() : HttpRequestDriver = {
+    import org.portablescala.reflect._
+        /*try {
+
+        //ScalaJs not compatible
+
+          import scala.reflect.runtime.{universe=>ru,_}
+          val mirror = ru.runtimeMirror(getClass.getClassLoader)
+          val classSymbol = mirror.classSymbol(Class.forName(conf.settings.driver))
+          val clsMirror = mirror.reflectClass(classSymbol.asClass)
+          val ctor = classSymbol.toType.decl(ru.termNames.CONSTRUCTOR).asMethod
+
+          clsMirror.reflectConstructor(ctor)().asInstanceOf[HttpRequestDriver]
+     */
+
+      Reflect.lookupInstantiatableClass(conf.settings.driver) match {
+        case Some( cls ) => cls.newInstance().asInstanceOf[HttpRequestDriver]
+        case None => throw StatementConfigurationException("Unknown Http Request Driver :"+conf.settings.driver)
+      }
+
+/*
+    } catch {
+      case _ : ClassNotFoundException => {
+        throw StatementConfigurationException("Unknown Http Request Driver :"+conf.settings.driver)
+      }
+      case e : Throwable => {
+        println(e)
+        throw StatementConfigurationException("Devel error with :"+conf.settings.driver)
+      }
+    } */
+  }
+
+  def logLevel() : LogLevel = conf.settings.logLevel.toLowerCase() match {
+      case "debug" | "d" => LogLevel.INFO
+      case "info" | "i" => LogLevel.INFO
+      case "warn" | "w" => LogLevel.WARN
+      case "error" | "e" => LogLevel.ERROR
+      case "trace" | "t" => LogLevel.TRACE
+      case "all" => LogLevel.ALL
+      case "off" => LogLevel.OFF
+      case _ => LogLevel.WARN
+    }
 }

@@ -90,8 +90,8 @@ object QueryPlannerExecutor {
           r.addChildren(buildRootNode(root,lbgp))
           info(r.toString())
           val refToIdentifier = pm.SparqlGenerator.correspondenceVariablesIdentifier(root)
-            ._1.filterKeys( k => listVariables.contains(k) ).toMap
-          val qr = QueryRunner(config.source(source)).query(
+            ._1.view.filterKeys( k => listVariables.contains(k) ).toMap
+          val qr = QueryRunner(config.source(source),config.getHttpDriver()).query(
             SparqlQueryBuilder.queryString(r,refToIdentifier,refToIdentifier.values.toSeq,prefixes)
           )
           println(qr)

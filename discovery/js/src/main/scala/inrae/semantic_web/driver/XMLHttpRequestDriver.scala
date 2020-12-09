@@ -1,15 +1,40 @@
-package inrae.http
-import org.scalajs.dom
+package inrae.semantic_web.driver
 
+import inrae.semantic_web.ConfigurationObject
+import inrae.semantic_web.sparql.{ConfigurationHttpRequest, HttpRequestDriver, QueryResult, QueryResultManager}
+import org.portablescala.reflect.annotation.EnableReflectiveInstantiation
+import org.scalajs.dom
 import wvlet.log.Logger.rootLogger._
 
-import inrae.semantic_web.sparql.QueryResult
-import scala.concurrent.{Future,Promise}
-import scala.scalajs.js.URIUtils
+import scala.concurrent.{Future, Promise}
 import scala.scalajs.js
+import scala.scalajs.js.URIUtils
+
+/**
+ *
+ * @param source
+ */
 
 
-case class Request(var url : String) {
+@EnableReflectiveInstantiation
+case class XMLHttpRequestDriver() extends HttpRequestDriver {
+
+  def jvmCompat() : Boolean = false
+  def jsCompat() : Boolean = true
+
+  def get( query: String, config : ConfigurationHttpRequest ) : Future[QueryResult] =
+    Request(config.url).queryViaGet(query, config.mimetype)
+
+  def post( query: String, config : ConfigurationHttpRequest ) : Future[QueryResult] =
+    Request(config.url).queryViaPost(query, config.mimetype)
+
+  def post_encoded( query: String, config : ConfigurationHttpRequest  ) : Future[QueryResult] =
+    Request(config.url).queryViaUrlEncodedPost(query, config.mimetype)
+
+}
+
+
+case class Request(url : String) {
 
   def addEncodedData(keyname: String, value: String) = {
     URIUtils.encodeURIComponent(keyname)+"="+URIUtils.encodeURIComponent(value)
@@ -35,13 +60,15 @@ case class Request(var url : String) {
     graphs.reduce( (g1,g2) => addEncodedData("named-graph-uri",g1)+"&"+addEncodedData("named-graph-uri",g2))
   }
 
-  def send(xhr : dom.XMLHttpRequest, data: scala.scalajs.js.Any, mimetype : String) : Future[QueryResult] = {
+  def send(query:String, xhr : dom.XMLHttpRequest, data: scala.scalajs.js.Any, mimetype : String) : Future[QueryResult] = {
     val p = Promise[QueryResult]()
 
     xhr.onload = { (e: dom.Event) =>
       if (xhr.status == 200) {
-        val qr2 = mimetype match {
-          case "json" => p success QueryResult(xhr.responseText, mimetype)
+        mimetype match {
+          case "json" => {
+            p success QueryResult(xhr.responseText, mimetype)
+          }
           case _ =>
             p.failure(js.JavaScriptException("[Configuration] Parser not available for this MIME type : "+mimetype))
         }
@@ -66,7 +93,7 @@ case class Request(var url : String) {
     //xhr.setRequestHeader("Access-Control-Allow-Origin", "*")
     xhr.setRequestHeader("Accept", mime(mimetype))
     val data = addQueryAsData(query)
-    send(xhr,data,mimetype)
+    send(query,xhr,data,mimetype)
   }
 
   def queryViaGet(query : String, mimetype : String) : Future[QueryResult] = {
@@ -77,7 +104,7 @@ case class Request(var url : String) {
     //xhr.setRequestHeader("Access-Control-Allow-Origin", "*")
     xhr.setRequestHeader("Accept", mime(mimetype))
 
-    send(xhr,"",mimetype)
+    send(query,xhr,"",mimetype)
   }
 
   def queryViaUrlEncodedPost(query : String, mimetype : String) : Future[QueryResult] = {
@@ -89,7 +116,7 @@ case class Request(var url : String) {
     xhr.setRequestHeader("Accept", mime(mimetype))
 
     val data = addQueryAsEncodedData(query)
-    send(xhr,data,mimetype)
+    send(query,xhr,data,mimetype)
   }
 
   def mime(idx : String) : String = {
@@ -105,5 +132,5 @@ case class Request(var url : String) {
       case _ => "text/plain"
     };
   }
-
 }
+
