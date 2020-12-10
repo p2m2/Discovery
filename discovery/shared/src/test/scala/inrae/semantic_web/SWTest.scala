@@ -26,7 +26,7 @@ object SWTest extends TestSuite {
            "mimetype" : "json"
          }],
          "settings" : {
-            "driver" : "inrae.semantic_web.driver.XMLHttpRequestDriver",
+            "driver" : "inrae.semantic_web.driver.RosHTTPDriver",
             "logLevel" : "debug",
             "sizeBatchProcessing" : 100
           }
@@ -52,7 +52,7 @@ object SWTest extends TestSuite {
             case Failure(exception) => println(exception); assert(false)
           }
     }
-    /*
+
     test("debug") {
       val query = new SW(config)
 
@@ -65,7 +65,7 @@ object SWTest extends TestSuite {
       val query = new SW(config)
       query.something("h1") //http://rdf.ebi.ac.uk/terms/chembl#BioComponent
         .isSubjectOf(URI("http://dbpedia.org/ontology/deathDate"))
-        .count
+        .count()
         .onComplete {
         case Success(count) => {
           println(count)
@@ -77,7 +77,7 @@ object SWTest extends TestSuite {
         }
       }
     }
-
+/*
     test("findTypeOf") {
       val query = new SW(config)
 

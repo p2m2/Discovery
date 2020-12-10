@@ -21,9 +21,6 @@ final case class HttpRequestDriverException(private val message: String = "",
 
 abstract class HttpRequestDriver {
 
-  def jvmCompat() : Boolean
-  def jsCompat() : Boolean
-
   def request(`type`: String , query: String, config : ConfigurationHttpRequest ): Future[QueryResult] = {
     info(" -- HttpRequestDriver > " + this.getClass.getName )
     `type`.toLowerCase() match {

@@ -30,13 +30,13 @@ lazy val scalaStubVersion = "1.0.0"
 lazy val scribeVersion = "2.7.13"
 lazy val log4jVersion = "2.14.0"
 lazy val scalatagVersion = "0.9.2"
-lazy val AkkaVersion = "2.6.8"
-lazy val AkkaHttpVersion = "10.2.1"
+lazy val scalaReflectVersion = "1.0.0"
+lazy val RosHttpVersion = "3.0.0"
 
 def sharedSetting(pName: String) = Seq(
   name := pName,
   version := "0.1-SNAPSHOT",
-  scalaVersion := "2.13.3",
+  scalaVersion := "2.13.4",
   organization := "Inrae"
 )
 
@@ -101,14 +101,15 @@ lazy val shared = crossProject(JSPlatform, JVMPlatform)
 lazy val discovery =crossProject(JSPlatform, JVMPlatform).in(file("discovery"))
   .settings(sharedSetting("discovery"))
   .settings(
+    resolvers += Resolver.bintrayRepo("hmil", "maven"),
     libraryDependencies ++= Seq(
       "com.typesafe.play" %%% "play-json" % playJsonVersion,
       "com.lihaoyi" %%% "utest" % utestVersion % "test",
       "com.lihaoyi" %%% "upickle" % upickleVersion,
-      "com.lihaoyi" %% "requests" % "0.6.5",
       "org.wvlet.airframe" %%% "airframe-log" % airframeLogVersion,
       "org.scala-lang.modules" %%% "scala-parser-combinators" % scalaParserCombinatorVersion,
-      "org.portable-scala" %%% "portable-scala-reflect" % "1.0.0"
+      "org.portable-scala" %%% "portable-scala-reflect" % scalaReflectVersion,
+      "fr.hmil" %%% "roshttp" % RosHttpVersion
     ),
     testFrameworks += new TestFramework("utest.runner.Framework"),
     scalacOptions ++= Seq("-deprecation", "-feature"),
@@ -116,8 +117,7 @@ lazy val discovery =crossProject(JSPlatform, JVMPlatform).in(file("discovery"))
   )
   .jsSettings(
     libraryDependencies ++= Seq(
-      "org.scala-js" %%% "scalajs-dom" % scalaJsDOMVersion ,
-      "org.scalaj" %% "scalaj-http" % scalaJHttpVersion,
+      "org.scala-js" %%% "scalajs-dom" % scalaJsDOMVersion
     ),
     jsEnv := new org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv()
   )
@@ -125,12 +125,6 @@ lazy val discovery =crossProject(JSPlatform, JVMPlatform).in(file("discovery"))
     libraryDependencies ++= Seq(
       "org.scala-js" %% "scalajs-stubs" % scalaStubVersion % "provided",
       "org.apache.jena" % "apache-jena" % jenaVersion pomOnly(),
-   //   "org.apache.jena" % "jena-arq" % jenaVersion pomOnly(),
-   //   "org.apache.logging.log4j" % "log4j-api" % log4jVersion,
-    //  "org.apache.logging.log4j" % "log4j-core" % log4jVersion,
-    //  "org.apache.jena" % "apache-jena-libs" % jenaVersion,
-    //  "org.apache.jena" % "jena-core" % jenaVersion ,
-    //  "org.apache.jena" % "jena-arq" % jenaVersion
     ))
 
 lazy val backEnd = (project in file("back-end"))

@@ -40,7 +40,7 @@ object ConfigurationObject {
   }
 
   case class GeneralSetting(
-                      driver: String = "inrae.semantic_web.driver.XMLHttpRequestDriver",
+                      driver: String = "inrae.semantic_web.driver.RosHTTPDriver",
                       logLevel : String = "warn"          , // debug, info, warn, error
                       sizeBatchProcessing : Int = 150
                     )

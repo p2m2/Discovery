@@ -12,9 +12,6 @@ import org.portablescala.reflect.annotation.EnableReflectiveInstantiation
 case class JenaRequestDriver() extends HttpRequestDriver {
   implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
 
-  def jvmCompat() : Boolean = true
-  def jsCompat() : Boolean = false
-
   def process(queryStr: String, config : ConfigurationHttpRequest): Future[QueryResult] = {
 
     Future {
