@@ -70,7 +70,7 @@ jobs:
           command: |
             set -x
             #docker-compose up -d virtuoso
-            sleep 20
+            #sleep 20
             docker ps
             #curl http://localhost:8890/sparql
             #curl http://127.0.0.1:8890/sparql
@@ -87,6 +87,6 @@ jobs:
       - run:
           command: |
             cat /dev/null | sbt clean coverage discoveryJVM/test:test
-            docker-compose logs
+            #docker-compose logs
       # coverage
       - run: sbt discoveryJVM/coverageReport
