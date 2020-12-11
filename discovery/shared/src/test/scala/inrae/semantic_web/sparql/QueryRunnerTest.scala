@@ -1,4 +1,4 @@
-import inrae.semantic_web.sparql.QueryRunner
+package inrae.semantic_web.sparql
 
 import utest._
 

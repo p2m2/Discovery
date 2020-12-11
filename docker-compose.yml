@@ -12,6 +12,7 @@ services:
 
   virtuoso:
     image: askomics/virtuoso:7.2.5.1
+    container_name: "virtuoso"
     env_file:
       - virtuoso.env
     command:
@@ -20,8 +21,6 @@ services:
       - netstat -nr | grep '^0\.0\.0\.0' | awk '{print $$2 " host "}' >> /etc/hosts && sh /virtuoso/virtuoso.sh
     ports:
       - "8890:8890"
-    volumes:
-      - ./storage/virtuoso:/data
 
   application:
     build: .

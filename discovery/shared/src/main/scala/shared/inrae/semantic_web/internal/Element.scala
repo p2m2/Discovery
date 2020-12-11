@@ -1,6 +1,7 @@
 package inrae.semantic_web.internal
 
 import inrae.semantic_web.rdf._
+import wvlet.log.Logger.rootLogger.debug
 
 trait Node {
 
@@ -12,11 +13,10 @@ trait Node {
   }
 
   def getRdfNode(ref : String,sep : String ="") : Option[RdfNode] = {
-    println(sep+" -- getRdfNode -- ")
-    val v = this match {
-      case  n : RdfNode if (ref == n.reference()) => { println("ref:"+ref+"  1"); Some(n) }
+    debug(" -- getRdfNode -- ")
+    this match {
+      case  n : RdfNode if (ref == n.reference()) => Some(n)
       case _ if children.length > 0 => {
-        println("ref:" + ref + "  2");
         val l = children.map(c => c.getRdfNode(ref, sep + "*")).flatten
         if ( l.length > 0 ) {
           Some(l.head)
@@ -24,10 +24,8 @@ trait Node {
           None
         }
       }
-      case _ => { println("ref:"+ref+"  3"); None }
+      case _ =>  None
     }
-    println(sep+"retour:"+v.toString)
-    v
   }
 
   override def toString() : String = {

@@ -8,7 +8,7 @@ import scala.util.{Failure, Success}
 import scala.concurrent.ExecutionContext.Implicits.global
 //https://bbip.askomics.org/virtuoso/sparql
 //https://dbpedia.org/sparql
-object TutorialApp {
+object BBIPRequest {
   def main(args: Array[String]): Unit = {
 
     val config: StatementConfiguration = new StatementConfiguration()

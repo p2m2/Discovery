@@ -17,34 +17,30 @@ object SparqlGenerator  {
         }.mkString("\n")
     }
 
-    def prolog(listVariables : Seq[String] = Seq[String]()) : String = {
+    def queryFormSelect(listVariables : Seq[String] = Seq[String]()) : String = {
         if (listVariables.length == 0 ) {
-            "SELECT * WHERE {"
-        } else
-            "SELECT DISTINCT" + listVariables.foldLeft(" ")( (acc,identifier) => acc+"?"+identifier+" ") + "\nWHERE {"
+            "SELECT *"
+        } else {
+            "SELECT DISTINCT" + listVariables.foldLeft(" ")( (acc,identifier) => acc+"?"+identifier+" ")
+        }
     }
+
+    def start_where() : String = "WHERE {"
+
+    def from(graphs : Seq[IRI]): String = graphs.map( g => "FROM "+g.sparql()).mkString("\n")
+
+    def fromNamed(graphs : Seq[IRI]): String = graphs.map( g => "FROM NAMED"+g.sparql()).mkString("\n")
 
     def solutionModifier () : String = {
         "} limit 13"
     }
 
-    def prologSourcesSelection() : String = {
-            "SELECT * WHERE {"
-    }
-
     def prologCountSelection(varCount : String) : String = {
-      //  variable match {
-        "SELECT ( COUNT(*) as ?"+varCount+" ) WHERE {"
-           // case _ => "SELECT ( COUNT(?"+variable+") as ?"+varCount+" ) WHERE {"
-        //}
+        "SELECT ( COUNT(*) as ?"+varCount+" )"
     }
 
     def solutionModifierSourcesSelection () : String = {
         "} LIMIT 1"
-    }
-
-    def termString() = {
-
     }
 
     def queryVariableTransform(term : SparqlDefinition,
@@ -61,7 +57,7 @@ object SparqlGenerator  {
                    referenceToIdentifier : Map[String,String],
                    varIdSire : String,
                    variableName : String) : String = {
-        debug(varIdSire+" - "+variableName)
+        trace(varIdSire+" - "+variableName)
          n match {
             case node : SubjectOf          => "\t?" + varIdSire + " " +
               queryVariableTransform(node.term,referenceToIdentifier).toString() + " " + "?"+ variableName + " .\n"
@@ -171,10 +167,10 @@ object SparqlGenerator  {
             } }
             case _ => varIdSire
         }
-        /*
-        debug("n:"+n.toString())
-        debug("varIdSire:"+varIdSire)
-        debug("variableName:"+variableName)*/
+
+        trace(n.toString())
+        trace("varIdSire:"+varIdSire)
+        trace("variableName:"+variableName)
         val triplet : String = sparqlNode(n,referenceToIdentifier,varIdSire,variableName)
         triplet + n.children.map( child => body( child,referenceToIdentifier, variableName)).mkString("")
     } 

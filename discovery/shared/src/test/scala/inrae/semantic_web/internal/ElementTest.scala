@@ -35,25 +35,5 @@ object ElementTest extends TestSuite {
       val v : Value = new Value(new Literal("test"))
       assert(true)
     }
-    /*
-    object TutorialApp {
-  def main(args: Array[String]): Unit = {
-    println("Hello world!")
-    val query = new SW()
-    val r = query.something("h1")
-               .set(URI("http://dbpedia.org/resource/%C3%84lvdalen"))
-               .isSubjectOf(URI("http://www.w3.org/2002/07/owl#sameAs"))
-               .select()
   }
 }
-     */
-  }
-}
-/*
-
-class Something(uniqRef : String) extends ReferenceNode(uniqRef)
-class SubjectOf(uniqRef : String, var uri : URI) extends ReferenceNode(uniqRef)
-class ObjectOf(uniqRef : String, var uri : URI) extends ReferenceNode(uniqRef)
-class Attribute(uniqRef : String, var uri : URI) extends ReferenceNode(uniqRef)
-class Value
- */

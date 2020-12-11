@@ -31,7 +31,7 @@ object QueryPlannerExecutor {
 
 
   def buildRootNode( swRootNode : Root, lbgp : Seq[Node]) : Node = {
-    warn("buildRootNode lbgp=>"+lbgp)
+    trace("buildRootNode lbgp=>"+lbgp)
     if ( lbgp.length == 0 ) {
       Something("__var"+randomUUID.toString)
     } else if ( lbgp.length == 1 ) {
@@ -58,7 +58,7 @@ object QueryPlannerExecutor {
             promise success ( lQueryResu(0)) // todo => union
           }
           case msg => {
-            System.err.println(msg)
+            error(msg)
             promise success (QueryResult(null))
           }
         })
@@ -72,15 +72,13 @@ object QueryPlannerExecutor {
             promise success ( lQueryResu(0)) // todo => intersection
           }
           case msg => {
-            System.err.println(msg)
+            error(msg)
             promise success (QueryResult(null))
           }
         })
         promise.future
       }
       case bgps: INTERSECTION_RESULTS_SET =>
-        println(" === INTERSECTION_RESULTS_SET == ")
-        println(bgps.lns)
         // pour l'instant pas d'ordonnancement sur les sources
         /* piste d optimisation : trouver les resultats les plus limitants ... */
         for ((source,lbgp) <- bgps.lns) {
@@ -88,13 +86,12 @@ object QueryPlannerExecutor {
           // todo : Verifier qu'on ne casse jamais de lien de parenté
           var r :Root = Root()
           r.addChildren(buildRootNode(root,lbgp))
-          info(r.toString())
+          trace(r.toString())
           val refToIdentifier = pm.SparqlGenerator.correspondenceVariablesIdentifier(root)
-            ._1.filterKeys( k => listVariables.contains(k) ).toMap
-          val qr = QueryRunner(config.source(source)).query(
-            SparqlQueryBuilder.queryString(r,refToIdentifier,refToIdentifier.values.toSeq,prefixes)
+            ._1.view.filterKeys( k => listVariables.contains(k) ).toMap
+          val qr = QueryRunner(config.source(source),config.conf.settings).query(
+            SparqlQueryBuilder.selectQueryString(r,refToIdentifier,refToIdentifier.values.toSeq)
           )
-          println(qr)
         }
         promise success (QueryResult("",""))
         promise.future

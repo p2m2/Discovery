@@ -6,7 +6,7 @@ RUN \
   apt-get install -y --no-install-recommends curl ca-certificates apt-transport-https && \
   apt-get install -y --no-install-recommends bzip2 bsdtar build-essential python git wget
 
-ENV SBT_VERSION 1.3.3
+ENV SBT_VERSION 1.4.4
 
 # Install sbt
 RUN \
