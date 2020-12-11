@@ -44,6 +44,8 @@ jobs:
           name: Start virtuoso container
           command: |
             set -x
+            ls
+            pwd
             docker-compose up -d
 
       - run: cat /dev/null | sbt discoveryJVM/test:compile
