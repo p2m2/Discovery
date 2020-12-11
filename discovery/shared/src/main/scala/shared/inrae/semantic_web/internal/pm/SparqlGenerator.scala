@@ -35,23 +35,12 @@ object SparqlGenerator  {
         "} limit 13"
     }
 
-    def prologSourcesSelection() : String = {
-            "SELECT * WHERE {"
-    }
-
     def prologCountSelection(varCount : String) : String = {
-      //  variable match {
-        "SELECT ( COUNT(*) as ?"+varCount+" ) WHERE {"
-           // case _ => "SELECT ( COUNT(?"+variable+") as ?"+varCount+" ) WHERE {"
-        //}
+        "SELECT ( COUNT(*) as ?"+varCount+" )"
     }
 
     def solutionModifierSourcesSelection () : String = {
         "} LIMIT 1"
-    }
-
-    def termString() = {
-
     }
 
     def queryVariableTransform(term : SparqlDefinition,

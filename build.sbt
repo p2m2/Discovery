@@ -116,14 +116,7 @@ lazy val discovery =crossProject(JSPlatform, JVMPlatform).in(file("discovery"))
     ),
     testFrameworks += new TestFramework("utest.runner.Framework"),
     scalacOptions ++= Seq("-deprecation", "-feature"),
-    classLoaderLayeringStrategy := ClassLoaderLayeringStrategy.AllLibraryJars,
-    Test / logBuffered := true,
-    /*
-    fork in Test := true,
-    envVars in Test := Map(
-      "VIRTUOSO_ENV" -> (File(".").toAbsolute + "/virtuoso.env"),
-      "VIRTUOSO_PORT" -> "8890",
-      "VIRTUOSO_CONTAINER_NAME" ->"virtuoso")*/
+    classLoaderLayeringStrategy := ClassLoaderLayeringStrategy.AllLibraryJars
   )
   .jsSettings(
     libraryDependencies ++= Seq(

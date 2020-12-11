@@ -5,20 +5,34 @@ import inrae.semantic_web.rdf.IRI
 
 object SparqlQueryBuilder {
 
-  def queryString(n: Root,
-                  refToIdentifier : Map[String,String],
-                  listVariables : Seq[String],
-                  prefixes : Map[String,IRI]): String = {
-    debug(" -- queryString -- ")
+  def baseQuery(n: Root,refToIdentifier : Map[String,String]) : String = {
 
-    (pm.SparqlGenerator.prefixes(prefixes) + "\n" +
-      pm.SparqlGenerator.queryFormSelect(listVariables) + "\n" +
-      pm.SparqlGenerator.from(n.defaultGraph) + "\n" +
+    (pm.SparqlGenerator.from(n.defaultGraph) + "\n" +
       pm.SparqlGenerator.fromNamed(n.namedGraph) + "\n" +
       pm.SparqlGenerator.start_where() + "\n" +
       pm.SparqlGenerator.body(n, refToIdentifier) + "\n" +
       pm.SparqlGenerator.solutionModifier())
+  }
 
-      .replace("\n\n","\n")
+  def selectQueryString(n: Root,
+                  refToIdentifier : Map[String,String],
+                  listVariables : Seq[String]): String = {
+    debug(" -- selectQueryString -- ")
+
+    (pm.SparqlGenerator.prefixes(n.prefixes) + "\n" +
+      pm.SparqlGenerator.queryFormSelect(listVariables) + "\n" +
+      baseQuery(n,refToIdentifier)).replace("\n\n","\n")
+
+  }
+
+  def countQueryString(n: Root,
+                        refToIdentifier : Map[String,String],
+                       varCount : String): String = {
+    debug(" -- countQueryString -- ")
+
+    (pm.SparqlGenerator.prefixes(n.prefixes) + "\n" +
+      pm.SparqlGenerator.prologCountSelection(varCount) + "\n" +
+      baseQuery(n,refToIdentifier)).replace("\n\n","\n")
+
   }
 }

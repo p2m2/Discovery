@@ -23,7 +23,7 @@ abstract class HttpRequestDriver {
 
   def request(`type`: String , query: String, config : ConfigurationHttpRequest ): Future[QueryResult] = {
     debug(" -- HttpRequestDriver > " + this.getClass.getName )
-    info(s" ${this.getClass.getName} http request on ${config.url}")
+    debug(s" ${this.getClass.getName} http request on ${config.url}")
 
     debug("\n\t"+config.url+"\n\n\t\t"+query.replace("\n","\n\t\t")+"\n\n")
 

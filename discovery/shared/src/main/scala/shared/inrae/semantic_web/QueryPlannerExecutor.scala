@@ -90,7 +90,7 @@ object QueryPlannerExecutor {
           val refToIdentifier = pm.SparqlGenerator.correspondenceVariablesIdentifier(root)
             ._1.view.filterKeys( k => listVariables.contains(k) ).toMap
           val qr = QueryRunner(config.source(source),config.conf.settings).query(
-            SparqlQueryBuilder.queryString(r,refToIdentifier,refToIdentifier.values.toSeq,prefixes)
+            SparqlQueryBuilder.selectQueryString(r,refToIdentifier,refToIdentifier.values.toSeq)
           )
         }
         promise success (QueryResult("",""))

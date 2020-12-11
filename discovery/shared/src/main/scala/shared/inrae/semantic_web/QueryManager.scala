@@ -20,7 +20,7 @@ case class QueryManager(config : StatementConfiguration) {
 
   def sparql_string(root: Root, n: Node): String = {
     val (refToIdentifier,_) = pm.SparqlGenerator.correspondenceVariablesIdentifier(n)
-    SparqlQueryBuilder.queryString(root,refToIdentifier,refToIdentifier.values.toSeq,root.prefixes)
+    SparqlQueryBuilder.selectQueryString(root,refToIdentifier,refToIdentifier.values.toSeq)
   }
 
 
@@ -33,29 +33,20 @@ case class QueryManager(config : StatementConfiguration) {
     debug(" -- countNbSolutions -- ")
 
     if (config.sources().length == 0) {
-      throw new Exception(" ** None sources available ** ")
+      Future { throw new DiscoveryException(" ** None sources available ** ") }
     } else if (config.sources().length == 1) {
       val source = config.sources()(0)
       val (refToIdentifier, _) = pm.SparqlGenerator.correspondenceVariablesIdentifier(root)
       val varCount = "count"
-     // val prolog = pm.SparqlGenerator.prologCountSelection(varCount,refToIdentifier(Node.references(n)))
-     val prolog = pm.SparqlGenerator.prologCountSelection(varCount)
 
-
-      val query =
-        pm.SparqlGenerator.prefixes(root.prefixes) +
-        prolog +
-        pm.SparqlGenerator.body(root, refToIdentifier) +
-        pm.SparqlGenerator.solutionModifier()
-
+      val query = SparqlQueryBuilder.countQueryString(root,refToIdentifier,varCount)
       val res: Future[QueryResult] = QueryRunner(source,config.conf.settings).query(query)
       res.map(v => {
         SparqlBuilder.createLiteral(v.json("results")("bindings")(0)(varCount)).toInt()
       })
     } else {
       // todo query planner
-      error("QueryPlanner is not available .")
-      throw new Exception("not manage.......")
+      Future { throw new DiscoveryException("QueryPlanner is not available .") }
     }
   }
 
@@ -67,12 +58,14 @@ case class QueryManager(config : StatementConfiguration) {
 
     config.sources().length match {
       case 0 => {
-        throw new Exception(" ** None sources available ** ")
+        Future {
+          throw DiscoveryException(" ** No sources available ** ")
+        }
       }
       case 1 => {
         val (refToIdentifier, _) = pm.SparqlGenerator.correspondenceVariablesIdentifier(root)
         trace(refToIdentifier.toString())
-        val query: String = SparqlQueryBuilder.queryString(root, refToIdentifier, listVariables, root.prefixes)
+        val query: String = SparqlQueryBuilder.selectQueryString(root, refToIdentifier, listVariables)
         QueryRunner(config.sources()(0),config.conf.settings).query(query).map( qr => {
           qr
         })
@@ -103,7 +96,8 @@ case class QueryManager(config : StatementConfiguration) {
       case r : RdfNode =>
         val (refToIdentifier,_) = pm.SparqlGenerator.correspondenceVariablesIdentifier(n)
         val query = pm.SparqlGenerator.prefixes(prefixes) + "\n" +
-          pm.SparqlGenerator.prologSourcesSelection() + "\n" +
+          pm.SparqlGenerator.queryFormSelect() + "\n" +
+          pm.SparqlGenerator.start_where() + "\n" +
           pm.SparqlGenerator.sparqlNode(r,refToIdentifier,"varUp","varCur") +
           pm.SparqlGenerator.solutionModifierSourcesSelection()
 

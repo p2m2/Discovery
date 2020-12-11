@@ -12,6 +12,19 @@ import wvlet.log.{LogLevel, Logger}
 import scala.concurrent.{Future, Promise}
 import scala.util.{Failure, Success}
 
+final case class DiscoveryException(private val message: String = "",
+
+                                                 private val cause: Throwable = None.orNull) extends Exception(message,cause)
+
+object SW {
+
+  private val version : String = "0.0.2"
+
+  info(" --------------------------------------------------" )
+  info(" ---- version Discovery :"+ version + "          -----------" )
+  info(" --------------------------------------------------" )
+}
+
 case class SW(var config: StatementConfiguration) {
   implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
   /* root node */
@@ -19,11 +32,6 @@ case class SW(var config: StatementConfiguration) {
   /* focus node */
   private var focusNode  : Node = rootNode
 
-  private val version : String = "0.0.2"
-
-  info(" --------------------------------------------------" )
-  info(" ---- version Discovery :"+ version + "          -----------" )
-  info(" --------------------------------------------------" )
 
   this.prefix("owl",IRI("http://www.w3.org/2002/07/owl#"))
   this.prefix("rdf",IRI("http://www.w3.org/1999/02/22-rdf-syntax-ns#"))
@@ -56,7 +64,7 @@ case class SW(var config: StatementConfiguration) {
   Logger.setDefaultLogLevel(config.conf.settings.getLogLevel())
 
   def help() : SW = {
-    println(" ---------------- SW "+version+" ---------------------------")
+    println(" ---------------- SW "+SW.version+" ---------------------------")
     println("   ")
     println("    -------------  Query Control ----------")
     println(" something:")
@@ -313,7 +321,8 @@ case class SW(var config: StatementConfiguration) {
       }
     }.distinct
 
-    trace("lSelectVariables :::"+lSelectVariables.toString())
+    trace("lSelectVariables :::" + lSelectVariables.toString())
+
     val p = Promise[ujson.Value]()
 
     /* manage variable name */
@@ -382,7 +391,7 @@ case class SW(var config: StatementConfiguration) {
       .select(List("_esp___type"))
       .map( json => {
         json("results")("bindings").arr.map(
-          row => SparqlBuilder.createUri(row("_esp___type")("value"))
+          row => SparqlBuilder.createUri(row("_esp___type"))
         ).toSeq
       })
   }
