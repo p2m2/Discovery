@@ -5,6 +5,7 @@ import fr.hmil.roshttp.HttpRequest
 import fr.hmil.roshttp.Method.POST
 import fr.hmil.roshttp.exceptions.HttpException
 import fr.hmil.roshttp.response.SimpleHttpResponse
+import inrae.data.DataTestFactory.url_endpoint
 import inrae.semantic_web.StatementConfiguration
 import wvlet.log.Logger.rootLogger.{debug, error, info}
 
@@ -40,12 +41,12 @@ object DataTestFactory {
       }
   }
 
-  def graph(classname: String) = "graph:test:discovery:" + classname.replace("$","")
+  def graph1(classname: String) = "graph:test:discovery:virtuoso1:" + classname.replace("$","")
+  def graph2(classname: String) = "graph:test:discovery:virtuoso2:" + classname.replace("$","")
 
-  /* insert into graph */
-  def insert(data : String ,
-                   classname: String,
-                   url_endpoint : String=url_endpoint) = {
+  private def insert(data : String,
+                     graph: String,
+                     url_endpoint : String=url_endpoint) = {
 
     put(s"""
         PREFIX owl: <http://www.w3.org/2002/07/owl#>
@@ -54,29 +55,60 @@ object DataTestFactory {
         PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 
         INSERT {
-            GRAPH <${graph(classname)}>
+            GRAPH <${graph}>
               {
                 ${data}
               }
           }
         """.stripMargin,url_endpoint).onComplete({
           case Success(_) => {
-            debug(s"${graph(classname)} is loaded !")
+            debug(s"${graph} is loaded !")
           }
-          case Failure(_) => throw new Error(s"Can not load graph :${graph(classname)}")
+          case Failure(_) => throw new Error(s"Can not load graph :${graph}")
         })
   }
 
-  def delete(classname: String,
-                   url_endpoint : String=url_endpoint) = {
+  def insert_virtuoso1(data : String,
+                       classname: String,
+                       url_endpoint : String=url_endpoint) = insert(data,graph1(classname),url_endpoint)
 
-    put(s"DROP SILENT GRAPH <${graph(classname)}>",url_endpoint)
+  def insert_virtuoso2(data : String,
+                       classname: String,
+                       url_endpoint : String=url_endpoint)= insert(data,graph2(classname),url_endpoint)
+
+  private def delete(graph: String,
+                       url_endpoint : String=url_endpoint) = {
+    put(s"DROP SILENT GRAPH <${graph}>",url_endpoint)
 
   }
 
+  def delete_virtuoso1(classname: String,
+                       url_endpoint : String=url_endpoint) = delete(graph1(classname),url_endpoint)
+
+  def delete_virtuoso2(classname: String,
+                       url_endpoint : String=url_endpoint) = delete(graph2(classname),url_endpoint)
 
 
-  def getConfig() : StatementConfiguration = {
+  def getConfigVirtuoso1() : StatementConfiguration = {
+    StatementConfiguration().setConfigString(
+      s"""
+        {
+         "sources" : [{
+           "id"       : "local",
+           "url"      : "${DataTestFactory.url_endpoint}",
+           "type"     : "tps",
+           "method"   : "POST",
+           "mimetype" : "json"
+         }],
+         "settings" : {
+            "logLevel" : "info",
+            "sizeBatchProcessing" : 100
+          }
+         }
+        """.stripMargin)
+  }
+
+  def getConfigVirtuoso2() : StatementConfiguration = {
     StatementConfiguration().setConfigString(
       s"""
         {

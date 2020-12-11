@@ -1,11 +1,10 @@
 package inrae.semantic_web.driver
 
-import inrae.semantic_web.sparql.{ConfigurationHttpRequest, HttpRequestDriver, QueryResult}
+import inrae.semantic_web.sparql.{ConfigurationHttpRequest, HttpRequestDriver, HttpRequestDriverException, QueryResult}
 import org.apache.jena.query._
 
 import java.io.ByteArrayOutputStream
 import scala.concurrent.Future
-
 import org.portablescala.reflect.annotation.EnableReflectiveInstantiation
 
 @EnableReflectiveInstantiation
@@ -30,12 +29,8 @@ case class JenaRequestDriver() extends HttpRequestDriver {
         val json = new String(outputStream.toByteArray)
         QueryResult(json, "json")
       } catch {
-        case e: QueryParseException => println(e.getMessage)
-          QueryResult(e.getMessage, "error")
-        case e: Throwable => {
-          //System.err.println(e.getMessage)
-          QueryResult(e.getMessage, "error")
-        }
+        case e: QueryParseException => throw HttpRequestDriverException(e.getMessage())
+        case e: Throwable => throw HttpRequestDriverException(e.getMessage())
       }
     }
   }

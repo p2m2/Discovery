@@ -12,8 +12,8 @@ object GeoSparql extends TestSuite {
 
   implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
 
-  val configTest: StatementConfiguration = new StatementConfiguration()
-  configTest.setConfigString(
+  val configTest: StatementConfiguration = StatementConfiguration()
+    .setConfigString(
     """
       {
                 "sources" : [{

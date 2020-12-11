@@ -1,6 +1,7 @@
 package inrae.semantic_web.sparql
 
 import inrae.semantic_web.rdf.{SparqlBuilder, SparqlDefinition}
+import wvlet.log.Logger.rootLogger.trace
 
 case class QueryResult(results: String, mimetype : String = "json") {
 
@@ -26,7 +27,7 @@ case class QueryResult(results: String, mimetype : String = "json") {
    * @return
    */
   def v2Ident(v2k : Map[String,String]) = {
-    //scribe.debug(v2k.toString)
+    trace(v2k.toString)
     val l = json("head")("vars").arr.map(v => {
       val v2 = v.toString().replace("\"","")
       v2k.find( v2 == _._2 ).map( x => x._1 ) match {
@@ -37,7 +38,7 @@ case class QueryResult(results: String, mimetype : String = "json") {
     json("head")("vars").arr.clear()
     l.map( {
       case a : String => json("head")("vars").arr.append(a)
-      case a => Nil
+      case _ => Nil
     })
 
     val records = json("results")("bindings").arr.map(kv => kv match {

@@ -4,7 +4,7 @@ import inrae.semantic_web.sparql.HttpRequestDriver
 import inrae.semantic_web.driver._
 import upickle.default.{macroRW, ReadWriter => RW}
 import wvlet.log.LogLevel
-import wvlet.log.Logger.rootLogger.error
+import wvlet.log.Logger.rootLogger.{error, warn}
 
 import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
 
@@ -26,7 +26,6 @@ object ConfigurationObject {
                                          sources : Seq[Source],
                                          settings : GeneralSetting = new GeneralSetting(),
                                        )
-
   case class Source(
                      id:String, /* identify the source endpoint */
                      url: String, /* url access */
@@ -65,7 +64,7 @@ object ConfigurationObject {
   case class GeneralSetting(
                       driver: String = "inrae.semantic_web.driver.RosHTTPDriver",
                       cache : Boolean = true,
-                      logLevel : String = "warn"          , // debug, info, warn, error
+                      logLevel : String = "warn"          , // trace, debug, info, warn, error, all, off
                       sizeBatchProcessing : Int = 150
                     ) {
 
@@ -87,7 +86,10 @@ object ConfigurationObject {
       case "trace" | "t" => LogLevel.TRACE
       case "all" => LogLevel.ALL
       case "off" => LogLevel.OFF
-      case _ => LogLevel.WARN
+      case _ => {
+        warn("[config.settings] logLevel is not defined. ")
+        LogLevel.WARN
+      }
     }
   }
 
@@ -136,8 +138,7 @@ case class StatementConfiguration() {
     try {
       conf = upickle.default.read[ConfigurationObject.StatementConfigurationJson](json_conf)
     } catch {
-      case e1: upickle.core.AbortException => {
-        error(e1)
+      case e1: Throwable => {
         throw StatementConfigurationException(e1.getMessage())
       }
     }

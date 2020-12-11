@@ -8,7 +8,6 @@ object SparqlAlgebraTest extends TestSuite {
     test("Root creation") {
       val root = Root()
       val sa = SparqlAlgebra.nodeToSparqlAlgebra(root,root,false,-1,-1)
-      println(sa)
     }
   }
 }

@@ -31,7 +31,7 @@ object QueryPlannerExecutor {
 
 
   def buildRootNode( swRootNode : Root, lbgp : Seq[Node]) : Node = {
-    warn("buildRootNode lbgp=>"+lbgp)
+    trace("buildRootNode lbgp=>"+lbgp)
     if ( lbgp.length == 0 ) {
       Something("__var"+randomUUID.toString)
     } else if ( lbgp.length == 1 ) {
@@ -86,7 +86,7 @@ object QueryPlannerExecutor {
           // todo : Verifier qu'on ne casse jamais de lien de parenté
           var r :Root = Root()
           r.addChildren(buildRootNode(root,lbgp))
-          info(r.toString())
+          trace(r.toString())
           val refToIdentifier = pm.SparqlGenerator.correspondenceVariablesIdentifier(root)
             ._1.view.filterKeys( k => listVariables.contains(k) ).toMap
           val qr = QueryRunner(config.source(source),config.conf.settings).query(

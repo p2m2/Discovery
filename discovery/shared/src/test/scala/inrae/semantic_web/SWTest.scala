@@ -16,7 +16,7 @@ import scala.concurrent.duration._
 object SWTest extends TestSuite {
 
 
-  DataTestFactory.insert(
+  DataTestFactory.insert_virtuoso1(
     """
       <aa> <bb> <cc> .
       <aa> <bb2> <cc2> .
@@ -32,7 +32,7 @@ object SWTest extends TestSuite {
       <OwlClass> a owl:Class .
       """.stripMargin, this.getClass.getSimpleName)
 
-  val config: StatementConfiguration = DataTestFactory.getConfig()
+  val config: StatementConfiguration = DataTestFactory.getConfigVirtuoso1()
 
   override def utestBeforeEach(path: Seq[String]): Unit = {
 
@@ -43,7 +43,7 @@ object SWTest extends TestSuite {
   }
 
   override def utestAfterAll(): Unit = {
-    DataTestFactory.delete(this.getClass.getSimpleName)
+    DataTestFactory.delete_virtuoso1(this.getClass.getSimpleName)
   }
 
   def tests = Tests {
@@ -80,7 +80,7 @@ object SWTest extends TestSuite {
     test("isSubjectOf") {
       SW(config)
         .something("h1")
-        .graph(IRI(DataTestFactory.graph(this.getClass.getSimpleName)))
+        .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
         .set(URI("aa"))
         .isSubjectOf(URI("bb"), "var")
         .select(List("var"))
@@ -98,7 +98,7 @@ object SWTest extends TestSuite {
 
     test("count") {
       SW(config)
-        .graph(IRI(DataTestFactory.graph(this.getClass.getSimpleName)))
+        .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
         .something("h1") //http://rdf.ebi.ac.uk/terms/chembl#BioComponent
         .isSubjectOf(URI("bb2"))
         .count()
@@ -115,7 +115,7 @@ object SWTest extends TestSuite {
 
     test("findClasses") {
       SW(config)
-        .graph(IRI(DataTestFactory.graph(this.getClass.getSimpleName)))
+        .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
         .something("h1")
         .set(URI("aa1"))
         .findClasses()
@@ -132,7 +132,7 @@ object SWTest extends TestSuite {
 
     test("findClasses with mother class -> owl:Class") {
       SW(config)
-        .graph(IRI(DataTestFactory.graph(this.getClass.getSimpleName)))
+        .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
         .something("h1")
         .set(URI("aa2"))
         .findClasses(URI("Class","owl"))
