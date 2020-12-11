@@ -6,6 +6,7 @@ addSbtPlugin("com.vmunier"        % "sbt-web-scalajs"               % "1.1.0")
 addSbtPlugin("com.typesafe.play"  % "sbt-plugin"                    % "2.8.5")
 addSbtPlugin("com.typesafe.sbt"   % "sbt-gzip"                      % "1.0.2")
 addSbtPlugin("com.typesafe.sbt"   % "sbt-digest"                    % "1.1.4")
+addSbtPlugin("org.scoverage"      % "sbt-scoverage"                 % "1.6.1")
 
 libraryDependencies += "org.scala-js" %% "scalajs-env-jsdom-nodejs" % "1.1.0"
 
