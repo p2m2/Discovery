@@ -1,6 +1,8 @@
 import sbt.Keys.scalacOptions
 import sbtcrossproject.CrossPlugin.autoImport.{CrossType, crossProject}
 
+import scala.reflect.io.File
+
 val circeVersion = "0.14.0-M1"
 val monocleVersion = "2.2.0-M1"//"1.5.1-cats"
 
@@ -32,6 +34,7 @@ lazy val log4jVersion = "2.14.0"
 lazy val scalatagVersion = "0.9.2"
 lazy val scalaReflectVersion = "1.0.0"
 lazy val RosHttpVersion = "3.0.0"
+lazy val scalaReflectPortableVersion = "1.0.0"
 
 def sharedSetting(pName: String) = Seq(
   name := pName,
@@ -113,7 +116,14 @@ lazy val discovery =crossProject(JSPlatform, JVMPlatform).in(file("discovery"))
     ),
     testFrameworks += new TestFramework("utest.runner.Framework"),
     scalacOptions ++= Seq("-deprecation", "-feature"),
-    classLoaderLayeringStrategy := ClassLoaderLayeringStrategy.AllLibraryJars
+    classLoaderLayeringStrategy := ClassLoaderLayeringStrategy.AllLibraryJars,
+    Test / logBuffered := true,
+    /*
+    fork in Test := true,
+    envVars in Test := Map(
+      "VIRTUOSO_ENV" -> (File(".").toAbsolute + "/virtuoso.env"),
+      "VIRTUOSO_PORT" -> "8890",
+      "VIRTUOSO_CONTAINER_NAME" ->"virtuoso")*/
   )
   .jsSettings(
     libraryDependencies ++= Seq(
@@ -161,7 +171,7 @@ lazy val table = (project in file("examples-discovery/html/table"))
                   mainClass in Compile := Some("inrae.application.TableApp"),
                   libraryDependencies ++= Seq(
                     "com.lihaoyi" %%% "scalatags" % scalatagVersion,
-                    "org.portable-scala" %%% "portable-scala-reflect" % "1.0.0"
+                    "org.portable-scala" %%% "portable-scala-reflect" % scalaReflectPortableVersion
                   )
                 )
                 .dependsOn(discovery.js)

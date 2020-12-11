@@ -12,6 +12,7 @@ services:
 
   virtuoso:
     image: askomics/virtuoso:7.2.5.1
+    container_name: "virtuoso"
     env_file:
       - virtuoso.env
     command:

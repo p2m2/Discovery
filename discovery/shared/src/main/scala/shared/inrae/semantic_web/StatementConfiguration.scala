@@ -4,6 +4,7 @@ import inrae.semantic_web.sparql.HttpRequestDriver
 import inrae.semantic_web.driver._
 import upickle.default.{macroRW, ReadWriter => RW}
 import wvlet.log.LogLevel
+import wvlet.log.Logger.rootLogger.error
 
 import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
 
@@ -29,21 +30,66 @@ object ConfigurationObject {
   case class Source(
                      id:String, /* identify the source endpoint */
                      url: String, /* url access */
-                     `type`: String="tps",  /* ldfragment, csv, tps */
+                     `type`: String="tps",  /* tps, ldf, csv, tps */
                      method: String = "POST", /* POST, POST_ENCODED, GET */
-                     auth : String = "none", /* basic, digest, bearer, proxy, none */
-                     login : String = "none" ,
-                     password : String = "none",
+                     auth : String = "", /* basic, digest, bearer, proxy */
+                     login : String = "" ,
+                     password : String = "",
                      token : String = "",
-                     mimetype: String = "json"
+                     mimetype: String = "application/json"
                    ) {
+
+    val type_legal = List("tps", "ldf", "csv", "tps")
+
+    `type` match {
+      case a if ! type_legal.contains(a) => throw StatementConfigurationException(s"type source unknown :${`type`}")
+      case _ =>
+    }
+
+    val method_legal = List("post","get")
+
+    method.toLowerCase() match {
+      case a if ! method_legal.contains(a) => throw StatementConfigurationException(s"method source unknown :${method}")
+      case _ =>
+    }
+
+    val auth_legal = List("basic", "digest", "bearer", "proxy","")
+
+    auth.toLowerCase() match {
+      case a if ! auth_legal.contains(a) => throw StatementConfigurationException(s"auth source not managed :${auth}")
+      case _ =>
+    }
+
   }
 
   case class GeneralSetting(
                       driver: String = "inrae.semantic_web.driver.RosHTTPDriver",
+                      cache : Boolean = true,
                       logLevel : String = "warn"          , // debug, info, warn, error
                       sizeBatchProcessing : Int = 150
-                    )
+                    ) {
+
+    def getHttpDriver() : HttpRequestDriver = {
+      import org.portablescala.reflect._
+
+      Reflect.lookupInstantiatableClass(driver) match {
+        case Some( cls ) => cls.newInstance().asInstanceOf[HttpRequestDriver]
+        case None => throw StatementConfigurationException("Unknown Http Request Driver :"+driver)
+      }
+
+    }
+
+    def getLogLevel() : LogLevel = logLevel.toLowerCase() match {
+      case "debug" | "d" => LogLevel.DEBUG
+      case "info" | "i" => LogLevel.INFO
+      case "warn" | "w" => LogLevel.WARN
+      case "error" | "e" => LogLevel.ERROR
+      case "trace" | "t" => LogLevel.TRACE
+      case "all" => LogLevel.ALL
+      case "off" => LogLevel.OFF
+      case _ => LogLevel.WARN
+    }
+  }
 
   case class Prefixes(list : Map[String,String])
 
@@ -65,7 +111,7 @@ object ConfigurationObject {
 }
 
 @JSExportTopLevel(name="EasySparqlStatementConfiguration")
-class StatementConfiguration {
+case class StatementConfiguration() {
 
   var conf: ConfigurationObject.StatementConfigurationJson =
     new ConfigurationObject.StatementConfigurationJson(
@@ -76,8 +122,9 @@ class StatementConfiguration {
    * @param conf
    */
   @JSExport
-  def setConfig(conf_ext : ConfigurationObject.StatementConfigurationJson) : Unit = {
-      conf = conf_ext
+  def setConfig(conf_ext : ConfigurationObject.StatementConfigurationJson) : StatementConfiguration = {
+    conf = conf_ext
+    this
   }
 
   /**
@@ -85,20 +132,21 @@ class StatementConfiguration {
    * @param json_conf
    */
   @JSExport
-  def setConfigString(json_conf: String) : Unit = {
+  def setConfigString(json_conf: String) : StatementConfiguration = {
     try {
       conf = upickle.default.read[ConfigurationObject.StatementConfigurationJson](json_conf)
     } catch {
-      case e1: upickle.core.AbortException => System.err.println(e1)
+      case e1: upickle.core.AbortException => {
+        error(e1)
+        throw StatementConfigurationException(e1.getMessage())
+      }
     }
+    this
   }
 
   def source(idname : String) : ConfigurationObject.Source = {
-    //(json \ "sources").as[Seq[Source]].find( source => source.id == idname )
-
     conf.sources.find(source => source.id == idname ) match {
       case Some(v : ConfigurationObject.Source) => v
-      //case Some(lv : Seq[Source]) => lv[0]
       case None => throw new Exception("Unknown source id:"+idname )
     }
   }
@@ -107,46 +155,4 @@ class StatementConfiguration {
     conf.sources
   }
 
-  def getHttpDriver() : HttpRequestDriver = {
-    import org.portablescala.reflect._
-        /*try {
-
-        //ScalaJs not compatible
-
-          import scala.reflect.runtime.{universe=>ru,_}
-          val mirror = ru.runtimeMirror(getClass.getClassLoader)
-          val classSymbol = mirror.classSymbol(Class.forName(conf.settings.driver))
-          val clsMirror = mirror.reflectClass(classSymbol.asClass)
-          val ctor = classSymbol.toType.decl(ru.termNames.CONSTRUCTOR).asMethod
-
-          clsMirror.reflectConstructor(ctor)().asInstanceOf[HttpRequestDriver]
-     */
-
-      Reflect.lookupInstantiatableClass(conf.settings.driver) match {
-        case Some( cls ) => cls.newInstance().asInstanceOf[HttpRequestDriver]
-        case None => throw StatementConfigurationException("Unknown Http Request Driver :"+conf.settings.driver)
-      }
-
-/*
-    } catch {
-      case _ : ClassNotFoundException => {
-        throw StatementConfigurationException("Unknown Http Request Driver :"+conf.settings.driver)
-      }
-      case e : Throwable => {
-        println(e)
-        throw StatementConfigurationException("Devel error with :"+conf.settings.driver)
-      }
-    } */
-  }
-
-  def logLevel() : LogLevel = conf.settings.logLevel.toLowerCase() match {
-      case "debug" | "d" => LogLevel.INFO
-      case "info" | "i" => LogLevel.INFO
-      case "warn" | "w" => LogLevel.WARN
-      case "error" | "e" => LogLevel.ERROR
-      case "trace" | "t" => LogLevel.TRACE
-      case "all" => LogLevel.ALL
-      case "off" => LogLevel.OFF
-      case _ => LogLevel.WARN
-    }
 }

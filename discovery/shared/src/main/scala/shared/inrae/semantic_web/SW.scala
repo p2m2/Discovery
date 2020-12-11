@@ -21,7 +21,9 @@ case class SW(var config: StatementConfiguration) {
 
   private val version : String = "0.0.2"
 
-  info(" ---- version Discovery :"+ version + " -----------" )
+  info(" --------------------------------------------------" )
+  info(" ---- version Discovery :"+ version + "          -----------" )
+  info(" --------------------------------------------------" )
 
   this.prefix("owl",IRI("http://www.w3.org/2002/07/owl#"))
   this.prefix("rdf",IRI("http://www.w3.org/1999/02/22-rdf-syntax-ns#"))
@@ -51,7 +53,7 @@ case class SW(var config: StatementConfiguration) {
 
   private val logger = Logger.of[SW]
   // Set the root logger's log level
-  Logger.setDefaultLogLevel(config.logLevel())
+  Logger.setDefaultLogLevel(config.conf.settings.getLogLevel())
 
   def help() : SW = {
     println(" ---------------- SW "+version+" ---------------------------")
@@ -97,7 +99,7 @@ case class SW(var config: StatementConfiguration) {
 
   /* set the current focus on the select node */
   def focus(ref : String) : SW = {
-    info("focus")
+    trace("focus")
     if (ref == "") throw new Error("reference can not be empty !")
     val arrNode = pm.SelectNode.getNodeWithRef(ref, rootNode)
     if ( arrNode.length > 0 ) {
@@ -140,7 +142,7 @@ case class SW(var config: StatementConfiguration) {
   }
 
   def setupnode(n : Node, upsource : Boolean = false, forward : Boolean = true ) : SW = {
-    debug("setupnode")
+    trace("setupnode")
 
     focusManagement(n,forward)
 
@@ -156,7 +158,7 @@ case class SW(var config: StatementConfiguration) {
   }
 
   def focusManagement(n : Node, forward: Boolean = true) : SW = {
-    debug("-- focusManagement --")
+    trace("-- focusManagement --")
     if (! focusNode.accept(n)) {
       error("Can not add "+n.toString()+" with the current focus ["+focusNode.toString()+"]")
       throw new Error("Can not add "+n.toString()+" with the current focus ["+focusNode.toString()+"]")
@@ -170,11 +172,13 @@ case class SW(var config: StatementConfiguration) {
 
   /* start a request with a variable */
   def something( ref : String = getUniqueRef() ) : SW = {
+    debug(" -- something -- ")
     setupnode(Something(ref))
   }
 
   /* create node which focus is the subject : ?focusId <uri> ?target */
   def isSubjectOf( term : SparqlDefinition , ref : String = getUniqueRef() ) : SW = {
+    debug(" -- isSubjectOf -- ")
     checkQueryVariable(term)
     setupnode(SubjectOf(ref,term))
   }
@@ -182,6 +186,7 @@ case class SW(var config: StatementConfiguration) {
 
   /* create node which focus is the subject : ?target <uri> ?focusId */
   def isObjectOf( term : SparqlDefinition , ref : String = getUniqueRef() ) : SW = {
+    debug(" -- isObjectOf -- ")
     checkQueryVariable(term)
     setupnode(ObjectOf(ref,term))
   }
@@ -190,6 +195,7 @@ case class SW(var config: StatementConfiguration) {
   ?focusId ?target <uri>|literal
   */
   def isLinkTo(term : SparqlDefinition, ref : String = getUniqueRef() ) : SW = {
+    debug(" -- isLinkTo -- ")
     checkQueryVariable(term)
     setupnode(LinkTo(ref,term))
   }
@@ -199,6 +205,7 @@ case class SW(var config: StatementConfiguration) {
   ?focusId a <uri>
   */
   def isA( term : SparqlDefinition  ) : SW = {
+    debug(" -- isA -- ")
     checkQueryVariable(term)
     val f = focusNode
     isSubjectOf(URI("a")).set(term)
@@ -210,6 +217,7 @@ case class SW(var config: StatementConfiguration) {
      <uri> ?target ?focusId
   */
   def isLinkFrom( term : SparqlDefinition, ref : String = getUniqueRef() ) : SW = {
+    debug(" -- isLinkFrom -- ")
     checkQueryVariable(term)
     setupnode(LinkFrom(ref,term))
   }
@@ -221,6 +229,7 @@ case class SW(var config: StatementConfiguration) {
   */
 
   def datatype( uri : URI, ref : String ) : SW = {
+    debug(" -- datatype -- ")
     val f = focusNode
 
     focusNode match {
@@ -239,31 +248,35 @@ case class SW(var config: StatementConfiguration) {
     We get the
   */
   def set( term : SparqlDefinition ) : SW = {
+    debug(" -- set -- ")
     checkQueryVariable(term)
     setupnode(Value(term),true,false)
   }
 
   def setList( uris : Seq[URI] ) : SW = {
+    debug(" -- setList -- ")
     setupnode(ListValues(uris),true,false)
   }
 
 
   def console() : SW = {
-      println("USER REQUEST\n" +
-        pm.SimpleConsole.get(rootNode) +
-        pm.SimpleConsole.get(focusNode) +
-        "QUERY PLANNER\n"+
-        "todo....")
+    debug(" -- console -- ")
+    println("USER REQUEST\n" +
+      pm.SimpleConsole.get(rootNode) +
+      pm.SimpleConsole.get(focusNode) +
+      "QUERY PLANNER\n"+
+      "todo....")
     this
   }
 
   def sparql_console() : SW = {
+    debug(" -- sparql_console -- ")
     println(QueryManager(config).sparql_string(rootNode,focusNode))
     this
   }
 
   def variable(reference: String) : Option[String] = {
-
+    debug(" -- variable -- ")
     val variableNameList = pm.SelectNode.getNodeWithRef(reference, rootNode)
       .map( v => {
         pm.SparqlGenerator.correspondenceVariablesIdentifier(rootNode)._1.getOrElse(reference,"")
@@ -277,15 +290,15 @@ case class SW(var config: StatementConfiguration) {
   }
 
   def select(lRef: Seq[String] = List()) : Future[ujson.Value] = {
-    info(" -- select -- ")
-    info("selected variables :"+lRef.toString)
+    debug(" -- select -- ")
+    trace("selected variables :"+lRef.toString)
 
     val mapId2Var =  pm.SparqlGenerator.correspondenceVariablesIdentifier(rootNode)._1
 
-    info("Mapping variable <-> references :\n" + mapId2Var.toString().split(",").mkString("\n"))
+    trace("Mapping variable <-> references :\n" + mapId2Var.toString().split(",").mkString("\n"))
 
     val lDatatype = rootNode.lDatatypeNode.filter(ld => lRef.contains(ld.property.reference()))
-    info("list datatype : "+lDatatype.toString)
+    trace("list datatype : "+lDatatype.toString)
 
     val lSelectVariables = {
       /* select uri type ask with decoration/datatype */
@@ -300,7 +313,7 @@ case class SW(var config: StatementConfiguration) {
       }
     }.distinct
 
-    info("lSelectVariables :::"+lSelectVariables.toString())
+    trace("lSelectVariables :::"+lSelectVariables.toString())
     val p = Promise[ujson.Value]()
 
     /* manage variable name */
@@ -310,12 +323,12 @@ case class SW(var config: StatementConfiguration) {
 
          /* create an empty set of datatypes */
          qr.json("results").update("datatypes",ujson.Obj())
-         println(qr.json)
+         trace(qr.json)
          /* manage datatype */
-         info("  lDatatype ====> " + lDatatype.toString())
+         trace("  lDatatype ====> " + lDatatype.toString())
 
          Future.sequence(lDatatype.map(datatypeNode => {
-           info("datatype node:"+datatypeNode)
+           trace("datatype node:"+datatypeNode)
 
            rootNode.getRdfNode(datatypeNode.refNode) match {
              case Some(_) => {
@@ -351,12 +364,14 @@ case class SW(var config: StatementConfiguration) {
   }
 
   def count() : Future[Int] = {
+    debug(" -- count -- ")
     QueryManager(config).countNbSolutions(rootNode)
   }
 
 
 
   def findClasses(motherClass: URI = URI("") ) : Future[Seq[URI]] = {
+    debug(" -- findClasses -- ")
     (motherClass match {
       case uri : URI if uri == URI("")  => isSubjectOf(URI("a"),"_esp___type")
       case _ : URI =>  isSubjectOf(URI("a"),"_esp___type")
@@ -373,6 +388,7 @@ case class SW(var config: StatementConfiguration) {
   }
 
   def findProperties(motherClassProperties: URI = URI("") , kind : String = "objectProperty" ) : Future[Seq[URI]] = {
+    debug(" -- findProperties -- ")
     val refCurrent = ref()
 
     var state = root()
@@ -401,9 +417,11 @@ case class SW(var config: StatementConfiguration) {
   }
 
   def findObjectProperties(motherClassProperties: URI = URI("") ) : Future[Seq[URI]] = {
+    debug(" -- findObjectProperties -- ")
     findProperties(motherClassProperties,"objectProperty")
   }
   def findDatatypeProperties(motherClassProperties: URI = URI("") ) : Future[Seq[URI]] = {
+    debug(" -- findDatatypeProperties -- ")
     findProperties(motherClassProperties,"datatypeProperty")
   }
 }

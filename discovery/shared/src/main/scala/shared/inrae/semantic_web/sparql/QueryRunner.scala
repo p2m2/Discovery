@@ -1,6 +1,7 @@
 package inrae.semantic_web.sparql
 
 import inrae.semantic_web.ConfigurationObject
+import inrae.semantic_web.ConfigurationObject.GeneralSetting
 import inrae.semantic_web.sparql.{QueryResult, QueryResultManager}
 
 import scala.concurrent.Future
@@ -23,10 +24,8 @@ object QueryRunner {
 }
 
 
-case class QueryRunner(source: ConfigurationObject.Source,driver : HttpRequestDriver)  {
+case class QueryRunner(source: ConfigurationObject.Source,settings : GeneralSetting)  {
   implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
-
-
 
   def query(queryStr: String): Future[QueryResult] = {
 
@@ -38,18 +37,19 @@ case class QueryRunner(source: ConfigurationObject.Source,driver : HttpRequestDr
 
       case None => {
         /* request */
-        driver.request(source.method, queryStr,
+        settings.getHttpDriver().request(source.method, queryStr,
           ConfigurationHttpRequest(
             url = source.url,
             login = source.login,
             password = source.password,
             token = source.token,
             auth = source.auth)).map(resultsQR => {
-          QueryRunner.getQrm(source.url).set(queryStr, resultsQR.results)
+          if (settings.cache)
+            QueryRunner.getQrm(source.url).set(queryStr, resultsQR.results)
           resultsQR
         })
       }
     }
   }
-  //new HttpRequestAkkaDriver(source).query(queryStr)
+
 }

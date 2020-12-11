@@ -25,12 +25,12 @@ case class QueryManager(config : StatementConfiguration) {
 
 
   def queryAll(rootRequest : Root) : Future[QueryResult] = {
-    debug("queryAll")
+    debug(" -- queryAll -- ")
     queryVariables(rootRequest,Node.references(rootRequest))
   }
 
   def countNbSolutions(root : Root) : Future[Int] = {
-    debug("countNbSolutions")
+    debug(" -- countNbSolutions -- ")
 
     if (config.sources().length == 0) {
       throw new Exception(" ** None sources available ** ")
@@ -48,7 +48,7 @@ case class QueryManager(config : StatementConfiguration) {
         pm.SparqlGenerator.body(root, refToIdentifier) +
         pm.SparqlGenerator.solutionModifier()
 
-      val res: Future[QueryResult] = QueryRunner(source,config.getHttpDriver()).query(query)
+      val res: Future[QueryResult] = QueryRunner(source,config.conf.settings).query(query)
       res.map(v => {
         SparqlBuilder.createLiteral(v.json("results")("bindings")(0)(varCount)).toInt()
       })
@@ -61,7 +61,9 @@ case class QueryManager(config : StatementConfiguration) {
 
   def queryVariables(root: Root,
                      listVariables : Seq[String]) : Future[QueryResult] = {
-    debug("queryVariables")
+    debug(" -- queryVariables -- ")
+
+    trace( pm.SimpleConsole.get(root) )
 
     config.sources().length match {
       case 0 => {
@@ -69,9 +71,9 @@ case class QueryManager(config : StatementConfiguration) {
       }
       case 1 => {
         val (refToIdentifier, _) = pm.SparqlGenerator.correspondenceVariablesIdentifier(root)
-        info(refToIdentifier.toString())
+        trace(refToIdentifier.toString())
         val query: String = SparqlQueryBuilder.queryString(root, refToIdentifier, listVariables, root.prefixes)
-        QueryRunner(config.sources()(0),config.getHttpDriver()).query(query).map( qr => {
+        QueryRunner(config.sources()(0),config.conf.settings).query(query).map( qr => {
           qr
         })
       }
@@ -105,11 +107,11 @@ case class QueryManager(config : StatementConfiguration) {
           pm.SparqlGenerator.sparqlNode(r,refToIdentifier,"varUp","varCur") +
           pm.SparqlGenerator.solutionModifierSourcesSelection()
 
-        debug(query)
+        trace(query)
 
         val nbRowResultsBySource : Seq[Future[Boolean]] = {
           config.sources().map(
-              source => QueryRunner(source,config.getHttpDriver()).query(query)
+              source => QueryRunner(source,config.conf.settings).query(query)
             ).map( {
               ( _.map(rr => rr.json("results")("bindings").arr.length>0))
             })
@@ -123,7 +125,7 @@ case class QueryManager(config : StatementConfiguration) {
             y3 success Some(SourcesNode(r.reference(), lCheck.zip(config.sources()).filter( _._1).map( _._2.id)))
           }
           case msg => {
-            System.err.println(msg)
+           error(msg)
             y3 success (None)
           }
         }
@@ -137,12 +139,12 @@ case class QueryManager(config : StatementConfiguration) {
   def process_datatypes(qr : QueryResult,
                         datatypeNode : DatatypeNode,
                         lUris : Seq[SparqlDefinition]) = {
-    info(" -- process_datatypes --")
+    debug(" -- process_datatypes --")
     val labelProperty = datatypeNode.property.reference()
 
     lUris.grouped(config.conf.settings.sizeBatchProcessing).toList.map(
       lSubUris => {
-        info( " datatypes:"+lSubUris.toString )
+        trace( " datatypes:"+lSubUris.toString )
         /* request using api */
         SW(config).something("val_uri")
           .setList(lSubUris.map(_ match { case uri: URI => uri }))

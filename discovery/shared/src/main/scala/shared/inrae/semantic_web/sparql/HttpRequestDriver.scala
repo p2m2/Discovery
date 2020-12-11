@@ -1,7 +1,7 @@
 package inrae.semantic_web.sparql
 
 import inrae.semantic_web.sparql.QueryResult
-import wvlet.log.Logger.rootLogger.info
+import wvlet.log.Logger.rootLogger.{debug, info}
 
 import scala.concurrent.Future
 
@@ -22,7 +22,11 @@ final case class HttpRequestDriverException(private val message: String = "",
 abstract class HttpRequestDriver {
 
   def request(`type`: String , query: String, config : ConfigurationHttpRequest ): Future[QueryResult] = {
-    info(" -- HttpRequestDriver > " + this.getClass.getName )
+    debug(" -- HttpRequestDriver > " + this.getClass.getName )
+    info(s" ${this.getClass.getName} http request on ${config.url}")
+
+    debug("\n\t"+config.url+"\n\n\t\t"+query.replace("\n","\n\t\t")+"\n\n")
+
     `type`.toLowerCase() match {
       case "post" => post( query, config  )
       case "post_encoded" => post_encoded( query, config  )
@@ -31,10 +35,10 @@ abstract class HttpRequestDriver {
     }
   }
 
-  def get( query: String, config : ConfigurationHttpRequest ) : Future[QueryResult]
+  protected[sparql] def get( query: String, config : ConfigurationHttpRequest ) : Future[QueryResult]
 
-  def post( query: String, config : ConfigurationHttpRequest ) : Future[QueryResult]
+  protected[sparql] def post( query: String, config : ConfigurationHttpRequest ) : Future[QueryResult]
 
-  def post_encoded( query: String, config : ConfigurationHttpRequest  ) : Future[QueryResult]
+  protected[sparql] def post_encoded( query: String, config : ConfigurationHttpRequest  ) : Future[QueryResult]
 
 }

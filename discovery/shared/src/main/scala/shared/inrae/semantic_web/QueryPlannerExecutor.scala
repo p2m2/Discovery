@@ -58,7 +58,7 @@ object QueryPlannerExecutor {
             promise success ( lQueryResu(0)) // todo => union
           }
           case msg => {
-            System.err.println(msg)
+            error(msg)
             promise success (QueryResult(null))
           }
         })
@@ -72,15 +72,13 @@ object QueryPlannerExecutor {
             promise success ( lQueryResu(0)) // todo => intersection
           }
           case msg => {
-            System.err.println(msg)
+            error(msg)
             promise success (QueryResult(null))
           }
         })
         promise.future
       }
       case bgps: INTERSECTION_RESULTS_SET =>
-        println(" === INTERSECTION_RESULTS_SET == ")
-        println(bgps.lns)
         // pour l'instant pas d'ordonnancement sur les sources
         /* piste d optimisation : trouver les resultats les plus limitants ... */
         for ((source,lbgp) <- bgps.lns) {
@@ -91,10 +89,9 @@ object QueryPlannerExecutor {
           info(r.toString())
           val refToIdentifier = pm.SparqlGenerator.correspondenceVariablesIdentifier(root)
             ._1.view.filterKeys( k => listVariables.contains(k) ).toMap
-          val qr = QueryRunner(config.source(source),config.getHttpDriver()).query(
+          val qr = QueryRunner(config.source(source),config.conf.settings).query(
             SparqlQueryBuilder.queryString(r,refToIdentifier,refToIdentifier.values.toSeq,prefixes)
           )
-          println(qr)
         }
         promise success (QueryResult("",""))
         promise.future
