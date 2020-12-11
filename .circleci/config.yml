@@ -49,6 +49,7 @@ jobs:
             done
             echo "virtuoso is Ok."
             set -e
+            sbt discoveryJVM/test
 
       - run: cat /dev/null | sbt discoveryJVM/test:compile
 
