@@ -15,9 +15,9 @@ case class RequestSemanticDb(endpoint: String, method : String = "POST_ENCODED",
     """
       {
        "sources" : [{
-         "id"  : "current",
-         "url" : """" + endpoint + """",
-         "typ" : """"+ `type` + """",
+         "id"     : "current",
+         "url"    : """" + endpoint + """",
+         "type"   : """"+ `type` + """",
          "method" : """" + method + """"
        }]}
       """.stripMargin)
@@ -31,7 +31,6 @@ case class RequestSemanticDb(endpoint: String, method : String = "POST_ENCODED",
               .select(List("instance","label"))
               .map ( response => response("results")("bindings").arr.map( r => {
                 val uri = SparqlBuilder.createUri(r("instance"))
-                println(r)
                 try {
                   (uri,SparqlBuilder.createLiteral(response("results")("datatypes")("label")(uri.toString)(0)).toString)
                 } catch {
@@ -108,17 +107,8 @@ case class RequestSemanticDb(endpoint: String, method : String = "POST_ENCODED",
                 (uri -> SparqlBuilder.createLiteral(row(uri.naiveLabel())))
               }
             ) ++
-            // label
             {
-              println("---------------------111111111111111111111111111111111111111111")
-              println(row("instance"))
-
-              println(uriInstance.localName)
-              println(response("results")("datatypes")("label_instance"))
               val labelInstance = SparqlBuilder.createLiteral(response("results")("datatypes")("label_instance")(uriInstance.localName).arr.head)
-              println("------+++++-----")
-              println(uriInstance + "__>>>" + labelInstance)
-              println("---------------------11111111111111111111111111111111111111111122222222222222222222222222")
               List(uriInstance -> labelInstance)
             }).toMap)
           }).toMap

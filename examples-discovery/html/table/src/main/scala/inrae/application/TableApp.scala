@@ -57,7 +57,6 @@ object TableApp {
 
     val tbody = document.getElementById(id_body_table).asInstanceOf[HTMLTableSectionElement]
 
-    println(tbody.toString)
     val lUriAtt = currentAttributes()
 
     requestHandler.getValues(currentEntity(), lUriAtt.keys.toList ).map( lValues => {
@@ -146,7 +145,7 @@ object TableApp {
       /* clean tr */
       document.getElementById(id_tr_header_table).innerHTML = tr().render
       /* new request configuration */
-      val requestHandler = RequestSemanticDb(endpoint.value,"POST_ENCODED")
+      val requestHandler = RequestSemanticDb(endpoint.value,"POST")
       updateListEntities(requestHandler)
 
       /* trigger when entity is selected */
