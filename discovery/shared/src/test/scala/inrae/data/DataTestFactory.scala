@@ -22,7 +22,7 @@ object DataTestFactory {
   val container_name = "virtuoso"
 
 
-  val url_endpoint = "http://0.0.0.0:"+port+"/sparql"
+  val url_endpoint = "http://virtuoso:"+port+"/sparql"
 
 
   def put(stringQuery : String, url_endpoint : String) = {
