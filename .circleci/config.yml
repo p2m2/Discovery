@@ -61,6 +61,8 @@ jobs:
       # run tests!
       - run:
           command: |
-            cat /dev/null | sbt clean coverage discoveryJVM/test:test
+            docker run -d --name my-app my-app
+            docker exec my-app curl --retry 10 --retry-connrefused http://localhost:8080
+            cat /dev/null | docker exec my-app sbt clean coverage discoveryJVM/test:test
       # coverage
       - run: sbt discoveryJVM/coverageReport
