@@ -3,6 +3,31 @@
 # Check https://circleci.com/docs/2.0/sample-config/ for more details
 #
 version: 2
+
+virtuoso:
+  image: askomics/virtuoso:7.2.5.1
+  container_name: "virtuoso"
+  env_file:
+    VIRT_Parameters_NumberOfBuffers: 3400
+    VIRT_Parameters_MaxDirtyBuffers: 2500
+    VIRT_Parameters_TN_MAX_memory: 400000
+    VIRT_SPARQL_ResultSetMaxRows: 10000
+    VIRT_SPARQL_MaxDataSourceSize: 100000
+    VIRT_Flags_TN_MAX_memory: 40000
+    VIRT_Parameters_StopCompilerWhenXOverRunTime: 1
+    VIRT_SPARQL_MaxQueryCostEstimationTime: 0
+    VIRT_SPARQL_MaxQueryExecutionTime: 300
+    VIRT_Parameters_MaxMemPoolSize: 80000
+    VIRT_Database_LockFile: virtuoso.lck
+    DBA_PASSWORD: dba
+    SPARQL_UPDATE: true
+    DEFAULT_GRAPH: http://localhost:8890/DAV
+  command:
+    - /bin/sh
+    - -c
+    - netstat -nr | grep '^0\.0\.0\.0' | awk '{print $$2 " host "}' >> /etc/hosts && sh /virtuoso/virtuoso.sh
+  ports:
+    - "8890:8890"
 jobs:
   build:
     docker:
@@ -48,7 +73,7 @@ jobs:
             sleep 20
             docker-compose logs
             curl http://localhost:8890/sparql
-            curl http:127.0.0.1:8890/sparql
+            curl http://127.0.0.1:8890/sparql
             curl http://0.0.0.0.1:8890/sparql
 
       - run: cat /dev/null | sbt discoveryJVM/test:compile
