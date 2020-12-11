@@ -69,12 +69,12 @@ jobs:
           name: Start virtuoso container
           command: |
             set -x
-            docker-compose up -d virtuoso
+            #docker-compose up -d virtuoso
             sleep 20
-            docker-compose logs
-            curl http://localhost:8890/sparql
-            curl http://127.0.0.1:8890/sparql
-            curl http://0.0.0.0.1:8890/sparql
+            docker ps
+            #curl http://localhost:8890/sparql
+            #curl http://127.0.0.1:8890/sparql
+            #curl http://0.0.0.0.1:8890/sparql
 
       - run: cat /dev/null | sbt discoveryJVM/test:compile
 
