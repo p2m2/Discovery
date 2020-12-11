@@ -44,7 +44,12 @@ jobs:
           name: Start virtuoso container
           command: |
             set -x
-            docker-compose up -d
+            docker-compose up -d virtuoso
+            sleep 20
+            docker-compose logs
+            curl http://localhost/sparql
+            curl http:127.0.0.1/sparql
+            curl http://0.0.0.0.1/sparql
 
       - run: cat /dev/null | sbt discoveryJVM/test:compile
 
@@ -54,7 +59,9 @@ jobs:
           key: v1-dependencies--{{ checksum "build.sbt" }}
 
       # run tests!
-      - run: cat /dev/null | sbt clean coverage discoveryJVM/test:test
-
+      - run:
+          command: |
+            cat /dev/null | sbt clean coverage discoveryJVM/test:test
+            docker-compose logs
       # coverage
       - run: sbt discoveryJVM/coverageReport
