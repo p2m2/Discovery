@@ -33,6 +33,9 @@ jobs:
             # fallback to using the latest cache if no exact match is found
             - v1-dependencies-
 
+      # using by discovery test
+      - run: docker pull tenforce/virtuoso:virtuoso7.2.5
+
       - run: cat /dev/null | sbt discoveryJVM/test:compile
 
       - save_cache:
