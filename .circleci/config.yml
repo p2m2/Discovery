@@ -14,7 +14,11 @@ jobs:
         auth:
           username: p2m2
           password: $DOCKERHUB_PASSWORD
-        
+        environment:
+          DBA_PASSWORD: dba
+          SPARQL_UPDATE: true
+          DEFAULT_GRAPH: "http://localhost:8890/DAV"
+
       # Specify service dependencies here if necessary
       # CircleCI maintains a library of pre-built images
       # documented at https://circleci.com/docs/2.0/circleci-images/
