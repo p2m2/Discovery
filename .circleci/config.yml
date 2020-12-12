@@ -32,25 +32,6 @@ jobs:
             # fallback to using the latest cache if no exact match is found
             - v1-dependencies-
 
-      # virtuoso
-      - run:
-          name: Start virtuoso container
-          command: |
-            docker pull askomics/virtuoso:7.2.5.1
-            docker run -d --name virtuoso -p 8891:8890 -p 1112:1111 -e DBA_PASSWORD=dba -e SPARQL_UPDATE=true -e DEFAULT_GRAPH=http://localhost:8891/DAV -t askomics/virtuoso:7.2.5.1 /bin/sh -c "netstat -nr | grep '^0\.0\.0\.0' | grep -oE '((1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])\.){3}(1?[0-9][0-9]?|2[0-4][0-9]|25[0-5])' | grep -v '^0\.0\.0\.0' | sed 's/$/ host/' >> /etc/hosts && /virtuoso/virtuoso.sh"
-            set +e
-            RES=1
-            echo -n "Wait for start "
-            until [ $RES -eq 0 ]; do
-                echo -n "."
-                sleep 1
-                docker logs virtuoso 2>&1 | grep "Server online at 1111" > /dev/null
-                RES=$?
-            done
-            echo "virtuoso is Ok."
-            set -e
-            sbt discoveryJVM/test
-
       - run: cat /dev/null | sbt discoveryJVM/test:compile
 
       - save_cache:
@@ -61,8 +42,7 @@ jobs:
       # run tests!
       - run:
           command: |
-            docker run -d --name my-app my-app
-            docker exec my-app curl --retry 10 --retry-connrefused http://localhost:8080
-            cat /dev/null | docker exec my-app sbt clean coverage discoveryJVM/test:test
+            cat /dev/null | sbt clean coverage discoveryJVM/test:test
+
       # coverage
       - run: sbt discoveryJVM/coverageReport

@@ -35,6 +35,7 @@ lazy val scalatagVersion = "0.9.2"
 lazy val scalaReflectVersion = "1.0.0"
 lazy val RosHttpVersion = "3.0.0"
 lazy val scalaReflectPortableVersion = "1.0.0"
+lazy val testcontainersScalaVersion="0.38.7"
 
 def sharedSetting(pName: String) = Seq(
   name := pName,
@@ -125,9 +126,11 @@ lazy val discovery =crossProject(JSPlatform, JVMPlatform).in(file("discovery"))
     jsEnv := new org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv()
   )
   .jvmSettings(
+    Test / fork := true,
     libraryDependencies ++= Seq(
       "org.scala-js" %% "scalajs-stubs" % scalaStubVersion % "provided",
       "org.apache.jena" % "apache-jena" % jenaVersion pomOnly(),
+      "com.dimafeng" %% "testcontainers-scala-scalatest" % testcontainersScalaVersion % "test"
     ))
 
 lazy val backEnd = (project in file("back-end"))

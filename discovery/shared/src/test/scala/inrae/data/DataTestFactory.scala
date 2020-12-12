@@ -1,33 +1,55 @@
 package inrae.data
 
-
+import com.dimafeng.testcontainers.GenericContainer
 import fr.hmil.roshttp.HttpRequest
 import fr.hmil.roshttp.Method.POST
 import fr.hmil.roshttp.exceptions.HttpException
 import fr.hmil.roshttp.response.SimpleHttpResponse
-import inrae.data.DataTestFactory.url_endpoint
 import inrae.semantic_web.StatementConfiguration
+import org.testcontainers.containers.wait.strategy.Wait
+import org.testcontainers.images.PullPolicy
 import wvlet.log.Logger.rootLogger.{debug, error, info}
 
 import java.io.IOException
+import java.time.Duration
+import java.time.temporal.ChronoUnit
 import scala.util.{Failure, Success}
 
 final case class DataTestFactoryException(private val message: String = "",
-                                                 private val cause: Throwable = None.orNull) extends Exception(message,cause)
+                                          private val cause: Throwable = None.orNull) extends Exception(message,cause)
 
-object DataTestFactory {
+object DataTestFactory  {
   import monix.execution.Scheduler.Implicits.global
 
-  val port = "8890"
-  val container_name = "virtuoso"
+  val virtuoso_cont = GenericContainer("tenforce/virtuoso:virtuoso7.2.5",
+    exposedPorts=List(8890),
+    env=Map(
+      "DBA_PASSWORD" -> "dba",
+      "SPARQL_UPDATE" -> "true",
+      "DEFAULT_GRAPH" -> "graph:test:discovery:default:",
+      "VIRT_Parameters_NumberOfBuffers" -> "5100",
+      "VIRT_Parameters_MaxDirtyBuffers" -> "3750",
+      "VIRT_Parameters_TN_MAX_memory" -> "4000000",
+      "VIRT_Parameters_TransactionAfterImageLimit" -> "50000",
+      "VIRT_SPARQL_ResultSetMaxRows" -> "100",
+      "VIRT_SPARQL_MaxDataSourceSize" -> "10000",
+      "VIRT_SPARQL_MaxQueryCostEstimationTime" -> "0",
+      "VIRT_SPARQL_MaxQueryExecutionTime" -> "5",
+    ),
+    waitStrategy=Wait.forHttp("/sparql")
+      .withStartupTimeout(Duration.of(100,ChronoUnit.SECONDS)),
+    imagePullPolicy=PullPolicy.alwaysPull()
+  )
+  //Wait.forLogMessage("Server online at 1111", 1)
+  //
+  virtuoso_cont.container.start()
+  val url_endpoint ="http://"+virtuoso_cont.container.getHost() + ":" + virtuoso_cont.container.getFirstMappedPort()+"/sparql"
 
-
-  val url_endpoint = "http://localhost:"+port+"/sparql"
 
 
   def put(stringQuery : String, url_endpoint : String) = {
     HttpRequest(url_endpoint)
-    //  .withHeader("Authorization", "Basic " + Base64.getEncoder.encodeToString("dba:dba".getBytes))
+      //  .withHeader("Authorization", "Basic " + Base64.getEncoder.encodeToString("dba:dba".getBytes))
       .withMethod(POST)
       .withQueryParameter("query",stringQuery)
       .send()
@@ -61,11 +83,11 @@ object DataTestFactory {
               }
           }
         """.stripMargin,url_endpoint).onComplete({
-          case Success(_) => {
-            debug(s"${graph} is loaded !")
-          }
-          case Failure(_) => throw new Error(s"Can not load graph :${graph}")
-        })
+      case Success(_) => {
+        debug(s"${graph} is loaded !")
+      }
+      case Failure(_) => throw new Error(s"Can not load graph :${graph}")
+    })
   }
 
   def insert_virtuoso1(data : String,
@@ -77,7 +99,7 @@ object DataTestFactory {
                        url_endpoint : String=url_endpoint)= insert(data,graph2(classname),url_endpoint)
 
   private def delete(graph: String,
-                       url_endpoint : String=url_endpoint) = {
+                     url_endpoint : String=url_endpoint) = {
     put(s"DROP SILENT GRAPH <${graph}>",url_endpoint)
 
   }
@@ -146,5 +168,5 @@ object DataTestFactory {
             }
             """.stripMargin.stripMargin)
   }
-//   "driver" : "inrae.semantic_web.driver.JenaRequestDriver",
+  //   "driver" : "inrae.semantic_web.driver.JenaRequestDriver",
 }

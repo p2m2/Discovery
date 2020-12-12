@@ -1,7 +1,6 @@
 package inrae.semantic_web
 
 import inrae.data.DataTestFactory
-import inrae.semantic_web.{SW, StatementConfiguration}
 import inrae.semantic_web.rdf._
 import utest._
 import wvlet.log.Logger.rootLogger.error
@@ -9,12 +8,8 @@ import wvlet.log.Logger.rootLogger.error
 import scala.language.postfixOps
 import scala.util.{Failure, Success}
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
-import scala.concurrent.{Await, blocking}
-import scala.concurrent.duration._
 
 object SWTest extends TestSuite {
-
 
   DataTestFactory.insert_virtuoso1(
     """
