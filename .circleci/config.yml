@@ -9,7 +9,10 @@ jobs:
     docker:
       # specify the version you desire here
       - image: circleci/openjdk:8-jdk
-
+        auth:
+          username: p2m2
+          password: $DOCKERHUB_PASSWORD
+          
       - image: tenforce/virtuoso:virtuoso7.2.5
         auth:
           username: p2m2
