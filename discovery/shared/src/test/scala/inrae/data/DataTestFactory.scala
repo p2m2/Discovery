@@ -42,9 +42,11 @@ object DataTestFactory  {
   )
   //Wait.forLogMessage("Server online at 1111", 1)
   //
-  virtuoso_cont.container.start()
-  val url_endpoint ="http://"+virtuoso_cont.container.getHost() + ":" + virtuoso_cont.container.getFirstMappedPort()+"/sparql"
 
+  //virtuoso_cont.container.start()
+
+  //val url_endpoint ="http://"+virtuoso_cont.container.getHost() + ":" + virtuoso_cont.container.getFirstMappedPort()+"/sparql"
+  val url_endpoint = "http://localhost:8890/sparql"
 
 
   def put(stringQuery : String, url_endpoint : String) = {
