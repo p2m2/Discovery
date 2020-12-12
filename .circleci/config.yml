@@ -3,12 +3,14 @@
 # Check https://circleci.com/docs/2.0/sample-config/ for more details
 #
 version: 2
-#machine: true
 jobs:
   build:
     docker:
       # specify the version you desire here
       - image: circleci/openjdk:8-jdk
+        auth:
+          username: p2m2
+          password: $DOCKERHUB_PASSWORD
 
       - image: tenforce/virtuoso:virtuoso7.2.5
         auth:
@@ -63,4 +65,12 @@ jobs:
             cat /dev/null | sbt clean coverage discoveryJVM/test:test
 
       # coverage
-      - run: sbt discoveryJVM/coverageReport
+      - run:
+          command: |
+            sbt discoveryJVM/coverageReport
+            bash <(curl -s https://codecov.io/bash)
+
+      - store_artifacts:
+          path: discovery/jvm/target/test-reports
+
+
