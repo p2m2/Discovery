@@ -10,6 +10,11 @@ jobs:
       # specify the version you desire here
       - image: circleci/openjdk:8-jdk
 
+      - image: tenforce/virtuoso:virtuoso7.2.5
+        auth:
+          username: p2m2
+          password: $DOCKERHUB_PASSWORD
+        
       # Specify service dependencies here if necessary
       # CircleCI maintains a library of pre-built images
       # documented at https://circleci.com/docs/2.0/circleci-images/
@@ -32,9 +37,6 @@ jobs:
             - v1-dependencies-{{ checksum "build.sbt" }}
             # fallback to using the latest cache if no exact match is found
             - v1-dependencies-
-
-      # using by discovery test
-      - run: docker pull tenforce/virtuoso:virtuoso7.2.5
 
       - run: cat /dev/null | sbt discoveryJVM/test:compile
 
