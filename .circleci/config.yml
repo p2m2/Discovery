@@ -15,9 +15,17 @@ jobs:
           username: p2m2
           password: $DOCKERHUB_PASSWORD
         environment:
+          VIRT_Parameters_NumberOfBuffers: 51000
+          VIRT_Parameters_MaxDirtyBuffers: 37500
+          VIRT_Parameters_TN_MAX_memory: 4000000
+          VIRT_Parameters_TransactionAfterImageLimit: 500000
+          VIRT_SPARQL_ResultSetMaxRows: 1000
+          VIRT_SPARQL_MaxDataSourceSize: 10000
+          VIRT_SPARQL_MaxQueryCostEstimationTime: 0
+          VIRT_SPARQL_MaxQueryExecutionTime: 0
           DBA_PASSWORD: dba
           SPARQL_UPDATE: true
-          DEFAULT_GRAPH: "http://localhost:8890/DAV"
+          DEFAULT_GRAPH: "graph:test:discovery:default:"
 
       # Specify service dependencies here if necessary
       # CircleCI maintains a library of pre-built images
