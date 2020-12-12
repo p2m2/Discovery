@@ -126,7 +126,7 @@ lazy val discovery =crossProject(JSPlatform, JVMPlatform).in(file("discovery"))
     jsEnv := new org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv()
   )
   .jvmSettings(
-    Test / fork := true,
+    //Test / fork := true,
     libraryDependencies ++= Seq(
       "org.scala-js" %% "scalajs-stubs" % scalaStubVersion % "provided",
       "org.apache.jena" % "apache-jena" % jenaVersion pomOnly(),
