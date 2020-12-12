@@ -64,3 +64,6 @@ jobs:
 
       # coverage
       - run: sbt discoveryJVM/coverageReport
+
+      - store_artifacts:
+        path: discovery/jvm/target/test-reports
