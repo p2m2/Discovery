@@ -62,7 +62,7 @@ jobs:
 
       # run tests!
       - run: cat /dev/null | sbt clean coverage discoveryJVM/test:test
-      - run: cat /dev/null | sbt clean coverage discoveryJS/test:test
+      - run: cat /dev/null | sbt discoveryJS/test:test
 
       # coverage
       - run: sbt discoveryJVM/coverageReport
