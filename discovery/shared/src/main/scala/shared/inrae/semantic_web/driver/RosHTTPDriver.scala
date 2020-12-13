@@ -16,7 +16,7 @@ import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
 @EnableReflectiveInstantiation
-class RosHTTPDriver() extends HttpRequestDriver {
+case class RosHTTPDriver() extends HttpRequestDriver {
 
 
   def post( query: String, config : ConfigurationHttpRequest ): Future[QueryResult] = {
@@ -67,7 +67,4 @@ class RosHTTPDriver() extends HttpRequestDriver {
     })
   }
 
-  def post_encoded( query: String, config : ConfigurationHttpRequest  ) : Future[QueryResult] = {
-    post(query,config)
-  }
 }

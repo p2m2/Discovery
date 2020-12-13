@@ -53,6 +53,7 @@ jobs:
             - v1-dependencies-
 
       - run: cat /dev/null | sbt discoveryJVM/test:compile
+      - run: cat /dev/null | sbt discoveryJS/test:compile
 
       - save_cache:
           paths:
@@ -60,15 +61,12 @@ jobs:
           key: v1-dependencies--{{ checksum "build.sbt" }}
 
       # run tests!
-      - run:
-          command: |
-            cat /dev/null | sbt clean coverage discoveryJVM/test:test
+      - run: cat /dev/null | sbt clean coverage discoveryJVM/test:test
+      - run: cat /dev/null | sbt clean coverage discoveryJS/test:test
 
       # coverage
-      - run:
-          command: |
-            sbt discoveryJVM/coverageReport
-            bash <(curl -s https://codecov.io/bash)
+      - run: sbt discoveryJVM/coverageReport
+      - run: bash <(curl -s https://codecov.io/bash)
 
       - store_artifacts:
           path: discovery/jvm/target/test-reports
