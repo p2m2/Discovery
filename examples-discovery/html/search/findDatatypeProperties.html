@@ -5,11 +5,17 @@
     <title>Count</title>
 </head>
 <body>
+<script>var exports = {"__esModule": true};</script>
 <script type="text/javascript" src="../../../discovery/js/target/scala-2.13/discovery-fastopt.js"></script>
 <pre id="demo"></pre>
 </body>
 <script>
-      let config = new EasySparqlStatementConfiguration()
+
+      var EasySparqlStatementConfiguration = exports.EasySparqlStatementConfiguration ;
+      var EasySparqlEngine = exports.EasySparqlEngine ;
+      var URI = exports.URI ;
+
+      let config = new EasySparqlStatementConfiguration();
 
       config.setConfigString(`
           {
@@ -17,7 +23,7 @@
           "id"  : "dbpedia",
           "url" : "https://dbpedia.org/sparql",
           "typ" : "tps",
-          "method" : "POST_ENCODED",
+          "method" : "POST",
           "mimetype" : "json"
            }]}
           `)

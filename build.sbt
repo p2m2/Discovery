@@ -120,6 +120,7 @@ lazy val discovery =crossProject(JSPlatform, JVMPlatform).in(file("discovery"))
     classLoaderLayeringStrategy := ClassLoaderLayeringStrategy.AllLibraryJars
   )
   .jsSettings(
+  //  scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.CommonJSModule) },
     libraryDependencies ++= Seq(
       "org.scala-js" %%% "scalajs-dom" % scalaJsDOMVersion
     ),
@@ -130,6 +131,7 @@ lazy val discovery =crossProject(JSPlatform, JVMPlatform).in(file("discovery"))
       "org.scala-js" %% "scalajs-stubs" % scalaStubVersion % "provided",
       "org.apache.jena" % "apache-jena" % jenaVersion pomOnly()
     ))
+  .enablePlugins(ScalaJSBundlerPlugin)
 
 lazy val backEnd = (project in file("back-end"))
   .settings(sharedSetting("backEnd"))
