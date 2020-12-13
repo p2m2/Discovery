@@ -2,13 +2,11 @@ package inrae.semantic_web.sandbox
 
 import inrae.semantic_web.{SW, StatementConfiguration}
 import inrae.semantic_web.rdf._
-import utest._
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
-
-object GeoSparql extends TestSuite {
+object GeoSparql {
 
   implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
 
@@ -25,8 +23,7 @@ object GeoSparql extends TestSuite {
                  }]}
       """.stripMargin)
 
-  def tests = Tests {
-    test("GeoSparql Test") {
+  def main(args: Array[String]): Unit = {
       val query = SW(configTest)
 
       Future {
@@ -50,7 +47,6 @@ object GeoSparql extends TestSuite {
             case Failure(exception) => println(exception); assert(false)
           }
       }
-    }
   }
 }
 
