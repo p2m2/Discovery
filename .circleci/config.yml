@@ -54,6 +54,8 @@ jobs:
 
       - run: cat /dev/null | sbt discoveryJVM/test:compile
       - run: cat /dev/null | sbt discoveryJS/test:compile
+      - run: cat /dev/null | sbt discoveryJS/fastOptJS
+      - run: cat /dev/null | sbt discoveryJS/fullOptJS
 
       - save_cache:
           paths:

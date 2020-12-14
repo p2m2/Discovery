@@ -46,7 +46,6 @@ case class RosHTTPDriver() extends HttpRequestDriver {
   }
 
   def get( query: String, config : ConfigurationHttpRequest ) : Future[QueryResult] = {
-    info(" -- get --")
     (HttpRequest(config.url)
       .withHeader("Accept", "application/json")
       .withMethod(GET)
