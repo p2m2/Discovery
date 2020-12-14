@@ -6,6 +6,8 @@ case class Graph(triples : Set[Triple])
 
 case class Triple(s: SparqlDefinition, p: SparqlDefinition, o: SparqlDefinition)
 
+import scala.language.implicitConversions
+
 trait SparqlDefinition {
   def cleanString(str : String) = {
     str.replaceAll("^\"","")
@@ -31,10 +33,28 @@ case class IRI (var iri : String) extends SparqlDefinition {
 
 }
 
+object IRI {
+  implicit def fromString(s: String): IRI = IRI(s)
+}
+
 @JSExportTopLevel(name="URI")
-case class URI (var localName : String,var nameSpace : String = "") extends SparqlDefinition {
-  localName = cleanString(localName)
-  nameSpace = cleanString(nameSpace)
+case class URI (localNameUser : String,nameSpaceUser : String = "") extends SparqlDefinition {
+  val localName = nameSpaceUser match {
+    case "" if (!localNameUser.contains("://")) => {
+      cleanString(localNameUser.split(":").last)
+    }
+    case _ => cleanString(localNameUser)
+  }
+
+  val nameSpace = nameSpaceUser match {
+    case "" if (!localNameUser.contains("://")) => {
+      localNameUser.split(":") match {
+        case arr if (arr.length==2) => arr(0)
+        case _ => "" /* something wrong if arity if different that 2 */
+      }
+    }
+    case _ => nameSpaceUser
+  }
 
   override def toString() : String = {
     (localName,nameSpace) match {
@@ -49,13 +69,18 @@ case class URI (var localName : String,var nameSpace : String = "") extends Spar
   def naiveLabel() : String = localName.split("[/#]").last
 }
 
+object URI {
+  implicit def fromString(s: String): URI = URI(s)
+  val empty = new URI("")
+}
+
+
 @JSExportTopLevel(name="Anonymous")
 case class Anonymous(var value : String) extends SparqlDefinition {
   value = cleanString(value)
 
-  override def toString() : String = {
-    return value
-  }
+  override def toString() : String = value
+
   def sparql() : String = toString
 
   def naiveLabel() : String = s"Anonymous[$value]"
@@ -72,19 +97,36 @@ case class PropertyPath(var value : String) extends SparqlDefinition {
   def naiveLabel() : String = s"PropertyPath[$value]"
 }
 
-@JSExportTopLevel(name="Literal")
-case class Literal(var value : String, var datatype : String = "xsd:string", var tag : Option[String]=None) extends SparqlDefinition {
-  value = cleanString(value)
-  datatype = cleanString(datatype)
+object PropertyPath {
+  implicit def fromString(s: String): PropertyPath = PropertyPath(s)
+}
 
-  override def toString() : String = value+"^^"+datatype
+@JSExportTopLevel(name="Literal")
+case class Literal(var value : String,var datatype : URI = URI.empty,var tag : String="") extends SparqlDefinition {
+  value = cleanString(value)
+  tag = cleanString(tag)
+
+  override def toString() : String = "\""+ value + "\""+ (datatype match {
+    case URI.empty => ""
+    case _ if (tag == "") => "^^"+datatype.toString()
+    case _ => ""
+
+  }) + ( tag match {
+    case "" => ""
+    case _ => "@"+tag
+  })
 
   def toInt() : Int = value.toInt
+
   def toBoolean() : Boolean = value.toBoolean
 
   def sparql() : String = toString
 
   def naiveLabel() : String = value
+}
+
+object Literal {
+  implicit def fromString(s: String): Literal = Literal(s)
 }
 
 @JSExportTopLevel(name="QueryVariable")
@@ -118,9 +160,9 @@ object SparqlBuilder {
 
   def createLiteral(value : ujson.Value) : Literal = {
     try {
-      Literal(value("value").toString,value("datatype").toString)
+      Literal(value("value").toString,URI(value("datatype").toString))
     } catch {
-      case _ : Throwable => Literal("","")
+      case _ : Throwable => Literal("")
     }
   }
 }

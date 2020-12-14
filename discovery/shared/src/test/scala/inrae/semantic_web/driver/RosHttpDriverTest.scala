@@ -22,9 +22,8 @@ object RosHttpDriverTest extends TestSuite {
   def tests = Tests {
 
 
-    test("RosHttpDriver get") {
-      //NOSONAR
-      RosHTTPDriver().get("select * where { <aa> ?b ?c . } limit 1", ConfigurationHttpRequest(url = DataTestFactory.url_endpoint))
+    test("get") {
+      RosHTTPDriver().get("select ?b ?c where { <aa> ?b ?c . } limit 1", ConfigurationHttpRequest(url = DataTestFactory.url_endpoint))
         .onComplete {
           case Success(qr) => {
             assert(qr.json("results")("bindings").arr(0)("b")("value").value=="bb")
@@ -37,7 +36,7 @@ object RosHttpDriverTest extends TestSuite {
         }
     }
 
-    test("JenaRequestDriver get bad request") {
+    test("get bad request") {
       //NOSONAR
       RosHTTPDriver().get("bad request", ConfigurationHttpRequest(url = DataTestFactory.url_endpoint))
         .onComplete {
@@ -49,32 +48,32 @@ object RosHttpDriverTest extends TestSuite {
           }
         }
     }
-    test("JenaRequestDriver get malformed endpoint") {
+    test("get malformed endpoint") {
       //NOSONAR
-      RosHTTPDriver().get("select * where { <aa> ?b ?c . } limit 1", ConfigurationHttpRequest(url = "bidon"))
+      RosHTTPDriver().get("select ?b ?c where { <aa> ?b ?c . } limit 1", ConfigurationHttpRequest(url = "bidon"))
         .onComplete {
-          case Success(qr) => {
+          case Success(_) => {
             assert(false)
           }
-          case Failure(e) => {
+          case Failure(_) => {
             assert(true)
           }
         }
     }
 
-    test("JenaRequestDriver get endpoint does not exist") {
-      RosHTTPDriver().get("select * where { <aa> ?b ?c . } limit 1", ConfigurationHttpRequest(url = "http://bidon.com"))
+    test("get endpoint does not exist") {
+      RosHTTPDriver().get("select ?b ?c where { <aa> ?b ?c . } limit 1", ConfigurationHttpRequest(url = "http://bidon.com"))
         .onComplete {
-          case Success(qr) => {
+          case Success(_) => {
             assert(false)
           }
-          case Failure(e) => {
+          case Failure(_) => {
             assert(true)
           }
         }
     }
-    test("RosHttpDriver post") {
-      RosHTTPDriver().post("select * where { <aa> ?b ?c. } limit 1", ConfigurationHttpRequest(url = DataTestFactory.url_endpoint))
+    test("post") {
+      RosHTTPDriver().post("select ?b ?c where { <aa> ?b ?c. } limit 1", ConfigurationHttpRequest(url = DataTestFactory.url_endpoint))
         .onComplete {
           case Success(qr) => {
             assert(qr.json("results")("bindings").arr(0)("b")("value").value=="bb")
@@ -83,6 +82,43 @@ object RosHttpDriverTest extends TestSuite {
           case Failure(e) => {
             error(e.getMessage())
             assert(false)
+          }
+        }
+    }
+
+    test("post bad request") {
+      //NOSONAR
+      RosHTTPDriver().post("bad request", ConfigurationHttpRequest(url = DataTestFactory.url_endpoint))
+        .onComplete {
+          case Success(_) => {
+            assert(false)
+          }
+          case Failure(_) => {
+            assert(true)
+          }
+        }
+    }
+    test("post malformed endpoint") {
+      //NOSONAR
+      RosHTTPDriver().post("select ?b ?c where { <aa> ?b ?c . } limit 1", ConfigurationHttpRequest(url = "bidon"))
+        .onComplete {
+          case Success(_) => {
+            assert(false)
+          }
+          case Failure(_) => {
+            assert(true)
+          }
+        }
+    }
+
+    test("post endpoint does not exist") {
+      RosHTTPDriver().post("select ?b ?c where { <aa> ?b ?c . } limit 1", ConfigurationHttpRequest(url = "http://bidon.com"))
+        .onComplete {
+          case Success(_) => {
+            assert(false)
+          }
+          case Failure(_) => {
+            assert(true)
           }
         }
     }
