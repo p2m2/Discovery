@@ -32,7 +32,7 @@ sbt discoveryJVM/coverageReport
 </head>
 <body>
 <script>var exports = {"__esModule": true};</script>
-<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/p2m2/Discovery@develop/ext/discovery-opt.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/p2m2/Discovery@master/dist/discovery.js"></script>
 <pre id="demo"></pre>
 </body>
 <script>
@@ -45,8 +45,8 @@ sbt discoveryJVM/coverageReport
       config.setConfigString(`
           {
           "sources" : [{
-          "id"  : "metabohub",
-          "url" : "http://endpoint-metabolomics.ara.inrae.fr/chembl/sparql/",
+          "id"  : "dbpedia",
+          "url" : "https://dbpedia.org/sparql",
           "typ" : "tps",
           "method" : "POST",
           "mimetype" : "json"
@@ -74,7 +74,7 @@ sbt discoveryJVM/coverageReport
 
 ### NodeJs example
 ```nodejs
-var EasySparqlStatementConfiguration = require('.discovery-opt.js').EasySparqlStatementConfiguration
+var EasySparqlStatementConfiguration = require('.discovery.js').EasySparqlStatementConfiguration
 var EasySparqlEngine = require('discovery-opt.js').EasySparqlEngine
 var URI = require('discovery-opt.js').URI
 
