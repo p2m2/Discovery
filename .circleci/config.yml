@@ -66,6 +66,7 @@ jobs:
       # coverage
       - run: sbt discoveryJVM/coverageReport
       - run: bash <(curl -s https://codecov.io/bash)
+      - run: bash <(curl -Ls https://coverage.codacy.com/get.sh) report
 
       - store_artifacts:
           path: discovery/jvm/target/test-reports
