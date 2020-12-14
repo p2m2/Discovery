@@ -29,7 +29,6 @@ abstract class HttpRequestDriver {
 
     `type`.toLowerCase() match {
       case "post" => post( query, config  )
-      case "post_encoded" => post_encoded( query, config  )
       case "get" => get( query, config  )
       case _ => throw HttpRequestDriverException(s"Unknown http type request : ${`type`}")
     }
@@ -38,7 +37,5 @@ abstract class HttpRequestDriver {
   protected[sparql] def get( query: String, config : ConfigurationHttpRequest ) : Future[QueryResult]
 
   protected[sparql] def post( query: String, config : ConfigurationHttpRequest ) : Future[QueryResult]
-
-  protected[sparql] def post_encoded( query: String, config : ConfigurationHttpRequest  ) : Future[QueryResult]
 
 }

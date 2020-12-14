@@ -6,6 +6,9 @@ import inrae.semantic_web.internal.Node.references
 import inrae.semantic_web.internal._
 import inrae.semantic_web.rdf.{IRI, QueryVariable, SparqlDefinition}
 
+
+final case class SparqlGeneratorException(private val message: String = "",
+                                    private val cause: Throwable = None.orNull) extends Exception(message,cause)
 /**
  * 
  */
@@ -32,7 +35,7 @@ object SparqlGenerator  {
     def fromNamed(graphs : Seq[IRI]): String = graphs.map( g => "FROM NAMED"+g.sparql()).mkString("\n")
 
     def solutionModifier () : String = {
-        "} limit 13"
+        "} limit 200"
     }
 
     def prologCountSelection(varCount : String) : String = {
@@ -48,7 +51,7 @@ object SparqlGenerator  {
         case v : QueryVariable =>QueryVariable(
             { referenceToIdentifier.get(v.name) match {
                 case Some(u) => u
-                case None => throw new Error("Reference variable does not exist :"+v.name)
+                case None => throw SparqlGeneratorException("Reference variable does not exist :"+v.name)
             }})
         case _ => term
     }
@@ -67,19 +70,20 @@ object SparqlGenerator  {
             case node : LinkFrom           => queryVariableTransform(node.term,referenceToIdentifier).toString() + " " + "?" + variableName + " " + "?"+ varIdSire + " .\n"
             case node : Value              => node.term match {
                 case _ : QueryVariable => "BIND ( ?" + varIdSire +  " AS " + queryVariableTransform(node.term,referenceToIdentifier).toString() + ")"
-                case _  =>  "VALUES ?" +varIdSire+ " { " + queryVariableTransform(node.term,referenceToIdentifier).toString() + " }.\n" }
-            case node : ListValues         => "VALUES ?" +varIdSire+ " { " + node.terms.map(t => t.sparql()).mkString(" ") + " }.\n"
-            case node : FilterNode         => "filter ( " + {
+                case _  =>  "VALUES ?" +varIdSire+ " { " + queryVariableTransform(node.term,referenceToIdentifier).toString() + " } .\n" }
+            case node : ListValues         => "VALUES ?" +varIdSire+ " { " + node.terms.map(t => t.sparql()).mkString(" ") + " } .\n"
+            case node : FilterNode         => "FILTER ( " + {
                 node.negation match {
                     case true => "!"
                     case false => ""
                 }
             } + {
                 node match {
-                    case n : Contains           => "contains(str(" + "?" +varIdSire + "), \""+ n.value + "\")"
-                    case n : isBlank            => "isBlank(" + "?" +varIdSire + ")"
-                    case n : isURI              => "isURI(" + "?" +varIdSire + ")"
-                    case n : isLiteral          => "isLiteral(" + "?" +varIdSire + ")"
+                    case n : Contains           => "contains(str(" + "?" +varIdSire + "),\""+ n.value + "\")"
+                    case n : Equal              => "(str(" + "?" +varIdSire + ")==\""+ n.value + "\")"
+                    case _ : isBlank            => "isBlank(" + "?" +varIdSire + ")"
+                    case _ : isURI              => "isURI(" + "?" +varIdSire + ")"
+                    case _ : isLiteral          => "isLiteral(" + "?" +varIdSire + ")"
                     case _ => throw new Exception("SparqlGenerator::sparqlNode . [Devel error] Node undefined ["+n.toString()+"]")
                 }
             } + " )\n"

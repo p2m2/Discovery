@@ -117,9 +117,13 @@ lazy val discovery =crossProject(JSPlatform, JVMPlatform).in(file("discovery"))
     ),
     testFrameworks += new TestFramework("utest.runner.Framework"),
     scalacOptions ++= Seq("-deprecation", "-feature"),
-    classLoaderLayeringStrategy := ClassLoaderLayeringStrategy.AllLibraryJars
+    classLoaderLayeringStrategy := ClassLoaderLayeringStrategy.AllLibraryJars,
+    coverageMinimum := 47,
+    coverageFailOnMinimum := false,
+    coverageHighlighting := true,
   )
   .jsSettings(
+    scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.CommonJSModule) },
     libraryDependencies ++= Seq(
       "org.scala-js" %%% "scalajs-dom" % scalaJsDOMVersion
     ),
@@ -130,6 +134,7 @@ lazy val discovery =crossProject(JSPlatform, JVMPlatform).in(file("discovery"))
       "org.scala-js" %% "scalajs-stubs" % scalaStubVersion % "provided",
       "org.apache.jena" % "apache-jena" % jenaVersion pomOnly()
     ))
+  //.enablePlugins(ScalaJSBundlerPlugin)
 
 lazy val backEnd = (project in file("back-end"))
   .settings(sharedSetting("backEnd"))

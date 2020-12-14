@@ -16,14 +16,7 @@ trait Node {
     debug(" -- getRdfNode -- ")
     this match {
       case  n : RdfNode if (ref == n.reference()) => Some(n)
-      case _ if children.length > 0 => {
-        val l = children.map(c => c.getRdfNode(ref, sep + "*")).flatten
-        if ( l.length > 0 ) {
-          Some(l.head)
-        } else {
-          None
-        }
-      }
+      case _ if children.nonEmpty => children.flatMap(c => c.getRdfNode(ref, sep + "*")).headOption
       case _ =>  None
     }
   }
@@ -81,7 +74,7 @@ case class Root() extends Node {
 }
 
 /* triplets */
-class RdfNode(uniqRef : String) extends Node {
+abstract class RdfNode(uniqRef : String) extends Node {
 
   def reference(): String = uniqRef
 

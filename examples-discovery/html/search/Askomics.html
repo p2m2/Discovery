@@ -21,6 +21,7 @@
 </head>
 <!--https://cdn.jsdelivr.net/gh/ofilangi/easySparql@develop/ext/es-opt.js-->
 <body>
+<script>var exports = {"__esModule": true};</script>
 <script type="text/javascript" src="../../../discovery/js/target/scala-2.13/discovery-fastopt.js"></script>
 <pre id="demo"></pre>
 
@@ -34,6 +35,10 @@
 <!-- https://bbip.askomics.org/virtuoso/sparql -->
 <!-- http://endpoint-metabolomics.ara.inrae.fr/metabolights/sparql -->
 <script>
+      var EasySparqlStatementConfiguration = exports.EasySparqlStatementConfiguration ;
+      var EasySparqlEngine = exports.EasySparqlEngine
+      var URI = exports.URI
+
       let config = new EasySparqlStatementConfiguration()
 
       document.getElementById("askomics_code").appendChild(document.createTextNode("TOTO<br/>"));
@@ -44,7 +49,7 @@
           "id"  : "askomics_database",
           "url" : "http://endpoint-metabolomics.ara.inrae.fr/metabolights/sparql",
           "typ" : "tps",
-          "method" : "POST_ENCODED",
+          "method" : "POST",
           "mimetype" : "json"
            }]}
           `)
