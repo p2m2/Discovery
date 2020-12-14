@@ -1,12 +1,13 @@
 package inrae.semantic_web.rdf
 
 import scala.scalajs.js.annotation.JSExportTopLevel
+import scala.language.implicitConversions
 
 case class Graph(triples : Set[Triple])
 
 case class Triple(s: SparqlDefinition, p: SparqlDefinition, o: SparqlDefinition)
 
-import scala.language.implicitConversions
+
 
 trait SparqlDefinition {
   def cleanString(str : String) = {
@@ -142,7 +143,7 @@ case class QueryVariable (var name : String) extends SparqlDefinition {
 
 object SparqlBuilder {
 
-  def create(value : ujson.Value) : SparqlDefinition = {
+  def create(value: ujson.Value): SparqlDefinition = {
     value("type").value match {
       case "uri" => createUri(value)
       case "literal" => createLiteral(value)
@@ -150,19 +151,7 @@ object SparqlBuilder {
     }
   }
 
-  def createUri(value : ujson.Value) : URI = {
-    try {
-      URI(value("value").value.toString)
-    } catch {
-      case _ : Throwable => URI("")
-    }
-  }
+  def createUri(value: ujson.Value): URI = URI(value("value").value.toString)
+  def createLiteral(value: ujson.Value): Literal = Literal(value("value").toString, URI(value("datatype").toString))
 
-  def createLiteral(value : ujson.Value) : Literal = {
-    try {
-      Literal(value("value").toString,URI(value("datatype").toString))
-    } catch {
-      case _ : Throwable => Literal("")
-    }
-  }
 }

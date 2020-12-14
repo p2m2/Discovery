@@ -19,11 +19,11 @@ object RosHttpDriverTest extends TestSuite {
     DataTestFactory.delete_virtuoso1(this.getClass.getSimpleName)
   }
 
+  val query = "select ?b ?c where { <aa> ?b ?c . } limit 1"
+
   def tests = Tests {
-
-
     test("get") {
-      RosHTTPDriver().get("select ?b ?c where { <aa> ?b ?c . } limit 1", ConfigurationHttpRequest(url = DataTestFactory.url_endpoint))
+      RosHTTPDriver().get(query, ConfigurationHttpRequest(url = DataTestFactory.url_endpoint))
         .onComplete {
           case Success(qr) => {
             assert(qr.json("results")("bindings").arr(0)("b")("value").value=="bb")
@@ -50,7 +50,7 @@ object RosHttpDriverTest extends TestSuite {
     }
     test("get malformed endpoint") {
       //NOSONAR
-      RosHTTPDriver().get("select ?b ?c where { <aa> ?b ?c . } limit 1", ConfigurationHttpRequest(url = "bidon"))
+      RosHTTPDriver().get(query, ConfigurationHttpRequest(url = "bidon"))
         .onComplete {
           case Success(_) => {
             assert(false)
@@ -62,7 +62,7 @@ object RosHttpDriverTest extends TestSuite {
     }
 
     test("get endpoint does not exist") {
-      RosHTTPDriver().get("select ?b ?c where { <aa> ?b ?c . } limit 1", ConfigurationHttpRequest(url = "http://bidon.com"))
+      RosHTTPDriver().get(query, ConfigurationHttpRequest(url = "http://bidon.com"))
         .onComplete {
           case Success(_) => {
             assert(false)
@@ -73,7 +73,7 @@ object RosHttpDriverTest extends TestSuite {
         }
     }
     test("post") {
-      RosHTTPDriver().post("select ?b ?c where { <aa> ?b ?c. } limit 1", ConfigurationHttpRequest(url = DataTestFactory.url_endpoint))
+      RosHTTPDriver().post(query, ConfigurationHttpRequest(url = DataTestFactory.url_endpoint))
         .onComplete {
           case Success(qr) => {
             assert(qr.json("results")("bindings").arr(0)("b")("value").value=="bb")
@@ -100,7 +100,7 @@ object RosHttpDriverTest extends TestSuite {
     }
     test("post malformed endpoint") {
       //NOSONAR
-      RosHTTPDriver().post("select ?b ?c where { <aa> ?b ?c . } limit 1", ConfigurationHttpRequest(url = "bidon"))
+      RosHTTPDriver().post(query, ConfigurationHttpRequest(url = "bidon"))
         .onComplete {
           case Success(_) => {
             assert(false)
@@ -112,7 +112,7 @@ object RosHttpDriverTest extends TestSuite {
     }
 
     test("post endpoint does not exist") {
-      RosHTTPDriver().post("select ?b ?c where { <aa> ?b ?c . } limit 1", ConfigurationHttpRequest(url = "http://bidon.com"))
+      RosHTTPDriver().post(query, ConfigurationHttpRequest(url = "http://bidon.com"))
         .onComplete {
           case Success(_) => {
             assert(false)

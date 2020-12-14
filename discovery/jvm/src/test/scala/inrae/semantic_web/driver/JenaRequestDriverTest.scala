@@ -21,9 +21,10 @@ object JenaRequestDriverTest extends TestSuite {
 
   def tests = Tests {
 
+    val query = "select ?b ?c where { <aa> ?b ?c . } limit 1"
 
     test("get") {
-      JenaRequestDriver().get("select ?b ?c where { <aa> ?b ?c . } limit 1", ConfigurationHttpRequest(url = DataTestFactory.url_endpoint))
+      JenaRequestDriver().get(query, ConfigurationHttpRequest(url = DataTestFactory.url_endpoint))
         .onComplete {
           case Success(qr) => {
             assert(qr.json("results")("bindings").arr(0)("b")("value").value=="bb")
@@ -49,7 +50,7 @@ object JenaRequestDriverTest extends TestSuite {
     }
 
     test("get malformed endpoint") {
-      JenaRequestDriver().get("select ?b ?c where { <aa> ?b ?c . } limit 1", ConfigurationHttpRequest(url = "bidon"))
+      JenaRequestDriver().get(query, ConfigurationHttpRequest(url = "bidon"))
         .onComplete {
           case Success(_) => {
             assert(false)
@@ -61,7 +62,7 @@ object JenaRequestDriverTest extends TestSuite {
     }
 
     test("get endpoint does not exist") {
-      JenaRequestDriver().get("select ?b ?c where { <aa> ?b ?c . } limit 1", ConfigurationHttpRequest(url = "http://bidon.com"))
+      JenaRequestDriver().get(query, ConfigurationHttpRequest(url = "http://bidon.com"))
         .onComplete {
           case Success(_) => {
             assert(false)
@@ -73,7 +74,7 @@ object JenaRequestDriverTest extends TestSuite {
     }
 
     test("post") {
-      JenaRequestDriver().post("select ?b ?c where { <aa> ?b ?c. } limit 1", ConfigurationHttpRequest(url = DataTestFactory.url_endpoint))
+      JenaRequestDriver().post(query, ConfigurationHttpRequest(url = DataTestFactory.url_endpoint))
         .onComplete {
           case Success(qr) => {
             assert(qr.json("results")("bindings").arr(0)("b")("value").value=="bb")
@@ -100,7 +101,7 @@ object JenaRequestDriverTest extends TestSuite {
     }
     test("post malformed endpoint") {
       //NOSONAR
-      JenaRequestDriver().post("select ?b ?c where { <aa> ?b ?c . } limit 1", ConfigurationHttpRequest(url = "bidon"))
+      JenaRequestDriver().post(query, ConfigurationHttpRequest(url = "bidon"))
         .onComplete {
           case Success(_) => {
             assert(false)
@@ -112,7 +113,7 @@ object JenaRequestDriverTest extends TestSuite {
     }
 
     test("post endpoint does not exist") {
-      JenaRequestDriver().post("select ?b ?c where { <aa> ?b ?c . } limit 1", ConfigurationHttpRequest(url = "http://bidon.com"))
+      JenaRequestDriver().post(query, ConfigurationHttpRequest(url = "http://bidon.com"))
         .onComplete {
           case Success(_) => {
             assert(false)
