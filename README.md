@@ -8,33 +8,19 @@
 ## Compil
 
 ```
-sbt discoveryJVM/run
-sbt discoveryJVM/test
-```
-
-## commands
-```
-npm install jsdom
-sbt discoveryJS/run
-sbt discoveryJS/test
-sbt discoveryJS/fastOptJS
 sbt discoveryJS/fullOptJS
-sbt discoveryJS/fastOptJS::webpack => bundle package
+sbt discoveryJVM/package 
 ```
 
-## note dev
-
+## test
 ```
-sbt compile
-sbt run   # run web app http://localhost:9000
-sbt package
-sbt test
-sbt fastOptJS => generer le JS
-sbt discoveryJVM/testOnly inrae.semantic_web.QueryPlannerTest
+sbt discoveryJVM/test  
 ```
 
-Vscode support : Metals plugin
-npm install source-map-support
+## coverage
+```
+sbt discoveryJVM/coverageReport 
+```
 
 ### Js example
 ```html
@@ -166,4 +152,16 @@ object GeoSparql {
   }
 }
 
+```
+
+
+## note dev
+
+```
+sbt compile
+sbt run   # run web app http://localhost:9000
+sbt package
+sbt test
+sbt fastOptJS => generer le JS
+sbt discoveryJVM/testOnly inrae.semantic_web.QueryPlannerTest
 ```
