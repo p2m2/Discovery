@@ -148,7 +148,7 @@ case class StatementConfiguration() {
   def source(idname : String) : ConfigurationObject.Source = {
     conf.sources.find(source => source.id == idname ) match {
       case Some(v : ConfigurationObject.Source) => v
-      case None => throw new Exception("Unknown source id:"+idname )
+      case None => throw new StatementConfigurationException("Unknown source id:"+idname )
     }
   }
 
