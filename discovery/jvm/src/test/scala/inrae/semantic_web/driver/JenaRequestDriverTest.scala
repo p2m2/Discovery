@@ -19,9 +19,9 @@ object JenaRequestDriverTest extends TestSuite {
     DataTestFactory.delete_virtuoso1(this.getClass.getSimpleName)
   }
 
-  def tests = Tests {
+  val query = "select ?b ?c where { <aa> ?b ?c . } limit 1"
 
-    val query = "select ?b ?c where { <aa> ?b ?c . } limit 1"
+  def tests = Tests {
 
     test("get") {
       JenaRequestDriver().get(query, ConfigurationHttpRequest(url = DataTestFactory.url_endpoint))

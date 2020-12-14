@@ -37,7 +37,6 @@ object RosHttpDriverTest extends TestSuite {
     }
 
     test("get bad request") {
-      //NOSONAR
       RosHTTPDriver().get("bad request", ConfigurationHttpRequest(url = DataTestFactory.url_endpoint))
         .onComplete {
           case Success(qr) => {
@@ -49,7 +48,6 @@ object RosHttpDriverTest extends TestSuite {
         }
     }
     test("get malformed endpoint") {
-      //NOSONAR
       RosHTTPDriver().get(query, ConfigurationHttpRequest(url = "bidon"))
         .onComplete {
           case Success(_) => {
@@ -87,7 +85,6 @@ object RosHttpDriverTest extends TestSuite {
     }
 
     test("post bad request") {
-      //NOSONAR
       RosHTTPDriver().post("bad request", ConfigurationHttpRequest(url = DataTestFactory.url_endpoint))
         .onComplete {
           case Success(_) => {
@@ -99,7 +96,6 @@ object RosHttpDriverTest extends TestSuite {
         }
     }
     test("post malformed endpoint") {
-      //NOSONAR
       RosHTTPDriver().post(query, ConfigurationHttpRequest(url = "bidon"))
         .onComplete {
           case Success(_) => {
