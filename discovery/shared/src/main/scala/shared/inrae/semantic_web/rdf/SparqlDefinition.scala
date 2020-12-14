@@ -10,21 +10,24 @@ case class Triple(s: SparqlDefinition, p: SparqlDefinition, o: SparqlDefinition)
 
 
 trait SparqlDefinition {
-  def cleanString(str : String) = {
-    str.replaceAll("^\"","")
-      .replaceAll("\"$","")
-      .replaceAll("^<","")
-      .replaceAll(">$","")
-  }
 
   def sparql() : String
 
   def naiveLabel() : String
 }
 
+object SparqlDefinition {
+  def cleanString(str : String) = {
+    str.replaceAll("^\"","")
+      .replaceAll("\"$","")
+      .replaceAll("^<","")
+      .replaceAll(">$","")
+  }
+}
+
 @JSExportTopLevel(name="IRI")
 case class IRI (var iri : String) extends SparqlDefinition {
-  iri = cleanString(iri)
+  iri = SparqlDefinition.cleanString(iri)
   override def toString() : String = {
       "<"+iri+">"
   }
@@ -42,9 +45,9 @@ object IRI {
 case class URI (localNameUser : String,nameSpaceUser : String = "") extends SparqlDefinition {
   val localName = nameSpaceUser match {
     case "" if (!localNameUser.contains("://")) => {
-      cleanString(localNameUser.split(":").last)
+      SparqlDefinition.cleanString(localNameUser.split(":").last)
     }
-    case _ => cleanString(localNameUser)
+    case _ => SparqlDefinition.cleanString(localNameUser)
   }
 
   val nameSpace = nameSpaceUser match {
@@ -78,7 +81,7 @@ object URI {
 
 @JSExportTopLevel(name="Anonymous")
 case class Anonymous(var value : String) extends SparqlDefinition {
-  value = cleanString(value)
+  value = SparqlDefinition.cleanString(value)
 
   override def toString() : String = value
 
@@ -89,7 +92,7 @@ case class Anonymous(var value : String) extends SparqlDefinition {
 
 @JSExportTopLevel(name="PropertyPath")
 case class PropertyPath(var value : String) extends SparqlDefinition {
-  value = cleanString(value)
+  value = SparqlDefinition.cleanString(value)
 
   override def toString() : String = value
 
@@ -104,8 +107,8 @@ object PropertyPath {
 
 @JSExportTopLevel(name="Literal")
 case class Literal(var value : String,var datatype : URI = URI.empty,var tag : String="") extends SparqlDefinition {
-  value = cleanString(value)
-  tag = cleanString(tag)
+  value = SparqlDefinition.cleanString(value)
+  tag = SparqlDefinition.cleanString(tag)
 
   override def toString() : String = "\""+ value + "\""+ (datatype match {
     case URI.empty => ""
@@ -132,7 +135,7 @@ object Literal {
 
 @JSExportTopLevel(name="QueryVariable")
 case class QueryVariable (var name : String) extends SparqlDefinition {
-  name = cleanString(name)
+  name = SparqlDefinition.cleanString(name)
   override def toString() : String = {
     "?"+name
   }
@@ -152,6 +155,23 @@ object SparqlBuilder {
   }
 
   def createUri(value: ujson.Value): URI = URI(value("value").value.toString)
-  def createLiteral(value: ujson.Value): Literal = Literal(value("value").toString, URI(value("datatype").toString))
+
+  def createLiteral(value: ujson.Value): Literal = {
+    val datatype = try { SparqlDefinition.cleanString(value("datatype").toString) match {
+        case v if v.length<=0 => URI.empty
+        case v => URI(v)
+      }
+    } catch {
+      case _ : java.util.NoSuchElementException => URI.empty
+    }
+
+    val tag = try {
+      SparqlDefinition.cleanString(value("tag").toString)
+    } catch {
+      case _ : java.util.NoSuchElementException => ""
+    }
+
+    Literal(value("value").toString, datatype,tag)
+  }
 
 }
