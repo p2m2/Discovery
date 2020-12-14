@@ -118,7 +118,7 @@ lazy val discovery =crossProject(JSPlatform, JVMPlatform).in(file("discovery"))
     testFrameworks += new TestFramework("utest.runner.Framework"),
     scalacOptions ++= Seq("-deprecation", "-feature"),
     classLoaderLayeringStrategy := ClassLoaderLayeringStrategy.AllLibraryJars,
-    coverageMinimum := 40,
+    coverageMinimum := 47,
     coverageFailOnMinimum := false,
     coverageHighlighting := true,
   )
