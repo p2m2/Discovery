@@ -1,3 +1,4 @@
+/* eslint no-console: "error" */
 /**
 Simple request send to DBpedia using NodeJs/Discovery lib.
 
@@ -5,11 +6,10 @@ sbt discoveryJS/fullOptJS
 nodejs ./examples-discovery/nodejs/exemple-node.js
 
 */
-var discoveryPath = '../../discovery/js/target/scala-2.13/discovery-opt.js'
 
-var EasySparqlStatementConfiguration = require(discoveryPath).EasySparqlStatementConfiguration ;
-var EasySparqlEngine = require(discoveryPath).EasySparqlEngine ;
-var URI = require(discoveryPath).URI ;
+var EasySparqlStatementConfiguration = require("../../discovery/js/target/scala-2.13/discovery-opt.js").EasySparqlStatementConfiguration ;
+var EasySparqlEngine = require("../../discovery/js/target/scala-2.13/discovery-opt.js").EasySparqlEngine ;
+var URI = require("../../discovery/js/target/scala-2.13/discovery-opt.js").URI ;
 
 
 let config = new EasySparqlStatementConfiguration()

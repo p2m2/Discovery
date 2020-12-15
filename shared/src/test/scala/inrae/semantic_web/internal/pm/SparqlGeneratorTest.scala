@@ -4,6 +4,8 @@ import inrae.semantic_web.internal._
 import inrae.semantic_web.rdf._
 import utest.{TestSuite, Tests, assert, test}
 
+import scala.util.{Failure, Success, Try}
+
 object SparqlGeneratorTest extends TestSuite {
   def tests = Tests {
 
@@ -90,11 +92,9 @@ object SparqlGeneratorTest extends TestSuite {
     }
 
     test("queryVariableTransform QueryVariable") {
-      try {
-        assert(SparqlGenerator.queryVariableTransform(QueryVariable("s"), Map()) == QueryVariable("s"))
-        assert(false)
-      } catch {
-        case _: Throwable => assert(true)
+      Try(assert(SparqlGenerator.queryVariableTransform(QueryVariable("s"), Map()) == QueryVariable("s"))) match {
+        case Success(_) => assert(false)
+        case Failure(_) => assert(true)
       }
     }
 
@@ -189,29 +189,24 @@ object SparqlGeneratorTest extends TestSuite {
     }
 
     test("sparqlNode DatatypeNode") {
-      try {
-        SparqlGenerator.sparqlNode(DatatypeNode("h", SubjectOf("1234", URI("something_property"))), Map(), "nothingSire", "nothingVar")
-        assert(false)
-      } catch {
-        case _ : Throwable => assert(true)
+      Try(SparqlGenerator.sparqlNode(DatatypeNode("h", SubjectOf("1234", URI("something_property"))), Map(),
+        "nothingSire", "nothingVar")) match {
+        case Success(_) => assert(false)
+        case Failure(_) => assert(true)
       }
     }
 
     test("sparqlNode SourcesNode") {
-      try {
-        SparqlGenerator.sparqlNode(SourcesNode("h",List("source1","source2")), Map(), "nothingSire", "nothingVar")
-        assert(false)
-      } catch {
-        case _ : Throwable => assert(true)
+      Try(SparqlGenerator.sparqlNode(SourcesNode("h",List("source1","source2")), Map(), "nothingSire", "nothingVar")) match {
+        case Success(_) => assert(false)
+        case Failure(_) => assert(true)
       }
     }
 
     test("sparqlNode OperatorNode") {
-      try {
-        SparqlGenerator.sparqlNode(OperatorNode("<"), Map(), "nothingSire", "nothingVar")
-        assert(false)
-      } catch {
-        case _ : Throwable => assert(true)
+      Try(SparqlGenerator.sparqlNode(OperatorNode("<"), Map(), "nothingSire", "nothingVar")) match {
+        case Success(_) => assert(false)
+        case Failure(_) => assert(true)
       }
     }
 

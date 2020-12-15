@@ -3,6 +3,7 @@ package inrae.semantic_web.driver
 import inrae.data.DataTestFactory
 import inrae.semantic_web.sparql.ConfigurationHttpRequest
 import utest.{TestSuite, Tests, test}
+import wvlet.log.{LogLevel, Logger}
 import wvlet.log.Logger.rootLogger.error
 
 import scala.util.{Failure, Success}
@@ -18,6 +19,8 @@ object JenaRequestDriverTest extends TestSuite {
   override def utestAfterAll(): Unit = {
     DataTestFactory.delete_virtuoso1(this.getClass.getSimpleName)
   }
+
+  Logger.setDefaultLogLevel(LogLevel.OFF)
 
   val query = "select ?b ?c where { <aa> ?b ?c . } limit 1"
 

@@ -6,6 +6,9 @@ import org.apache.jena.query._
 import java.io.ByteArrayOutputStream
 import scala.concurrent.Future
 import org.portablescala.reflect.annotation.EnableReflectiveInstantiation
+import wvlet.log.Logger.rootLogger.debug
+
+import scala.util.{Failure, Success, Try}
 
 @EnableReflectiveInstantiation
 case class JenaRequestDriver() extends HttpRequestDriver {
@@ -19,19 +22,25 @@ case class JenaRequestDriver() extends HttpRequestDriver {
       val query = QueryFactory.create(queryStr)
 
       //val authenticator = new Nothing("user", "password".toCharArray)
-      try {
-        val qexec: QueryExecution = QueryExecutionFactory.sparqlService(config.url, query)
-        val results: ResultSet = qexec.execSelect()
-
-        val outputStream = new ByteArrayOutputStream();
-        ResultSetFormatter.outputAsJSON(outputStream, results)
-        // and turn that into a String
-        val json = new String(outputStream.toByteArray)
-        QueryResult(json, "json")
-      } catch {
-        case e: QueryParseException => throw HttpRequestDriverException(e.getMessage())
-        case e: Throwable => throw HttpRequestDriverException(e.getMessage())
+      val qexec: QueryExecution = Try(QueryExecutionFactory.sparqlService(config.url, query)) match {
+        case Success(result) => result
+        case Failure(e) => throw HttpRequestDriverException(e.getMessage())
       }
+
+      debug("queryExecution Ok !")
+
+      val results: ResultSet = Try(qexec.execSelect()) match {
+        case Success(result) => result
+        case Failure(e) => throw HttpRequestDriverException(e.getMessage())
+      }
+
+      debug("execSelect Ok !")
+
+      val outputStream = new ByteArrayOutputStream();
+      ResultSetFormatter.outputAsJSON(outputStream, results)
+      // and turn that into a String
+      val json = new String(outputStream.toByteArray)
+      QueryResult(json, "json")
     }
   }
 

@@ -8,7 +8,7 @@ import org.scalajs.dom.{MouseEvent, NodeList, document}
 import org.scalajs.dom.raw.{HTMLCollection, HTMLDataListElement, HTMLInputElement, HTMLOptionElement, HTMLSelectElement, HTMLTableCellElement, HTMLTableSectionElement}
 
 import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
-import scala.util.{Failure, Success}
+import scala.util.{Failure, Success, Try}
 import scalatags.Text.all.{list, _}
 import sourcecode.Text.generate
 import wvlet.log.Logger.rootLogger.{error, info}
@@ -38,16 +38,14 @@ object TableApp {
     (0 to th.length-1).map( i => {
       val elt : HTMLTableCellElement = th(i).asInstanceOf[HTMLTableCellElement]
 
-      val inputList = elt.getElementsByTagName("input")
-      if (inputList.length>0) {
-        try {
-          val inp: HTMLInputElement = inputList(0).asInstanceOf[HTMLInputElement]
-          Some(URI(elt.id) -> inp.value.toInt)
-        } catch {
-          case _ : Throwable => None
+      elt.getElementsByTagName("input") match {
+        case inputList if inputList.length > 0 => {
+          Try(inputList(0).asInstanceOf[HTMLInputElement]) match {
+            case Success(element) => Some(URI(elt.id) -> element.value.toInt)
+            case Failure(_) => None
+          }
         }
-      } else {
-        None
+        case _ => None
       }
     }).toList.flatten.toMap
   }
@@ -243,6 +241,3 @@ object TableApp {
   }
 
 }
-
-
-

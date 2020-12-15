@@ -8,6 +8,7 @@ import wvlet.log.Logger.rootLogger.error
 import scala.util.{Failure, Success}
 import inrae.semantic_web.driver._
 import monix.execution.Scheduler.Implicits.global
+import wvlet.log.{LogLevel, Logger}
 
 object RosHttpDriverTest extends TestSuite {
   DataTestFactory.insert_virtuoso1(
@@ -19,6 +20,7 @@ object RosHttpDriverTest extends TestSuite {
     DataTestFactory.delete_virtuoso1(this.getClass.getSimpleName)
   }
 
+  Logger.setDefaultLogLevel(LogLevel.OFF)
   val query = "select ?b ?c where { <aa> ?b ?c . } limit 1"
 
   def tests = Tests {
@@ -39,10 +41,10 @@ object RosHttpDriverTest extends TestSuite {
     test("get bad request") {
       RosHTTPDriver().get("bad request", ConfigurationHttpRequest(url = DataTestFactory.url_endpoint))
         .onComplete {
-          case Success(qr) => {
+          case Success(_) => {
             assert(false)
           }
-          case Failure(e) => {
+          case Failure(_) => {
             assert(true)
           }
         }

@@ -66,6 +66,7 @@ lazy val table = (project in file("examples-discovery/html/table"))
                 .settings(
                   name := "table",
                   version := "0.1",
+                  scalaVersion := "2.13.4",
                   scalaJSUseMainModuleInitializer := true,
                   mainClass in Compile := Some("inrae.application.TableApp"),
                   libraryDependencies ++= Seq(

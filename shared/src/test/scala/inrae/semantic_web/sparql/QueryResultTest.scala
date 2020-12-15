@@ -1,3 +1,16 @@
 package inrae.semantic_web.sparql
 
-case object QueryResultTest
+import utest._
+
+object QueryResultTest extends TestSuite {
+
+  def tests = Tests {
+    test("QueryResultTest") {
+
+    }
+
+    test("QueryResultTest2") {
+
+    }
+  }
+}
