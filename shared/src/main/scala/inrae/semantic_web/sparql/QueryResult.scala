@@ -3,23 +3,25 @@ package inrae.semantic_web.sparql
 import inrae.semantic_web.rdf.{SparqlBuilder, SparqlDefinition}
 import wvlet.log.Logger.rootLogger.trace
 
+import scala.util.{Failure, Success, Try}
+
 case class QueryResult(results: String, mimetype : String = "json") {
 
-  var json = try {
-    ujson.read(results)
-  } catch {
-    case _ : Throwable => ujson.Obj(
-      "head" -> ujson.Obj(
-        "link" -> ujson.Arr(),
-        "vars" -> ujson.Arr()
-      ),
-      "results" -> ujson.Obj(
-        "distinct" -> "false",
-        "ordered" -> "true",
-        "bindings" -> ujson.Arr()
+  var json =
+    Try(ujson.read(results)) match {
+      case Success(json) => json
+      case Failure(_) => ujson.Obj(
+        "head" -> ujson.Obj(
+          "link" -> ujson.Arr(),
+          "vars" -> ujson.Arr()
+        ),
+        "results" -> ujson.Obj(
+          "distinct" -> "false",
+          "ordered" -> "true",
+          "bindings" -> ujson.Arr()
+        )
       )
-    )
-  }
+    }
 
   /**
    * replace all variable name by alias used by the user

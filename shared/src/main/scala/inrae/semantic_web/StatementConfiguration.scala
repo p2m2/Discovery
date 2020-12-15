@@ -5,6 +5,7 @@ import inrae.semantic_web.driver._
 import upickle.default.{macroRW, ReadWriter => RW}
 import wvlet.log.LogLevel
 import wvlet.log.Logger.rootLogger.{error, warn}
+import scala.util.{Try, Success, Failure}
 
 import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
 
@@ -87,7 +88,7 @@ object ConfigurationObject {
       case "all" => LogLevel.ALL
       case "off" => LogLevel.OFF
       case _ => {
-        warn("[config.settings] logLevel is not defined. ")
+        warn("[config.settings.logLevel] possible value : trace, debug, info, warn, error, all, off . find ["+logLevel+"]")
         LogLevel.WARN
       }
     }
@@ -135,13 +136,12 @@ case class StatementConfiguration() {
    */
   @JSExport
   def setConfigString(json_conf: String) : StatementConfiguration = {
-    try {
-      conf = upickle.default.read[ConfigurationObject.StatementConfigurationJson](json_conf)
-    } catch {
-      case e1: Throwable => {
-        throw StatementConfigurationException(e1.getMessage())
+      conf = util.Try(upickle.default.read[ConfigurationObject.StatementConfigurationJson](json_conf))
+      match {
+        case Success(v) => v
+        case Failure(e) => throw StatementConfigurationException(e.getMessage())
       }
-    }
+
     this
   }
 
