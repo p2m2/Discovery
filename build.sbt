@@ -15,6 +15,8 @@ lazy val jenaVersion = "3.16.0"
 //table
 lazy val scalaReflectPortableVersion = "1.0.0"
 
+releaseIgnoreUntrackedFiles := true
+
 def getPackageSetting() = Seq(
   name := "discovery",
   version := "0.0.2-SNAPSHOT",
