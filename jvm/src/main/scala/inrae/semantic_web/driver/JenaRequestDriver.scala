@@ -42,9 +42,4 @@ case class JenaRequestDriver() extends HttpRequestDriver {
   def post( query: String, config : ConfigurationHttpRequest ) : Future[QueryResult] = {
     process(query,config)
   }
-
-  def post_encoded( query: String, config : ConfigurationHttpRequest  ) : Future[QueryResult] = {
-    process(query,config)
-  }
-
 }

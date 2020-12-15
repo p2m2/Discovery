@@ -36,8 +36,8 @@
         <script src="https://unpkg.com/terraformer@1.0.7"></script>
         <script src="https://unpkg.com/terraformer-arcgis-parser@1.0.5"></script>
         <script src="https://unpkg.com/terraformer-wkt-parser@1.1.2"></script>
-
-        <script type="text/javascript" src="../../../discovery/js/target/scala-2.13/discovery-fastopt.js"></script>
+        <script>var exports = {"__esModule": true};</script>
+        <script type="text/javascript" src="../../../discovery/js/target/scala-2.13/discovery-opt.js"></script>
     </head>
 
     <body onload="initialize()">
@@ -53,6 +53,10 @@
     </body>
 </html>
 <script type="text/javascript">
+    var EasySparqlStatementConfiguration = exports.EasySparqlStatementConfiguration ;
+    var EasySparqlEngine = exports.EasySparqlEngine ;
+    var URI = exports.URI ;
+
     var map ;
     var layerGeoJSON ;
 
@@ -64,7 +68,7 @@
           "id"  : "dbpedia",
           "url" : "https://cors-anywhere.herokuapp.com/https://www.navigae.fr/repositories/Navigae",
           "typ" : "Navigae",
-          "method" : "POST_ENCODED",
+          "method" : "POST",
           "mimetype" : "json"
            }]}
           `)

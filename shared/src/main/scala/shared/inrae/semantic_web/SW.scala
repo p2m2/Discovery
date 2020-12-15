@@ -13,7 +13,6 @@ import scala.concurrent.{Future, Promise}
 import scala.util.{Failure, Success}
 
 final case class DiscoveryException(private val message: String = "",
-
                                                  private val cause: Throwable = None.orNull) extends Exception(message,cause)
 
 object SW {
