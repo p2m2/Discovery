@@ -34,10 +34,11 @@ case class QueryResult(results: String, mimetype : String = "json") {
       val v2 = v.toString().replace("\"","")
       v2k.find( v2 == _._2 ).map( x => x._1 ) match {
         case Some(s) => s
-        case s => s
+        case None => v.toString().replace("\"","")
       }})
 
     json("head")("vars").arr.clear()
+    //json("head")("vars").arr.addAll(l.toArray)
     l.map( {
       case a : String => json("head")("vars").arr.append(a)
       case _ => Nil
@@ -59,10 +60,11 @@ case class QueryResult(results: String, mimetype : String = "json") {
 
   /* get column results */
   def getValues( key : String ): Seq[SparqlDefinition] = {
-    json("results")("bindings").arr.map(kv => kv match {
+    json("results")("bindings").arr.flatMap(kv => kv match {
       case o: ujson.Obj => {
-        SparqlBuilder.create(o(key))
+        Some(SparqlBuilder.create(o(key)))
       }
+      case _ => None
     }).toSeq
   }
 
