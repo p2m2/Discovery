@@ -12,9 +12,7 @@ case class ConfigurationHttpRequest(
                                      token: String = "", // bearer case
                                      auth: String = "", // basic, proxy, bearer
                                      mimetype : String ="json"
-                                   ) {
-
-}
+                                   )
 
 final case class HttpRequestDriverException(private val message: String = "",
                                             private val cause: Throwable = None.orNull) extends Exception(message,cause)

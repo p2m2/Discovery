@@ -4,6 +4,8 @@ import inrae.semantic_web.internal._
 import inrae.semantic_web.rdf._
 import utest._
 
+import scala.util.{Failure, Success, Try}
+
 object ElementTest extends TestSuite {
 
   def tests = Tests {
@@ -11,11 +13,9 @@ object ElementTest extends TestSuite {
         val v : Root = Root()
         assert(true)
         assert(v.toString() != "")
-        try {
-          v.addChildren(Root())
-          assert(true)
-        } catch {
-          case _ : Throwable => assert(false)
+        Try(v.addChildren(Root())) match {
+          case Success(_) => assert(true)
+          case Failure(_) => assert(false)
         }
     }
 

@@ -3,6 +3,7 @@ package inrae.semantic_web.sparql
 /**
  * Simple manager to memorize results
  */
+
 case class QueryResultManager() {
   var mapQueryResult = Map[String,String]()
 

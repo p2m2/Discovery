@@ -42,8 +42,6 @@ object SWTest extends TestSuite {
   }
 
   def tests = Tests {
-
-
     test("No sources definition") {
       val config: StatementConfiguration = StatementConfiguration()
       config.setConfigString(""" { "sources" : [] } """)

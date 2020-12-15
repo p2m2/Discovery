@@ -23,10 +23,8 @@ object QueryPlannerExecutor {
       //case or: OR_RESULTS_SET =>
       //case and: AND_RESULTS_SET =>
       case bgps: INTERSECTION_RESULTS_SET =>executeSet(root,rs,listVariables,config,prefixes)
-      case _ => Future { QueryResult(null) }
+      case _ => Future { QueryResult("null") }
     }
-
-
   }
 
 
@@ -59,7 +57,7 @@ object QueryPlannerExecutor {
           }
           case msg => {
             error(msg)
-            promise success (QueryResult(null))
+            promise success (QueryResult("null"))
           }
         })
         promise.future
@@ -73,7 +71,7 @@ object QueryPlannerExecutor {
           }
           case msg => {
             error(msg)
-            promise success (QueryResult(null))
+            promise success (QueryResult("null"))
           }
         })
         promise.future

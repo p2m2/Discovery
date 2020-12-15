@@ -3,23 +3,25 @@ package inrae.semantic_web.sparql
 import inrae.semantic_web.rdf.{SparqlBuilder, SparqlDefinition}
 import wvlet.log.Logger.rootLogger.trace
 
+import scala.util.{Failure, Success, Try}
+
 case class QueryResult(results: String, mimetype : String = "json") {
 
-  var json = try {
-    ujson.read(results)
-  } catch {
-    case _ : Throwable => ujson.Obj(
-      "head" -> ujson.Obj(
-        "link" -> ujson.Arr(),
-        "vars" -> ujson.Arr()
-      ),
-      "results" -> ujson.Obj(
-        "distinct" -> "false",
-        "ordered" -> "true",
-        "bindings" -> ujson.Arr()
+  var json =
+    Try(ujson.read(results)) match {
+      case Success(json) => json
+      case Failure(_) => ujson.Obj(
+        "head" -> ujson.Obj(
+          "link" -> ujson.Arr(),
+          "vars" -> ujson.Arr()
+        ),
+        "results" -> ujson.Obj(
+          "distinct" -> "false",
+          "ordered" -> "true",
+          "bindings" -> ujson.Arr()
+        )
       )
-    )
-  }
+    }
 
   /**
    * replace all variable name by alias used by the user
@@ -32,10 +34,11 @@ case class QueryResult(results: String, mimetype : String = "json") {
       val v2 = v.toString().replace("\"","")
       v2k.find( v2 == _._2 ).map( x => x._1 ) match {
         case Some(s) => s
-        case s => s
+        case None => v.toString().replace("\"","")
       }})
 
     json("head")("vars").arr.clear()
+    //json("head")("vars").arr.addAll(l.toArray)
     l.map( {
       case a : String => json("head")("vars").arr.append(a)
       case _ => Nil
@@ -57,10 +60,11 @@ case class QueryResult(results: String, mimetype : String = "json") {
 
   /* get column results */
   def getValues( key : String ): Seq[SparqlDefinition] = {
-    json("results")("bindings").arr.map(kv => kv match {
+    json("results")("bindings").arr.flatMap(kv => kv match {
       case o: ujson.Obj => {
-        SparqlBuilder.create(o(key))
+        Some(SparqlBuilder.create(o(key)))
       }
+      case _ => None
     }).toSeq
   }
 

@@ -86,14 +86,11 @@ abstract class RdfNode(uniqRef : String) extends Node {
     } }
   }
 
-  /*
- duplicateWithoutChildren
-*/
-  def duplicateWithoutChildren() : RdfNode = ???
+  def duplicateWithoutChildren() : RdfNode
 }
 
 
-class URIRdfNode(concretUniqRef : String,val term : SparqlDefinition) extends RdfNode(concretUniqRef)
+abstract class URIRdfNode(concretUniqRef : String,val term : SparqlDefinition) extends RdfNode(concretUniqRef)
 
 case class Something(concretUniqRef: String) extends RdfNode(concretUniqRef) {
   override def duplicateWithoutChildren() = Something(concretUniqRef)

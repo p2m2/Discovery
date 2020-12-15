@@ -8,7 +8,7 @@ import scala.concurrent.Promise
 //import scala.concurrent.{Await}
 import scala.concurrent.Future
 /**
- * 
+ *
  */
 object SimpleConsole  {
     implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
@@ -93,6 +93,5 @@ object SimpleConsole  {
         }
 
         labelledLine + children + sourcesNode + datatypeNode
-    } 
+    }
 }
-
