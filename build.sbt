@@ -1,5 +1,5 @@
 import sbt.Keys.scalacOptions
-import sbtcrossproject.CrossPlugin.autoImport.{CrossType, crossProject}
+import sbtcrossproject.CrossPlugin.autoImport.crossProject
 
 lazy val utestVersion = "0.7.5"
 lazy val upickleVersion  = "1.2.2"
@@ -42,6 +42,9 @@ lazy val discovery =crossProject(JSPlatform, JVMPlatform).in(file("."))
     coverageMinimum := 47,
     coverageFailOnMinimum := false,
     coverageHighlighting := true,
+    // release ->  https://oss.sonatype.org/service/local/staging/deploy/maven2
+    publishTo := Some("Sonatype Snapshots Nexus" at "https://oss.sonatype.org/content/repositories/snapshots"),
+    publishMavenStyle := true,
   )
   .jsSettings(
     scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.CommonJSModule) },
@@ -51,8 +54,6 @@ lazy val discovery =crossProject(JSPlatform, JVMPlatform).in(file("."))
     jsEnv := new org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv()
   )
   .jvmSettings(
-    // release ->  https://oss.sonatype.org/service/local/staging/deploy/maven2
-    publishTo := Some("Sonatype Snapshots Nexus" at "https://oss.sonatype.org/content/repositories/snapshots"),
     credentials += Credentials(Path.userHome / ".sbt" / ".credentials"),
     libraryDependencies ++= Seq(
       "org.scala-js" %% "scalajs-stubs" % scalaStubVersion % "provided",
@@ -76,3 +77,4 @@ lazy val table = (project in file("examples-discovery/html/table"))
                 .enablePlugins(ScalaJSPlugin)
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
+//publishTo in ThisBuild :=

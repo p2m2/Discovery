@@ -175,7 +175,7 @@ object SparqlAlgebra {
       val unionBlock : SparqlAlgebra = n.children.collect( _ match { case u : UnionBlock => union(u.children,map) } )
                                                  .reduce( (u1,u2) => Union(u1,u2))
       val bgpBlock : SparqlAlgebra = Bgp(n.children.collect( _ match { case rdf : RdfNode => algebra(n,rdf,map) } )
-                                         ,List()) /* Todo Filter */
+                                         ,List()) // TODO Filter
       Join(bgpBlock,unionBlock)
     }
   }
