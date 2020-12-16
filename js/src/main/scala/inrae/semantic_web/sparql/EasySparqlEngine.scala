@@ -90,7 +90,7 @@ class EasySparqlEngine(var config: StatementConfiguration) {
   def debug() : EasySparqlEngine = { sw.console() ; this  }
 
   @JSExport
-  def sparql_console() : EasySparqlEngine = { sw.sparql_console() ; this }
+  def sparql() : String = { sw.sparql() }
 
   @JSExport
   def select(lRef: String*): Promise[Dynamic] = { sw.select(lRef).map(x => scala.scalajs.js.JSON.parse(x.toString())).toJSPromise }

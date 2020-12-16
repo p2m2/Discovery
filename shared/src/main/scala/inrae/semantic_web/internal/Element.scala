@@ -71,6 +71,13 @@ case class Root() extends Node {
       case _ => ""
     } } + "\n=======================================================\n"
   }
+
+  /* Accept only something on the root */
+  override def accept(n: Node): Boolean = n match {
+    case _ : Something => true
+    case _ => false
+  }
+
 }
 
 /* triplets */

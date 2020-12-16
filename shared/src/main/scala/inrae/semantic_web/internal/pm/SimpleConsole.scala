@@ -48,7 +48,7 @@ object SimpleConsole  {
             case node : SourcesNode => "SourceNode -> " + node.refNode
             case node : Value       => "Value ("+node.term.toString +")"
             case node : FilterNode  => "FILTER "+ node.toString()
-            case node : DatatypeNode => "DatatypeNode ("+ node.refNode  +" -> " + node.property.toString+ ") "
+            case node : DatatypeNode => "DatatypeNode ("+ node.refNode  +" -> " + Labelled(node.property)+ ") "
             case v                  => "--- Unkown ---"+v.toString
         }
     }

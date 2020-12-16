@@ -19,7 +19,7 @@ case class QueryManager(config : StatementConfiguration) {
    */
 
   def sparql_string(root: Root, n: Node): String = {
-    val (refToIdentifier,_) = pm.SparqlGenerator.correspondenceVariablesIdentifier(n)
+    val (refToIdentifier,_) = pm.SparqlGenerator.correspondenceVariablesIdentifier(root)
     SparqlQueryBuilder.selectQueryString(root,refToIdentifier,refToIdentifier.values.toSeq)
   }
 

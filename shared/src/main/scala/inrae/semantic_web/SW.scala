@@ -167,7 +167,6 @@ case class SW(var config: StatementConfiguration) {
   def focusManagement(n : Node, forward: Boolean = true) : SW = {
     trace("-- focusManagement --")
     if (! focusNode.accept(n)) {
-      error("Can not add "+n.toString()+" with the current focus ["+focusNode.toString()+"]")
       throw new Error("Can not add "+n.toString()+" with the current focus ["+focusNode.toString()+"]")
     }
 
@@ -276,10 +275,9 @@ case class SW(var config: StatementConfiguration) {
     this
   }
 
-  def sparql_console() : SW = {
-    debug(" -- sparql_console -- ")
-    println(QueryManager(config).sparql_string(rootNode,focusNode))
-    this
+  def sparql() : String = {
+    debug(" -- sparql -- ")
+    QueryManager(config).sparql_string(rootNode,focusNode)
   }
 
   def variable(reference: String) : Option[String] = {
