@@ -1,41 +1,18 @@
 package inrae.semantic_web
 
-import inrae.semantic_web.{SW, StatementConfiguration}
-import inrae.semantic_web.internal.{Node, ObjectOf, Something, SubjectOf, Value}
+import inrae.semantic_web.internal.Node
 import inrae.semantic_web.rdf.{IRI, SparqlDefinition, URI}
-import ujson.IndexedValue.False
 
-import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
+import scala.scalajs._
 import scala.scalajs.js.JSConverters._
 import scala.scalajs.js._
-import scala.scalajs._
+import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
 
-@JSExportTopLevel("FilterIncrement")
-class FilterIncrement(swf: EasySparqlEngine)  {
-  var negation = false
 
-  @JSExport
-  def isLiteral: EasySparqlEngine = { swf.sw.filter.isLiteral ; swf }
-
-  @JSExport
-  def isUri: EasySparqlEngine = { swf.sw.filter.isUri ; swf }
-
-  @JSExport
-  def isBlank: EasySparqlEngine = { swf.sw.filter.isBlank ; swf }
-
-  @JSExport
-  def contains(l:String): EasySparqlEngine = { swf.sw.filter.contains(l) ; swf }
-
-  @JSExport
-  def not : FilterIncrement = { swf.sw.filter.not ; this }
-}
 
 @JSExportTopLevel(name="EasySparqlEngine")
 class EasySparqlEngine(var config: StatementConfiguration) {
   implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
-
-  implicit def string2Uri(uri: String) = URI(uri)
-  implicit def string2Iri(uri: String) = IRI(uri)
 
   var sw = SW(config)
 
@@ -90,10 +67,13 @@ class EasySparqlEngine(var config: StatementConfiguration) {
   def debug() : EasySparqlEngine = { sw.console() ; this  }
 
   @JSExport
-  def sparql_console() : EasySparqlEngine = { sw.sparql_console() ; this }
+  def sparql() : String = { sw.sparql() }
 
   @JSExport
   def select(lRef: String*): Promise[Dynamic] = { sw.select(lRef).map(x => scala.scalajs.js.JSON.parse(x.toString())).toJSPromise }
+
+  @JSExport
+  def selectByPage(lRef: Seq[String] = List())  : Promise[(Int,Seq[LazyFutureJsonValue])] = { sw.selectByPage(lRef).toJSPromise }
 
   @JSExport
   def count(): Promise[Int] = { sw.count().toJSPromise }

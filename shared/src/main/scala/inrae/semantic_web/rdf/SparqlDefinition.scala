@@ -2,6 +2,7 @@ package inrae.semantic_web.rdf
 
 import scala.scalajs.js.annotation.JSExportTopLevel
 import scala.language.implicitConversions
+import scala.util.{Failure, Success, Try}
 
 case class Graph(triples : Set[Triple])
 
@@ -147,10 +148,13 @@ case class QueryVariable (var name : String) extends SparqlDefinition {
 object SparqlBuilder {
 
   def create(value: ujson.Value): SparqlDefinition = {
-    value("type").value match {
+    (Try(value("type").value) match {
+      case Success(v1) => v1
+      case Failure(_) => throw new Error("Can not found key `type` in obj:"+value.toString())
+      }) match {
       case "uri" => createUri(value)
-      case "literal" => createLiteral(value)
-      case _ => throw new Error("unknown type !")
+      case "literal" | "typed-literal"=> createLiteral(value)
+      case _ => throw new Error("unknown type ")
     }
   }
 

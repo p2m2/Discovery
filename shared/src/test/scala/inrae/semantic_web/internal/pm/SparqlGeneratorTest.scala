@@ -53,16 +53,26 @@ object SparqlGeneratorTest extends TestSuite {
 
 
     test("solutionModifier") {
-      assert(SparqlGenerator.solutionModifier().contains("}"))
+      assert(SparqlGenerator.solutionModifier(0,0).contains("}"))
+      assert(!SparqlGenerator.solutionModifier(0,0).toLowerCase().contains("limit"))
+      assert(!SparqlGenerator.solutionModifier(0,0).toLowerCase().contains("offset"))
+    }
+
+    test("solutionModifier limit") {
+      assert(SparqlGenerator.solutionModifier(10,0).contains("}"))
+      assert(SparqlGenerator.solutionModifier(10,0).toLowerCase().contains("limit 10"))
+      assert(!SparqlGenerator.solutionModifier(10,0).toLowerCase().contains("offset"))
+    }
+
+    test("solutionModifier offset") {
+      assert(SparqlGenerator.solutionModifier(0,10).contains("}"))
+      assert(!SparqlGenerator.solutionModifier(0,10).toLowerCase().contains("limit"))
+      assert(SparqlGenerator.solutionModifier(0,10).toLowerCase().contains("offset 10"))
     }
 
     test("prologCountSelection") {
       assert(SparqlGenerator.prologCountSelection("myvar").toLowerCase().contains("count"))
       assert(SparqlGenerator.prologCountSelection("myvar").toLowerCase().contains("myvar"))
-    }
-
-    test("solutionModifierSourcesSelection") {
-      assert(SparqlGenerator.solutionModifierSourcesSelection() == "} LIMIT 1" )
     }
 
     test("sparqlNode - SubjectOf") {

@@ -14,19 +14,26 @@ case class QueryManager(config : StatementConfiguration) {
   implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
 
   /**
-   * Find source available in configuration for this node
-   * @param n
+   *
+   * @param root : root request
+   * @return Sparql query string
    */
-
-  def sparql_string(root: Root, n: Node): String = {
-    val (refToIdentifier,_) = pm.SparqlGenerator.correspondenceVariablesIdentifier(n)
-    SparqlQueryBuilder.selectQueryString(root,refToIdentifier,refToIdentifier.values.toSeq)
+  def sparql_string(root: Root): String = {
+    val (refToIdentifier,_) = pm.SparqlGenerator.correspondenceVariablesIdentifier(root)
+    SparqlQueryBuilder.selectQueryString(root,refToIdentifier,refToIdentifier.values.toSeq,0,0)
   }
 
-
-  def queryAll(rootRequest : Root) : Future[QueryResult] = {
+  /**
+   * queryAll
+   * Apply a select on all variables
+   * @param rootRequest : root request
+   * @param limit : upper bound on the number of solutions returned
+   * @param offset : solution are generated after this offset
+   * @return Solutions embedded in QueryResult object as Future
+   */
+  def queryAll(rootRequest : Root,limit : Int, offset : Int) : Future[QueryResult] = {
     debug(" -- queryAll -- ")
-    queryVariables(rootRequest,Node.references(rootRequest))
+    queryVariables(rootRequest,Node.references(rootRequest),limit,offset)
   }
 
   def countNbSolutions(root : Root) : Future[Int] = {
@@ -50,8 +57,17 @@ case class QueryManager(config : StatementConfiguration) {
     }
   }
 
+  /**
+   *  queryVariables
+   *
+   * @param root : first node to build the sparql query
+   * @param listVariables : slected variables
+   * @param limit : upper bound on the number of solutions returned
+   * @param offset : solution are generated after this offset
+   * @return Solutions embedded in QueryResult object as Future
+   */
   def queryVariables(root: Root,
-                     listVariables : Seq[String]) : Future[QueryResult] = {
+                     listVariables : Seq[String],limit : Int, offset : Int) : Future[QueryResult] = {
     debug(" -- queryVariables -- ")
 
     trace( pm.SimpleConsole.get(root) )
@@ -65,7 +81,7 @@ case class QueryManager(config : StatementConfiguration) {
       case 1 => {
         val (refToIdentifier, _) = pm.SparqlGenerator.correspondenceVariablesIdentifier(root)
         trace(refToIdentifier.toString())
-        val query: String = SparqlQueryBuilder.selectQueryString(root, refToIdentifier, listVariables)
+        val query: String = SparqlQueryBuilder.selectQueryString(root, refToIdentifier, listVariables,limit,offset)
         QueryRunner(config.sources()(0),config.conf.settings).query(query).map( qr => {
           qr
         })
@@ -99,7 +115,7 @@ case class QueryManager(config : StatementConfiguration) {
           pm.SparqlGenerator.queryFormSelect() + "\n" +
           pm.SparqlGenerator.start_where() + "\n" +
           pm.SparqlGenerator.sparqlNode(r,refToIdentifier,"varUp","varCur") +
-          pm.SparqlGenerator.solutionModifierSourcesSelection()
+          pm.SparqlGenerator.solutionModifier(1,0)
 
         trace(query)
 

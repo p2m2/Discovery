@@ -121,9 +121,7 @@ object DataTestFactory  {
         """.stripMargin)
   }
 
-  def getDbpediaConfig() : StatementConfiguration = {
-    StatementConfiguration().setConfigString(
-      s"""
+  val dbpedia_config_string = """
             {
              "sources" : [{
                "id"  : "dbpedia",
@@ -138,7 +136,10 @@ object DataTestFactory  {
               "cache" : false
              }
             }
-            """.stripMargin.stripMargin)
+            """.stripMargin.stripMargin
+
+  def getDbpediaConfig() : StatementConfiguration = {
+    StatementConfiguration().setConfigString(dbpedia_config_string)
   }
   //   "driver" : "inrae.semantic_web.driver.JenaRequestDriver",
 }
