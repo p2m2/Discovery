@@ -27,7 +27,7 @@ object SW {
 case class SW(var config: StatementConfiguration) {
   implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
   /* root node */
-  private var rootNode   : Root = Root()
+  private val rootNode   : Root = Root()
   /* focus node */
   private var focusNode  : Node = rootNode
 
@@ -277,7 +277,7 @@ case class SW(var config: StatementConfiguration) {
 
   def sparql() : String = {
     debug(" -- sparql -- ")
-    QueryManager(config).sparql_string(rootNode,focusNode)
+    QueryManager(config).sparql_string(rootNode)
   }
 
   def variable(reference: String) : Option[String] = {
@@ -294,7 +294,14 @@ case class SW(var config: StatementConfiguration) {
     }
   }
 
-  def select(lRef: Seq[String] = List()) : Future[ujson.Value] = {
+  /**
+   *
+   * @param lRef : selected variables
+   * @param limit : upper bound on the number of solutions returned
+   * @param offset : solution are generated after this offset
+   * @return
+   */
+  def select(lRef: Seq[String] = List(), limit : Int = 0, offset : Int = 0) : Future[ujson.Value] = {
     debug(" -- select -- ")
     trace("selected variables :"+lRef.toString)
 
@@ -323,7 +330,7 @@ case class SW(var config: StatementConfiguration) {
     val p = Promise[ujson.Value]()
 
     /* manage variable name */
-    QueryManager(config).queryVariables(rootNode,lSelectVariables)
+    QueryManager(config).queryVariables(rootNode,lSelectVariables,limit,offset)
       /* manage datatype decoration */
        .map( (qr : QueryResult) => {
 

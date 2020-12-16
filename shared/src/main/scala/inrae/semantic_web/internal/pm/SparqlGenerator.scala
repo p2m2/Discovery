@@ -10,7 +10,7 @@ import inrae.semantic_web.rdf.{IRI, QueryVariable, SparqlDefinition}
 final case class SparqlGeneratorException(private val message: String = "",
                                     private val cause: Throwable = None.orNull) extends Exception(message,cause)
 /**
- * 
+ *
  */
 object SparqlGenerator  {
 
@@ -34,16 +34,18 @@ object SparqlGenerator  {
 
     def fromNamed(graphs : Seq[IRI]): String = graphs.map( g => "FROM NAMED"+g.sparql()).mkString("\n")
 
-    def solutionModifier () : String = {
-        "} limit 200"
+    def solutionModifier (limit : Int, offset : Int) : String = {
+        "}" + { limit match {
+            case n if n>0 => " LIMIT "+limit.toString()
+            case _ => ""
+        }} + { offset match {
+            case n if n>0 => " OFFSET "+offset.toString()
+            case _ => ""
+        }}
     }
 
     def prologCountSelection(varCount : String) : String = {
         "SELECT ( COUNT(*) as ?"+varCount+" )"
-    }
-
-    def solutionModifierSourcesSelection () : String = {
-        "} LIMIT 1"
     }
 
     def queryVariableTransform(term : SparqlDefinition,
@@ -177,6 +179,5 @@ object SparqlGenerator  {
         trace("variableName:"+variableName)
         val triplet : String = sparqlNode(n,referenceToIdentifier,varIdSire,variableName)
         triplet + n.children.map( child => body( child,referenceToIdentifier, variableName)).mkString("")
-    } 
+    }
 }
-
