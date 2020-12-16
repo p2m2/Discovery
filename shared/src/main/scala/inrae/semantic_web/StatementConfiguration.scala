@@ -66,18 +66,19 @@ object ConfigurationObject {
                       driver: String = "inrae.semantic_web.driver.RosHTTPDriver",
                       cache : Boolean = true,
                       logLevel : String = "warn"          , // trace, debug, info, warn, error, all, off
-                      sizeBatchProcessing : Int = 150
+                      sizeBatchProcessing : Int = 150,
+                      pageSize : Int = 20
                     ) {
 
     def getHttpDriver() : HttpRequestDriver = {
       import org.portablescala.reflect._
-
       Reflect.lookupInstantiatableClass(driver) match {
         case Some( cls ) => cls.newInstance().asInstanceOf[HttpRequestDriver]
         case None => throw StatementConfigurationException("Unknown Http Request Driver :"+driver)
       }
-
     }
+    /* check if driver exist when config is loaded . */
+    getHttpDriver()
 
     def getLogLevel() : LogLevel = logLevel.toLowerCase() match {
       case "debug" | "d" => LogLevel.DEBUG
