@@ -93,6 +93,11 @@ object ConfigurationObject {
         LogLevel.WARN
       }
     }
+
+    if ( pageSize<=0 ) {
+      throw StatementConfigurationException("pageSize can not be equal to zero or negative !")
+    }
+
   }
 
   case class Prefixes(list : Map[String,String])

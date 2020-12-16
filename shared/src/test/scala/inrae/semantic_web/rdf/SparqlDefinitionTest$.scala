@@ -136,5 +136,13 @@ object SparqlDefinitionTest$ extends TestSuite {
       assert( value.naiveLabel() == "test")
     }
 
+    test("create literal") {
+      val ujsonv = ujson.Value("{ \"type\" : \"typed-literal\" , \"value\": \"test\" , \"datatype\" : \"\"  , \"tag\":\"fr\"}")
+      val value = SparqlBuilder.create(ujsonv)
+      assert( value.toString() == "\"test\"@fr")
+      assert( value.sparql() == "\"test\"@fr")
+      assert( value.naiveLabel() == "test")
+    }
+
   }
 }

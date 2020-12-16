@@ -295,7 +295,7 @@ case class SW(var config: StatementConfiguration) {
   }
 
   /**
-   *
+   * Return solutions as Future corresponding with the current Node request.
    * @param lRef : selected variables
    * @param limit : upper bound on the number of solutions returned
    * @param offset : solution are generated after this offset
@@ -381,7 +381,22 @@ case class SW(var config: StatementConfiguration) {
     QueryManager(config).countNbSolutions(rootNode)
   }
 
-
+  /**
+   * Give an iterable object to browse and obtain all solution performed by a select.
+   * @param lRef : selected variables
+   * @return iterable on select function
+   */
+  def selectByPage(lRef: Seq[String] = List())  : Future[(Int,Seq[LazyFutureJsonValue])] = {
+    count().map(
+      nsolutions => {
+        val nit : Int = nsolutions / config.conf.settings.pageSize
+        (nit+1,(0 to nit).map( p =>{
+          val limit = config.conf.settings.pageSize
+          val offset = p*config.conf.settings.pageSize
+          LazyFutureJsonValue( () => select(lRef,limit,offset) )
+        }))
+      })
+  }
 
   def findClasses(motherClass: URI = URI("") ) : Future[Seq[URI]] = {
     debug(" -- findClasses -- ")

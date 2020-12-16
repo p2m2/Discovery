@@ -145,5 +145,28 @@ object StatementConfigurationTest extends TestSuite {
           "\"off\""))
       assert(c.conf.settings.getLogLevel() == LogLevel.OFF)
     }
+
+    test("pageSize can not be negative") {
+      Try(StatementConfiguration()
+        .setConfigString(config_base.replace("\"pageSize\" : 10",
+          "\"pageSize\" : -1"))) match {
+        case Success(c) => assert(false)
+        case Failure(e) => assert(true)
+      }
+    }
+    test("pageSize can be equal to zero") {
+      Try(StatementConfiguration()
+        .setConfigString(config_base.replace("\"pageSize\" : 10",
+          "\"pageSize\" : 0"))) match {
+        case Success(c) => assert(false)
+        case Failure(e) => assert(true)
+      }
+    }
+    test("pageSize") {
+      val c = StatementConfiguration()
+        .setConfigString(config_base.replace("\"pageSize\" : 10",
+          "\"pageSize\" : 5"))
+      assert(c.conf.settings.pageSize == 5)
+    }
   }
 }
