@@ -12,9 +12,6 @@ lazy val scalaStubVersion = "1.0.0"
 lazy val scalatagVersion = "0.9.2"
 lazy val jenaVersion = "3.16.0"
 
-//table
-lazy val scalaReflectPortableVersion = "1.0.0"
-
 releaseIgnoreUntrackedFiles := true
 
 def getPackageSetting() = Seq(
@@ -60,22 +57,6 @@ lazy val discovery =crossProject(JSPlatform, JVMPlatform).in(file("."))
       "org.apache.jena" % "apache-jena" % jenaVersion pomOnly()
     ))
   //.enablePlugins(ScalaJSBundlerPlugin)
-
-// Applications static
-lazy val table = (project in file("examples-discovery/html/table"))
-                .settings(
-                  name := "table",
-                  version := "0.1",
-                  scalaVersion := "2.13.4",
-                  scalaJSUseMainModuleInitializer := true,
-                  mainClass in Compile := Some("inrae.application.TableApp"),
-                  libraryDependencies ++= Seq(
-                    "com.lihaoyi" %%% "scalatags" % scalatagVersion,
-                    "org.portable-scala" %%% "portable-scala-reflect" % scalaReflectPortableVersion
-                  )
-                )
-                .dependsOn(discovery.js)
-                .enablePlugins(ScalaJSPlugin)
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
 //publishTo in ThisBuild :=
