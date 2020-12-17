@@ -11,6 +11,9 @@ import monix.execution.Scheduler.Implicits.global
 import wvlet.log.{LogLevel, Logger}
 
 object RosHttpDriverTest extends TestSuite {
+
+  DataTestFactory.delete_virtuoso1(this.getClass.getSimpleName)
+
   DataTestFactory.insert_virtuoso1(
     """
       <aa> <bb> <cc> .
@@ -28,6 +31,7 @@ object RosHttpDriverTest extends TestSuite {
       RosHTTPDriver().get(query, ConfigurationHttpRequest(url = DataTestFactory.url_endpoint))
         .onComplete {
           case Success(qr) => {
+            println(qr.json("results")("bindings"))
             assert(qr.json("results")("bindings").arr(0)("b")("value").value=="bb")
             assert(qr.json("results")("bindings").arr(0)("c")("value").value=="cc")
           }
