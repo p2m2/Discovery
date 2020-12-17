@@ -21,7 +21,15 @@ def getPackageSetting() = Seq(
   organization := "com.github.p2m2"
 )
 
-lazy val discovery =crossProject(JSPlatform, JVMPlatform).in(file("."))
+lazy val root = (project in file("."))
+  .aggregate(discovery.js, discovery.jvm)
+  .settings(
+    // crossScalaVersions must be set to Nil on the aggregating project
+    crossScalaVersions := Nil,
+    publish / skip := true
+  )
+
+lazy val discovery=crossProject(JSPlatform, JVMPlatform).in(file("."))
   .settings(getPackageSetting())
   .settings(
     resolvers += Resolver.bintrayRepo("hmil", "maven"),
