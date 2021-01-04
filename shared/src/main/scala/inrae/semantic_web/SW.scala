@@ -1,16 +1,18 @@
 package inrae.semantic_web
 
+import inrae.semantic_web.event.{DiscoveryRequestEvent, DiscoveryStateRequestEvent, Publisher, Subscriber}
+
 import java.util.UUID.randomUUID
 import inrae.semantic_web.internal.Node.references
 import inrae.semantic_web.internal._
 import inrae.semantic_web.internal.pm.SelectNode
 import inrae.semantic_web.rdf._
-import inrae.semantic_web.sparql.{QueryResult}
+import inrae.semantic_web.sparql.QueryResult
+import wvlet.log.Logger
 import wvlet.log.Logger.rootLogger._
-import wvlet.log.{LogLevel, Logger}
 
 import scala.concurrent.{Future, Promise}
-import scala.util.{Failure, Success}
+import scala.util.{Failure, Success, Try}
 
 final case class DiscoveryException(private val message: String = "",
                                                  private val cause: Throwable = None.orNull) extends Exception(message,cause)
@@ -24,7 +26,9 @@ object SW {
   info(" --------------------------------------------------" )
 }
 
-case class SW(var config: StatementConfiguration) {
+case class SW(var config: StatementConfiguration)
+  extends Subscriber[DiscoveryRequestEvent,QueryManager]
+{
   implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
   /* root node */
   private val rootNode   : Root = Root()
@@ -94,6 +98,7 @@ case class SW(var config: StatementConfiguration) {
     println("  --------------------------------------------------------------" )
     this
   }
+
 
   /* manage the creation of an unique ref */
   def getUniqueRef() : String = "_internal_" + randomUUID.toString
@@ -330,10 +335,12 @@ case class SW(var config: StatementConfiguration) {
     val p = Promise[ujson.Value]()
 
     /* manage variable name */
-    QueryManager(config).queryVariables(rootNode,lSelectVariables,limit,offset)
+    val qm = QueryManager(config)
+    qm.subscribe(this.asInstanceOf[Subscriber[DiscoveryRequestEvent,Publisher[DiscoveryRequestEvent]]])
+    qm.queryVariables(rootNode,lSelectVariables,limit,offset)
       /* manage datatype decoration */
        .map( (qr : QueryResult) => {
-
+         notify(DiscoveryRequestEvent(DiscoveryStateRequestEvent.DATATYPE_BUILD))
          /* create an empty set of datatypes */
          qr.json("results").update("datatypes",ujson.Obj())
          trace(qr.json)
@@ -341,44 +348,47 @@ case class SW(var config: StatementConfiguration) {
          trace("  lDatatype ====> " + lDatatype.toString())
 
          Future.sequence(lDatatype.map(datatypeNode => {
-           trace("datatype node:"+datatypeNode)
+             trace("datatype node:"+datatypeNode)
 
-           rootNode.getRdfNode(datatypeNode.refNode) match {
-             case Some(_) => {
+             rootNode.getRdfNode(datatypeNode.refNode) match {
+               case Some(_) => {
 
-               /* find uris value inside results to decorate */
-               val lUris : Seq[SparqlDefinition] =
-                 try {
-                   qr.getValues(mapId2Var(datatypeNode.refNode))
-                 } catch {
-                   case _ : Throwable => {
-                     List()
+                 /* find uris value inside results to decorate */
+                 val lUris : Seq[SparqlDefinition] =
+                   try {
+                     qr.getValues(mapId2Var(datatypeNode.refNode))
+                   } catch {
+                     case _ : Throwable => {
+                       List()
+                     }
                    }
-                 }
-               Future.sequence(QueryManager(config).process_datatypes(qr,datatypeNode,lUris))
+                 Future.sequence(QueryManager(config).process_datatypes(qr,datatypeNode,lUris))
+               }
+               case None => {
+                 Future { }
+               }
              }
-             case None => {
-               Future { }
+           })) onComplete {
+             case Success(_) => {
+               notify(DiscoveryRequestEvent(DiscoveryStateRequestEvent.DATATYPE_DONE))
+               qr.v2Ident(mapId2Var)
+               p success qr.json
+              }
+             case Failure(e) => {
+               p failure(e)
              }
            }
-         })) onComplete {
-           case Success(result) => {
-             qr.v2Ident(mapId2Var)
-             p success qr.json
-            }
-           case Failure(e) => {
-             error(e.getMessage)
-             p failure(e)
-           }
-         }
-       })
-
+       }).recover( exception => {
+          p failure(exception)
+        })
     p.future
   }
 
   def count() : Future[Int] = {
     debug(" -- count -- ")
-    QueryManager(config).countNbSolutions(rootNode)
+    val qm =QueryManager(config)
+    qm.subscribe(this.asInstanceOf[Subscriber[DiscoveryRequestEvent,Publisher[DiscoveryRequestEvent]]])
+    qm.countNbSolutions(rootNode)
   }
 
   /**
@@ -451,5 +461,33 @@ case class SW(var config: StatementConfiguration) {
   def findDatatypeProperties(motherClassProperties: URI = URI("") ) : Future[Seq[URI]] = {
     debug(" -- findDatatypeProperties -- ")
     findProperties(motherClassProperties,"datatypeProperty")
+  }
+
+  /**
+   * Event management
+   * @param pub
+   * @param event
+   */
+
+  var notifyFunList = Map[String, ( String  => Unit)]()
+
+  def notify (event: DiscoveryRequestEvent) : Unit = {
+    notifyFunList.values.map( fun => fun(event.state.toString) )
+  }
+
+  def notify (pub: QueryManager, event: DiscoveryRequestEvent) : Unit = {
+    notifyFunList.values.map( fun => fun(event.state.toString) )
+  }
+
+  def subscribe( id: String, userFunctionTriggered : ( String  => Unit) ): Unit = {
+    notifyFunList = notifyFunList + (id ->  userFunctionTriggered)
+  }
+
+  def unsubscribe(id: String ) : Unit = {
+    notifyFunList = notifyFunList - id
+  }
+
+  def abort(): Unit = {
+
   }
 }
