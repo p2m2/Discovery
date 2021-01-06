@@ -3,7 +3,6 @@ package inrae.semantic_web
 import inrae.data.DataTestFactory
 import inrae.semantic_web.rdf._
 import utest._
-import wvlet.log.Logger.rootLogger.error
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.language.postfixOps

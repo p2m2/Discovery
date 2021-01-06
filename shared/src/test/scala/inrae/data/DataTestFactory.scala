@@ -95,7 +95,7 @@ object DataTestFactory  {
            "mimetype" : "json"
          }],
          "settings" : {
-            "logLevel" : "info",
+            "logLevel" : "off",
             "sizeBatchProcessing" : 100
           }
          }
@@ -114,7 +114,7 @@ object DataTestFactory  {
            "mimetype" : "json"
          }],
          "settings" : {
-            "logLevel" : "info",
+            "logLevel" : "off",
             "sizeBatchProcessing" : 100
           }
          }
