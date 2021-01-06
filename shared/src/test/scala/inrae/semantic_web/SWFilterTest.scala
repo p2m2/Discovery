@@ -6,11 +6,12 @@ import utest._
 import wvlet.log.Logger.rootLogger.error
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 import scala.language.postfixOps
 import scala.util.{Failure, Success}
 
 object SWFilterTest extends TestSuite {
-  //DataTestFactory.delete_virtuoso1(this.getClass.getSimpleName)
+  DataTestFactory.delete_virtuoso1(this.getClass.getSimpleName)
 
   DataTestFactory.insert_virtuoso1(
     """
@@ -206,6 +207,5 @@ object SWFilterTest extends TestSuite {
           assert(result("results")("bindings").arr.length == 8)
         })
     }
-
   }
 }

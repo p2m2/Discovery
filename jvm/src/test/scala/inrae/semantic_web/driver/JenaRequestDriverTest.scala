@@ -11,14 +11,14 @@ import scala.util.{Failure, Success}
 
 object JenaRequestDriverTest extends TestSuite {
   implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
+
+  DataTestFactory.delete_virtuoso1(this.getClass.getSimpleName)
+
   DataTestFactory.insert_virtuoso1(
     """
       <aa> <bb> <cc> .
       """.stripMargin, this.getClass.getSimpleName)
 
-  override def utestAfterAll(): Unit = {
-    DataTestFactory.delete_virtuoso1(this.getClass.getSimpleName)
-  }
 
   Logger.setDefaultLogLevel(LogLevel.OFF)
 

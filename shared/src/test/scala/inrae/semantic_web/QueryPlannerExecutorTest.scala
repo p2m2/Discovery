@@ -8,6 +8,10 @@ import utest._
 object QueryPlannerExecutorTest extends TestSuite {
 
   implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
+
+  DataTestFactory.delete_virtuoso1(this.getClass.getSimpleName)
+  DataTestFactory.delete_virtuoso2(this.getClass.getSimpleName)
+
   DataTestFactory.insert_virtuoso1(
     """
       <aa_v1> <bb_v1> <cc_v1> .
@@ -15,7 +19,7 @@ object QueryPlannerExecutorTest extends TestSuite {
       <aa_v1> <bb2_v1> <cc3_v1> .
       """.stripMargin, this.getClass.getSimpleName)
 
-  DataTestFactory.insert_virtuoso1(
+  DataTestFactory.insert_virtuoso2(
     """
       <aa_v2> <bb_v2> <cc_v2> .
       <aa_v2> <bb_v2> <cc2_v2> .

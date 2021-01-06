@@ -10,6 +10,8 @@ import scala.util.{Failure, Success}
 
 object SWSubscribeEventTest extends TestSuite {
 
+  DataTestFactory.delete_virtuoso1(this.getClass.getSimpleName)
+
   DataTestFactory.insert_virtuoso1(
     """
       <aaSWSubscribeEventTest> <bb> <cc> .
@@ -33,7 +35,7 @@ object SWSubscribeEventTest extends TestSuite {
       stepDiscovery = stepDiscovery + (event -> true)
     }
 
-    var sw = SW(config)
+    val sw = SW(config)
     sw.subscribe("myfun", funsub)
     if (unsubscribe)
       sw.unsubscribe("myfun")
