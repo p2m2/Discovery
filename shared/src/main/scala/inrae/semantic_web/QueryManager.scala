@@ -1,4 +1,5 @@
 package inrae.semantic_web
+import inrae.semantic_web.event.{DiscoveryRequestEvent, DiscoveryStateRequestEvent, Publisher, Subscriber}
 import wvlet.log.Logger.rootLogger._
 import inrae.semantic_web.internal._
 import inrae.semantic_web.rdf._
@@ -9,9 +10,16 @@ import scala.concurrent.{Future, Promise}
 import scala.util._
 
 
-case class QueryManager(config : StatementConfiguration) {
+case class QueryManager(config : StatementConfiguration)
+  extends Subscriber[DiscoveryRequestEvent,QueryRunner]
+    with Publisher[DiscoveryRequestEvent]
+{
 
   implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
+
+  def notify (pub: QueryRunner, event: DiscoveryRequestEvent) : Unit = {
+    publish(event)
+  }
 
   /**
    *
@@ -40,20 +48,25 @@ case class QueryManager(config : StatementConfiguration) {
     debug(" -- countNbSolutions -- ")
 
     if (config.sources().length == 0) {
-      Future { throw new DiscoveryException(" ** None sources available ** ") }
+      Future { throw DiscoveryException(" ** None sources available ** ") }
     } else if (config.sources().length == 1) {
       val source = config.sources()(0)
       val (refToIdentifier, _) = pm.SparqlGenerator.correspondenceVariablesIdentifier(root)
       val varCount = "count"
-
+      publish(DiscoveryRequestEvent(DiscoveryStateRequestEvent.QUERY_BUILD))
       val query = SparqlQueryBuilder.countQueryString(root,refToIdentifier,varCount)
-      val res: Future[QueryResult] = QueryRunner(source,config.conf.settings).query(query)
+      val qr = QueryRunner(source,config.conf.settings)
+
+      qr.subscribe(this.asInstanceOf[Subscriber[DiscoveryRequestEvent,Publisher[DiscoveryRequestEvent]]])
+
+      val res: Future[QueryResult] = qr.query(query)
       res.map(v => {
+        publish(DiscoveryRequestEvent(DiscoveryStateRequestEvent.RESULTS_BUILD))
         SparqlBuilder.createLiteral(v.json("results")("bindings")(0)(varCount)).toInt()
       })
     } else {
       // todo query planner
-      Future { throw new DiscoveryException("QueryPlanner is not available .") }
+      Future { throw DiscoveryException("QueryPlanner is not available .") }
     }
   }
 
@@ -81,14 +94,18 @@ case class QueryManager(config : StatementConfiguration) {
       case 1 => {
         val (refToIdentifier, _) = pm.SparqlGenerator.correspondenceVariablesIdentifier(root)
         trace(refToIdentifier.toString())
+        publish(DiscoveryRequestEvent(DiscoveryStateRequestEvent.QUERY_BUILD))
         val query: String = SparqlQueryBuilder.selectQueryString(root, refToIdentifier, listVariables,limit,offset)
-        QueryRunner(config.sources()(0),config.conf.settings).query(query).map( qr => {
+        val qr = QueryRunner(config.sources()(0),config.conf.settings)
+        qr.subscribe(this.asInstanceOf[Subscriber[DiscoveryRequestEvent,Publisher[DiscoveryRequestEvent]]])
+        qr.query(query).map( qr => {
           qr
         })
       }
       case _ => {
         val plan = QueryPlanner.buildPlanning(root) //,listVariables,config)
         val plan_results_set = QueryPlanner.ordonnanceBySource(plan, root)
+        publish(DiscoveryRequestEvent(DiscoveryStateRequestEvent.QUERY_BUILD))
         QueryPlannerExecutor.executePlanning(root, plan_results_set, listVariables, config, root.prefixes)
       }
     }
@@ -121,7 +138,9 @@ case class QueryManager(config : StatementConfiguration) {
 
         val nbRowResultsBySource : Seq[Future[Boolean]] = {
           config.sources().map(
-              source => QueryRunner(source,config.conf.settings).query(query)
+              source => {
+                QueryRunner(source,config.conf.settings).query(query)
+              }
             ).map( {
               ( _.map(rr => rr.json("results")("bindings").arr.length>0))
             })
