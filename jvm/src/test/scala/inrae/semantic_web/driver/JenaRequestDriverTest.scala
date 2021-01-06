@@ -11,18 +11,18 @@ import scala.util.{Failure, Success}
 
 object JenaRequestDriverTest extends TestSuite {
   implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
+
+  DataTestFactory.delete_virtuoso1(this.getClass.getSimpleName)
+
   DataTestFactory.insert_virtuoso1(
     """
-      <aa> <bb> <cc> .
+      <aaJenaRequestDriverTest> <bb> <cc> .
       """.stripMargin, this.getClass.getSimpleName)
 
-  override def utestAfterAll(): Unit = {
-    DataTestFactory.delete_virtuoso1(this.getClass.getSimpleName)
-  }
 
   Logger.setDefaultLogLevel(LogLevel.OFF)
 
-  val query = "select ?b ?c where { <aa> ?b ?c . } limit 1"
+  val query = "select ?b ?c where { <aaJenaRequestDriverTest> ?b ?c . } limit 1"
 
   def tests = Tests {
 
@@ -78,30 +78,21 @@ object JenaRequestDriverTest extends TestSuite {
 
     test("post") {
       JenaRequestDriver().post(query, ConfigurationHttpRequest(url = DataTestFactory.url_endpoint))
-        .onComplete {
-          case Success(qr) => {
+        .map( qr => {
             assert(qr.json("results")("bindings").arr(0)("b")("value").value=="bb")
             assert(qr.json("results")("bindings").arr(0)("c")("value").value=="cc")
-          }
-          case Failure(e) => {
-            error(e.getMessage())
-            assert(false)
-          }
-        }
+          })
     }
+
 
     test("post bad request") {
       //NOSONAR
       JenaRequestDriver().post("bad request", ConfigurationHttpRequest(url = DataTestFactory.url_endpoint))
-        .onComplete {
-          case Success(_) => {
+        .map( _ => {
             assert(false)
-          }
-          case Failure(_) => {
-            assert(true)
-          }
-        }
+        }).recover( _ => assert(true))
     }
+
     test("post malformed endpoint") {
       //NOSONAR
       JenaRequestDriver().post(query, ConfigurationHttpRequest(url = "bidon"))

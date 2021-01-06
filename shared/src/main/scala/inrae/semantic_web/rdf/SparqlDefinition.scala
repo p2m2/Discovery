@@ -132,6 +132,10 @@ case class Literal(var value : String,var datatype : URI = URI.empty,var tag : S
 
 object Literal {
   implicit def fromString(s: String): Literal = Literal(s)
+  implicit def fromString(s: Int): Literal = Literal(s.toString,URI("integer","xsd"))
+  implicit def fromString(s: Boolean): Literal = Literal(s.toString,URI("boolean","xsd"))
+  implicit def fromString(s: Double): Literal = Literal(s.toString,URI("double","xsd"))
+  implicit def fromString(s: Float): Literal = Literal(s.toString,URI("float","xsd"))
 }
 
 @JSExportTopLevel(name="QueryVariable")

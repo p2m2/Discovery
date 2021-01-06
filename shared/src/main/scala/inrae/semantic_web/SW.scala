@@ -39,6 +39,7 @@ case class SW(var config: StatementConfiguration)
   this.prefix("owl",IRI("http://www.w3.org/2002/07/owl#"))
   this.prefix("rdf",IRI("http://www.w3.org/1999/02/22-rdf-syntax-ns#"))
   this.prefix("rdfs",IRI("http://www.w3.org/2000/01/rdf-schema#"))
+  this.prefix("xsd",IRI("http://www.w3.org/2001/XMLSchema#"))
 
   class FilterIncrement() {
     var negation = false
@@ -55,7 +56,16 @@ case class SW(var config: StatementConfiguration)
 
     /* strings */
     def contains( string : String ) : SW = manageFilter(Contains(string,this.negation),false)
+    def strStarts( string : String ) : SW = manageFilter(StrStarts(string,this.negation),false)
+    def strEnds( string : String ) : SW = manageFilter(StrEnds(string,this.negation),false)
 
+    /* numeric */
+    def equal( value : Literal ) : SW = manageFilter(Equal(value,this.negation),false)
+    def notEqual( value : Literal ) : SW = manageFilter(NotEqual(value,this.negation),false)
+    def inf( value : Literal ) : SW = manageFilter(Inf(value,this.negation),false)
+    def infEqual( value : Literal ) : SW = manageFilter(InfEqual(value,this.negation),false)
+    def sup( value : Literal ) : SW = manageFilter(Sup(value,this.negation),false)
+    def supEqual( value : Literal ) : SW = manageFilter(SupEqual(value,this.negation),false)
 
     def not : FilterIncrement = { this.negation = !this.negation ; this }
   }

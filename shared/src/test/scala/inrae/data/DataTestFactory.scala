@@ -6,8 +6,10 @@ import fr.hmil.roshttp.exceptions.HttpException
 import fr.hmil.roshttp.response.SimpleHttpResponse
 import inrae.semantic_web.StatementConfiguration
 import wvlet.log.Logger.rootLogger.{debug, error, info}
+import scala.concurrent.duration._
 
 import java.io.IOException
+import scala.concurrent.Await
 import scala.util.{Failure, Success}
 
 final case class DataTestFactoryException(private val message: String = "",
@@ -18,8 +20,10 @@ object DataTestFactory  {
 
   val url_endpoint = "http://localhost:8890/sparql"
 
+  val timeout = 30.seconds
 
   def put(stringQuery : String, url_endpoint : String) = {
+
     HttpRequest(url_endpoint)
       //  .withHeader("Authorization", "Basic " + Base64.getEncoder.encodeToString("dba:dba".getBytes))
       .withMethod(POST)
@@ -42,7 +46,7 @@ object DataTestFactory  {
                      graph: String,
                      url_endpoint : String=url_endpoint) = {
 
-    put(s"""
+    Await.result(put(s"""
         PREFIX owl: <http://www.w3.org/2002/07/owl#>
         PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
         PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -54,12 +58,9 @@ object DataTestFactory  {
                 ${data}
               }
           }
-        """.stripMargin,url_endpoint).onComplete({
-      case Success(_) => {
-        debug(s"${graph} is loaded !")
-      }
-      case Failure(_) => throw new Error(s"Can not load graph :${graph}")
-    })
+        """.stripMargin,url_endpoint)
+      .map( r => debug(s"${graph} is loaded !"))
+      .recover( _ =>  { throw new Error(s"Can not load graph :${graph}") } ), timeout )
   }
 
   def insert_virtuoso1(data : String,
@@ -72,7 +73,7 @@ object DataTestFactory  {
 
   private def delete(graph: String,
                      url_endpoint : String=url_endpoint) = {
-    put(s"DROP SILENT GRAPH <${graph}>",url_endpoint)
+    Await.result(put(s"DROP SILENT GRAPH <${graph}>",url_endpoint), timeout )
 
   }
 
@@ -95,7 +96,7 @@ object DataTestFactory  {
            "mimetype" : "json"
          }],
          "settings" : {
-            "logLevel" : "info",
+            "logLevel" : "off",
             "sizeBatchProcessing" : 100
           }
          }
@@ -114,7 +115,7 @@ object DataTestFactory  {
            "mimetype" : "json"
          }],
          "settings" : {
-            "logLevel" : "info",
+            "logLevel" : "off",
             "sizeBatchProcessing" : 100
           }
          }

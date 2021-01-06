@@ -3,13 +3,14 @@ package inrae.semantic_web
 import inrae.data.DataTestFactory
 import inrae.semantic_web.rdf._
 import utest._
-import wvlet.log.Logger.rootLogger.error
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.language.postfixOps
 import scala.util.{Failure, Success}
 
 object SWSubscribeEventTest extends TestSuite {
+
+  DataTestFactory.delete_virtuoso1(this.getClass.getSimpleName)
 
   DataTestFactory.insert_virtuoso1(
     """
@@ -34,7 +35,7 @@ object SWSubscribeEventTest extends TestSuite {
       stepDiscovery = stepDiscovery + (event -> true)
     }
 
-    var sw = SW(config)
+    val sw = SW(config)
     sw.subscribe("myfun", funsub)
     if (unsubscribe)
       sw.unsubscribe("myfun")

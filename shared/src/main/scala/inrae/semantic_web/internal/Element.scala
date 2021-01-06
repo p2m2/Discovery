@@ -162,6 +162,7 @@ class FilterNode(val negation: Boolean) extends Node {
     case _ => false
   }
 }
+
 case class isBlank(override val negation: Boolean) extends FilterNode(negation) {
   override def toString() : String = negation.toString() + " isBlank"
 }
@@ -178,8 +179,36 @@ case class Contains(value :String,override val negation: Boolean)  extends Filte
   override def toString() : String =  negation.toString() + " Contains ("+value+")"
 }
 
-case class Equal(value :String,override val negation: Boolean)  extends FilterNode(negation) {
-  override def toString() : String = negation.toString() + " Equal ("+value+")"
+case class StrStarts(value :String,override val negation: Boolean)  extends FilterNode(negation) {
+  override def toString() : String =  negation.toString() + " Strstarts ("+value+")"
+}
+
+case class StrEnds(value :String,override val negation: Boolean)  extends FilterNode(negation) {
+  override def toString() : String =  negation.toString() + " Strends ("+value+")"
+}
+
+case class Equal(value :Literal,override val negation: Boolean)  extends FilterNode(negation) {
+  override def toString() : String = negation.toString() + " == "+value
+}
+
+case class NotEqual(value :Literal,override val negation: Boolean)  extends FilterNode(negation) {
+  override def toString() : String = negation.toString() + " == "+value
+}
+
+case class Inf(value :Literal,override val negation: Boolean)  extends FilterNode(negation) {
+  override def toString() : String = negation.toString() + " < "+value
+}
+
+case class InfEqual(value :Literal,override val negation: Boolean)  extends FilterNode(negation) {
+  override def toString() : String = negation.toString() + " <= "+value
+}
+
+case class Sup(value :Literal,override val negation: Boolean)  extends FilterNode(negation) {
+  override def toString() : String = negation.toString() + " > "+value
+}
+
+case class SupEqual(value :Literal,override val negation: Boolean)  extends FilterNode(negation) {
+  override def toString() : String = negation.toString() + " >= "+value
 }
 
 /* Datatype Node */

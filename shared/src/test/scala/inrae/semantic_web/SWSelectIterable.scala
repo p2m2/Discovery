@@ -12,6 +12,8 @@ import scala.concurrent.Future
 
 object SWSelectIterable extends TestSuite {
 
+  DataTestFactory.delete_virtuoso1(this.getClass.getSimpleName)
+
   val data = """
       <aa> <bb> 1 .
       <aa> <bb> 2 .

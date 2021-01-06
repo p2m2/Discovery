@@ -168,35 +168,105 @@ object SparqlGeneratorTest extends TestSuite {
       assert(v.trim().split(" ").toList == List("FILTER","(","isLiteral(?nothingSire)",")"))
     }
 
-    test("sparqlNode isURI neg") {
-      val v = SparqlGenerator.sparqlNode(isURI(true),Map(),"nothingSire","nothingVar")
-      assert(v.trim().split(" ").toList == List("FILTER","(","!isURI(?nothingSire)",")"))
-    }
 
     test("sparqlNode isURI") {
       val v = SparqlGenerator.sparqlNode(isURI(false),Map(),"nothingSire","nothingVar")
       assert(v.trim().split(" ").toList == List("FILTER","(","isURI(?nothingSire)",")"))
     }
 
-    test("sparqlNode Contains neg") {
-      val v = SparqlGenerator.sparqlNode(Contains("h",true),Map(),"nothingSire","nothingVar")
-      assert(v.trim().split(" ").toList == List("FILTER","(","!contains(str(?nothingSire),\"h\")",")"))
+    test("sparqlNode isURI neg") {
+      val v = SparqlGenerator.sparqlNode(isURI(true),Map(),"nothingSire","nothingVar")
+      assert(v.trim().split(" ").toList == List("FILTER","(","!isURI(?nothingSire)",")"))
     }
+
     test("sparqlNode Contains") {
 
       val v = SparqlGenerator.sparqlNode(Contains("h",false),Map(),"nothingSire","nothingVar")
       assert(v.trim().split(" ").toList == List("FILTER","(","contains(str(?nothingSire),\"h\")",")"))
     }
 
-    test("sparqlNode Equal neg") {
-      val v = SparqlGenerator.sparqlNode(Equal("h",true),Map(),"nothingSire","nothingVar")
-      assert(v.trim().split(" ").toList == List("FILTER","(","!(str(?nothingSire)==\"h\")",")"))
+    test("sparqlNode Contains neg") {
+      val v = SparqlGenerator.sparqlNode(Contains("h",true),Map(),"nothingSire","nothingVar")
+      assert(v.trim().split(" ").toList == List("FILTER","(","!contains(str(?nothingSire),\"h\")",")"))
+    }
+
+    test("sparqlNode StrStarts") {
+
+      val v = SparqlGenerator.sparqlNode(StrStarts("h",false),Map(),"nothingSire","nothingVar")
+      assert(v.trim().split(" ").toList == List("FILTER","(","strStarts(str(?nothingSire),\"h\")",")"))
+    }
+
+    test("sparqlNode StrEnds") {
+
+      val v = SparqlGenerator.sparqlNode(StrEnds("h",false),Map(),"nothingSire","nothingVar")
+      assert(v.trim().split(" ").toList == List("FILTER","(","strEnds(str(?nothingSire),\"h\")",")"))
     }
 
     test("sparqlNode Equal") {
       val v = SparqlGenerator.sparqlNode(Equal("h",false),Map(),"nothingSire","nothingVar")
-      assert(v.trim().split(" ").toList == List("FILTER","(","(str(?nothingSire)==\"h\")",")"))
+      assert(v.trim().split(" ").toList == List("FILTER","(","(?nothingSire=\"h\")",")"))
     }
+
+    test("sparqlNode Equal neg") {
+      val v = SparqlGenerator.sparqlNode(Equal("h",true),Map(),"nothingSire","nothingVar")
+      assert(v.trim().split(" ").toList == List("FILTER","(","!(?nothingSire=\"h\")",")"))
+    }
+
+    test("sparqlNode NotEqual") {
+      val v = SparqlGenerator.sparqlNode(NotEqual("h",false),Map(),"nothingSire","nothingVar")
+      assert(v.trim().split(" ").toList == List("FILTER","(","(?nothingSire!=\"h\")",")"))
+    }
+
+    test("sparqlNode NotEqual neg") {
+      val v = SparqlGenerator.sparqlNode(NotEqual("h",true),Map(),"nothingSire","nothingVar")
+      assert(v.trim().split(" ").toList == List("FILTER","(","!(?nothingSire!=\"h\")",")"))
+    }
+
+    test("sparqlNode Inf") {
+      val v = SparqlGenerator.sparqlNode(Inf(0.5,false),Map(),"nothingSire","nothingVar")
+      assert(v.trim().split(" ").toList == List("FILTER","(","(?nothingSire<\"0.5\"^^xsd:double)",")"))
+    }
+
+    test("sparqlNode Inf with Literal without type ") {
+      val v = SparqlGenerator.sparqlNode(Inf(Literal("0.5"),false),Map(),"nothingSire","nothingVar")
+      assert(v.trim().split(" ").toList == List("FILTER","(","(?nothingSire<\"0.5\")",")"))
+    }
+
+    test("sparqlNode InfEqual neg") {
+      val v = SparqlGenerator.sparqlNode(Inf(0.5,true),Map(),"nothingSire","nothingVar")
+      assert(v.trim().split(" ").toList == List("FILTER","(","!(?nothingSire<\"0.5\"^^xsd:double)",")"))
+    }
+
+    test("sparqlNode InfEqual") {
+      val v = SparqlGenerator.sparqlNode(InfEqual(0.5,false),Map(),"nothingSire","nothingVar")
+      assert(v.trim().split(" ").toList == List("FILTER","(","(?nothingSire<=\"0.5\"^^xsd:double)",")"))
+    }
+
+    test("sparqlNode InfEqual neg") {
+      val v = SparqlGenerator.sparqlNode(InfEqual(0.5,true),Map(),"nothingSire","nothingVar")
+      assert(v.trim().split(" ").toList == List("FILTER","(","!(?nothingSire<=\"0.5\"^^xsd:double)",")"))
+    }
+
+    test("sparqlNode Sup") {
+      val v = SparqlGenerator.sparqlNode(Sup(0.5,false),Map(),"nothingSire","nothingVar")
+      assert(v.trim().split(" ").toList == List("FILTER","(","(?nothingSire>\"0.5\"^^xsd:double)",")"))
+    }
+
+    test("sparqlNode Sup neg") {
+      val v = SparqlGenerator.sparqlNode(Sup(0.5,true),Map(),"nothingSire","nothingVar")
+      assert(v.trim().split(" ").toList == List("FILTER","(","!(?nothingSire>\"0.5\"^^xsd:double)",")"))
+    }
+
+    test("sparqlNode SupEqual") {
+      val v = SparqlGenerator.sparqlNode(SupEqual(0.5,false),Map(),"nothingSire","nothingVar")
+      assert(v.trim().split(" ").toList == List("FILTER","(","(?nothingSire>=\"0.5\"^^xsd:double)",")"))
+    }
+
+    test("sparqlNode SupEqual neg") {
+      val v = SparqlGenerator.sparqlNode(SupEqual(0.5,true),Map(),"nothingSire","nothingVar")
+      assert(v.trim().split(" ").toList == List("FILTER","(","!(?nothingSire>=\"0.5\"^^xsd:double)",")"))
+    }
+
 
     test("sparqlNode DatatypeNode") {
       Try(SparqlGenerator.sparqlNode(DatatypeNode("h", SubjectOf("1234", URI("something_property"))), Map(),

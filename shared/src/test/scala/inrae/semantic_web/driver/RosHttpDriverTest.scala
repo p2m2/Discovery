@@ -12,16 +12,13 @@ import wvlet.log.{LogLevel, Logger}
 
 object RosHttpDriverTest extends TestSuite {
 
- // DataTestFactory.delete_virtuoso1(this.getClass.getSimpleName)
+  DataTestFactory.delete_virtuoso1(this.getClass.getSimpleName)
 
   DataTestFactory.insert_virtuoso1(
     """
       <aaRosHttpDriverTest> <bb> <cc> .
       """.stripMargin, this.getClass.getSimpleName)
 
-  override def utestAfterAll(): Unit = {
-    DataTestFactory.delete_virtuoso1(this.getClass.getSimpleName)
-  }
 
   Logger.setDefaultLogLevel(LogLevel.OFF)
   val query = "select ?b ?c where { <aaRosHttpDriverTest> ?b ?c . } limit 1"
