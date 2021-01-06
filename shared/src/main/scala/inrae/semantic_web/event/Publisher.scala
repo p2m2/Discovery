@@ -17,7 +17,7 @@ trait Publisher[Event] {
 
   /**
    * RAJOUTER la methode subscribe(sub: Sub, FILTER (event => bool )):
-   * je l avais enlever ...pas bien etc etait pour filter sur les objets (subscriber) qui
+   * pour filter sur les objets (subscriber) qui
    * avait souscrit au publisher sur un event precis !!!!
    *
    * voir la classe publisher de scala 1.2
@@ -33,10 +33,5 @@ trait Publisher[Event] {
     filters.foreach(sub =>
       if (!suspended.contains(sub) )  sub.notify(self, event)
     )
-  }
-
-  override def equals(obj: Any): Boolean = obj match {
-    case that: Publisher[_] => filters == that.filters && suspended == that.suspended
-    case _                  => false
   }
 }

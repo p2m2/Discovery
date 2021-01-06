@@ -19,39 +19,55 @@ object SWSubscribeEventTest extends TestSuite {
 
   val config: StatementConfiguration = DataTestFactory.getConfigVirtuoso1()
 
+  def stepDiscoveryExecutor(unsubscribe : Boolean = false) = {
+    var stepDiscovery : Map[String,Boolean] = Map(
+      "QUERY_BUILD" -> false,
+      "DATATYPE_BUILD" -> false,
+      "DATATYPE_DONE" -> false,
+      "START_HTTP_REQUEST" -> false,
+      "PROCESS_HTTP_REQUEST" -> false,
+      "FINISHED_HTTP_REQUEST" -> false,
+      "RESULTS_BUILD" -> false,
+      "RESULTS_DONE"-> false)
 
+    def funsub( event: String ) =  {
+      stepDiscovery = stepDiscovery + (event -> true)
+    }
+
+    var sw = SW(config)
+    sw.subscribe("myfun", funsub)
+    if (unsubscribe)
+      sw.unsubscribe("myfun")
+
+    sw.something("h1")
+      .isSubjectOf(URI("bb"))
+
+      .select(List("h1"))
+      .onComplete {
+        case Success(_) => {
+          if (unsubscribe)
+            assert(stepDiscovery.forall( x => ! x._2))
+          else
+            assert(stepDiscovery.forall( x => x._2))
+        }
+        case Failure(_) => {
+          assert(false)
+        }
+      }
+  }
 
   def tests = Tests {
     test("DiscoveryRequestEvent steps") {
-      var stepDiscovery : Map[String,Boolean] = Map(
-        "QUERY_BUILD" -> false,
-        "DATATYPE_BUILD" -> false,
-        "DATATYPE_DONE" -> false,
-        "START_HTTP_REQUEST" -> false,
-        "PROCESS_HTTP_REQUEST" -> false,
-        "FINISHED_HTTP_REQUEST" -> false,
-        "RESULTS_BUILD" -> false,
-        "RESULTS_DONE"-> false)
+      stepDiscoveryExecutor(false)
+    }
 
-      def funsub( event: String ) =  {
-        stepDiscovery = stepDiscovery + (event -> true)
-      }
+    test("unsubscribe") {
+      stepDiscoveryExecutor(true)
+    }
 
+    test("unsubscribe unknown id") {
       var sw = SW(config)
-      sw.subscribe("myfun", funsub)
-
-        sw.something("h1")
-          .isSubjectOf(URI("bb"))
-
-        .select(List("h1"))
-        .onComplete {
-          case Success(_) => {
-            assert(stepDiscovery.forall( x => x._2))
-          }
-          case Failure(_) => {
-            assert(false)
-          }
-        }
+      sw.unsubscribe("myfun")
     }
 
     test("DiscoveryRequestEvent ERROR_HTTP_REQUEST") {
@@ -84,5 +100,7 @@ object SWSubscribeEventTest extends TestSuite {
           }
         }
     }
+
+
   }
 }
