@@ -3,11 +3,9 @@ package inrae.semantic_web
 import inrae.data.DataTestFactory
 import inrae.semantic_web.rdf._
 import utest._
-import wvlet.log.Logger.rootLogger.error
 
-import scala.language.postfixOps
-import scala.util.{Failure, Success}
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.language.postfixOps
 
 object SWTest extends TestSuite {
 
@@ -23,6 +21,9 @@ object SWTest extends TestSuite {
 
       <aa2> a <LeafType> .
       <aa2> a <OwlClass> .
+
+
+      <aa3> <propDatatype> "test" .
 
       <OwlClass> a owl:Class .
       """.stripMargin, this.getClass.getSimpleName)
@@ -74,6 +75,20 @@ object SWTest extends TestSuite {
           assert(result("results")("bindings").arr.length == 1)
           assert(SparqlBuilder.createUri(result("results")("bindings")(0)("var")).localName == "cc")
         })
+    }
+
+    test("datatype") {
+      SW(config).something("h1")
+        .set(URI("aa3"))
+        .datatype(URI("propDatatype"),"d")
+        .select(List("d"))
+        .commit()
+        .raw
+        .map(
+          response => {
+            assert(response("results")("datatypes")("d")("aa3")(0)("value").toString().length >0)
+          }
+        )
     }
 
     test("count") {
