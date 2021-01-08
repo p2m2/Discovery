@@ -29,9 +29,8 @@ object SWAbortRequestTest extends TestSuite {
           .select(List("h1","h2","h3"))
 
       swr.abort()
-      println(swr.progression)
-      println(swr.requestEvent)
-      assert(swr.requestEvent == "ABORTED_BY_THE_USER")
+
+      assert(swr.currentRequestEvent == "ABORTED_BY_THE_USER")
 
       swr
         .raw
