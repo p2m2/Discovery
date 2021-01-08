@@ -44,7 +44,7 @@ lazy val discovery=crossProject(JSPlatform, JVMPlatform).in(file("."))
     testFrameworks += new TestFramework("utest.runner.Framework"),
     scalacOptions ++= Seq("-deprecation", "-feature"),
     classLoaderLayeringStrategy := ClassLoaderLayeringStrategy.AllLibraryJars,
-    coverageMinimum := 47,
+    coverageMinimum := 70,
     coverageFailOnMinimum := false,
     coverageHighlighting := true,
     // release ->  https://oss.sonatype.org/service/local/staging/deploy/maven2
