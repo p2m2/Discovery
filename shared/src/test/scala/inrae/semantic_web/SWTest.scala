@@ -3,11 +3,9 @@ package inrae.semantic_web
 import inrae.data.DataTestFactory
 import inrae.semantic_web.rdf._
 import utest._
-import wvlet.log.Logger.rootLogger.error
 
-import scala.language.postfixOps
-import scala.util.{Failure, Success}
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.language.postfixOps
 
 object SWTest extends TestSuite {
 
@@ -23,6 +21,9 @@ object SWTest extends TestSuite {
 
       <aa2> a <LeafType> .
       <aa2> a <OwlClass> .
+
+
+      <aa3> <propDatatype> "test" .
 
       <OwlClass> a owl:Class .
       """.stripMargin, this.getClass.getSimpleName)
@@ -47,27 +48,18 @@ object SWTest extends TestSuite {
       config.setConfigString(""" { "sources" : [] } """)
       SW(config).something("h1")
         .select(List("h1"))
-        .onComplete {
-          case Success(_) => {
-            assert(false)
-          }
-          case Failure(_) => {
-            assert(true)
-          }
-        }
+        .commit()
+        .raw
+        .map(_ => assert(false))
+        .recover((_) => assert(true))
     }
 
     test("something") {
       SW(config).something("h1")
         .select(List("h1"))
-        .onComplete {
-          case Success(_) => {
-            assert(true)
-          }
-          case Failure(_) => {
-            assert(false)
-          }
-        }
+        .commit()
+        .raw
+        .map(_ => assert(true))
     }
 
     test("isSubjectOf") {
@@ -77,16 +69,26 @@ object SWTest extends TestSuite {
         .set(URI("aa"))
         .isSubjectOf(URI("bb"), "var")
         .select(List("var"))
-        .onComplete {
-          case Success(result) => {
-            assert(result("results")("bindings").arr.length == 1)
-            assert(SparqlBuilder.createUri(result("results")("bindings")(0)("var")).localName == "cc")
+        .commit()
+        .raw
+        .map(result => {
+          assert(result("results")("bindings").arr.length == 1)
+          assert(SparqlBuilder.createUri(result("results")("bindings")(0)("var")).localName == "cc")
+        })
+    }
+
+    test("datatype") {
+      SW(config).something("h1")
+        .set(URI("aa3"))
+        .datatype(URI("propDatatype"),"d")
+        .select(List("d"))
+        .commit()
+        .raw
+        .map(
+          response => {
+            assert(response("results")("datatypes")("d")("aa3")(0)("value").toString().length >0)
           }
-          case Failure(exception) => {
-            error(exception)
-            assert(false)
-          }
-        }
+        )
     }
 
     test("count") {
@@ -95,15 +97,7 @@ object SWTest extends TestSuite {
         .something("h1") //http://rdf.ebi.ac.uk/terms/chembl#BioComponent
         .isSubjectOf(URI("bb2"))
         .count()
-        .onComplete {
-          case Success(count) => {
-            assert(count == 2)
-          }
-          case Failure(exception) => {
-            error(exception)
-            assert(false)
-          }
-        }
+        .map(count => assert(count == 2))
     }
 
     test("findClasses") {
@@ -112,15 +106,7 @@ object SWTest extends TestSuite {
         .something("h1")
         .set(URI("aa1"))
         .findClasses()
-        .onComplete {
-          case Success(types) => {
-            assert(types.length == 1)
-            assert(true)
-          }
-          case Failure(exception) => {
-            error(exception);
-            assert(false) }
-        }
+        .map(types => assert(types.length == 1))
     }
 
     test("findClasses with mother class -> owl:Class") {
@@ -128,16 +114,8 @@ object SWTest extends TestSuite {
         .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
         .something("h1")
         .set(URI("aa2"))
-        .findClasses(URI("Class","owl"))
-        .onComplete {
-          case Success(types) => {
-            assert(types.length == 1)
-          }
-          case Failure(exception) => {
-            error(exception);
-            assert(false)
-          }
-        }
+        .findClasses(URI("Class", "owl"))
+        .map(types => assert(types.length == 1))
     }
 
 
@@ -145,31 +123,14 @@ object SWTest extends TestSuite {
       SW(config).something("h1")
         .set(URI("aa"))
         .findObjectProperties()
-        .onComplete {
-          case Success(response) => {
-            assert(response.length == 2)
-          }
-          case Failure(exception) => {
-            error(exception)
-            assert(false)
-          }
-        }
+        .map(response => assert(response.length == 2))
     }
 
     test("findObjectProperties mother class --> owl:ObjectProperty ") {
       SW(config).something("h1")
         .set(URI("aa"))
         .findObjectProperties(URI("ObjectProperty", "owl"))
-        .onComplete {
-          case Success(response) => {
-            assert(response.length == 1)
-            assert(true)
-          }
-          case Failure(exception) => {
-            error(exception)
-            assert(false)
-          }
-        }
+        .map(response => assert(response.length == 1))
     }
   }
 }

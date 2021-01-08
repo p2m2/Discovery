@@ -53,6 +53,8 @@ object SWFilterTest extends TestSuite {
         .isSubjectOf(QueryVariable("prop"))
         .filter.isLiteral
         .select(List("prop"))
+        .commit()
+        .raw
         .map(result => {
           assert(result("results")("bindings").arr.length == 5)
         })
@@ -65,6 +67,8 @@ object SWFilterTest extends TestSuite {
         .isSubjectOf(QueryVariable("prop"))
         .filter.isUri
         .select(List("prop"))
+        .commit()
+        .raw
         .map(result => {
             assert(result("results")("bindings").arr.length == 1)
             assert(SparqlBuilder.createUri(result("results")("bindings")(0)("prop")).localName == "propUri")
@@ -78,6 +82,8 @@ object SWFilterTest extends TestSuite {
         .isSubjectOf(QueryVariable("prop"))
         .filter.isBlank
         .select(List("prop"))
+        .commit()
+        .raw
         .map(result => {
             assert(result("results")("bindings").arr.length == 1)
             assert(SparqlBuilder.createUri(result("results")("bindings")(0)("prop")).localName == "propBlank")
@@ -91,6 +97,8 @@ object SWFilterTest extends TestSuite {
         .isSubjectOf(QueryVariable("prop"))
         .filter.contains("regex_expected")
         .select(List("prop"))
+        .commit()
+        .raw
         .map(result => {
           assert(result("results")("bindings").arr.length == 1)
           assert(SparqlBuilder.createUri(result("results")("bindings")(0)("prop")).localName == "propContains")
@@ -104,6 +112,8 @@ object SWFilterTest extends TestSuite {
         .isSubjectOf(QueryVariable("prop"))
         .filter.strStarts("tes")
         .select(List("prop"))
+        .commit()
+        .raw
         .map(result => {
           assert(result("results")("bindings").arr.length == 1)
           assert(SparqlBuilder.createUri(result("results")("bindings")(0)("prop")).localName == "propLiteral")
@@ -117,6 +127,8 @@ object SWFilterTest extends TestSuite {
         .isSubjectOf(QueryVariable("prop"))
         .filter.strEnds("est")
         .select(List("prop"))
+        .commit()
+        .raw
         .map(result => {
           assert(result("results")("bindings").arr.length == 1)
           assert(SparqlBuilder.createUri(result("results")("bindings")(0)("prop")).localName == "propLiteral")
@@ -130,6 +142,8 @@ object SWFilterTest extends TestSuite {
         .isSubjectOf(QueryVariable("prop"),"value")
         .filter.equal("test")
         .select(List("prop"))
+        .commit()
+        .raw
         .map(result => {
           assert(result("results")("bindings").arr.length == 1)
           assert(SparqlBuilder.createUri(result("results")("bindings")(0)("prop")).localName == "propLiteral")
@@ -143,6 +157,8 @@ object SWFilterTest extends TestSuite {
         .isSubjectOf(QueryVariable("prop"),"v")
         .filter.notEqual("test")
         .select(List("value"))
+        .commit()
+        .raw
         .map(result => {
           assert(result("results")("bindings").arr.map( v => v("v")("value").value ).filter( _ == "test").length == 0)
         })
@@ -155,6 +171,8 @@ object SWFilterTest extends TestSuite {
         .isSubjectOf(URI("propNum"),"value")
         .filter.inf(5)
         .select(List("value"))
+        .commit()
+        .raw
         .map(result => {
           assert(result("results")("bindings").arr.length == 4)
         })
@@ -167,6 +185,8 @@ object SWFilterTest extends TestSuite {
         .isSubjectOf(URI("propDate"),"value")
         .filter.inf(Literal("1900-01-01",URI("date","xsd")))
         .select(List("value"))
+        .commit()
+        .raw
         .map(result => {
           assert(result("results")("bindings").arr.length == 1)
         })
@@ -179,6 +199,8 @@ object SWFilterTest extends TestSuite {
         .isSubjectOf(URI("propNum"),"value")
         .filter.infEqual(5)
         .select(List("value"))
+        .commit()
+        .raw
         .map(result => {
           assert(result("results")("bindings").arr.length == 5)
         })
@@ -191,6 +213,8 @@ object SWFilterTest extends TestSuite {
         .isSubjectOf(URI("propNum"),"value")
         .filter.sup(5)
         .select(List("value"))
+        .commit()
+        .raw
         .map(result => {
           assert(result("results")("bindings").arr.length == 7)
         })
@@ -203,6 +227,8 @@ object SWFilterTest extends TestSuite {
         .isSubjectOf(URI("propNum"),"value")
         .filter.supEqual(5)
         .select(List("value"))
+        .commit()
+        .raw
         .map(result => {
           assert(result("results")("bindings").arr.length == 8)
         })

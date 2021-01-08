@@ -16,7 +16,6 @@ import scala.concurrent.Future
 @EnableReflectiveInstantiation
 case class RosHTTPDriver() extends HttpRequestDriver {
 
-
   def post(query: String, config: ConfigurationHttpRequest): Future[QueryResult] = {
     publish(DiscoveryRequestEvent(DiscoveryStateRequestEvent.PROCESS_HTTP_REQUEST))
 

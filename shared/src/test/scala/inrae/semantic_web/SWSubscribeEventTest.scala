@@ -31,44 +31,42 @@ object SWSubscribeEventTest extends TestSuite {
       "RESULTS_BUILD" -> false,
       "RESULTS_DONE"-> false)
 
-    def funsub( event: String ) =  {
+    def funEvent( event: String ) =  {
       stepDiscovery = stepDiscovery + (event -> true)
     }
 
+    def funProg( percent: Double ) =  {
+      assert(percent <=1)
+      assert(percent >=0)
+    }
+
     val sw = SW(config)
-    sw.subscribe("myfun", funsub)
-    if (unsubscribe)
-      sw.unsubscribe("myfun")
 
-    sw.something("h1")
+    val swr = sw.something("h1")
       .isSubjectOf(URI("bb"))
-
       .select(List("h1"))
-      .onComplete {
-        case Success(_) => {
+
+    if(! unsubscribe) {
+      swr.requestEvent(funEvent)
+      swr.progression(funProg)
+    }
+    swr.commit().raw.map(_ => {
+          assert(swr.currentRequestEvent == "REQUEST_DONE")
           if (unsubscribe)
             assert(stepDiscovery.forall( x => ! x._2))
           else
             assert(stepDiscovery.forall( x => x._2))
-        }
-        case Failure(_) => {
-          assert(false)
-        }
-      }
-  }
+        })
+    }
 
   def tests = Tests {
+
     test("DiscoveryRequestEvent steps") {
       stepDiscoveryExecutor(false)
     }
 
     test("unsubscribe") {
       stepDiscoveryExecutor(true)
-    }
-
-    test("unsubscribe unknown id") {
-      var sw = SW(config)
-      sw.unsubscribe("myfun")
     }
 
     test("DiscoveryRequestEvent ERROR_HTTP_REQUEST") {
@@ -87,21 +85,14 @@ object SWSubscribeEventTest extends TestSuite {
         "ERROR_HTTP_REQUEST" -> false
       )
 
-      var sw = SW(config)
-      sw.subscribe("myfun", (s => { stepDiscovery = stepDiscovery + (s -> true) }))
-      sw.something("h1")
+      var swr =
+        SW(config).something("h1")
         .isSubjectOf(URI("bb"))
         .select(List("h1"))
-        .onComplete {
-          case Success(_) => {
-            assert(false)
-          }
-          case Failure(_) => {
-            assert(stepDiscovery("ERROR_HTTP_REQUEST"))
-          }
-        }
+
+      swr.commit().raw.map( _=> assert(false))
+        .recover( _ => {
+          assert(swr.currentRequestEvent == "ERROR_HTTP_REQUEST") } )
     }
-
-
   }
 }

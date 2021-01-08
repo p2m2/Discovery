@@ -1,10 +1,9 @@
 package inrae.semantic_web
 import inrae.semantic_web.event.{DiscoveryRequestEvent, DiscoveryStateRequestEvent, Publisher, Subscriber}
-import wvlet.log.Logger.rootLogger._
 import inrae.semantic_web.internal._
 import inrae.semantic_web.rdf._
-import inrae.semantic_web.sparql.{QueryResult, _}
-import inrae.semantic_web.sparql.QueryRunner
+import inrae.semantic_web.sparql.{QueryResult, QueryRunner}
+import wvlet.log.Logger.rootLogger._
 
 import scala.concurrent.{Future, Promise}
 import scala.util._
@@ -179,6 +178,8 @@ case class QueryManager(config : StatementConfiguration)
           .setList(lSubUris.map(_ match { case uri: URI => uri }))
           .setupnode(datatypeNode.property, false, false)
           .select(List("val_uri", labelProperty))
+          .commit()
+          .raw
           .map(json => {
             qr.setDatatype(labelProperty, json("results")("bindings").arr.map(rec => {
               rec("val_uri")("value").value.toString -> rec(labelProperty)
