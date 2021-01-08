@@ -8,6 +8,6 @@ import scala.scalajs.js.annotation.JSExportTopLevel
  * @param wrp
  */
 @JSExportTopLevel(name="LazyFutureJsonValue")
-case class LazyFutureSwResults(wrp : () => SWResults) {
+case class LazyFutureSwResults(wrp : () => SWTransaction) {
   lazy val wrapped = wrp()
 }

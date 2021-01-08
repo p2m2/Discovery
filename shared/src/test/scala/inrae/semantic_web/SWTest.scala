@@ -47,6 +47,7 @@ object SWTest extends TestSuite {
       config.setConfigString(""" { "sources" : [] } """)
       SW(config).something("h1")
         .select(List("h1"))
+        .commit()
         .raw
         .map(_ => assert(false))
         .recover((_) => assert(true))
@@ -55,6 +56,7 @@ object SWTest extends TestSuite {
     test("something") {
       SW(config).something("h1")
         .select(List("h1"))
+        .commit()
         .raw
         .map(_ => assert(true))
     }
@@ -66,6 +68,7 @@ object SWTest extends TestSuite {
         .set(URI("aa"))
         .isSubjectOf(URI("bb"), "var")
         .select(List("var"))
+        .commit()
         .raw
         .map(result => {
           assert(result("results")("bindings").arr.length == 1)

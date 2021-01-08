@@ -32,12 +32,12 @@ object SWSubscribeEventTest extends TestSuite {
       "RESULTS_DONE"-> false)
 
     def funEvent( event: String ) =  {
-      println(event)
       stepDiscovery = stepDiscovery + (event -> true)
     }
 
     def funProg( percent: Double ) =  {
-      println(percent)
+      assert(percent <=1)
+      assert(percent >=0)
     }
 
     val sw = SW(config)
@@ -46,13 +46,12 @@ object SWSubscribeEventTest extends TestSuite {
       .isSubjectOf(URI("bb"))
       .select(List("h1"))
 
-    if(unsubscribe) {
+    if(! unsubscribe) {
       swr.requestEvent(funEvent)
       swr.progression(funProg)
     }
-    swr.raw.map(_ => {
+    swr.commit().raw.map(_ => {
           assert(swr.currentRequestEvent == "REQUEST_DONE")
-      println(stepDiscovery)
           if (unsubscribe)
             assert(stepDiscovery.forall( x => ! x._2))
           else
@@ -91,7 +90,7 @@ object SWSubscribeEventTest extends TestSuite {
         .isSubjectOf(URI("bb"))
         .select(List("h1"))
 
-      swr.raw.map( _=> assert(false))
+      swr.commit().raw.map( _=> assert(false))
         .recover( _ => {
           assert(swr.currentRequestEvent == "ERROR_HTTP_REQUEST") } )
     }

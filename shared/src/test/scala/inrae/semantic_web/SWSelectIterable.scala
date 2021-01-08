@@ -74,7 +74,7 @@ object SWSelectIterable extends TestSuite {
           case Success((nb,results)) => {
             assert(nb == nblock)
             val listR = Future.sequence((0 to nblock-1).map( iblock => {
-              results(iblock).wrapped.raw.map({
+              results(iblock).wrapped.commit().raw.map({
                 r => {
                   assert(r("results")("bindings").arr.length<=pageSize)
                   r("results")("bindings").arr.map( json => SparqlBuilder.createLiteral(json("obj")))

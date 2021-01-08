@@ -14,12 +14,12 @@ object DiscoveryStateRequestEvent extends Enumeration {
   DATATYPE_DONE,
   RESULTS_DONE,
   REQUEST_DONE,
-//10 steps
+
   ERROR_HTTP_REQUEST,
   ABORTED_BY_THE_USER
   = Value
 
-  val nValidStep = 10
+  val nValidStep = 11
 
 }
 

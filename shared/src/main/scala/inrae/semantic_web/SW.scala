@@ -3,19 +3,17 @@ package inrae.semantic_web
 import inrae.semantic_web.event.{DiscoveryRequestEvent, DiscoveryStateRequestEvent, Publisher, Subscriber}
 
 import java.util.UUID.randomUUID
-import inrae.semantic_web.internal.Node.references
 import inrae.semantic_web.internal._
 import inrae.semantic_web.internal.pm.SelectNode
 import inrae.semantic_web.rdf._
-import inrae.semantic_web.sparql.QueryResult
 import wvlet.log.Logger
 import wvlet.log.Logger.rootLogger._
 
-import scala.concurrent.{Future, Promise}
+import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
 final case class DiscoveryException(private val message: String = "",
-                                                 private val cause: Throwable = None.orNull) extends Exception(message,cause)
+                                    private val cause: Throwable = None.orNull) extends Exception(message,cause)
 
 object SW {
 
@@ -26,19 +24,12 @@ object SW {
   info(" --------------------------------------------------" )
 }
 
-case class SW(var config: StatementConfiguration)
-  extends Subscriber[DiscoveryRequestEvent,QueryManager]
-    with Publisher[DiscoveryRequestEvent]
-{
+case class SW(var config: StatementConfiguration) {
   implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
   /* root node */
-  private val rootNode   : Root = Root()
+  val rootNode   : Root = Root()
   /* focus node */
-  private var focusNode  : Node = rootNode
-
-  def notify (pub: QueryManager, event: DiscoveryRequestEvent) : Unit = {
-    publish(event)
-  }
+  var focusNode  : Node = rootNode
 
   this.prefix("owl",IRI("http://www.w3.org/2002/07/owl#"))
   this.prefix("rdf",IRI("http://www.w3.org/1999/02/22-rdf-syntax-ns#"))
@@ -299,19 +290,11 @@ case class SW(var config: StatementConfiguration)
     QueryManager(config).sparql_string(rootNode)
   }
 
-  def variable(reference: String) : Option[String] = {
-    debug(" -- variable -- ")
-    val variableNameList = pm.SelectNode.getNodeWithRef(reference, rootNode)
-      .map( v => {
-        pm.SparqlGenerator.correspondenceVariablesIdentifier(rootNode)._1.getOrElse(reference,"")
-      })
+  /**
+   * Discovery request
+   *
+   */
 
-    if (variableNameList.filter(_ != "").length==0) {
-     None
-    } else {
-      Some(variableNameList(0))
-    }
-  }
 
   /**
    * Return solutions as Future corresponding with the current Node request.
@@ -320,90 +303,14 @@ case class SW(var config: StatementConfiguration)
    * @param offset : solution are generated after this offset
    * @return
    */
-  def select(lRef: Seq[String] = List(), limit : Int = 0, offset : Int = 0) : SWResults = {
+  def select(lRef: Seq[String] = List(), limit : Int = 0, offset : Int = 0) : SWTransaction = {
     debug(" -- select -- ")
-    trace("selected variables :"+lRef.toString)
-
-    val swr = SWResults(Promise[ujson.Value]())
-    this.subscribe(swr.asInstanceOf[Subscriber[DiscoveryRequestEvent,Publisher[DiscoveryRequestEvent]]])
-
-    val mapId2Var =  pm.SparqlGenerator.correspondenceVariablesIdentifier(rootNode)._1
-
-    trace("Mapping variable <-> references :\n" + mapId2Var.toString().split(",").mkString("\n"))
-
-    val lDatatype = rootNode.lDatatypeNode.filter(ld => lRef.contains(ld.property.reference()))
-    trace("list datatype : "+lDatatype.toString)
-
-    val lSelectVariables = {
-      /* select uri type ask with decoration/datatype */
-      lDatatype.map(ld => {
-        mapId2Var(ld.refNode)
-      }) ++ {
-        /* select user ask variable */
-        lRef match {
-          case v if v.length > 0 => v.flatMap(ref => variable(ref))
-          case _ => references(focusNode).flatMap(ref => variable(ref))
-        }
-      }
-    }.distinct
-
-    trace("lSelectVariables :::" + lSelectVariables.toString())
-
-    /* manage variable name */
-    val qm = QueryManager(config)
-    qm.subscribe(this.asInstanceOf[Subscriber[DiscoveryRequestEvent,Publisher[DiscoveryRequestEvent]]])
-    qm.queryVariables(rootNode,lSelectVariables,limit,offset)
-      /* manage datatype decoration */
-       .map( (qr : QueryResult) => {
-         publish(DiscoveryRequestEvent(DiscoveryStateRequestEvent.DATATYPE_BUILD))
-         /* create an empty set of datatypes */
-         qr.json("results").update("datatypes",ujson.Obj())
-         trace(qr.json)
-         /* manage datatype */
-         trace("  lDatatype ====> " + lDatatype.toString())
-
-         Future.sequence(lDatatype.map(datatypeNode => {
-             trace("datatype node:"+datatypeNode)
-
-             rootNode.getRdfNode(datatypeNode.refNode) match {
-               case Some(_) => {
-
-                 /* find uris value inside results to decorate */
-                 val lUris : Seq[SparqlDefinition] =
-                   try {
-                     qr.getValues(mapId2Var(datatypeNode.refNode))
-                   } catch {
-                     case _ : Throwable => {
-                       List()
-                     }
-                   }
-                 Future.sequence(QueryManager(config).process_datatypes(qr,datatypeNode,lUris))
-               }
-               case None => {
-                 Future { }
-               }
-             }
-           })) onComplete {
-             case Success(_) => {
-               publish(DiscoveryRequestEvent(DiscoveryStateRequestEvent.DATATYPE_DONE))
-               qr.v2Ident(mapId2Var)
-               swr._prom_raw success qr.json
-               publish(DiscoveryRequestEvent(DiscoveryStateRequestEvent.REQUEST_DONE))
-              }
-             case Failure(e) => {
-               swr._prom_raw failure(e)
-             }
-           }
-       }).recover( exception => {
-        swr._prom_raw failure(exception)
-        })
-    swr
+    SWTransaction(this,lRef,limit,offset)
   }
 
   def count() : Future[Int] = {
     debug(" -- count -- ")
     val qm =QueryManager(config)
-    qm.subscribe(this.asInstanceOf[Subscriber[DiscoveryRequestEvent,Publisher[DiscoveryRequestEvent]]])
     qm.countNbSolutions(rootNode)
   }
 
@@ -424,6 +331,11 @@ case class SW(var config: StatementConfiguration)
       })
   }
 
+  /**
+   * Discovery functionalities
+   *
+   */
+
   def findClasses(motherClass: URI = URI("") ) : Future[Seq[URI]] = {
     debug(" -- findClasses -- ")
     (motherClass match {
@@ -434,6 +346,7 @@ case class SW(var config: StatementConfiguration)
     })
       .focus("_esp___type")
       .select(List("_esp___type"))
+      .commit()
       .raw
       .map( json => {
         json("results")("bindings").arr.map(
@@ -463,6 +376,7 @@ case class SW(var config: StatementConfiguration)
       case "datatypeProperty" => state.focus("_esp___type").filter.isLiteral
       case _ => state
     }).select(List("_esp___property"))
+      .commit()
       .raw
       .map( json => {
         json("results")("bindings").arr.map(
