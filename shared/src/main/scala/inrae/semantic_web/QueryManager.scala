@@ -179,6 +179,7 @@ case class QueryManager(config : StatementConfiguration)
           .setList(lSubUris.map(_ match { case uri: URI => uri }))
           .setupnode(datatypeNode.property, false, false)
           .select(List("val_uri", labelProperty))
+          .raw
           .map(json => {
             qr.setDatatype(labelProperty, json("results")("bindings").arr.map(rec => {
               rec("val_uri")("value").value.toString -> rec(labelProperty)

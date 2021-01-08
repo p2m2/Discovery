@@ -47,27 +47,16 @@ object SWTest extends TestSuite {
       config.setConfigString(""" { "sources" : [] } """)
       SW(config).something("h1")
         .select(List("h1"))
-        .onComplete {
-          case Success(_) => {
-            assert(false)
-          }
-          case Failure(_) => {
-            assert(true)
-          }
-        }
+        .raw
+        .map(_ => assert(false))
+        .recover((_) => assert(true))
     }
 
     test("something") {
       SW(config).something("h1")
         .select(List("h1"))
-        .onComplete {
-          case Success(_) => {
-            assert(true)
-          }
-          case Failure(_) => {
-            assert(false)
-          }
-        }
+        .raw
+        .map(_ => assert(true))
     }
 
     test("isSubjectOf") {
@@ -77,16 +66,11 @@ object SWTest extends TestSuite {
         .set(URI("aa"))
         .isSubjectOf(URI("bb"), "var")
         .select(List("var"))
-        .onComplete {
-          case Success(result) => {
-            assert(result("results")("bindings").arr.length == 1)
-            assert(SparqlBuilder.createUri(result("results")("bindings")(0)("var")).localName == "cc")
-          }
-          case Failure(exception) => {
-            error(exception)
-            assert(false)
-          }
-        }
+        .raw
+        .map(result => {
+          assert(result("results")("bindings").arr.length == 1)
+          assert(SparqlBuilder.createUri(result("results")("bindings")(0)("var")).localName == "cc")
+        })
     }
 
     test("count") {
@@ -95,15 +79,7 @@ object SWTest extends TestSuite {
         .something("h1") //http://rdf.ebi.ac.uk/terms/chembl#BioComponent
         .isSubjectOf(URI("bb2"))
         .count()
-        .onComplete {
-          case Success(count) => {
-            assert(count == 2)
-          }
-          case Failure(exception) => {
-            error(exception)
-            assert(false)
-          }
-        }
+        .map(count => assert(count == 2))
     }
 
     test("findClasses") {
@@ -112,15 +88,7 @@ object SWTest extends TestSuite {
         .something("h1")
         .set(URI("aa1"))
         .findClasses()
-        .onComplete {
-          case Success(types) => {
-            assert(types.length == 1)
-            assert(true)
-          }
-          case Failure(exception) => {
-            error(exception);
-            assert(false) }
-        }
+        .map(types => assert(types.length == 1))
     }
 
     test("findClasses with mother class -> owl:Class") {
@@ -128,16 +96,8 @@ object SWTest extends TestSuite {
         .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
         .something("h1")
         .set(URI("aa2"))
-        .findClasses(URI("Class","owl"))
-        .onComplete {
-          case Success(types) => {
-            assert(types.length == 1)
-          }
-          case Failure(exception) => {
-            error(exception);
-            assert(false)
-          }
-        }
+        .findClasses(URI("Class", "owl"))
+        .map(types => assert(types.length == 1))
     }
 
 
@@ -145,31 +105,14 @@ object SWTest extends TestSuite {
       SW(config).something("h1")
         .set(URI("aa"))
         .findObjectProperties()
-        .onComplete {
-          case Success(response) => {
-            assert(response.length == 2)
-          }
-          case Failure(exception) => {
-            error(exception)
-            assert(false)
-          }
-        }
+        .map(response => assert(response.length == 2))
     }
 
     test("findObjectProperties mother class --> owl:ObjectProperty ") {
       SW(config).something("h1")
         .set(URI("aa"))
         .findObjectProperties(URI("ObjectProperty", "owl"))
-        .onComplete {
-          case Success(response) => {
-            assert(response.length == 1)
-            assert(true)
-          }
-          case Failure(exception) => {
-            error(exception)
-            assert(false)
-          }
-        }
+        .map(response => assert(response.length == 1))
     }
   }
 }

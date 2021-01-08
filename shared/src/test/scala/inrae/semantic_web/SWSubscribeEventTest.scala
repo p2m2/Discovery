@@ -20,55 +20,19 @@ object SWSubscribeEventTest extends TestSuite {
 
   val config: StatementConfiguration = DataTestFactory.getConfigVirtuoso1()
 
-  def stepDiscoveryExecutor(unsubscribe : Boolean = false) = {
-    var stepDiscovery : Map[String,Boolean] = Map(
-      "QUERY_BUILD" -> false,
-      "DATATYPE_BUILD" -> false,
-      "DATATYPE_DONE" -> false,
-      "START_HTTP_REQUEST" -> false,
-      "PROCESS_HTTP_REQUEST" -> false,
-      "FINISHED_HTTP_REQUEST" -> false,
-      "RESULTS_BUILD" -> false,
-      "RESULTS_DONE"-> false)
-
-    def funsub( event: String ) =  {
-      stepDiscovery = stepDiscovery + (event -> true)
-    }
-
-    val sw = SW(config)
-    sw.subscribe("myfun", funsub)
-    if (unsubscribe)
-      sw.unsubscribe("myfun")
-
-    sw.something("h1")
-      .isSubjectOf(URI("bb"))
-
-      .select(List("h1"))
-      .onComplete {
-        case Success(_) => {
-          if (unsubscribe)
-            assert(stepDiscovery.forall( x => ! x._2))
-          else
-            assert(stepDiscovery.forall( x => x._2))
-        }
-        case Failure(_) => {
-          assert(false)
-        }
-      }
-  }
-
   def tests = Tests {
     test("DiscoveryRequestEvent steps") {
-      stepDiscoveryExecutor(false)
-    }
+      val swr =
+        SW(config).something("h1")
+          .isSubjectOf(URI("bb"))
+          .select(List("h1"))
 
-    test("unsubscribe") {
-      stepDiscoveryExecutor(true)
-    }
-
-    test("unsubscribe unknown id") {
-      var sw = SW(config)
-      sw.unsubscribe("myfun")
+      swr
+        .raw
+        .map( _=>{
+          assert(swr.requestEvent == "REQUEST_DONE")
+          assert(swr.progression == 1.0)
+        })
     }
 
     test("DiscoveryRequestEvent ERROR_HTTP_REQUEST") {
@@ -87,21 +51,14 @@ object SWSubscribeEventTest extends TestSuite {
         "ERROR_HTTP_REQUEST" -> false
       )
 
-      var sw = SW(config)
-      sw.subscribe("myfun", (s => { stepDiscovery = stepDiscovery + (s -> true) }))
-      sw.something("h1")
+      var swr =
+        SW(config).something("h1")
         .isSubjectOf(URI("bb"))
         .select(List("h1"))
-        .onComplete {
-          case Success(_) => {
-            assert(false)
-          }
-          case Failure(_) => {
-            assert(stepDiscovery("ERROR_HTTP_REQUEST"))
-          }
-        }
+
+      swr.raw.map( _=> assert(false))
+        .recover( _ => {
+          assert(swr.requestEvent == "ERROR_HTTP_REQUEST") } )
     }
-
-
   }
 }

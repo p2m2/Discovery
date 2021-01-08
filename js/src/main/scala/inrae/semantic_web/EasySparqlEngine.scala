@@ -73,7 +73,7 @@ class EasySparqlEngine(var config: StatementConfiguration) {
   def select(lRef: String*): Promise[Dynamic] = { sw.select(lRef).map(x => scala.scalajs.js.JSON.parse(x.toString())).toJSPromise }
 
   @JSExport
-  def selectByPage(lRef: Seq[String] = List())  : Promise[(Int,Seq[LazyFutureJsonValue])] = { sw.selectByPage(lRef).toJSPromise }
+  def selectByPage(lRef: Seq[String] = List())  : Promise[(Int,Seq[LazyFutureSwResults])] = { sw.selectByPage(lRef).toJSPromise }
 
   @JSExport
   def count(): Promise[Int] = { sw.count().toJSPromise }

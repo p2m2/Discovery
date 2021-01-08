@@ -28,6 +28,7 @@ object SW {
 
 case class SW(var config: StatementConfiguration)
   extends Subscriber[DiscoveryRequestEvent,QueryManager]
+    with Publisher[DiscoveryRequestEvent]
 {
   implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
   /* root node */
@@ -35,6 +36,9 @@ case class SW(var config: StatementConfiguration)
   /* focus node */
   private var focusNode  : Node = rootNode
 
+  def notify (pub: QueryManager, event: DiscoveryRequestEvent) : Unit = {
+    publish(event)
+  }
 
   this.prefix("owl",IRI("http://www.w3.org/2002/07/owl#"))
   this.prefix("rdf",IRI("http://www.w3.org/1999/02/22-rdf-syntax-ns#"))
@@ -316,9 +320,12 @@ case class SW(var config: StatementConfiguration)
    * @param offset : solution are generated after this offset
    * @return
    */
-  def select(lRef: Seq[String] = List(), limit : Int = 0, offset : Int = 0) : Future[ujson.Value] = {
+  def select(lRef: Seq[String] = List(), limit : Int = 0, offset : Int = 0) : SWResults = {
     debug(" -- select -- ")
     trace("selected variables :"+lRef.toString)
+
+    val swr = SWResults(Promise[ujson.Value]())
+    this.subscribe(swr.asInstanceOf[Subscriber[DiscoveryRequestEvent,Publisher[DiscoveryRequestEvent]]])
 
     val mapId2Var =  pm.SparqlGenerator.correspondenceVariablesIdentifier(rootNode)._1
 
@@ -342,15 +349,13 @@ case class SW(var config: StatementConfiguration)
 
     trace("lSelectVariables :::" + lSelectVariables.toString())
 
-    val p = Promise[ujson.Value]()
-
     /* manage variable name */
     val qm = QueryManager(config)
     qm.subscribe(this.asInstanceOf[Subscriber[DiscoveryRequestEvent,Publisher[DiscoveryRequestEvent]]])
     qm.queryVariables(rootNode,lSelectVariables,limit,offset)
       /* manage datatype decoration */
        .map( (qr : QueryResult) => {
-         notify(DiscoveryRequestEvent(DiscoveryStateRequestEvent.DATATYPE_BUILD))
+         publish(DiscoveryRequestEvent(DiscoveryStateRequestEvent.DATATYPE_BUILD))
          /* create an empty set of datatypes */
          qr.json("results").update("datatypes",ujson.Obj())
          trace(qr.json)
@@ -380,18 +385,19 @@ case class SW(var config: StatementConfiguration)
              }
            })) onComplete {
              case Success(_) => {
-               notify(DiscoveryRequestEvent(DiscoveryStateRequestEvent.DATATYPE_DONE))
+               publish(DiscoveryRequestEvent(DiscoveryStateRequestEvent.DATATYPE_DONE))
                qr.v2Ident(mapId2Var)
-               p success qr.json
+               swr._prom_raw success qr.json
+               publish(DiscoveryRequestEvent(DiscoveryStateRequestEvent.REQUEST_DONE))
               }
              case Failure(e) => {
-               p failure(e)
+               swr._prom_raw failure(e)
              }
            }
        }).recover( exception => {
-          p failure(exception)
+        swr._prom_raw failure(exception)
         })
-    p.future
+    swr
   }
 
   def count() : Future[Int] = {
@@ -406,14 +412,14 @@ case class SW(var config: StatementConfiguration)
    * @param lRef : selected variables
    * @return iterable on select function
    */
-  def selectByPage(lRef: Seq[String] = List())  : Future[(Int,Seq[LazyFutureJsonValue])] = {
+  def selectByPage(lRef: Seq[String] = List())  : Future[(Int,Seq[LazyFutureSwResults])] = {
     count().map(
       nsolutions => {
         val nit : Int = nsolutions / config.conf.settings.pageSize
         (nit+1,(0 to nit).map( p =>{
           val limit = config.conf.settings.pageSize
           val offset = p*config.conf.settings.pageSize
-          LazyFutureJsonValue( () => select(lRef,limit,offset) )
+          LazyFutureSwResults( () => select(lRef,limit,offset) )
         }))
       })
   }
@@ -428,6 +434,7 @@ case class SW(var config: StatementConfiguration)
     })
       .focus("_esp___type")
       .select(List("_esp___type"))
+      .raw
       .map( json => {
         json("results")("bindings").arr.map(
           row => SparqlBuilder.createUri(row("_esp___type"))
@@ -456,6 +463,7 @@ case class SW(var config: StatementConfiguration)
       case "datatypeProperty" => state.focus("_esp___type").filter.isLiteral
       case _ => state
     }).select(List("_esp___property"))
+      .raw
       .map( json => {
         json("results")("bindings").arr.map(
           row => {
@@ -471,33 +479,5 @@ case class SW(var config: StatementConfiguration)
   def findDatatypeProperties(motherClassProperties: URI = URI("") ) : Future[Seq[URI]] = {
     debug(" -- findDatatypeProperties -- ")
     findProperties(motherClassProperties,"datatypeProperty")
-  }
-
-  /**
-   * Event management
-   * @param pub
-   * @param event
-   */
-
-  var notifyFunList = Map[String, ( String  => Unit)]()
-
-  def notify (event: DiscoveryRequestEvent) : Unit = {
-    notifyFunList.values.map( fun => fun(event.state.toString) )
-  }
-
-  def notify (pub: QueryManager, event: DiscoveryRequestEvent) : Unit = {
-    notifyFunList.values.map( fun => fun(event.state.toString) )
-  }
-
-  def subscribe( id: String, userFunctionTriggered : ( String  => Unit) ): Unit = {
-    notifyFunList = notifyFunList + (id ->  userFunctionTriggered)
-  }
-
-  def unsubscribe(id: String ) : Unit = {
-    notifyFunList = notifyFunList - id
-  }
-
-  def abort(): Unit = {
-
   }
 }
