@@ -5,12 +5,11 @@ import fr.hmil.roshttp.Method.POST
 import fr.hmil.roshttp.exceptions.HttpException
 import fr.hmil.roshttp.response.SimpleHttpResponse
 import inrae.semantic_web.StatementConfiguration
-import wvlet.log.Logger.rootLogger.{debug, error, info}
-import scala.concurrent.duration._
+import wvlet.log.Logger.rootLogger.{debug, error}
 
 import java.io.IOException
 import scala.concurrent.Await
-import scala.util.{Failure, Success}
+import scala.concurrent.duration._
 
 final case class DataTestFactoryException(private val message: String = "",
                                           private val cause: Throwable = None.orNull) extends Exception(message,cause)
