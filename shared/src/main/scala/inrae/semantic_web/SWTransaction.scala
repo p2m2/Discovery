@@ -1,7 +1,6 @@
 package inrae.semantic_web
 
 import inrae.semantic_web.event.{DiscoveryRequestEvent, DiscoveryStateRequestEvent, Publisher, Subscriber}
-import inrae.semantic_web.internal._
 import inrae.semantic_web.internal.Node.references
 import inrae.semantic_web.internal.pm
 import inrae.semantic_web.rdf.SparqlDefinition
@@ -9,7 +8,7 @@ import inrae.semantic_web.sparql.QueryResult
 import wvlet.log.Logger.rootLogger.{debug, trace}
 
 import scala.concurrent.{Future, Promise}
-import scala.util.{Failure, Success, Try}
+import scala.util.{Failure, Success}
 
 case class SWTransaction(sw : SW,lRef: Seq[String] = List(), limit : Int = 0, offset : Int = 0)
     extends Subscriber[DiscoveryRequestEvent,QueryManager]
@@ -43,8 +42,7 @@ case class SWTransaction(sw : SW,lRef: Seq[String] = List(), limit : Int = 0, of
     currentRequestEvent = event.state.toString()
     countEvent = countEvent + 1
 
-    val p = countEvent.toDouble / DiscoveryStateRequestEvent.nValidStep.toDouble
-    _progressionCallBack.foreach (f => f(p))
+    _progressionCallBack.foreach (f => f(DiscoveryStateRequestEvent.getPercentProgression(event.state)))
 
     _requestEventCallBack.foreach(f => f(currentRequestEvent))
   }

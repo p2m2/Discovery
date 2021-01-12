@@ -6,7 +6,6 @@ import utest._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.language.postfixOps
-import scala.util.{Failure, Success}
 
 object SWSubscribeEventTest extends TestSuite {
 
@@ -50,12 +49,14 @@ object SWSubscribeEventTest extends TestSuite {
       swr.requestEvent(funEvent)
       swr.progression(funProg)
     }
+
     swr.commit().raw.map(_ => {
           assert(swr.currentRequestEvent == "REQUEST_DONE")
           if (unsubscribe)
             assert(stepDiscovery.forall( x => ! x._2))
-          else
+          else {
             assert(stepDiscovery.forall( x => x._2))
+          }
         })
     }
 

@@ -21,6 +21,19 @@ object DiscoveryStateRequestEvent extends Enumeration {
 
   val nValidStep = 11
 
+  def getPercentProgression(s : DiscoveryRequestEvent) : Double = s match {
+    case START => 0.1
+    case QUERY_BUILD => 0.2
+    case RESULTS_BUILD => 0.3
+    case START_HTTP_REQUEST => 0.3
+    case PROCESS_HTTP_REQUEST => 0.4
+    case FINISHED_HTTP_REQUEST => 0.5
+    case RESULTS_DONE => 0.6
+    case DATATYPE_BUILD => 0.7
+    case DATATYPE_DONE => 0.8
+    case _ => 1.0
+  }
+
 }
 
 case class DiscoveryRequestEvent(state : DiscoveryStateRequestEvent.Value)
