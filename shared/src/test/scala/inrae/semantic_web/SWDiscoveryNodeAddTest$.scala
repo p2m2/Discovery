@@ -10,25 +10,25 @@ import scala.util.matching.Regex
 import scala.language.postfixOps
 import scala.util.{Failure, Success, Try}
 
-object SWNodeAddTest extends TestSuite {
+object SWDiscoveryNodeAddTest$ extends TestSuite {
 
   val config: StatementConfiguration = DataTestFactory.getConfigVirtuoso1()
 
   def tests = Tests {
 
     test("something") {
-      val s = SW(config).something("h1")
+      val s = SWDiscovery(config).something("h1")
     }
 
     test("isSubjectOf on the root") {
-      Try(SW(config).isSubjectOf(URI("bb"), "var")) match {
+      Try(SWDiscovery(config).isSubjectOf(URI("bb"), "var")) match {
         case Success(_) => assert(false)
         case Failure(_) => assert(true)
       }
     }
 
     test("isSubjectOf") {
-      val s = SW(config)
+      val s = SWDiscovery(config)
                .something("h1")
                .isSubjectOf(URI("bb"), "var")
 
@@ -41,14 +41,14 @@ object SWNodeAddTest extends TestSuite {
     }
 
     test("isObjectOf on the root") {
-      Try(SW(config).isObjectOf(URI("bb"), "var")) match {
+      Try(SWDiscovery(config).isObjectOf(URI("bb"), "var")) match {
         case Success(_) => assert(false)
         case Failure(_) => assert(true)
       }
     }
 
     test("isObjectOf") {
-      val s = SW(config)
+      val s = SWDiscovery(config)
         .something("h1")
         .isObjectOf(URI("bb"), "var")
 
@@ -62,14 +62,14 @@ object SWNodeAddTest extends TestSuite {
 
     test("isLinkTo on the root") {
 
-      Try(SW(config).isLinkTo(URI("bb"), "var")) match {
+      Try(SWDiscovery(config).isLinkTo(URI("bb"), "var")) match {
         case Success(_) => assert(false)
         case Failure(_) => assert(true)
       }
     }
 
     test("isLinkTo") {
-      val s = SW(config)
+      val s = SWDiscovery(config)
         .something("h1")
         .isLinkTo(URI("bb"), "var")
 
@@ -82,14 +82,14 @@ object SWNodeAddTest extends TestSuite {
     }
 
     test("isLinkFrom on the root") {
-      Try(SW(config).isLinkFrom(URI("bb"), "var")) match {
+      Try(SWDiscovery(config).isLinkFrom(URI("bb"), "var")) match {
         case Success(_) => assert(false)
         case Failure(_) => assert(true)
       }
     }
 
     test("isLinkFrom") {
-      val s = SW(config)
+      val s = SWDiscovery(config)
         .something("h1")
         .isLinkFrom(URI("bb"), "var")
 
@@ -102,14 +102,14 @@ object SWNodeAddTest extends TestSuite {
     }
 
     test("isA on the root") {
-      Try(SW(config).isA(URI("class"))) match {
+      Try(SWDiscovery(config).isA(URI("class"))) match {
         case Success(_) => assert(false)
         case Failure(_) => assert(true)
       }
     }
 
     test("isLinkFrom") {
-      val s = SW(config)
+      val s = SWDiscovery(config)
         .something("h1")
         .isA(URI("class"))
 

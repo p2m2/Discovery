@@ -4,13 +4,12 @@ import inrae.data.DataTestFactory
 import inrae.semantic_web.rdf._
 import utest._
 
-import scala.language.postfixOps
-import scala.util.matching.Regex
-import scala.util.{Failure, Success, Try}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.language.postfixOps
+import scala.util.{Failure, Success}
 
-object SWSelectIterable extends TestSuite {
+object SWDiscoverySelectIterable$ extends TestSuite {
 
   DataTestFactory.delete_virtuoso1(this.getClass.getSimpleName)
 
@@ -64,7 +63,7 @@ object SWSelectIterable extends TestSuite {
   def tests = Tests {
 
     test("something") {
-      val s = SW(config)
+      val s = SWDiscovery(config)
         .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
         .something()
         .set(URI("<aa>"))
@@ -74,7 +73,7 @@ object SWSelectIterable extends TestSuite {
           case Success((nb,results)) => {
             assert(nb == nblock)
             val listR = Future.sequence((0 to nblock-1).map( iblock => {
-              results(iblock).wrapped.commit().raw.map({
+              results(iblock).commit().raw.map({
                 r => {
                   assert(r("results")("bindings").arr.length<=pageSize)
                   r("results")("bindings").arr.map( json => SparqlBuilder.createLiteral(json("obj")))

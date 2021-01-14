@@ -1,13 +1,12 @@
 package inrae.semantic_web
 
 import inrae.semantic_web.sparql.HttpRequestDriver
-import inrae.semantic_web.driver._
 import upickle.default.{macroRW, ReadWriter => RW}
 import wvlet.log.LogLevel
-import wvlet.log.Logger.rootLogger.{error, warn}
-import scala.util.{Try, Success, Failure}
+import wvlet.log.Logger.rootLogger.warn
 
 import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
+import scala.util.{Failure, Success}
 
 final case class StatementConfigurationException(private val message: String = "",
                                             private val cause: Throwable = None.orNull) extends Exception(message,cause)
@@ -119,7 +118,7 @@ object ConfigurationObject {
   }
 }
 
-@JSExportTopLevel(name="EasySparqlStatementConfiguration")
+@JSExportTopLevel(name="SWDiscoveryConfiguration")
 case class StatementConfiguration() {
 
   var conf: ConfigurationObject.StatementConfigurationJson =

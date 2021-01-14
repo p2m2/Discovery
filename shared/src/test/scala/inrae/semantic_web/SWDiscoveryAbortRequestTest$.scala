@@ -7,7 +7,7 @@ import utest._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.language.postfixOps
 
-object SWAbortRequestTest extends TestSuite {
+object SWDiscoveryAbortRequestTest$ extends TestSuite {
 
   DataTestFactory.delete_virtuoso1(this.getClass.getSimpleName)
 
@@ -24,7 +24,7 @@ object SWAbortRequestTest extends TestSuite {
     test("Abort Request steps") {
       val swr =
 
-        SW(config).something("h1")
+        SWDiscovery(config).something("h1")
           .isSubjectOf(QueryVariable("h2"),"h3")
           .select(List("h1","h2","h3"))
 
