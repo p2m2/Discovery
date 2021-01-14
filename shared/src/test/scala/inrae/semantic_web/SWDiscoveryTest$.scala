@@ -7,7 +7,7 @@ import utest._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.language.postfixOps
 
-object SWTest extends TestSuite {
+object SWDiscoveryTest$ extends TestSuite {
 
   DataTestFactory.insert_virtuoso1(
     """
@@ -46,7 +46,7 @@ object SWTest extends TestSuite {
     test("No sources definition") {
       val config: StatementConfiguration = StatementConfiguration()
       config.setConfigString(""" { "sources" : [] } """)
-      SW(config).something("h1")
+      SWDiscovery(config).something("h1")
         .select(List("h1"))
         .commit()
         .raw
@@ -55,7 +55,7 @@ object SWTest extends TestSuite {
     }
 
     test("something") {
-      SW(config).something("h1")
+      SWDiscovery(config).something("h1")
         .select(List("h1"))
         .commit()
         .raw
@@ -63,7 +63,7 @@ object SWTest extends TestSuite {
     }
 
     test("isSubjectOf") {
-      SW(config)
+      SWDiscovery(config)
         .something("h1")
         .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
         .set(URI("aa"))
@@ -78,7 +78,7 @@ object SWTest extends TestSuite {
     }
 
     test("datatype") {
-      SW(config).something("h1")
+      SWDiscovery(config).something("h1")
         .set(URI("aa3"))
         .datatype(URI("propDatatype"),"d")
         .select(List("d"))
@@ -92,7 +92,7 @@ object SWTest extends TestSuite {
     }
 
     test("count") {
-      SW(config)
+      SWDiscovery(config)
         .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
         .something("h1") //http://rdf.ebi.ac.uk/terms/chembl#BioComponent
         .isSubjectOf(URI("bb2"))
@@ -101,7 +101,7 @@ object SWTest extends TestSuite {
     }
 
     test("findClasses") {
-      SW(config)
+      SWDiscovery(config)
         .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
         .something("h1")
         .set(URI("aa1"))
@@ -110,7 +110,7 @@ object SWTest extends TestSuite {
     }
 
     test("findClasses with mother class -> owl:Class") {
-      SW(config)
+      SWDiscovery(config)
         .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
         .something("h1")
         .set(URI("aa2"))
@@ -120,14 +120,14 @@ object SWTest extends TestSuite {
 
 
     test("findObjectProperties") {
-      SW(config).something("h1")
+      SWDiscovery(config).something("h1")
         .set(URI("aa"))
         .findObjectProperties()
         .map(response => assert(response.length == 2))
     }
 
     test("findObjectProperties mother class --> owl:ObjectProperty ") {
-      SW(config).something("h1")
+      SWDiscovery(config).something("h1")
         .set(URI("aa"))
         .findObjectProperties(URI("ObjectProperty", "owl"))
         .map(response => assert(response.length == 1))

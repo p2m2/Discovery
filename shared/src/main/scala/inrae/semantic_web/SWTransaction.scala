@@ -10,7 +10,8 @@ import wvlet.log.Logger.rootLogger.{debug, trace}
 import scala.concurrent.{Future, Promise}
 import scala.util.{Failure, Success}
 
-case class SWTransaction(sw : SW,lRef: Seq[String] = List(), limit : Int = 0, offset : Int = 0)
+
+case class SWTransaction(sw : SWDiscovery, lRef: Seq[String] = List(), limit : Int = 0, offset : Int = 0)
     extends Subscriber[DiscoveryRequestEvent,QueryManager]
 {
   implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
@@ -147,5 +148,4 @@ case class SWTransaction(sw : SW,lRef: Seq[String] = List(), limit : Int = 0, of
     })
     this
   }
-
 }

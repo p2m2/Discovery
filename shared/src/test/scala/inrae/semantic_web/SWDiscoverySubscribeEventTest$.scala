@@ -7,7 +7,7 @@ import utest._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.language.postfixOps
 
-object SWSubscribeEventTest extends TestSuite {
+object SWDiscoverySubscribeEventTest$ extends TestSuite {
 
   DataTestFactory.delete_virtuoso1(this.getClass.getSimpleName)
 
@@ -39,7 +39,7 @@ object SWSubscribeEventTest extends TestSuite {
       assert(percent >=0)
     }
 
-    val sw = SW(config)
+    val sw = SWDiscovery(config)
 
     val swr = sw.something("h1")
       .isSubjectOf(URI("bb"))
@@ -87,7 +87,7 @@ object SWSubscribeEventTest extends TestSuite {
       )
 
       var swr =
-        SW(config).something("h1")
+        SWDiscovery(config).something("h1")
         .isSubjectOf(URI("bb"))
         .select(List("h1"))
 

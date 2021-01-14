@@ -174,7 +174,7 @@ case class QueryManager(config : StatementConfiguration)
       lSubUris => {
         trace( " datatypes:"+lSubUris.toString )
         /* request using api */
-        SW(config).something("val_uri")
+        SWDiscovery(config).something("val_uri")
           .setList(lSubUris.map(_ match { case uri: URI => uri }))
           .setupnode(datatypeNode.property, false, false)
           .select(List("val_uri", labelProperty))

@@ -10,7 +10,7 @@ import scala.concurrent.Future
 import scala.language.postfixOps
 import scala.util.{Failure, Success}
 
-object SWFilterTest extends TestSuite {
+object SWDiscoveryFilterTest$ extends TestSuite {
   DataTestFactory.delete_virtuoso1(this.getClass.getSimpleName)
 
   DataTestFactory.insert_virtuoso1(
@@ -47,7 +47,7 @@ object SWFilterTest extends TestSuite {
   def tests = Tests {
 
     test("SW Filter isLiteral") {
-      SW(config)
+      SWDiscovery(config)
         .something()
         .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
         .isSubjectOf(QueryVariable("prop"))
@@ -61,7 +61,7 @@ object SWFilterTest extends TestSuite {
     }
 
     test("SW Filter isUri") {
-      SW(config)
+      SWDiscovery(config)
         .something()
         .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
         .isSubjectOf(QueryVariable("prop"))
@@ -76,7 +76,7 @@ object SWFilterTest extends TestSuite {
     }
 
     test("SW Filter isBlank") {
-      SW(config)
+      SWDiscovery(config)
         .something()
         .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
         .isSubjectOf(QueryVariable("prop"))
@@ -91,7 +91,7 @@ object SWFilterTest extends TestSuite {
     }
 
     test("SW Filter contains") {
-      SW(config)
+      SWDiscovery(config)
         .something()
         .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
         .isSubjectOf(QueryVariable("prop"))
@@ -106,7 +106,7 @@ object SWFilterTest extends TestSuite {
     }
 
     test("SW Filter strStarts") {
-      SW(config)
+      SWDiscovery(config)
         .something()
         .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
         .isSubjectOf(QueryVariable("prop"))
@@ -121,7 +121,7 @@ object SWFilterTest extends TestSuite {
     }
 
     test("SW Filter strEnds") {
-      SW(config)
+      SWDiscovery(config)
         .something()
         .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
         .isSubjectOf(QueryVariable("prop"))
@@ -136,7 +136,7 @@ object SWFilterTest extends TestSuite {
     }
 
     test("SW Filter equal") {
-      SW(config)
+      SWDiscovery(config)
         .something()
         .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
         .isSubjectOf(QueryVariable("prop"),"value")
@@ -151,7 +151,7 @@ object SWFilterTest extends TestSuite {
     }
 
     test("SW Filter notEqual") {
-      SW(config)
+      SWDiscovery(config)
         .something()
         .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
         .isSubjectOf(QueryVariable("prop"),"v")
@@ -165,7 +165,7 @@ object SWFilterTest extends TestSuite {
     }
 
     test("SW Filter inf") {
-      SW(config)
+      SWDiscovery(config)
         .something()
         .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
         .isSubjectOf(URI("propNum"),"value")
@@ -179,7 +179,7 @@ object SWFilterTest extends TestSuite {
     }
 
     test("SW Filter inf 2") {
-      SW(config)
+      SWDiscovery(config)
         .something()
         .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
         .isSubjectOf(URI("propDate"),"value")
@@ -193,7 +193,7 @@ object SWFilterTest extends TestSuite {
     }
 
     test("SW Filter infEqual") {
-      SW(config)
+      SWDiscovery(config)
         .something()
         .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
         .isSubjectOf(URI("propNum"),"value")
@@ -207,7 +207,7 @@ object SWFilterTest extends TestSuite {
     }
 
     test("SW Filter Sup") {
-      SW(config)
+      SWDiscovery(config)
         .something()
         .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
         .isSubjectOf(URI("propNum"),"value")
@@ -221,7 +221,7 @@ object SWFilterTest extends TestSuite {
     }
 
     test("SW Filter SupEqual") {
-      SW(config)
+      SWDiscovery(config)
         .something()
         .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
         .isSubjectOf(URI("propNum"),"value")
