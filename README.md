@@ -5,6 +5,15 @@
 [![CodeFactor](https://www.codefactor.io/repository/github/p2m2/discovery/badge)](https://www.codefactor.io/repository/github/p2m2/discovery)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/8d8ecb66f9ff4963a22efab3c693b629)](https://www.codacy.com/gh/p2m2/Discovery/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=p2m2/Discovery&amp;utm_campaign=Badge_Grade)
 
+## Installation
+
+```sbt
+resolvers += Resolver.bintrayRepo("hmil", "maven")
+libraryDependencies += "com.github.p2m2" %%% "discovery" % "0.0.2-SNAPSHOT"
+```
+
+
+
 ## Compil
 
 ```
@@ -164,4 +173,5 @@ sbt package
 sbt test
 sbt fastOptJS => generer le JS
 sbt discoveryJVM/testOnly inrae.semantic_web.QueryPlannerTest
+sbt publishLocal
 ```
