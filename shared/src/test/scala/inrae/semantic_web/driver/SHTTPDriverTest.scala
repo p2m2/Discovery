@@ -37,7 +37,7 @@ object SHTTPDriverTest extends TestSuite {
     test("get bad request") {
       SHTTPDriver().get("bad request", ConfigurationHttpRequest(url = DataTestFactory.url_endpoint))
         .map(_ => assert(false))
-        .recover( v => { println(v); assert(true)})
+        .recover( v => assert(true) )
     }
 
     test("get malformed endpoint") {
@@ -55,7 +55,6 @@ object SHTTPDriverTest extends TestSuite {
     test("post") {
       SHTTPDriver().post(query, ConfigurationHttpRequest(url = DataTestFactory.url_endpoint))
         .map(qr => {
-          println(qr)
           assert(qr.json("results")("bindings").arr.length>0)
           assert(qr.json("results")("bindings").arr(0)("b")("value").value == "bb")
           assert(qr.json("results")("bindings").arr(0)("c")("value").value == "cc")
