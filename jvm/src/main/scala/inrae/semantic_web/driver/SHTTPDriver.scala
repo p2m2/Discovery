@@ -1,8 +1,9 @@
 package inrae.semantic_web.driver
 
-import inrae.semantic_web.sparql.{ConfigurationHttpRequest, HttpRequestDriver, QueryResult}
+import inrae.semantic_web.event.{DiscoveryRequestEvent, DiscoveryStateRequestEvent}
+import inrae.semantic_web.sparql.{ConfigurationHttpRequest, HttpRequestDriver, HttpRequestDriverException, QueryResult}
 import org.portablescala.reflect.annotation.EnableReflectiveInstantiation
-import sttp.client3.{UriContext, basicRequest}
+import sttp.client3._
 
 import scala.concurrent.Future
 
@@ -15,10 +16,11 @@ case class SHTTPDriver() extends HttpRequestDriver {
     HttpURLConnectionBackend
    */
 
-  val backendShttp = FetchBackend
+  val backendShttp = HttpURLConnectionBackend
 
   def post(query: String, config: ConfigurationHttpRequest): Future[QueryResult] = {
     Future {
+      publish(DiscoveryRequestEvent(DiscoveryStateRequestEvent.PROCESS_HTTP_REQUEST))
       val request = basicRequest.post(uri"${config.url}")
         .headers(Map("accept" -> "application/json",
           "content-type" -> "application/x-www-form-urlencoded"))
@@ -26,22 +28,35 @@ case class SHTTPDriver() extends HttpRequestDriver {
       val backend = backendShttp()
       val response = request.send(backend)
       response.body match {
-        case Right(v) => QueryResult(v)
-        case Left(v) => QueryResult(v)
+        case Right(v) => {
+          publish(DiscoveryRequestEvent(DiscoveryStateRequestEvent.FINISHED_HTTP_REQUEST))
+          QueryResult(v)
+        }
+        case Left(e) => {
+          publish(DiscoveryRequestEvent(DiscoveryStateRequestEvent.ERROR_HTTP_REQUEST))
+          throw HttpRequestDriverException(e)
+        }
       }
     }
   }
 
   def get(query: String, config: ConfigurationHttpRequest): Future[QueryResult] = {
     Future {
+      publish(DiscoveryRequestEvent(DiscoveryStateRequestEvent.PROCESS_HTTP_REQUEST))
       val request = basicRequest.get(uri"${config.url}")
         .headers(Map("accept" -> "application/json"))
         .body(Map("query" -> query))
       val backend = backendShttp()
       val response = request.send(backend)
       response.body match {
-        case Right(v) => QueryResult(v)
-        case Left(v) => QueryResult(v)
+        case Right(v) => {
+          publish(DiscoveryRequestEvent(DiscoveryStateRequestEvent.FINISHED_HTTP_REQUEST))
+          QueryResult(v)
+        }
+        case Left(e) => {
+          publish(DiscoveryRequestEvent(DiscoveryStateRequestEvent.ERROR_HTTP_REQUEST))
+          throw HttpRequestDriverException(e)
+        }
       }
     }
   }

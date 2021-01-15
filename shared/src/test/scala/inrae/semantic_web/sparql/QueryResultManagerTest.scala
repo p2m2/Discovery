@@ -2,9 +2,6 @@ package inrae.semantic_web.sparql
 
 import utest._
 
-import scala.io.Source
-import scala.util.{Failure, Success, Try}
-
 object QueryResultManagerTest extends TestSuite {
 
   val q1 = "Select ?a { ?a ?b ?c . } "
@@ -28,7 +25,7 @@ object QueryResultManagerTest extends TestSuite {
       }
     }
 
-
+/*
     test("Compression long string") {
       val json_f = Source.fromResource("./json_results/dbpedia_a_isa_concept_10000.json").mkString
 
@@ -39,6 +36,6 @@ object QueryResultManagerTest extends TestSuite {
         case Some(r) if r == json_f => assert(true)
         case _ => assert(false)
       }
-    }
+    }*/
   }
 }
