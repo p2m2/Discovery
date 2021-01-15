@@ -93,6 +93,7 @@ object SWDiscoverySubscribeEventTest$ extends TestSuite {
 
       swr.commit().raw.map( _=> assert(false))
         .recover( _ => {
+          println(swr.currentRequestEvent)
           assert(swr.currentRequestEvent == "ERROR_HTTP_REQUEST") } )
     }
   }
