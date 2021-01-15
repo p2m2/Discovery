@@ -3,12 +3,9 @@ package inrae.semantic_web
 import inrae.data.DataTestFactory
 import inrae.semantic_web.rdf._
 import utest._
-import wvlet.log.Logger.rootLogger.error
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 import scala.language.postfixOps
-import scala.util.{Failure, Success}
 
 object SWDiscoveryFilterTest$ extends TestSuite {
   DataTestFactory.delete_virtuoso1(this.getClass.getSimpleName)
@@ -92,16 +89,43 @@ object SWDiscoveryFilterTest$ extends TestSuite {
 
     test("SW Filter contains") {
       SWDiscovery(config)
-        .something()
+        .something("x")
         .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
-        .isSubjectOf(QueryVariable("prop"))
+        .isSubjectOf(URI("propContains"))
         .filter.contains("regex_expected")
-        .select(List("prop"))
+        .select(List("x"))
         .commit()
         .raw
         .map(result => {
           assert(result("results")("bindings").arr.length == 1)
-          assert(SparqlBuilder.createUri(result("results")("bindings")(0)("prop")).localName == "propContains")
+        })
+    }
+
+    test("SW Filter not contains") {
+      SWDiscovery(config)
+        .something()
+        .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
+        .isSubjectOf(URI("propContains"))
+        .filter.not.contains("regex_expected")
+        .select(List("prop"))
+        .commit()
+        .raw
+        .map(result => {
+          assert(result("results")("bindings").arr.length == 0)
+        })
+    }
+    test("SW Filter not contains 2") {
+      SWDiscovery(config)
+        .something()
+        .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
+        .isSubjectOf(URI("propContains"))
+        .filter.contains("bidon")
+        .filter.not.contains("regex_expected")
+        .select(List("prop"))
+        .commit()
+        .raw
+        .map(result => {
+          assert(result("results")("bindings").arr.length == 0)
         })
     }
 
