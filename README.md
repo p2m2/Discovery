@@ -12,8 +12,6 @@ resolvers += Resolver.bintrayRepo("hmil", "maven")
 libraryDependencies += "com.github.p2m2" %%% "discovery" % "0.0.2-SNAPSHOT"
 ```
 
-
-
 ## Library generation 
 
 ```

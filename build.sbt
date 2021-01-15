@@ -16,7 +16,7 @@ releaseIgnoreUntrackedFiles := true
 
 def getPackageSetting() = Seq(
   name := "discovery",
-  version := "0.0.2-SNAPSHOT",
+  version := "0.0.2-beta.3.SNAPSHOT",
   scalaVersion := "2.13.4",
   organization := "com.github.p2m2"
 )
@@ -39,7 +39,8 @@ lazy val discovery=crossProject(JSPlatform, JVMPlatform).in(file("."))
       "org.wvlet.airframe" %%% "airframe-log" % airframeLogVersion,
       "org.scala-lang.modules" %%% "scala-parser-combinators" % scalaParserCombinatorVersion,
       "org.portable-scala" %%% "portable-scala-reflect" % scalaReflectVersion,
-      "fr.hmil" %%% "roshttp" % RosHttpVersion
+      "fr.hmil" %%% "roshttp" % RosHttpVersion,
+      "com.softwaremill.sttp.client3" %%% "core" % "3.0.0"
     ),
     testFrameworks += new TestFramework("utest.runner.Framework"),
     scalacOptions ++= Seq("-deprecation", "-feature"),
@@ -52,7 +53,7 @@ lazy val discovery=crossProject(JSPlatform, JVMPlatform).in(file("."))
     publishMavenStyle := true,
   )
   .jsSettings(
-    scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.CommonJSModule) },
+    scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.CommonJSModule) } ,
     libraryDependencies ++= Seq(
       "org.scala-js" %%% "scalajs-dom" % scalaJsDOMVersion
     ),

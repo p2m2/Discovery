@@ -10,7 +10,7 @@ import inrae.semantic_web.sparql.{ConfigurationHttpRequest, HttpRequestDriver, H
 import org.portablescala.reflect.annotation.EnableReflectiveInstantiation
 import wvlet.log.Logger.rootLogger.debug
 
-import java.io.IOException
+
 import scala.concurrent.Future
 
 @EnableReflectiveInstantiation
@@ -32,14 +32,10 @@ case class RosHTTPDriver() extends HttpRequestDriver {
           //  " Here is what the application server says: " + e.body)
           publish(DiscoveryRequestEvent(DiscoveryStateRequestEvent.ERROR_HTTP_REQUEST))
           throw HttpRequestDriverException(e.body)
-        case e: IOException =>
-          // By handling transport issues separately, you get a chance to apply
-          // your own recovery strategy. Should you report to the user? Log the error?
-          // Retry the request? Send an alert to your ops team?
-          //error(s"${config.url} is not reachable .There was a network issue, please try again")
+        case e: Throwable => {
           publish(DiscoveryRequestEvent(DiscoveryStateRequestEvent.ERROR_HTTP_REQUEST))
           throw HttpRequestDriverException(e.getMessage())
-        case e: Throwable => println(s"Throwable ==> message:${e.getMessage()}")
+        }
       }).map(v => {
       publish(DiscoveryRequestEvent(DiscoveryStateRequestEvent.FINISHED_HTTP_REQUEST))
       debug(v.asInstanceOf[SimpleHttpResponse].body.substring(0, 100))
@@ -60,9 +56,10 @@ case class RosHTTPDriver() extends HttpRequestDriver {
         case HttpException(e: SimpleHttpResponse) =>
           publish(DiscoveryRequestEvent(DiscoveryStateRequestEvent.ERROR_HTTP_REQUEST))
           throw HttpRequestDriverException(e.body)
-        case e: IOException =>
+        case e: Throwable => {
           publish(DiscoveryRequestEvent(DiscoveryStateRequestEvent.ERROR_HTTP_REQUEST))
           throw HttpRequestDriverException(e.getMessage())
+        }
       }).map(v => {
       publish(DiscoveryRequestEvent(DiscoveryStateRequestEvent.FINISHED_HTTP_REQUEST))
       QueryResult(v.asInstanceOf[SimpleHttpResponse].body)

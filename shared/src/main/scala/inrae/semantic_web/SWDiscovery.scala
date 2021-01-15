@@ -278,8 +278,11 @@ case class SWDiscovery(var config: StatementConfiguration) {
     println("USER REQUEST\n" +
       pm.SimpleConsole.get(rootNode) +
       pm.SimpleConsole.get(focusNode) +
-      "QUERY PLANNER\n"+
-      "todo....")
+      "\nENDPOINT:"+config.sources().map(v => println(v.url)).mkString(",") +"\n\n" +
+      "\n -- SPARQL Request -- \n\n" +
+      sparql())
+      //"QUERY PLANNER\n"+
+      //"todo....")
     this
   }
 
