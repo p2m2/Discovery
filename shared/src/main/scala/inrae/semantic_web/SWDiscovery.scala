@@ -63,7 +63,7 @@ case class SWDiscovery(var config: StatementConfiguration) {
     def not : FilterIncrement = { this.negation = !this.negation ; this }
   }
 
-  val filter : FilterIncrement = new FilterIncrement()
+  def filter : FilterIncrement = new FilterIncrement()
 
   private val logger = Logger.of[SWDiscovery]
   // Set the root logger's log level
