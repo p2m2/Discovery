@@ -19,6 +19,7 @@ workflows:
       - compile:
           context:
             - DOCKER_CONTEXT
+
       - lib_js:
           requires:
             - compile
@@ -46,8 +47,6 @@ workflows:
                 - master
 
       - publish_tag_to_sonatype_stagge_for_release:
-          requires:
-            - compile
           context:
             - DOCKER_CONTEXT
             - CREDENTIAL_CONTEXT
@@ -58,9 +57,9 @@ workflows:
               ignore: /.*/
 
       - check_discovery_valid_fullopjs_cdn_jsdelivr:
-          requires:
-            - lib_js
-            - test_and_coverage_jvm
+          filters:
+            tags:
+              only: /.*/
 
 executors:
 
