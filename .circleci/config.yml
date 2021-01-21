@@ -213,7 +213,7 @@ jobs:
       - run:
           name: commit fullOptJS
           command: |
-                cp js/target/scala-x.xx/discovery-opt.js dist/discovery.js
+                cp js/target/scala-2.13/discovery-opt.js dist/discovery.js
                 npm install -g --silent browserify
                 browserify -r ./dist/discovery.js -s discovery > dist/discovery-web.js
                 git config user.email "p2m2-circle-ci@inrae.fr"
