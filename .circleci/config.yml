@@ -57,7 +57,10 @@ workflows:
             branches:
               ignore: /.*/
 
-      - check_discovery_valid_fullopjs_cdn_jsdelivr
+      - check_discovery_valid_fullopjs_cdn_jsdelivr:
+          requires:
+            - lib_js
+            - test_and_coverage_jvm
 
 executors:
 
@@ -197,10 +200,12 @@ jobs:
       - run:
           name: compare checksum scala files
           command: |
-            find . -name *.scala | sort -V | grep -v SWDiscoveryVersionAtBuildTime.scala
+
             cat $(find . -name *.scala | sort -V | grep -v SWDiscoveryVersionAtBuildTime.scala) | md5sum > ./checksum
+
             F1=./checksum
             F2=./dist/checksum
+
             if [ "$(diff -q $F1 $F2)" != ""  ]; then
                echo "discovery and discovery-web have to be updated with update_cdn_libjs.sh !" ;
                echo "current checksum : "$(cat checksum)
