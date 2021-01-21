@@ -57,11 +57,7 @@ workflows:
             branches:
               ignore: /.*/
 
-      - check_discovery_valid_fullopjs_cdn_jsdelivr:
-          requires:
-            - test_and_coverage_jvm
-          context:
-            - DOCKER_CONTEXT
+      - check_discovery_valid_fullopjs_cdn_jsdelivr
 
 executors:
 
@@ -223,7 +219,7 @@ jobs:
           command: |
             cp ./dist/discovery-web.js ./dist/discovery-tmp-web.js
             cp ./dist/discovery.js ./dist/discovery-tmp.js
-            update_cdn_libjs.sh
+            ./update_cdn_libjs.sh
       - run:
           name: check discovery.js discovery-web.js
           command: |
