@@ -13,13 +13,25 @@ lazy val scalatagVersion = "0.9.2"
 lazy val jenaVersion = "3.16.0"
 
 releaseIgnoreUntrackedFiles := true
+val version_build = scala.util.Properties.envOrElse("DISCOVERY_VERSION", "local-SNAPSHOT" )
+val SWDiscoveryVersionAtBuildTimeFile = "./shared/src/main/scala/inrae/semantic_web/SWDiscoveryVersionAtBuildTime.scala"
+
+
+val buildSWDiscoveryVersionAtBuildTimeFile =
+  if ( ! reflect.io.File(SWDiscoveryVersionAtBuildTimeFile).exists)
+    reflect.io.File(SWDiscoveryVersionAtBuildTimeFile).writeAll(
+      Predef.augmentString(
+      s"""|
+      |package inrae.semantic_web
+      |
+      |object SWDiscoveryVersionAtBuildTime {
+      |   val version : String = "${version_build}"
+      |}""").stripMargin)
 
 
 def getPackageSetting() = Seq(
   name := "discovery",
-  version :=  {
-    scala.util.Properties.envOrElse("DISCOVERY_VERSION", "local-SNAPSHOT" )
-  },
+  version :=  version_build,
   scalaVersion := "2.13.4",
   organization := "com.github.p2m2",
   organizationName := "p2m2",
@@ -39,12 +51,10 @@ def getPackageSetting() = Seq(
     val host = scala.util.Properties.envOrElse("HOST_CREDENTIAL", "" )
     val login = scala.util.Properties.envOrElse("LOGIN_CREDENTIAL", "" )
     val pass = scala.util.Properties.envOrElse("PASSWORD_CREDENTIAL", "" )
-    println("---- credential ---")
-    println(realm)
-    println(host)
+
     val file_credential = Path.userHome / ".sbt" / ".credentials"
 
-    if (scala.reflect.io.File(file_credential).exists) {
+    if (reflect.io.File(file_credential).exists) {
       Credentials(file_credential)
     } else {
         Credentials(realm,host,login,pass)

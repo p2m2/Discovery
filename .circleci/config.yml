@@ -148,5 +148,4 @@ jobs:
             export DISCOVERY_VERSION="${CIRCLE_BRANCH}-SNAPSHOT"
             echo "$REALM_CREDENTIAL"
             echo "$HOST_CREDENTIAL"
-
             sbt publish
