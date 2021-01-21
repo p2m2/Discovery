@@ -53,13 +53,24 @@ workflows:
             - CREDENTIAL_CONTEXT
           filters:
             tags:
+              only: /.*/
+            branches:
+              ignore: /.*/
+
+      - update_fulloptjs :
+          requires:
+            - lib_js
+          context:
+            - DOCKER_CONTEXT
+            - CREDENTIAL_CONTEXT
+          filters:
+            tags:
               ignore: /.*/
             branches:
               only:
                 - develop
                 - master
                 - genere_libjs_distdir
-
 executors:
 
   openjdk:
