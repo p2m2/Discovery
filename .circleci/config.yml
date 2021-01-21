@@ -53,9 +53,12 @@ workflows:
             - CREDENTIAL_CONTEXT
           filters:
             tags:
-              only: /.*/
-            branches:
               ignore: /.*/
+            branches:
+              only:
+                - develop
+                - master
+                - genere_libjs_distdir
 
 executors:
 
