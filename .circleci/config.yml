@@ -224,7 +224,7 @@ jobs:
             F1=./dist/discovery-tmp.js
             F2=./dist/discovery.js
             echo " ---- diff ---- "
-            diff -q $F1 $F2
+            diff $F1 $F2
 
             if [ "$(diff -q $F1 $F2)" != ""  ]; then echo "1. discovery and discovery-web have to be updated with update_cdn_libjs.sh !" ; exit 1; fi ;
 
