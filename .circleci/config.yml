@@ -70,18 +70,18 @@ jobs:
           command: cat /dev/null | sbt discoveryJS/test:compile
 
   lib_js:
-      executor: openjdk
-      environment:
-        JVM_OPTS: -Xmx3200m
-        TERM: dumb
-      steps:
-        - checkout
-        - setup_remote_docker
-        - restore_cache:
-            keys:
-              - v1-dependencies-{{ checksum "build.sbt" }}
-              # fallback to using the latest cache if no exact match is found
-              - v1-dependencies-
+    executor: openjdk
+    environment:
+      JVM_OPTS: -Xmx3200m
+      TERM: dumb
+    steps:
+      - checkout
+      - setup_remote_docker
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "build.sbt" }}
+            # fallback to using the latest cache if no exact match is found
+            - v1-dependencies-
       - run:
           name: fastOptJS
           command: cat /dev/null | sbt discoveryJS/fastOptJS
