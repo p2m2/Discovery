@@ -9,7 +9,7 @@ sed -i "s#$(pwd)#com/github/p2m2#g" dist/discovery.js
 
 # generate md5sum to check js libraries
 
-find . -name *.scala | md5sum > dist/checksum
+find . -name *.scala | grep -v SWDiscoveryVersionAtBuildTime.scala | md5sum > dist/checksum
 
 # var CI defined on circleci at true
 
