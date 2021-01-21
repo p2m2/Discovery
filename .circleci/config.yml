@@ -190,11 +190,7 @@ jobs:
             sbt publish
 
   check_discovery_valid_fullopjs_cdn_jsdelivr:
-    docker:
-      - image: cimg/ruby:2.7.1-node
-        auth:
-            username: ${DOCKER_USER}
-            password: ${DOCKER_PASS}
+    executor: openjdk
     steps:
       - checkout
       - setup_remote_docker
