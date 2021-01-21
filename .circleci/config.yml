@@ -190,14 +190,15 @@ jobs:
             sbt publish
 
   check_discovery_valid_fullopjs_cdn_jsdelivr:
-    executor: openjdk
+    machine:
+      image: ubuntu-2004:202010-01
     steps:
       - checkout
       - setup_remote_docker
       - run:
           name: compare checksum scala files
           command: |
-            cat $(find . -name *.scala | grep -v SWDiscoveryVersionAtBuildTime.scala) | md5sum > ./checksum
+            cat $(find ./js -name *.scala | grep -v SWDiscoveryVersionAtBuildTime.scala) | md5sum > ./checksum
             F1=./checksum
             F2=./dist/checksum
             if [ "$(diff -q $F1 $F2)" != ""  ]; then
