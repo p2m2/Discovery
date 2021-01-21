@@ -56,6 +56,8 @@ workflows:
               only: /.*/
             branches:
               ignore: /.*/
+              
+      - check_discovery_valid_fullopjs_cdn_jsdelivr:
 
 executors:
 
@@ -186,3 +188,40 @@ jobs:
           command: |
             export DISCOVERY_VERSION="${CIRCLE_TAG}"
             sbt publish
+
+  check_discovery_valid_fullopjs_cdn_jsdelivr:
+    docker:
+      - image: cimg/ruby:2.7.1-node
+        auth:
+          username: ${DOCKER_USER}
+          password: ${DOCKER_PASS}
+    steps:
+      - checkout
+      - setup_remote_docker
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "build.sbt" }}
+            # fallback to using the latest cache if no exact match is found
+            - v1-dependencies-
+      - run:
+          name: fullOptJS
+          command: cat /dev/null | sbt discoveryJS/fullOptJS
+      - run:
+          name: check discovery.js
+          command: |
+            F1=./js/target/scala-2.13/discovery-opt.js
+            F2=./dist/discovery.js
+            if [ "$(diff -q $F1 $F2)" != ""  ]; then  echo "$F2 have to be updated !" ; fi ;
+      -run:
+          name: install npm
+          command: curl https://www.npmjs.com/install.sh | sudo bash
+      - run:
+          name: browserify
+          command: |
+            browserify -r ./dist/discovery.js -s discovery > dist/discovery-tmp-web.js
+      -run:
+        name: check discovery-web.js
+        command: |
+            F1=./dist/discovery-tmp-web.js
+            F2=./dist/discovery-web.js
+            if [ "$(diff -q $F1 $F2)" != ""  ]; then  echo "$F2 have to be updated !" ; fi ;
