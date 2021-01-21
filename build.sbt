@@ -16,9 +16,31 @@ releaseIgnoreUntrackedFiles := true
 
 def getPackageSetting() = Seq(
   name := "discovery",
-  version := "0.0.2-beta.3.SNAPSHOT",
+  version := "0.0.2-beta.3",
   scalaVersion := "2.13.4",
-  organization := "com.github.p2m2"
+  organization := "com.github.p2m2",
+  organizationName := "p2m2",
+  organizationHomepage := Some(url("https://www6.inrae.fr/p2m2")),
+  licenses := Seq("MIT License" -> url("http://www.opensource.org/licenses/mit-license.php")),
+  homepage := Some(url("https://github.com/p2m2/Discovery")),
+  description := "Ease Sparql request on the network MetaboHUB/Semantics Databases.",
+  scmInfo := Some(
+    ScmInfo(
+      url("https://github.com/p2m2/Discovery"),
+      "scm:git@github.com:p2m2/Discovery.git"
+    )
+  ),
+  credentials += Credentials(Path.userHome / ".sbt" / ".credentials"),
+  publishTo := {
+    if (isSnapshot.value)
+      Some("Sonatype Snapshots Nexus" at "https://oss.sonatype.org/content/repositories/snapshots")
+    else
+      Some("Sonatype Snapshots Nexus" at "https://oss.sonatype.org/service/local/staging/deploy/maven2")
+  },
+  publishConfiguration := publishConfiguration.value.withOverwrite(true) ,
+  publishLocalConfiguration := publishLocalConfiguration.value.withOverwrite(true),
+  pomIncludeRepository := { _ => false },
+  publishMavenStyle := true,
 )
 
 lazy val root = (project in file("."))
@@ -47,10 +69,7 @@ lazy val discovery=crossProject(JSPlatform, JVMPlatform).in(file("."))
     classLoaderLayeringStrategy := ClassLoaderLayeringStrategy.AllLibraryJars,
     coverageMinimum := 70,
     coverageFailOnMinimum := false,
-    coverageHighlighting := true,
-    // release ->  https://oss.sonatype.org/service/local/staging/deploy/maven2
-    publishTo := Some("Sonatype Snapshots Nexus" at "https://oss.sonatype.org/content/repositories/snapshots"),
-    publishMavenStyle := true,
+    coverageHighlighting := true
   )
   .jsSettings(
     scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.CommonJSModule) } ,
@@ -60,7 +79,6 @@ lazy val discovery=crossProject(JSPlatform, JVMPlatform).in(file("."))
     jsEnv := new org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv()
   )
   .jvmSettings(
-    credentials += Credentials(Path.userHome / ".sbt" / ".credentials"),
     libraryDependencies ++= Seq(
       "org.scala-js" %% "scalajs-stubs" % scalaStubVersion % "provided",
       "org.apache.jena" % "apache-jena" % jenaVersion pomOnly()

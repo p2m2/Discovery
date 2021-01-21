@@ -92,5 +92,8 @@ sbt package
 sbt test
 sbt fastOptJS => generer le JS
 sbt discoveryJVM/testOnly inrae.semantic_web.QueryPlannerTest
+## local publication -> .ivy2
 sbt publishLocal
+## osssonatype maven centra repository publication
+sbt publish
 ```
