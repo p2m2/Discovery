@@ -1,6 +1,16 @@
-# Scala CircleCI 2.0 configuration file
 #
-# Check https://circleci.com/docs/2.0/sample-config/ for more details
+#  - Compile JVM/Js
+#  - Tests JVM
+#  - publish JVM Sonatype Snapshot for branches : master/develop
+#  - publish JVM Sonatype Stagge/Release (wait approval) for tags release
+#
+#  DOCKER_CONTEXT is a context global env variable for all application github p2m2 organization
+#   - DOCKER_USER          -> login
+#   - DOCKER_PASS          -> password
+#   - ORGANIZATION_NAME    -> organization register on dockerhub
+#
+#  CREDENTIAL_CONTEXT used by build.sbt
+#   - REALM_CREDENTIAL,HOST_CREDENTIAL,LOGIN_CREDENTIAL,PASSWORD_CREDENTIAL
 #
 version: 2.1
 workflows:
@@ -14,11 +24,13 @@ workflows:
             - compile
           context:
             - DOCKER_CONTEXT
+
       - test_and_coverage_jvm:
           requires:
             - compile
           context:
             - DOCKER_CONTEXT
+
       - publish_snapshot:
           requires:
             - test_and_coverage_jvm
@@ -32,7 +44,18 @@ workflows:
               only:
                 - develop
                 - master
-                - fixSonatypeRelease
+
+      - publish_tag_to_sonatype_stagge_for_release:
+          requires:
+            - compile
+          context:
+            - DOCKER_CONTEXT
+            - CREDENTIAL_CONTEXT
+          filters:
+            tags:
+              only: /.*/
+            branches:
+              ignore: /.*/
 
 executors:
 
@@ -146,6 +169,20 @@ jobs:
           name: Snapshot publication
           command: |
             export DISCOVERY_VERSION="${CIRCLE_BRANCH}-SNAPSHOT"
-            echo "$REALM_CREDENTIAL"
-            echo "$HOST_CREDENTIAL"
+            sbt publish
+
+  publish_tag_to_sonatype_stagge_for_release:
+    executor: openjdk
+    steps:
+      - checkout
+      - setup_remote_docker
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "build.sbt" }}
+            # fallback to using the latest cache if no exact match is found
+            - v1-dependencies-
+      - run:
+          name: Snapshot publication
+          command: |
+            export DISCOVERY_VERSION="${CIRCLE_TAG}"
             sbt publish
