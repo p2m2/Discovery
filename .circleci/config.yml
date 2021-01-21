@@ -216,6 +216,7 @@ jobs:
       - run:
           name: browserify
           command: |
+            npm install -g browserify
             browserify -r ./dist/discovery.js -s discovery > dist/discovery-tmp-web.js
       - run:
           name: check discovery-web.js
