@@ -19,6 +19,20 @@ workflows:
             - compile
           context:
             - DOCKER_CONTEXT
+      - publish_snapshot:
+          requires:
+            - test_and_coverage_jvm
+          context:
+            - DOCKER_CONTEXT
+            - CREDENTIAL_CONTEXT
+          filters:
+            tags:
+              ignore: /.*/
+            branches:
+              only:
+                - develop
+                - master
+                - fixSonatypeRelease
 
 executors:
 
@@ -108,12 +122,31 @@ jobs:
             # fallback to using the latest cache if no exact match is found
             - v1-dependencies-
       - run:
-          name: fastOptJS
+          name: Test and Coverage
           command: |
             cat /dev/null | sbt clean coverage discoveryJVM/test:test
             sbt discoveryJVM/coverageReport
             bash <(curl -s https://codecov.io/bash)
             bash <(curl -Ls https://coverage.codacy.com/get.sh) report
-            
+
       - store_artifacts:
           path: discovery/jvm/target/test-reports
+
+  publish_snapshot:
+    executor: virtuoso_environment_executor
+    environment:
+      JVM_OPTS: -Xmx3200m
+      TERM: dumb
+    steps:
+      - checkout
+      - setup_remote_docker
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "build.sbt" }}
+            # fallback to using the latest cache if no exact match is found
+            - v1-dependencies-
+      - run:
+          name: Snapshot publication
+          command: |
+            export DISCOVERY_VERSION="${CIRCLE_BRANCH}-SNAPSHOT"
+            sbt publish
