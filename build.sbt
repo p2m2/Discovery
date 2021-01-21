@@ -14,9 +14,12 @@ lazy val jenaVersion = "3.16.0"
 
 releaseIgnoreUntrackedFiles := true
 
+
 def getPackageSetting() = Seq(
   name := "discovery",
-  version := "0.0.2-beta.3",
+  version :=  {
+    scala.util.Properties.envOrElse("DISCOVERY_VERSION", "local-SNAPSHOT" )
+  },
   scalaVersion := "2.13.4",
   organization := "com.github.p2m2",
   organizationName := "p2m2",
@@ -30,7 +33,23 @@ def getPackageSetting() = Seq(
       "scm:git@github.com:p2m2/Discovery.git"
     )
   ),
-  credentials += Credentials(Path.userHome / ".sbt" / ".credentials"),
+  credentials += {
+
+    val realm = scala.util.Properties.envOrElse("REALM_CREDENTIAL", "" )
+    val host = scala.util.Properties.envOrElse("HOST_CREDENTIAL", "" )
+    val login = scala.util.Properties.envOrElse("LOGIN_CREDENTIAL", "" )
+    val pass = scala.util.Properties.envOrElse("PASSWORD_CREDENTIAL", "" )
+    println("---- credential ---")
+    println(realm)
+    println(host)
+    val file_credential = Path.userHome / ".sbt" / ".credentials"
+
+    if (scala.reflect.io.File(file_credential).exists) {
+      Credentials(file_credential)
+    } else {
+        Credentials(realm,host,login,pass)
+    }
+  },
   publishTo := {
     if (isSnapshot.value)
       Some("Sonatype Snapshots Nexus" at "https://oss.sonatype.org/content/repositories/snapshots")

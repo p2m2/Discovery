@@ -15,7 +15,7 @@ final case class DiscoveryException(private val message: String = "",
 
 object SWDiscovery {
 
-  private val version : String = "0.0.2"
+  private val version : String = scala.util.Properties.envOrElse("DISCOVERY_VERSION", "local-SNAPSHOT" )
 
   info(" --------------------------------------------------" )
   info(" ---- version Discovery :"+ version + "          -----------" )

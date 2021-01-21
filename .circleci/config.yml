@@ -133,10 +133,7 @@ jobs:
           path: discovery/jvm/target/test-reports
 
   publish_snapshot:
-    executor: virtuoso_environment_executor
-    environment:
-      JVM_OPTS: -Xmx3200m
-      TERM: dumb
+    executor: openjdk
     steps:
       - checkout
       - setup_remote_docker
