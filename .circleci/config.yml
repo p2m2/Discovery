@@ -49,6 +49,6 @@ jobs:
             # fallback to using the latest cache if no exact match is found
             - v1-dependencies-
       - run:
-          name: [JVM] Compile And Test
+          name: Compile And Test - JVM
           command: |
-            cat /dev/null | sbt discoveryJVM/test:compile
+                      cat /dev/null | sbt discoveryJVM/test:compile
