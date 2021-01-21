@@ -1894,7 +1894,6 @@ d.ib=function(){return"Queue"};d.CJ=function(a,b){return h5(a,b)};d.DJ=function(
 Qs(Ss(),"inrae.semantic_web.driver.SHTTPDriver",q(YY),[[[],()=>new UY]]);exports.QueryVariable=function(a){return new ch(a)};exports.PropertyPath=function(a){return new iU(a)};exports.SWDiscovery=function(a){return new bf(a)};exports.IRI=function(a){return new KQ(a)};exports.Anonymous=function(a){return new hU(a)};exports.SWDiscoveryTransaction=function(a){return new of(a)};exports.URI=function(a,...b){void 0===b[0]?(Bf(),b=""):b=b[0];return new Af(a,b)};exports.SWFilterIncrement=function(a){return new Jd(a)};
 var j5=exports;wz||(wz=new sz);j5.log=wz;exports.Literal=function(a,...b){if(void 0===b[0]){gB||(gB=new fB);var c=Bf().sr}else c=b[0];void 0===b[1]?(gB||(gB=new fB),b=""):b=b[1];return new sh(a,c,b)};exports.SWDiscoveryConfiguration=function(){return new WQ};
 
-
 }).call(this)}).call(this,require("buffer").Buffer,require("timers").setImmediate)
 },{"buffer":2,"timers":5}],1:[function(require,module,exports){
 'use strict'
