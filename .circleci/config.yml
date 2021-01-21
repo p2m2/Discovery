@@ -48,5 +48,7 @@ jobs:
             - v1-dependencies-{{ checksum "build.sbt" }}
             # fallback to using the latest cache if no exact match is found
             - v1-dependencies-
-            - run: |
-              cat /dev/null | sbt discoveryJVM/test:compile
+            - run:
+              name: [JVM] Compile And Test
+              command: |
+                cat /dev/null | sbt discoveryJVM/test:compile
