@@ -207,7 +207,7 @@ jobs:
           command: |
             F1=./js/target/scala-2.13/discovery-opt.js
             F2=./dist/discovery.js
-            if [ "$(diff -q $F1 $F2)" != ""  ]; then  echo "$F2 have to be updated with update_cdn_libjs.sh !" ; fi ;
+            if [ "$(diff -q $F1 $F2)" != ""  ]; then  echo "$F2 have to be updated with update_cdn_libjs.sh !" ; exit 1; fi ;
       - run:
           name: install node - npm
           command: |
@@ -223,4 +223,4 @@ jobs:
           command: |
             F1=./dist/discovery-tmp-web.js
             F2=./dist/discovery-web.js
-            if [ "$(diff -q $F1 $F2)" != ""  ]; then  echo "$F2 have to be updated with update_cdn_libjs.sh !" ; fi ;
+            if [ "$(diff -q $F1 $F2)" != ""  ]; then  echo "$F2 have to be updated with update_cdn_libjs.sh !" ; exit 1; fi ;
