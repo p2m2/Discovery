@@ -225,8 +225,8 @@ jobs:
           command: |
             F1=./dist/discovery-tmp.js
             F2=./dist/discovery.js
-            if [ "$(diff -q $F1 $F2)" != ""  ]; then  echo "discovery and discovery-web have to be updated with update_cdn_libjs.sh !" ; exit 1; fi ;
+            if [ "$(diff -q $F1 $F2)" != ""  ]; then echo "discovery and discovery-web have to be updated with update_cdn_libjs.sh !" ;  exit 1; fi ;
 
             F1=./dist/discovery-tmp-web.js
             F2=./dist/discovery-web.js
-            if [ "$(diff -q $F1 $F2)" != ""  ]; then  echo "discovery and discovery-web have to be updated with update_cdn_libjs.sh !" ; exit 1; fi ;
+            if [ "$(diff -q $F1 $F2)" != ""  ]; then  echo "discovery and discovery-web have to be updated with update_cdn_libjs.sh !" ; $(diff -q $F1 $F2); exit 1; fi ;
