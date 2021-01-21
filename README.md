@@ -23,9 +23,7 @@ sbt publishLocal
 ### Library generation html/nodejs  
 
 ```bash
-sbt discoveryJS/fullOptJS
-cp js/target/scala-x.xx/discovery-opt.js dist/discovery.js
-browserify -r ./dist/discovery.js -s discovery > dist/discovery-web.js
+./update_cdn_libjs.sh
 ```
 
 ## test
