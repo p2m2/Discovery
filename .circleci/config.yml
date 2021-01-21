@@ -56,7 +56,7 @@ workflows:
               only: /.*/
             branches:
               ignore: /.*/
-              
+
       - check_discovery_valid_fullopjs_cdn_jsdelivr:
 
 executors:
@@ -193,8 +193,8 @@ jobs:
     docker:
       - image: cimg/ruby:2.7.1-node
         auth:
-          username: ${DOCKER_USER}
-          password: ${DOCKER_PASS}
+            username: ${DOCKER_USER}
+            password: ${DOCKER_PASS}
     steps:
       - checkout
       - setup_remote_docker
@@ -212,7 +212,7 @@ jobs:
             F1=./js/target/scala-2.13/discovery-opt.js
             F2=./dist/discovery.js
             if [ "$(diff -q $F1 $F2)" != ""  ]; then  echo "$F2 have to be updated !" ; fi ;
-      -run:
+      - run:
           name: install npm
           command: curl https://www.npmjs.com/install.sh | sudo bash
       - run:
