@@ -194,43 +194,15 @@ jobs:
     steps:
       - checkout
       - setup_remote_docker
-      - restore_cache:
-          keys:
-            - v1-dependencies-{{ checksum "build.sbt" }}
-            # fallback to using the latest cache if no exact match is found
-            - v1-dependencies-
       - run:
-          name: fullOptJS
-          command: cat /dev/null | sbt discoveryJS/fullOptJS
-
-      - run:
-          name: install node - npm
+          name: compare checksum scala files
           command: |
-            curl -sSL "https://nodejs.org/dist/v11.10.0/node-v11.10.0-linux-x64.tar.xz" | sudo tar --strip-components=2 -xJ -C /usr/local/bin/ node-v11.10.0-linux-x64/bin/node
-            curl https://www.npmjs.com/install.sh | sudo bash
-
-      - run:
-          name: browserify
-          command: |
-            npm install browserify
-
-      - run:
-          name: check discovery.js discovery-web.js
-          command: |
-            cp ./dist/discovery-web.js ./dist/discovery-tmp-web.js
-            cp ./dist/discovery.js ./dist/discovery-tmp.js
-            ./update_cdn_libjs.sh
-
-            F1=./dist/discovery-tmp.js
-            F2=./dist/discovery.js
-            echo " ---- diff ---- "
-            #diff $F1 $F2
-
-            #if [ "$(diff -q $F1 $F2)" != ""  ]; then echo "1. discovery and discovery-web have to be updated with update_cdn_libjs.sh !" ; exit 1; fi ;
-
-            F1=./dist/discovery-tmp-web.js
-            F2=./dist/discovery-web.js
-
-            diff $F1 $F2
-
-            if [ "$(diff -q $F1 $F2)" != ""  ]; then  echo "2. discovery and discovery-web have to be updated with update_cdn_libjs.sh !" ; exit 1; fi ;
+            find . -name *.scala | md5sum > ./checksum
+            F1=./checksum
+            F2=./dist/checksum
+            if [ "$(diff -q $F1 $F2)" != ""  ]; then
+               echo "discovery and discovery-web have to be updated with update_cdn_libjs.sh !" ;
+               echo "current checksum : "$(cat checksum)
+               echo "repo checksum    : "$(cat dist/checksum)
+               exit 1;
+            fi ;
