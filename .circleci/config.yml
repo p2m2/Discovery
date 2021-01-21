@@ -4,12 +4,12 @@
 #
 version: 2.1
 workflows:
-  test-workflow:
+  compile-workflow:
     jobs:
       - compile:
           context:
             - DOCKER_CONTEXT
-      - test:
+      - lib_js:
           requires:
             - compile
           context:
