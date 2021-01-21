@@ -57,7 +57,7 @@ workflows:
             branches:
               ignore: /.*/
 
-      - check_discovery_valid_fullopjs_cdn_jsdelivr:
+      - check_discovery_valid_fullopjs_cdn_jsdelivr
 
 executors:
 
