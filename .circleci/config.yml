@@ -207,7 +207,7 @@ jobs:
           command: |
             F1=./js/target/scala-2.13/discovery-opt.js
             F2=./dist/discovery.js
-            if [ "$(diff -q $F1 $F2)" != ""  ]; then  echo "$F2 have to be updated !" ; fi ;
+            if [ "$(diff -q $F1 $F2)" != ""  ]; then  echo "$F2 have to be updated with update_cdn_libjs.sh !" ; fi ;
       - run:
           name: install node - npm
           command: |
@@ -216,11 +216,11 @@ jobs:
       - run:
           name: browserify
           command: |
-            npm install -g browserify
-            browserify -r ./dist/discovery.js -s discovery > dist/discovery-tmp-web.js
+            npm install browserify
+            ./node_modules/.bin/browserify -r ./dist/discovery.js -s discovery > dist/discovery-tmp-web.js
       - run:
           name: check discovery-web.js
           command: |
             F1=./dist/discovery-tmp-web.js
             F2=./dist/discovery-web.js
-            if [ "$(diff -q $F1 $F2)" != ""  ]; then  echo "$F2 have to be updated !" ; fi ;
+            if [ "$(diff -q $F1 $F2)" != ""  ]; then  echo "$F2 have to be updated with update_cdn_libjs.sh !" ; fi ;
