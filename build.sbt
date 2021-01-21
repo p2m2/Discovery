@@ -102,6 +102,7 @@ lazy val discovery=crossProject(JSPlatform, JVMPlatform).in(file("."))
   )
   .jsSettings(
     scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.CommonJSModule) } ,
+    scalaJSLinkerConfig in (Compile, fullOptJS) ~= { _.withSourceMap(false) },
     libraryDependencies ++= Seq(
       "org.scala-js" %%% "scalajs-dom" % scalaJsDOMVersion
     ),
