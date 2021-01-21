@@ -15,10 +15,10 @@ final case class DiscoveryException(private val message: String = "",
 
 object SWDiscovery {
 
-  private val version : String = "0.0.2"
+  private val version : String = SWDiscoveryVersionAtBuildTime.version
 
   info(" --------------------------------------------------" )
-  info(" ---- version Discovery :"+ version + "          -----------" )
+  info(" ---- Discovery :"+ SWDiscovery.version + "         -----------" )
   info(" --------------------------------------------------" )
 }
 
