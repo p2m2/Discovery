@@ -12,8 +12,6 @@ resolvers += Resolver.bintrayRepo("hmil", "maven")
 libraryDependencies += "com.github.p2m2" %%% "discovery" % "0.0.2-SNAPSHOT"
 ```
 
-
-
 ## Library generation 
 
 ```
@@ -25,9 +23,7 @@ sbt publishLocal
 ### Library generation html/nodejs  
 
 ```bash
-sbt discoveryJS/fullOptJS
-cp js/target/scala-x.xx/discovery-opt.js dist/discovery.js
-browserify -r ./dist/discovery.js -s discovery > dist/discovery-web.js
+./update_cdn_libjs.sh
 ```
 
 ## test
@@ -94,5 +90,8 @@ sbt package
 sbt test
 sbt fastOptJS => generer le JS
 sbt discoveryJVM/testOnly inrae.semantic_web.QueryPlannerTest
+## local publication -> .ivy2
 sbt publishLocal
+## osssonatype maven centra repository publication
+sbt publish
 ```

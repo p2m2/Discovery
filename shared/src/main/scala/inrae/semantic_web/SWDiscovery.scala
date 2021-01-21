@@ -15,10 +15,10 @@ final case class DiscoveryException(private val message: String = "",
 
 object SWDiscovery {
 
-  private val version : String = "0.0.2"
+  private val version : String = SWDiscoveryVersionAtBuildTime.version
 
   info(" --------------------------------------------------" )
-  info(" ---- version Discovery :"+ version + "          -----------" )
+  info(" ---- Discovery :"+ SWDiscovery.version + "         -----------" )
   info(" --------------------------------------------------" )
 }
 
@@ -63,7 +63,7 @@ case class SWDiscovery(var config: StatementConfiguration) {
     def not : FilterIncrement = { this.negation = !this.negation ; this }
   }
 
-  val filter : FilterIncrement = new FilterIncrement()
+  def filter : FilterIncrement = new FilterIncrement()
 
   private val logger = Logger.of[SWDiscovery]
   // Set the root logger's log level
@@ -278,8 +278,11 @@ case class SWDiscovery(var config: StatementConfiguration) {
     println("USER REQUEST\n" +
       pm.SimpleConsole.get(rootNode) +
       pm.SimpleConsole.get(focusNode) +
-      "QUERY PLANNER\n"+
-      "todo....")
+      "\nENDPOINT:"+config.sources().map(v => println(v.url)).mkString(",") +"\n\n" +
+      "\n -- SPARQL Request -- \n\n" +
+      sparql())
+      //"QUERY PLANNER\n"+
+      //"todo....")
     this
   }
 

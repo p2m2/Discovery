@@ -1,76 +1,214 @@
-# Scala CircleCI 2.0 configuration file
 #
-# Check https://circleci.com/docs/2.0/sample-config/ for more details
+#  - Compile JVM/Js
+#  - Tests JVM
+#  - publish JVM Sonatype Snapshot for branches : master/develop
+#  - publish JVM Sonatype Stagge/Release (wait approval) for tags release
 #
-version: 2
+#  DOCKER_CONTEXT is a context global env variable for all application github p2m2 organization
+#   - DOCKER_USER          -> login
+#   - DOCKER_PASS          -> password
+#   - ORGANIZATION_NAME    -> organization register on dockerhub
+#
+#  CREDENTIAL_CONTEXT used by build.sbt
+#   - REALM_CREDENTIAL,HOST_CREDENTIAL,LOGIN_CREDENTIAL,PASSWORD_CREDENTIAL
+#
+version: 2.1
+workflows:
+  compile-workflow:
+    jobs:
+      - compile:
+          context:
+            - DOCKER_CONTEXT
+      - lib_js:
+          requires:
+            - compile
+          context:
+            - DOCKER_CONTEXT
+
+      - test_and_coverage_jvm:
+          requires:
+            - compile
+          context:
+            - DOCKER_CONTEXT
+
+      - publish_snapshot:
+          requires:
+            - test_and_coverage_jvm
+          context:
+            - DOCKER_CONTEXT
+            - CREDENTIAL_CONTEXT
+          filters:
+            tags:
+              ignore: /.*/
+            branches:
+              only:
+                - develop
+                - master
+
+      - publish_tag_to_sonatype_stagge_for_release:
+          requires:
+            - compile
+          context:
+            - DOCKER_CONTEXT
+            - CREDENTIAL_CONTEXT
+          filters:
+            tags:
+              only: /.*/
+            branches:
+              ignore: /.*/
+
+      - check_discovery_valid_fullopjs_cdn_jsdelivr:
+          requires:
+            - lib_js
+            - test_and_coverage_jvm
+
+executors:
+
+  openjdk:
+      docker:
+        - image: circleci/openjdk:8-jdk
+          auth:
+            username: ${DOCKER_USER}
+            password: ${DOCKER_PASS}
+
+  virtuoso_environment_executor:
+      docker:
+        - image: circleci/openjdk:8-jdk
+          auth:
+            username: ${DOCKER_USER}
+            password: ${DOCKER_PASS}
+        - image: tenforce/virtuoso:virtuoso7.2.5
+          auth:
+            username: ${DOCKER_USER}
+            password: ${DOCKER_PASS}
+          environment:
+            VIRT_Parameters_NumberOfBuffers: 51000
+            VIRT_Parameters_MaxDirtyBuffers: 37500
+            VIRT_Parameters_TN_MAX_memory: 4000000
+            VIRT_Parameters_TransactionAfterImageLimit: 500000
+            VIRT_SPARQL_ResultSetMaxRows: 1000
+            VIRT_SPARQL_MaxDataSourceSize: 10000
+            VIRT_SPARQL_MaxQueryCostEstimationTime: 0
+            VIRT_SPARQL_MaxQueryExecutionTime: 0
+            DBA_PASSWORD: dba
+            SPARQL_UPDATE: true
+            DEFAULT_GRAPH: "graph:test:discovery:default:"
+
 jobs:
-  build:
-    docker:
-      # specify the version you desire here
-      - image: circleci/openjdk:8-jdk
-        auth:
-          username: p2m2
-          password: $DOCKERHUB_PASSWORD
-
-      - image: tenforce/virtuoso:virtuoso7.2.5
-        auth:
-          username: p2m2
-          password: $DOCKERHUB_PASSWORD
-        environment:
-          VIRT_Parameters_NumberOfBuffers: 51000
-          VIRT_Parameters_MaxDirtyBuffers: 37500
-          VIRT_Parameters_TN_MAX_memory: 4000000
-          VIRT_Parameters_TransactionAfterImageLimit: 500000
-          VIRT_SPARQL_ResultSetMaxRows: 1000
-          VIRT_SPARQL_MaxDataSourceSize: 10000
-          VIRT_SPARQL_MaxQueryCostEstimationTime: 0
-          VIRT_SPARQL_MaxQueryExecutionTime: 0
-          DBA_PASSWORD: dba
-          SPARQL_UPDATE: true
-          DEFAULT_GRAPH: "graph:test:discovery:default:"
-
-      # Specify service dependencies here if necessary
-      # CircleCI maintains a library of pre-built images
-      # documented at https://circleci.com/docs/2.0/circleci-images/
-      # - image: circleci/postgres:9.4
-
-    working_directory: ~/repo
-
+  compile:
+    executor: openjdk
     environment:
-      # Customize the JVM maximum heap limit
       JVM_OPTS: -Xmx3200m
       TERM: dumb
-
     steps:
       - checkout
-      - setup_remote_docker:
-          version: 19.03.13
-      # Download and cache dependencies
+      - setup_remote_docker
       - restore_cache:
           keys:
             - v1-dependencies-{{ checksum "build.sbt" }}
             # fallback to using the latest cache if no exact match is found
             - v1-dependencies-
+      - run:
+          name: Compile - JVM
+          command: cat /dev/null | sbt discoveryJVM/test:compile
 
-      - run: cat /dev/null | sbt discoveryJVM/test:compile
-      - run: cat /dev/null | sbt discoveryJS/test:compile
-      - run: cat /dev/null | sbt discoveryJS/fastOptJS
-      - run: cat /dev/null | sbt discoveryJS/fullOptJS
+      - run:
+          name: Compile - JS
+          command: cat /dev/null | sbt discoveryJS/test:compile
 
-      - save_cache:
-          paths:
-            - ~/.m2
-          key: v1-dependencies--{{ checksum "build.sbt" }}
+  lib_js:
+    executor: openjdk
+    environment:
+      JVM_OPTS: -Xmx3200m
+      TERM: dumb
+    steps:
+      - checkout
+      - setup_remote_docker
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "build.sbt" }}
+            # fallback to using the latest cache if no exact match is found
+            - v1-dependencies-
+      - run:
+          name: fastOptJS
+          command: cat /dev/null | sbt discoveryJS/fastOptJS
+      - run:
+          name: fullOptJS
+          command: cat /dev/null | sbt discoveryJS/fullOptJS
 
-      # run tests!
-      - run: cat /dev/null | sbt clean coverage discoveryJVM/test:test
-
-      # coverage
-      - run: sbt discoveryJVM/coverageReport
-      - run: bash <(curl -s https://codecov.io/bash)
-      - run: bash <(curl -Ls https://coverage.codacy.com/get.sh) report
+  test_and_coverage_jvm:
+    executor: virtuoso_environment_executor
+    environment:
+      JVM_OPTS: -Xmx3200m
+      TERM: dumb
+    steps:
+      - checkout
+      - setup_remote_docker
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "build.sbt" }}
+            # fallback to using the latest cache if no exact match is found
+            - v1-dependencies-
+      - run:
+          name: Test and Coverage
+          command: |
+            cat /dev/null | sbt clean coverage discoveryJVM/test:test
+            sbt discoveryJVM/coverageReport
+            bash <(curl -s https://codecov.io/bash)
+            bash <(curl -Ls https://coverage.codacy.com/get.sh) report
 
       - store_artifacts:
           path: discovery/jvm/target/test-reports
 
+  publish_snapshot:
+    executor: openjdk
+    steps:
+      - checkout
+      - setup_remote_docker
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "build.sbt" }}
+            # fallback to using the latest cache if no exact match is found
+            - v1-dependencies-
+      - run:
+          name: Snapshot publication
+          command: |
+            export DISCOVERY_VERSION="${CIRCLE_BRANCH}-SNAPSHOT"
+            sbt publish
 
+  publish_tag_to_sonatype_stagge_for_release:
+    executor: openjdk
+    steps:
+      - checkout
+      - setup_remote_docker
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "build.sbt" }}
+            # fallback to using the latest cache if no exact match is found
+            - v1-dependencies-
+      - run:
+          name: Snapshot publication
+          command: |
+            export DISCOVERY_VERSION="${CIRCLE_TAG}"
+            sbt publish
+
+  check_discovery_valid_fullopjs_cdn_jsdelivr:
+    executor: openjdk
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: compare checksum scala files
+          command: |
+
+            cat $(find . -name *.scala | sort -V | grep -v SWDiscoveryVersionAtBuildTime.scala) | md5sum > ./checksum
+
+            F1=./checksum
+            F2=./dist/checksum
+
+            if [ "$(diff -q $F1 $F2)" != ""  ]; then
+               echo "discovery and discovery-web have to be updated with update_cdn_libjs.sh !" ;
+               echo "current checksum : "$(cat checksum)
+               echo "repo checksum    : "$(cat dist/checksum)
+               exit 1;
+            fi ;
