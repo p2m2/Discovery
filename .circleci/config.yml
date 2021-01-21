@@ -219,9 +219,9 @@ jobs:
           name: browserify
           command: |
             browserify -r ./dist/discovery.js -s discovery > dist/discovery-tmp-web.js
-      -run:
-        name: check discovery-web.js
-        command: |
+      - run:
+          name: check discovery-web.js
+          command: |
             F1=./dist/discovery-tmp-web.js
             F2=./dist/discovery-web.js
             if [ "$(diff -q $F1 $F2)" != ""  ]; then  echo "$F2 have to be updated !" ; fi ;
