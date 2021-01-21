@@ -204,17 +204,29 @@ jobs:
             sbt publish
 
   update_fulloptjs:
-    executor: openjdk
+    docker:
+      - image: cimg/ruby:2.7.1-node
+        auth:
+          username: ${DOCKER_USER}
+          password: ${DOCKER_PASS}
     steps:
       - checkout
       - setup_remote_docker
       - attach_workspace:
           at: ~/repo/js/target/scala-2.13/
       - run:
+          name: Update npm
+          command: curl https://www.npmjs.com/install.sh | sudo bash
+      - run:
           name: commit fullOptJS
+          command: cp js/target/scala-2.13/discovery-opt.js dist/discovery.js
+      - run:
+          name: browserify discovery
           command: |
-                cp js/target/scala-2.13/discovery-opt.js dist/discovery.js
                 npm install -g --silent browserify
                 browserify -r ./dist/discovery.js -s discovery > dist/discovery-web.js
+      - run:
+          name: commit discovery.js discovery-web.js
+          command: |
                 git config user.email "p2m2-circle-ci@inrae.fr"
                 git config user.name "p2m2-circle-ci"
