@@ -2,14 +2,14 @@
 #
 # Check https://circleci.com/docs/2.0/sample-config/ for more details
 #
-version: 2
+version: 2.1
 workflows:
   test-workflow:
     jobs:
       - test:
           context:
             - DOCKER_CONTEXT
-          
+
 executors:
   virtuoso_environment_executor:
     machine: true
