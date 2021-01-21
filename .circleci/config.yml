@@ -6,37 +6,50 @@ version: 2.1
 workflows:
   test-workflow:
     jobs:
+      - compile:
+          context:
+            - DOCKER_CONTEXT
       - test:
+          requires:
+            - compile
           context:
             - DOCKER_CONTEXT
 
 executors:
+
+  openjdk:
+      docker:
+        - image: circleci/openjdk:8-jdk
+          auth:
+            username: ${DOCKER_USER}
+            password: ${DOCKER_PASS}
+
   virtuoso_environment_executor:
-    docker:
-      - image: circleci/openjdk:8-jdk
-        auth:
-          username: ${DOCKER_USER}
-          password: ${DOCKER_PASS}
-      - image: tenforce/virtuoso:virtuoso7.2.5
-        auth:
-          username: ${DOCKER_USER}
-          password: ${DOCKER_PASS}
-        environment:
-          VIRT_Parameters_NumberOfBuffers: 51000
-          VIRT_Parameters_MaxDirtyBuffers: 37500
-          VIRT_Parameters_TN_MAX_memory: 4000000
-          VIRT_Parameters_TransactionAfterImageLimit: 500000
-          VIRT_SPARQL_ResultSetMaxRows: 1000
-          VIRT_SPARQL_MaxDataSourceSize: 10000
-          VIRT_SPARQL_MaxQueryCostEstimationTime: 0
-          VIRT_SPARQL_MaxQueryExecutionTime: 0
-          DBA_PASSWORD: dba
-          SPARQL_UPDATE: true
-          DEFAULT_GRAPH: "graph:test:discovery:default:"
+      docker:
+        - image: circleci/openjdk:8-jdk
+          auth:
+            username: ${DOCKER_USER}
+            password: ${DOCKER_PASS}
+        - image: tenforce/virtuoso:virtuoso7.2.5
+          auth:
+            username: ${DOCKER_USER}
+            password: ${DOCKER_PASS}
+          environment:
+            VIRT_Parameters_NumberOfBuffers: 51000
+            VIRT_Parameters_MaxDirtyBuffers: 37500
+            VIRT_Parameters_TN_MAX_memory: 4000000
+            VIRT_Parameters_TransactionAfterImageLimit: 500000
+            VIRT_SPARQL_ResultSetMaxRows: 1000
+            VIRT_SPARQL_MaxDataSourceSize: 10000
+            VIRT_SPARQL_MaxQueryCostEstimationTime: 0
+            VIRT_SPARQL_MaxQueryExecutionTime: 0
+            DBA_PASSWORD: dba
+            SPARQL_UPDATE: true
+            DEFAULT_GRAPH: "graph:test:discovery:default:"
 
 jobs:
-  test:
-    executor: virtuoso_environment_executor
+  compile:
+    executor: openjdk
     environment:
       JVM_OPTS: -Xmx3200m
       TERM: dumb
@@ -49,6 +62,29 @@ jobs:
             # fallback to using the latest cache if no exact match is found
             - v1-dependencies-
       - run:
-          name: Compile And Test - JVM
-          command: |
-                      cat /dev/null | sbt discoveryJVM/test:compile
+          name: Compile - JVM
+          command: cat /dev/null | sbt discoveryJVM/test:compile
+
+      - run:
+          name: Compile - JS
+          command: cat /dev/null | sbt discoveryJS/test:compile
+
+  lib_js:
+      executor: openjdk
+      environment:
+        JVM_OPTS: -Xmx3200m
+        TERM: dumb
+      steps:
+        - checkout
+        - setup_remote_docker
+        - restore_cache:
+            keys:
+              - v1-dependencies-{{ checksum "build.sbt" }}
+              # fallback to using the latest cache if no exact match is found
+              - v1-dependencies-
+      - run:
+          name: fastOptJS
+          command: cat /dev/null | sbt discoveryJS/fastOptJS
+      - run:
+          name: fullOptJS
+          command: cat /dev/null | sbt discoveryJS/fullOptJS
