@@ -197,8 +197,8 @@ jobs:
       - run:
           name: compare checksum scala files
           command: |
-            find . -name *.scala | sort | grep -v SWDiscoveryVersionAtBuildTime.scala
-            cat $(find . -name *.scala | sort | grep -v SWDiscoveryVersionAtBuildTime.scala) | md5sum > ./checksum
+            find . -name *.scala | sort -V | grep -v SWDiscoveryVersionAtBuildTime.scala
+            cat $(find . -name *.scala | sort -V | grep -v SWDiscoveryVersionAtBuildTime.scala) | md5sum > ./checksum
             F1=./checksum
             F2=./dist/checksum
             if [ "$(diff -q $F1 $F2)" != ""  ]; then
