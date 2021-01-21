@@ -190,8 +190,7 @@ jobs:
             sbt publish
 
   check_discovery_valid_fullopjs_cdn_jsdelivr:
-    machine:
-      image: ubuntu-2004:202010-01
+    executor: openjdk
     steps:
       - checkout
       - setup_remote_docker
