@@ -35,14 +35,9 @@ case class SWDiscovery(config: StatementConfiguration,rootNode : Root = Root(), 
   this.prefix("rdfs",IRI("http://www.w3.org/2000/01/rdf-schema#"))
   this.prefix("xsd",IRI("http://www.w3.org/2001/XMLSchema#"))
 
-  class FilterIncrement() {
-    var negation = false
+  case class FilterIncrement(val negation : Boolean = false) {
 
-    def manageFilter(n:Node,forward : Boolean = false) : SWDiscovery = {
-      val sw = focusManagement(n,forward)
-      this.negation = !this.negation
-      sw
-    }
+    def manageFilter(n:Node,forward : Boolean = false) : SWDiscovery = focusManagement(n,forward)
 
     def isLiteral : SWDiscovery = manageFilter(inrae.semantic_web.internal.isLiteral(this.negation),false)
     def isUri : SWDiscovery = manageFilter(inrae.semantic_web.internal.isURI(this.negation),false)
@@ -61,7 +56,7 @@ case class SWDiscovery(config: StatementConfiguration,rootNode : Root = Root(), 
     def sup( value : Literal ) : SWDiscovery = manageFilter(Sup(value,this.negation),false)
     def supEqual( value : Literal ) : SWDiscovery = manageFilter(SupEqual(value,this.negation),false)
 
-    def not : FilterIncrement = { this.negation = !this.negation ; this }
+    def not : FilterIncrement = { FilterIncrement(true) }
   }
 
   def filter : FilterIncrement = new FilterIncrement()
@@ -117,11 +112,10 @@ case class SWDiscovery(config: StatementConfiguration,rootNode : Root = Root(), 
     if (ref == "") throw new Error("reference can not be empty !")
     val arrNode = pm.SelectNode.getNodeWithRef(ref, rootNode)
     if ( arrNode.length > 0 ) {
-      SWDiscovery(config,rootNode,Some(focusNode))
+      SWDiscovery(config,rootNode,Some(arrNode(0)))
     } else {
       throw new Error("ref unknown :"+ref)
     }
-    this
   }
 
   /* get ref of the current focus */

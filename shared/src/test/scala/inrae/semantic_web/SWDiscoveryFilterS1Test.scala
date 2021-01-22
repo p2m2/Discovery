@@ -27,12 +27,12 @@ object SWDiscoveryFilterS1Test extends TestSuite {
         val trans = SWDiscovery(config)
           .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
           .something("instance")
-          .isSubjectOf(URI("a"))
-          .set(URI("Class", "owl"))
+            .isSubjectOf(URI("a"))
+              .set(URI("Class", "owl"))
           .focus("instance")
-          .filter.contains("w3")
+            .filter.contains("w3")
           .focus("instance")
-          .filter.not.contains("http://www.w3.org/2002/07/owl")
+            .filter.not.contains("http://www.w3.org/2002/07/owl")
           .select(List("instance"))
 
 
