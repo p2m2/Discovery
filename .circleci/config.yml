@@ -98,7 +98,6 @@ executors:
           environment:
             login: dba
             passwd: dba
-            chrome_container: chrome
           command: >
               bash -c 'sleep 15s && echo " **** configure CORS / Virtuoso  ****" && node virtuoso_cors.js'
 
@@ -129,7 +128,7 @@ jobs:
           command: cat /dev/null | sbt discoveryJS/test:compile
 
   lib_js_test_js:
-    executor: openjdk
+    executor: virtuoso_environment_executor
     environment:
       JVM_OPTS: -Xmx3200m
       TERM: dumb
