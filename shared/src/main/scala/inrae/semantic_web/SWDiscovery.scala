@@ -22,12 +22,8 @@ object SWDiscovery {
   info(" --------------------------------------------------" )
 }
 
-case class SWDiscovery(var config: StatementConfiguration) {
+case class SWDiscovery(config: StatementConfiguration,rootNode : Root = Root(), focusNode  : Node  ) {
   implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
-  /* root node */
-  val rootNode   : Root = Root()
-  /* focus node */
-  var focusNode  : Node = rootNode
 
   this.prefix("owl",IRI("http://www.w3.org/2002/07/owl#"))
   this.prefix("rdf",IRI("http://www.w3.org/1999/02/22-rdf-syntax-ns#"))
