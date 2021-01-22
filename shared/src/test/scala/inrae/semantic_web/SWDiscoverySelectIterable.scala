@@ -35,7 +35,7 @@ object SWDiscoverySelectIterable extends TestSuite {
   val nblock = (nbValues / pageSize) + 1
 
 
-  var config: StatementConfiguration = StatementConfiguration().setConfigString(
+  val config: StatementConfiguration = StatementConfiguration().setConfigString(
     s"""
         {
          "sources" : [{
