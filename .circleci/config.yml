@@ -76,6 +76,7 @@ executors:
           auth:
             username: ${DOCKER_USER}
             password: ${DOCKER_PASS}
+
         - image: tenforce/virtuoso:virtuoso7.2.5
           auth:
             username: ${DOCKER_USER}
@@ -117,9 +118,6 @@ jobs:
 
   lib_js:
     executor: openjdk
-    environment:
-      JVM_OPTS: -Xmx3200m
-      TERM: dumb
     steps:
       - checkout
       - setup_remote_docker
@@ -134,6 +132,7 @@ jobs:
       - run:
           name: fullOptJS
           command: cat /dev/null | sbt discoveryJS/fullOptJS
+
 
   test_and_coverage_jvm:
     executor: virtuoso_environment_executor

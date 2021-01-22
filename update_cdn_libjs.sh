@@ -5,6 +5,10 @@ cp js/target/scala-2.13/discovery-opt.js dist/discovery.js
 
 sed -i "s#$(pwd)#com/github/p2m2#g" dist/discovery.js
 
+if [ ! -f ./node_modules/.bin/browserify ] ;then
+  npm install   browserify
+fi
+
 ./node_modules/.bin/browserify -r ./dist/discovery.js -s discovery > dist/discovery-web.js
 
 # generate md5sum to check js libraries

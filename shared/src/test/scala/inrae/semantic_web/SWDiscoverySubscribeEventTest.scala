@@ -7,7 +7,7 @@ import utest._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.language.postfixOps
 
-object SWDiscoverySubscribeEventTest$ extends TestSuite {
+object SWDiscoverySubscribeEventTest extends TestSuite {
 
   DataTestFactory.delete_virtuoso1(this.getClass.getSimpleName)
 
@@ -72,21 +72,24 @@ object SWDiscoverySubscribeEventTest$ extends TestSuite {
 
     test("DiscoveryRequestEvent ERROR_HTTP_REQUEST") {
       val config: StatementConfiguration = StatementConfiguration()
-      config.setConfigString(""" {
+      config.setConfigString(s""" {
                                |         "sources" : [{
                                |           "id"       : "badtps",
                                |           "url"      : "http://bidon",
                                |           "type"     : "tps",
                                |           "method"   : "POST",
                                |           "mimetype" : "json"
-                               |         }]
+                               |         }],
+                               |         "settings" : {
+                               |            "driver" : "${DataTestFactory.default_http_driver}"
+                               |          }
                                |         } """.stripMargin)
 
       var stepDiscovery : Map[String,Boolean] = Map(
         "ERROR_HTTP_REQUEST" -> false
       )
 
-      var swr =
+       val swr =
         SWDiscovery(config).something("h1")
         .isSubjectOf(URI("bb"))
         .select(List("h1"))
