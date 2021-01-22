@@ -1,12 +1,7 @@
 package inrae.semantic_web.internal.pm
 
 import inrae.semantic_web.internal._
-import inrae.semantic_web.rdf.SparqlDefinition
 
-import scala.concurrent.Promise
-//import scala.concurrent.duration.Duration
-//import scala.concurrent.{Await}
-import scala.concurrent.Future
 /**
  *
  */

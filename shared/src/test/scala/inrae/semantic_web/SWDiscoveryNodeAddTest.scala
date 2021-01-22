@@ -3,14 +3,12 @@ package inrae.semantic_web
 import inrae.data.DataTestFactory
 import inrae.semantic_web.rdf._
 import utest._
-import wvlet.log.Logger.rootLogger.error
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.util.matching.Regex
 import scala.language.postfixOps
+import scala.util.matching.Regex
 import scala.util.{Failure, Success, Try}
 
-object SWDiscoveryNodeAddTest$ extends TestSuite {
+object SWDiscoveryNodeAddTest extends TestSuite {
 
   val config: StatementConfiguration = DataTestFactory.getConfigVirtuoso1()
 

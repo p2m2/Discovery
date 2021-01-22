@@ -20,7 +20,7 @@ workflows:
           context:
             - DOCKER_CONTEXT
 
-      - lib_js:
+      - lib_js_test_js:
           requires:
             - compile
           context:
@@ -76,6 +76,7 @@ executors:
           auth:
             username: ${DOCKER_USER}
             password: ${DOCKER_PASS}
+
         - image: tenforce/virtuoso:virtuoso7.2.5
           auth:
             username: ${DOCKER_USER}
@@ -92,6 +93,18 @@ executors:
             DBA_PASSWORD: dba
             SPARQL_UPDATE: true
             DEFAULT_GRAPH: "graph:test:discovery:default:"
+
+        - image: inraep2m2/service-allow-cors-virtuoso
+            environment:
+              login: dba
+              passwd: dba
+              chrome_container: chrome
+            command: >
+              bash -c 'sleep 15s && echo " **** configure CORS / Virtuoso  ****" && node virtuoso_cors.js'
+
+        - image: selenium/standalone-chrome
+            environment:
+              START_XVFB: 'false'
 
 jobs:
   compile:
@@ -115,7 +128,7 @@ jobs:
           name: Compile - JS
           command: cat /dev/null | sbt discoveryJS/test:compile
 
-  lib_js:
+  lib_js_test_js:
     executor: openjdk
     environment:
       JVM_OPTS: -Xmx3200m
@@ -134,6 +147,9 @@ jobs:
       - run:
           name: fullOptJS
           command: cat /dev/null | sbt discoveryJS/fullOptJS
+      - run:
+          name: test js
+          command: cat /dev/null | sbt discoveryJS/test
 
   test_and_coverage_jvm:
     executor: virtuoso_environment_executor

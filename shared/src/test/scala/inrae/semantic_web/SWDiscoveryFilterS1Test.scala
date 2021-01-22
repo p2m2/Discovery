@@ -1,16 +1,15 @@
 package inrae.semantic_web
 
 import inrae.data.DataTestFactory
-import inrae.semantic_web.rdf.{SparqlBuilder, URI}
+import inrae.semantic_web.rdf.{IRI, SparqlBuilder, URI}
 import utest._
 
 object SWDiscoveryFilterS1Test extends TestSuite {
   implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
 
-  DataTestFactory.delete_virtuoso1(this.getClass.getSimpleName)
-
-  DataTestFactory.insert_virtuoso1(
-    """
+  val insert_data =
+    DataTestFactory.insert_virtuoso1(
+      """
       <aaSWFilterTest> a <http://www.w3.org/2002/07/owl#Thing> .
       <aaSWFilterTest> <some> "test" .
       <aaSWFilterTest2> a <url_w3_class_stuff> .
@@ -24,26 +23,32 @@ object SWDiscoveryFilterS1Test extends TestSuite {
 
   def tests = Tests {
     test("SW Filter contains") {
-      val trans = SWDiscovery(config)
-        .something("instance")
-        .isSubjectOf(URI("a"))
-        .set(URI("Class", "owl"))
-        .focus("instance")
+      insert_data.map(_ => {
+        val trans = SWDiscovery(config)
+          .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
+          .something("instance")
+          .isSubjectOf(URI("a"))
+          .set(URI("Class", "owl"))
+          .focus("instance")
           .filter.contains("w3")
-        .focus("instance")
+          .focus("instance")
           .filter.not.contains("http://www.w3.org/2002/07/owl")
-        .console()
-        .select(List("instance"))
+          .select(List("instance"))
 
 
         trans.commit()
-        .raw
-        .map(result => {
-          println(result)
-          assert(result("results")("bindings").arr.length > 0)
-          assert(SparqlBuilder.createUri(result("results")("bindings")(0)("instance")).localName.contains("w3"))
-          assert(!SparqlBuilder.createUri(result("results")("bindings")(0)("instance")).localName.contains("http://www.w3.org/2002/07/owl"))
-        })
+          .raw
+          .map(result => {
+            assert(result("results")("bindings").arr.length > 0)
+            assert(SparqlBuilder.createUri(result("results")("bindings")(0)("instance")).localName.contains("w3"))
+            assert(!SparqlBuilder.createUri(result("results")("bindings")(0)("instance")).localName.contains("http://www.w3.org/2002/07/owl"))
+          })
+      }).flatten
     }
+  }
+
+  TestRunner.runAsync(tests).map { _ => {
+    DataTestFactory.delete_virtuoso1(this.getClass.getSimpleName)
+  }
   }
 }

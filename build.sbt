@@ -25,7 +25,7 @@ val buildSWDiscoveryVersionAtBuildTimeFile =
       |package inrae.semantic_web
       |
       |object SWDiscoveryVersionAtBuildTime {
-      |   val version : String = "${version_build}"
+      |   val version : String = "${version_build} - build ${java.time.LocalDate.now.toString}"
       |}""").stripMargin)
 
 
@@ -98,16 +98,19 @@ lazy val discovery=crossProject(JSPlatform, JVMPlatform).in(file("."))
     classLoaderLayeringStrategy := ClassLoaderLayeringStrategy.AllLibraryJars,
     coverageMinimum := 70,
     coverageFailOnMinimum := false,
-    coverageHighlighting := true
+    coverageHighlighting := true,
+
   )
   .jsSettings(
-    scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.CommonJSModule) } ,
-    scalaJSLinkerConfig in (Compile, fullOptJS) ~= { _.withSourceMap(false) },
-    libraryDependencies ++= Seq(
-      "org.scala-js" %%% "scalajs-dom" % scalaJsDOMVersion
-    ),
-    jsEnv := new org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv()
-  )
+    scalaJSLinkerConfig in (Compile, fastOptJS ) ~= {
+      _.withOptimizer(false)
+        .withPrettyPrint(true)
+        .withSourceMap(true)
+    },
+    scalaJSLinkerConfig in (Compile, fullOptJS) ~= {
+      _.withSourceMap(false)
+        .withModuleKind(ModuleKind.CommonJSModule)
+    })
   .jvmSettings(
     libraryDependencies ++= Seq(
       "org.scala-js" %% "scalajs-stubs" % scalaStubVersion % "provided",
