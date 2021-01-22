@@ -22,8 +22,13 @@ object SWDiscovery {
   info(" --------------------------------------------------" )
 }
 
-case class SWDiscovery(config: StatementConfiguration,rootNode : Root = Root(), focusNode  : Node  ) {
+case class SWDiscovery(config: StatementConfiguration,rootNode : Root = Root(), fn : Option[Node] = None) {
   implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
+
+  val focusNode : Node = fn match {
+    case Some(v) => v
+    case None => rootNode
+  }
 
   this.prefix("owl",IRI("http://www.w3.org/2002/07/owl#"))
   this.prefix("rdf",IRI("http://www.w3.org/1999/02/22-rdf-syntax-ns#"))
@@ -103,10 +108,8 @@ case class SWDiscovery(config: StatementConfiguration,rootNode : Root = Root(), 
   def getUniqueRef() : String = "_internal_" + randomUUID.toString
 
   /* set focus on root */
-  def root(): SWDiscovery  = {
-    focusNode = rootNode
-    this
-  }
+  def root(): SWDiscovery  = SWDiscovery(config,rootNode,Some(rootNode))
+
 
   /* set the current focus on the select node */
   def focus(ref : String) : SWDiscovery = {
@@ -114,7 +117,7 @@ case class SWDiscovery(config: StatementConfiguration,rootNode : Root = Root(), 
     if (ref == "") throw new Error("reference can not be empty !")
     val arrNode = pm.SelectNode.getNodeWithRef(ref, rootNode)
     if ( arrNode.length > 0 ) {
-      focusNode = arrNode(0)
+      SWDiscovery(config,rootNode,Some(focusNode))
     } else {
       throw new Error("ref unknown :"+ref)
     }
@@ -155,7 +158,7 @@ case class SWDiscovery(config: StatementConfiguration,rootNode : Root = Root(), 
   def setupnode(n : Node, upsource : Boolean = false, forward : Boolean = true ) : SWDiscovery = {
     trace("setupnode")
 
-    focusManagement(n,forward)
+    val sw = focusManagement(n,forward)
 
     if ( upsource ) {
       QueryManager(config).setUpSourcesNode(n,rootNode.prefixes).onComplete {
@@ -165,19 +168,24 @@ case class SWDiscovery(config: StatementConfiguration,rootNode : Root = Root(), 
         case _  => None
       }
     }
-    this
+    sw
   }
 
   def focusManagement(n : Node, forward: Boolean = true) : SWDiscovery = {
     trace("-- focusManagement --")
+
     if (! focusNode.accept(n)) {
       throw new Error("Can not add "+n.toString()+" with the current focus ["+focusNode.toString()+"]")
     }
 
     focusNode.addChildren(n)
+
     /* current node is the focusNode */
-    if (forward) focusNode = n
-    this
+    if (forward) {
+      SWDiscovery(config,rootNode,Some(n))
+    }  else {
+      SWDiscovery(config,rootNode,Some(focusNode))
+    }
   }
 
   /* start a request with a variable */
@@ -219,7 +227,7 @@ case class SWDiscovery(config: StatementConfiguration,rootNode : Root = Root(), 
     checkQueryVariable(term)
     val f = focusNode
     isSubjectOf(URI("a")).set(term)
-    focusNode = f
+    SWDiscovery(config,rootNode,Some(f))
     this
   }
 
@@ -248,8 +256,7 @@ case class SWDiscovery(config: StatementConfiguration,rootNode : Root = Root(), 
       }
       case _ => throw new Error("Can not add datatype property with "+focusNode.getClass.toString)
     }
-
-    focusNode = f
+    SWDiscovery(config,rootNode,Some(f))
     this
   }
 
