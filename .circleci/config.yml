@@ -95,16 +95,16 @@ executors:
             DEFAULT_GRAPH: "graph:test:discovery:default:"
 
         - image: inraep2m2/service-allow-cors-virtuoso
-            environment:
-              login: dba
-              passwd: dba
-              chrome_container: chrome
-            command: >
+          environment:
+            login: dba
+            passwd: dba
+            chrome_container: chrome
+          command: >
               bash -c 'sleep 15s && echo " **** configure CORS / Virtuoso  ****" && node virtuoso_cors.js'
 
         - image: selenium/standalone-chrome
-            environment:
-              START_XVFB: 'false'
+          environment:
+            START_XVFB: 'false'
 
 jobs:
   compile:
