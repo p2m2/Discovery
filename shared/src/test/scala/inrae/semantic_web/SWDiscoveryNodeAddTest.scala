@@ -12,10 +12,10 @@ object SWDiscoveryNodeAddTest extends TestSuite {
 
   val config: StatementConfiguration = DataTestFactory.getConfigVirtuoso1()
 
-  def tests = Tests {
+  def tests: Tests = Tests {
 
     test("something") {
-      val s = SWDiscovery(config).something("h1")
+      SWDiscovery(config).something("h1")
     }
 
     test("isSubjectOf on the root") {
@@ -39,7 +39,9 @@ object SWDiscoveryNodeAddTest extends TestSuite {
     }
 
     test("isObjectOf on the root") {
-      Try(SWDiscovery(config).isObjectOf(URI("bb"), "var")) match {
+      Try(SWDiscovery(config)
+        .isObjectOf(URI("bb"), "var")
+        .console()) match {
         case Success(_) => assert(false)
         case Failure(_) => assert(true)
       }
@@ -106,7 +108,7 @@ object SWDiscoveryNodeAddTest extends TestSuite {
       }
     }
 
-    test("isLinkFrom") {
+    test("isA") {
       val s = SWDiscovery(config)
         .something("h1")
         .isA(URI("class"))
@@ -118,6 +120,5 @@ object SWDiscoveryNodeAddTest extends TestSuite {
         case None => assert(false)
       }
     }
-
   }
 }

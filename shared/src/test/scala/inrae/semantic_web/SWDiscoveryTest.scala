@@ -77,6 +77,7 @@ object SWDiscoveryTest extends TestSuite {
         SWDiscovery(config).something("h1")
           .set(URI("aa3"))
           .datatype(URI("propDatatype"), "d")
+          .console()
           .select(List("d"))
           .commit()
           .raw

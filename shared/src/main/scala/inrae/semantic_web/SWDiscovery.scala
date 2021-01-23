@@ -8,10 +8,9 @@ import wvlet.log.Logger.rootLogger._
 
 import java.util.UUID.randomUUID
 import scala.concurrent.Future
-import scala.util.Success
 
-final case class DiscoveryException(private val message: String = "",
-                                    private val cause: Throwable = None.orNull) extends Exception(message,cause)
+final case class SWDiscoveryException(private val message: String = "",
+                                      private val cause: Throwable = None.orNull) extends Exception(message,cause)
 
 object SWDiscovery {
 
@@ -22,46 +21,41 @@ object SWDiscovery {
   info(" --------------------------------------------------" )
 }
 
-case class SWDiscovery(config: StatementConfiguration,rootNode : Root = Root(), fn : Option[Node] = None) {
+case class SWDiscovery(config: StatementConfiguration,rootNode : Root = Root(), fn : Option[String] = None) {
   implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
 
-  val focusNode : Node = fn match {
+  val focusNode : String = fn match {
     case Some(v) => v
-    case None => rootNode
+    case None => rootNode.reference()
   }
 
-  this.prefix("owl",IRI("http://www.w3.org/2002/07/owl#"))
-  this.prefix("rdf",IRI("http://www.w3.org/1999/02/22-rdf-syntax-ns#"))
-  this.prefix("rdfs",IRI("http://www.w3.org/2000/01/rdf-schema#"))
-  this.prefix("xsd",IRI("http://www.w3.org/2001/XMLSchema#"))
-
-  case class FilterIncrement(val negation : Boolean = false) {
+  case class FilterIncrement(negation : Boolean = false) {
 
     def manageFilter(n:Node,forward : Boolean = false) : SWDiscovery = focusManagement(n,forward)
 
-    def isLiteral : SWDiscovery = manageFilter(inrae.semantic_web.internal.isLiteral(this.negation),false)
-    def isUri : SWDiscovery = manageFilter(inrae.semantic_web.internal.isURI(this.negation),false)
-    def isBlank : SWDiscovery = manageFilter(inrae.semantic_web.internal.isBlank(this.negation),false)
+    def isLiteral : SWDiscovery = manageFilter(inrae.semantic_web.internal.isLiteral(this.negation))
+    def isUri : SWDiscovery = manageFilter(inrae.semantic_web.internal.isURI(this.negation))
+    def isBlank : SWDiscovery = manageFilter(inrae.semantic_web.internal.isBlank(this.negation))
 
     /* strings */
-    def contains( string : String ) : SWDiscovery = manageFilter(Contains(string,this.negation),false)
-    def strStarts( string : String ) : SWDiscovery = manageFilter(StrStarts(string,this.negation),false)
-    def strEnds( string : String ) : SWDiscovery = manageFilter(StrEnds(string,this.negation),false)
+    def contains( string : String ) : SWDiscovery = manageFilter(Contains(string,this.negation))
+    def strStarts( string : String ) : SWDiscovery = manageFilter(StrStarts(string,this.negation))
+    def strEnds( string : String ) : SWDiscovery = manageFilter(StrEnds(string,this.negation))
 
     /* numeric */
-    def equal( value : Literal ) : SWDiscovery = manageFilter(Equal(value,this.negation),false)
-    def notEqual( value : Literal ) : SWDiscovery = manageFilter(NotEqual(value,this.negation),false)
-    def inf( value : Literal ) : SWDiscovery = manageFilter(Inf(value,this.negation),false)
-    def infEqual( value : Literal ) : SWDiscovery = manageFilter(InfEqual(value,this.negation),false)
-    def sup( value : Literal ) : SWDiscovery = manageFilter(Sup(value,this.negation),false)
-    def supEqual( value : Literal ) : SWDiscovery = manageFilter(SupEqual(value,this.negation),false)
+    def equal( value : Literal ) : SWDiscovery = manageFilter(Equal(value,this.negation))
+    def notEqual( value : Literal ) : SWDiscovery = manageFilter(NotEqual(value,this.negation))
+    def inf( value : Literal ) : SWDiscovery = manageFilter(Inf(value,this.negation))
+    def infEqual( value : Literal ) : SWDiscovery = manageFilter(InfEqual(value,this.negation))
+    def sup( value : Literal ) : SWDiscovery = manageFilter(Sup(value,this.negation))
+    def supEqual( value : Literal ) : SWDiscovery = manageFilter(SupEqual(value,this.negation))
 
     def not : FilterIncrement = { FilterIncrement(true) }
   }
 
-  def filter : FilterIncrement = new FilterIncrement()
+  def filter : FilterIncrement = FilterIncrement()
 
-  private val logger = Logger.of[SWDiscovery]
+  //private val logger = Logger.of[SWDiscovery]
   // Set the root logger's log level
   Logger.setDefaultLogLevel(config.conf.settings.getLogLevel())
 
@@ -98,12 +92,8 @@ case class SWDiscovery(config: StatementConfiguration,rootNode : Root = Root(), 
     this
   }
 
-
-  /* manage the creation of an unique ref */
-  def getUniqueRef() : String = "_internal_" + randomUUID.toString
-
   /* set focus on root */
-  def root(): SWDiscovery  = SWDiscovery(config,rootNode,Some(rootNode))
+  def root(): SWDiscovery  = SWDiscovery(config,rootNode,Some(rootNode.reference()))
 
 
   /* set the current focus on the select node */
@@ -112,127 +102,93 @@ case class SWDiscovery(config: StatementConfiguration,rootNode : Root = Root(), 
     if (ref == "") throw new Error("reference can not be empty !")
     val arrNode = pm.SelectNode.getNodeWithRef(ref, rootNode)
     if ( arrNode.length > 0 ) {
-      SWDiscovery(config,rootNode,Some(arrNode(0)))
+      SWDiscovery(config,rootNode,Some(arrNode(0).reference()))
     } else {
       throw new Error("ref unknown :"+ref)
     }
   }
 
   /* get ref of the current focus */
-  def ref(): String = {
-    pm.SelectNode.getNodeRef(rootNode,focusNode)
-  }
+  def ref(): String = focusNode
 
-  def prefix(short : String, long : IRI ) : SWDiscovery = {
-    rootNode.prefixes = rootNode.prefixes + ( short -> long )
-    this
-  }
+  def prefix(short : String, long : IRI ) : SWDiscovery = SWDiscovery(config,rootNode.addPrefix(short , long ),Some(focusNode))
 
-  def graph(graph : IRI) : SWDiscovery = {
-    rootNode.defaultGraph = rootNode.defaultGraph :+ graph
-    this
-  }
 
-  def namedGraph(graph : IRI ) : SWDiscovery = {
-    rootNode.namedGraph = rootNode.namedGraph :+ graph
-    this
-  }
+  def graph(graph : IRI) : SWDiscovery = SWDiscovery(config,rootNode.addDefaultGraph(graph),Some(focusNode))
 
-  def checkQueryVariable(term : SparqlDefinition) = {
+
+  def namedGraph(graph : IRI ) : SWDiscovery = SWDiscovery(config,rootNode.addNamedGraph(graph),Some(focusNode))
+
+  def checkQueryVariable(term : SparqlDefinition): SWDiscovery = {
     /* Check if QueryVariable is referenced with Element.
      *  add a Something element otherwise */
     term match {
-        case qv : QueryVariable => if (SelectNode.getNodeWithRef(qv.name,rootNode).length == 0) {
-          rootNode.addChildren(Something(qv.name))
-        }
-        case _ => None
+        case qv : QueryVariable if SelectNode.getNodeWithRef(qv.name,rootNode).length == 0  =>
+          SWDiscovery(config,rootNode.addChildren(rootNode.reference(),Something(qv.name)),Some(focusNode))
+        case _ => this
       }
-  }
-
-  def setupnode(n : Node, upsource : Boolean = false, forward : Boolean = true ) : SWDiscovery = {
-    trace("setupnode")
-
-    val sw = focusManagement(n,forward)
-
-    if ( upsource ) {
-      QueryManager(config).setUpSourcesNode(n,rootNode.prefixes).onComplete {
-        case Success(Some(sn)) => {
-          rootNode.lSourcesNodes = rootNode.lSourcesNodes :+ sn
-        }
-        case _  => None
-      }
-    }
-    sw
   }
 
   def focusManagement(n : Node, forward: Boolean = true) : SWDiscovery = {
     trace("-- focusManagement --")
 
-    if (! focusNode.accept(n)) {
-      throw new Error("Can not add "+n.toString()+" with the current focus ["+focusNode.toString()+"]")
-    }
+    /****
+     *
+     *   MANIPULER UN ID POUR LE FOCUS NODE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+     *   creer le nouveau root avec l arbre en sortie de addChildren
+     *
+     *
+     *
+     */
 
-    focusNode.addChildren(n)
+    val newRootNode = rootNode.addChildren(focusNode,n)
+
 
     /* current node is the focusNode */
     if (forward) {
-      SWDiscovery(config,rootNode,Some(n))
+      SWDiscovery(config,newRootNode,Some(n.reference()))
     }  else {
-      SWDiscovery(config,rootNode,Some(focusNode))
+      SWDiscovery(config,newRootNode,Some(focusNode))
     }
   }
+  def getUniqueRef: String = randomUUID.toString
 
   /* start a request with a variable */
-  def something( ref : String = getUniqueRef() ) : SWDiscovery = {
+  def something( ref : String = getUniqueRef ) : SWDiscovery = {
     debug(" -- something -- ")
-    setupnode(Something(ref))
+    focusManagement(Something(ref))
   }
 
   /* create node which focus is the subject : ?focusId <uri> ?target */
-  def isSubjectOf( term : SparqlDefinition , ref : String = getUniqueRef() ) : SWDiscovery = {
-    debug(" -- isSubjectOf -- ")
-    checkQueryVariable(term)
-    setupnode(SubjectOf(ref,term))
-  }
+  def isSubjectOf( term : SparqlDefinition , ref : String = getUniqueRef ) : SWDiscovery =
+    checkQueryVariable(term).focusManagement(SubjectOf(ref,term))
 
 
   /* create node which focus is the subject : ?target <uri> ?focusId */
-  def isObjectOf( term : SparqlDefinition , ref : String = getUniqueRef() ) : SWDiscovery = {
-    debug(" -- isObjectOf -- ")
-    checkQueryVariable(term)
-    setupnode(ObjectOf(ref,term))
-  }
+  def isObjectOf( term : SparqlDefinition , ref : String = getUniqueRef ) : SWDiscovery =
+    checkQueryVariable(term).focusManagement(ObjectOf(ref,term))
 
   /* create node which focus is the properties :
   ?focusId ?target <uri>|literal
   */
-  def isLinkTo(term : SparqlDefinition, ref : String = getUniqueRef() ) : SWDiscovery = {
-    debug(" -- isLinkTo -- ")
-    checkQueryVariable(term)
-    setupnode(LinkTo(ref,term))
-  }
+  def isLinkTo(term : SparqlDefinition, ref : String = getUniqueRef ) : SWDiscovery =
+    checkQueryVariable(term).focusManagement(LinkTo(ref,term))
 
 
   /* create node which focus is typed with <uri>:
   ?focusId a <uri>
   */
-  def isA( term : SparqlDefinition  ) : SWDiscovery = {
-    debug(" -- isA -- ")
+  def isA( term : SparqlDefinition  ) : SWDiscovery =
     checkQueryVariable(term)
-    val f = focusNode
-    isSubjectOf(URI("a")).set(term)
-    SWDiscovery(config,rootNode,Some(f))
-    this
-  }
+    .isSubjectOf(URI("a"))
+    .set(term)
+    .focus(focusNode)
 
   /* create node which focus is the properties :
      <uri> ?target ?focusId
   */
-  def isLinkFrom( term : SparqlDefinition, ref : String = getUniqueRef() ) : SWDiscovery = {
-    debug(" -- isLinkFrom -- ")
-    checkQueryVariable(term)
-    setupnode(LinkFrom(ref,term))
-  }
+  def isLinkFrom( term : SparqlDefinition, ref : String = getUniqueRef ) : SWDiscovery =
+    checkQueryVariable(term).focusManagement(LinkFrom(ref,term))
 
   /*
   Get attribute value of an object.
@@ -240,41 +196,23 @@ case class SWDiscovery(config: StatementConfiguration,rootNode : Root = Root(), 
   Attribute value is optional
   */
 
-  def datatype( uri : URI, ref : String ) : SWDiscovery = {
-    debug(" -- datatype -- ")
-    val f = focusNode
+  def datatype( uri : URI, ref : String ) : SWDiscovery =
+    SWDiscovery(config,
+      rootNode.addDatatype(DatatypeNode(ref,SubjectOf(ref,uri),getUniqueRef)),
+      Some(focusNode))
 
-    focusNode match {
-      case n : RdfNode => {
-        rootNode.lDatatypeNode = rootNode.lDatatypeNode :+ (DatatypeNode(n.reference(),SubjectOf(ref,uri)))
-      }
-      case _ => throw new Error("Can not add datatype property with "+focusNode.getClass.toString)
-    }
-    SWDiscovery(config,rootNode,Some(f))
-    this
-  }
 
-  /*
-    Specific treatment : add value possibilities for a specific node
-    We get the
-  */
-  def set( term : SparqlDefinition ) : SWDiscovery = {
-    debug(" -- set -- ")
-    checkQueryVariable(term)
-    setupnode(Value(term),true,false)
-  }
+  def set( term : SparqlDefinition ) : SWDiscovery =
+    checkQueryVariable(term).focusManagement(Value(term),forward = false)
 
-  def setList( uris : Seq[URI] ) : SWDiscovery = {
-    debug(" -- setList -- ")
-    setupnode(ListValues(uris),true,false)
-  }
+  def setList( uris : Seq[URI] ) : SWDiscovery = focusManagement(ListValues(uris),forward = false)
 
 
   def console() : SWDiscovery = {
     debug(" -- console -- ")
     println("USER REQUEST\n" +
-      pm.SimpleConsole.get(rootNode) +
-      pm.SimpleConsole.get(focusNode) +
+      pm.SimpleConsole.get(rootNode) + "\n" +
+      "FOCUS NODE:"+ focusNode +
       "\nENDPOINT:"+config.sources().map(v => println(v.url)).mkString(",") +"\n\n" +
       "\n -- SPARQL Request -- \n\n" +
       sparql())
@@ -283,10 +221,7 @@ case class SWDiscovery(config: StatementConfiguration,rootNode : Root = Root(), 
     this
   }
 
-  def sparql() : String = {
-    debug(" -- sparql -- ")
-    QueryManager(config).sparql_string(rootNode)
-  }
+  def sparql() : String = QueryManager(config).sparql_string(rootNode)
 
   /**
    * Discovery request
@@ -301,16 +236,11 @@ case class SWDiscovery(config: StatementConfiguration,rootNode : Root = Root(), 
    * @param offset : solution are generated after this offset
    * @return
    */
-  def select(lRef: Seq[String] = List(), limit : Int = 0, offset : Int = 0) : SWTransaction = {
-    debug(" -- select -- ")
+  def select(lRef: Seq[String] = List(), limit : Int = 0, offset : Int = 0) : SWTransaction =
     SWTransaction(this,lRef,limit,offset)
-  }
 
-  def count() : Future[Int] = {
-    debug(" -- count -- ")
-    val qm =QueryManager(config)
-    qm.countNbSolutions(rootNode)
-  }
+  def count() : Future[Int] =
+    QueryManager(config).countNbSolutions(rootNode)
 
   /**
    * Give an iterable object to browse and obtain all solution performed by a select.
@@ -386,7 +316,7 @@ case class SWDiscovery(config: StatementConfiguration,rootNode : Root = Root(), 
 
   def findObjectProperties(motherClassProperties: URI = URI("") ) : Future[Seq[URI]] = {
     debug(" -- findObjectProperties -- ")
-    findProperties(motherClassProperties,"objectProperty")
+    findProperties(motherClassProperties)
   }
   def findDatatypeProperties(motherClassProperties: URI = URI("") ) : Future[Seq[URI]] = {
     debug(" -- findDatatypeProperties -- ")

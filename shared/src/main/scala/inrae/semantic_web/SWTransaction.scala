@@ -1,7 +1,6 @@
 package inrae.semantic_web
 
 import inrae.semantic_web.event.{DiscoveryRequestEvent, DiscoveryStateRequestEvent, Publisher, Subscriber}
-import inrae.semantic_web.internal.Node.references
 import inrae.semantic_web.internal.pm
 import inrae.semantic_web.rdf.SparqlDefinition
 import inrae.semantic_web.sparql.QueryResult
@@ -56,7 +55,7 @@ case class SWTransaction(sw : SWDiscovery, lRef: Seq[String] = List(), limit : I
     */
     currentRequestEvent = DiscoveryStateRequestEvent.ABORTED_BY_THE_USER.toString()
 
-    _prom_raw failure(DiscoveryException("aborted by the user."))
+    _prom_raw failure(SWDiscoveryException("aborted by the user."))
   }
 
   private def variable(reference: String) : Option[String] = {
@@ -86,12 +85,14 @@ case class SWTransaction(sw : SWDiscovery, lRef: Seq[String] = List(), limit : I
     val lSelectVariables = {
       /* select uri type ask with decoration/datatype */
       lDatatype.map(ld => {
+        println(ld.toString+"==>"+ld.refNode)
+        println(mapId2Var)
         mapId2Var(ld.refNode)
       }) ++ {
         /* select user ask variable */
         lRef match {
           case v if v.length > 0 => v.flatMap(ref => variable(ref))
-          case _ => references(sw.focusNode).flatMap(ref => variable(ref))
+          case _ => sw.rootNode.referencesChildren().flatMap(ref => variable(ref))
         }
       }
     }.distinct

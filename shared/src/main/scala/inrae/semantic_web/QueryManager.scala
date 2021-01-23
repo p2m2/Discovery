@@ -40,14 +40,14 @@ case class QueryManager(config : StatementConfiguration)
    */
   def queryAll(rootRequest : Root,limit : Int, offset : Int) : Future[QueryResult] = {
     debug(" -- queryAll -- ")
-    queryVariables(rootRequest,Node.references(rootRequest),limit,offset)
+    queryVariables(rootRequest,rootRequest.referencesChildren(),limit,offset)
   }
 
   def countNbSolutions(root : Root) : Future[Int] = {
     debug(" -- countNbSolutions -- ")
 
     if (config.sources().length == 0) {
-      Future { throw DiscoveryException(" ** None sources available ** ") }
+      Future { throw SWDiscoveryException(" ** None sources available ** ") }
     } else if (config.sources().length == 1) {
       val source = config.sources()(0)
       val (refToIdentifier, _) = pm.SparqlGenerator.correspondenceVariablesIdentifier(root)
@@ -65,7 +65,7 @@ case class QueryManager(config : StatementConfiguration)
       })
     } else {
       // todo query planner
-      Future { throw DiscoveryException("QueryPlanner is not available .") }
+      Future { throw SWDiscoveryException("QueryPlanner is not available .") }
     }
   }
 
@@ -87,7 +87,7 @@ case class QueryManager(config : StatementConfiguration)
     config.sources().length match {
       case 0 => {
         Future {
-          throw DiscoveryException(" ** No sources available ** ")
+          throw SWDiscoveryException(" ** No sources available ** ")
         }
       }
       case 1 => {
@@ -176,7 +176,7 @@ case class QueryManager(config : StatementConfiguration)
         /* request using api */
         SWDiscovery(config).something("val_uri")
           .setList(lSubUris.map(_ match { case uri: URI => uri }))
-          .setupnode(datatypeNode.property, false, false)
+       //   .setupnode(datatypeNode.property, false, false)
           .select(List("val_uri", labelProperty))
           .commit()
           .raw
