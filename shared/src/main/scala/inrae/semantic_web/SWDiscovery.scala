@@ -198,7 +198,7 @@ case class SWDiscovery(config: StatementConfiguration,rootNode : Root = Root(), 
 
   def datatype( uri : URI, ref : String ) : SWDiscovery =
     SWDiscovery(config,
-      rootNode.addDatatype(DatatypeNode(ref,SubjectOf(ref,uri),getUniqueRef)),
+      rootNode.addDatatype(DatatypeNode(focusNode,SubjectOf(ref,uri))),
       Some(focusNode))
 
 

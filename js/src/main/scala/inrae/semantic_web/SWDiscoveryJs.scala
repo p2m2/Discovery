@@ -14,7 +14,7 @@ import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
 class SWDiscoveryJs(var config: StatementConfiguration) {
   implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
 
-  var sw = SWDiscovery(config)
+  val sw: SWDiscovery = SWDiscovery(config)
 
   @JSExport
   val filter = new FilterIncrementJs(this)
@@ -38,24 +38,24 @@ class SWDiscoveryJs(var config: StatementConfiguration) {
   def namedGraph(graph : IRI ) : SWDiscoveryJs = { sw.namedGraph(graph) ; this }
   /* start a request */
   @JSExport
-  def something( ref : String = sw.getUniqueRef() ) : SWDiscoveryJs = { sw.something(ref) ; this }
+  def something( ref : String = sw.getUniqueRef ) : SWDiscoveryJs = { sw.something(ref) ; this }
 
   /* create node which focus is the subject : ?focusId <uri> ?target */
   @JSExport
-  def isSubjectOf( uri : URI , ref : String = sw.getUniqueRef() ) : SWDiscoveryJs = { sw.isSubjectOf(uri,ref) ; this }
+  def isSubjectOf( uri : URI , ref : String = sw.getUniqueRef ) : SWDiscoveryJs = { sw.isSubjectOf(uri,ref) ; this }
 
   /* create node which focus is the subject : ?focusId <uri> ?target */
   @JSExport
-  def isObjectOf( uri : URI , ref : String = sw.getUniqueRef() ) : SWDiscoveryJs = { sw.isObjectOf(uri,ref); this }
+  def isObjectOf( uri : URI , ref : String = sw.getUniqueRef ) : SWDiscoveryJs = { sw.isObjectOf(uri,ref); this }
 
   @JSExport
-  def isLinkTo( uri : URI , ref : String = sw.getUniqueRef() ) : SWDiscoveryJs = { sw.isLinkTo(uri,ref); this }
+  def isLinkTo( uri : URI , ref : String = sw.getUniqueRef ) : SWDiscoveryJs = { sw.isLinkTo(uri,ref); this }
 
   @JSExport
   def isA( term : SparqlDefinition ) : SWDiscoveryJs = { sw.isA(term); this }
 
   @JSExport
-  def isLinkFrom( uri : URI , ref : String = sw.getUniqueRef() ) : SWDiscoveryJs = { sw.isLinkFrom(uri,ref); this }
+  def isLinkFrom( uri : URI , ref : String = sw.getUniqueRef ) : SWDiscoveryJs = { sw.isLinkFrom(uri,ref); this }
   /* set */
   @JSExport
   def set( uri : URI ) : SWDiscoveryJs = { sw.set(uri) ; this }
@@ -80,8 +80,8 @@ class SWDiscoveryJs(var config: StatementConfiguration) {
   @JSExport
   def selectByPage(lRef: String*)  : Promise[(Int,js.Array[SWTransactionJs])] = {
     sw.count().map(
-      nsolutions => {
-        val nit : Int = nsolutions / config.conf.settings.pageSize
+      nSolutions => {
+        val nit : Int = nSolutions / config.conf.settings.pageSize
         (nit+1,(0 to nit).map( p =>{
           val limit = config.conf.settings.pageSize
           val offset = p*config.conf.settings.pageSize

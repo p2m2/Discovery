@@ -171,12 +171,13 @@ case class QueryManager(config : StatementConfiguration)
     val labelProperty = datatypeNode.property.reference()
 
     lUris.grouped(config.conf.settings.sizeBatchProcessing).toList.map(
-      lSubUris => {
-        trace( " datatypes:"+lSubUris.toString )
+      f = lSubUris => {
+        trace(" datatypes:" + lSubUris.toString)
         /* request using api */
-        SWDiscovery(config).something("val_uri")
+        SWDiscovery(config)
+          .something("val_uri")
           .setList(lSubUris.map(_ match { case uri: URI => uri }))
-       //   .setupnode(datatypeNode.property, false, false)
+          .focusManagement(datatypeNode.property, false)
           .select(List("val_uri", labelProperty))
           .commit()
           .raw

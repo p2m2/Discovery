@@ -85,8 +85,6 @@ case class SWTransaction(sw : SWDiscovery, lRef: Seq[String] = List(), limit : I
     val lSelectVariables = {
       /* select uri type ask with decoration/datatype */
       lDatatype.map(ld => {
-        println(ld.toString+"==>"+ld.refNode)
-        println(mapId2Var)
         mapId2Var(ld.refNode)
       }) ++ {
         /* select user ask variable */
