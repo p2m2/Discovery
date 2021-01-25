@@ -45,6 +45,9 @@ def getPackageSetting() = Seq(
       "scm:git@github.com:p2m2/Discovery.git"
     )
   ),
+  developers := List(
+    Developer("ofilangi", "Olivier Filangi", "olivier.filangi@inrae.fr",url("https://github.com/ofilangi"))
+  ),
   credentials += {
 
     val realm = scala.util.Properties.envOrElse("REALM_CREDENTIAL", "" )
