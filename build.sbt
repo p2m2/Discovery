@@ -13,7 +13,7 @@ lazy val scalatagVersion = "0.9.2"
 lazy val jenaVersion = "3.16.0"
 
 releaseIgnoreUntrackedFiles := true
-val version_build = scala.util.Properties.envOrElse("DISCOVERY_VERSION", "local-SNAPSHOT" )
+val version_build = scala.util.Properties.envOrElse("DISCOVERY_VERSION", "SNAPSHOT" )
 val SWDiscoveryVersionAtBuildTimeFile = "./shared/src/main/scala/inrae/semantic_web/SWDiscoveryVersionAtBuildTime.scala"
 
 
