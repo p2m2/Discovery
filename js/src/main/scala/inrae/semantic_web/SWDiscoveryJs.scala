@@ -11,10 +11,16 @@ import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
 
 
 @JSExportTopLevel(name="SWDiscovery")
-case class SWDiscoveryJs(config: StatementConfiguration=StatementConfiguration(),sw: SWDiscovery = SWDiscovery()) {
+case class SWDiscoveryJs(
+                          config: StatementConfiguration=StatementConfiguration(),
+                          swArg: SWDiscovery = null
+                        ) {
   implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
 
-  //val sw: SWDiscovery = SWDiscovery(config)
+  val sw: SWDiscovery = swArg match {
+    case null => SWDiscovery(config)
+    case v =>v
+  }
 
   @JSExport
   val filter = new FilterIncrementJs(this)
@@ -52,7 +58,7 @@ case class SWDiscoveryJs(config: StatementConfiguration=StatementConfiguration()
   def isLinkTo( uri : URI , ref : String = sw.getUniqueRef ) : SWDiscoveryJs = SWDiscoveryJs(config,sw.isLinkTo(uri,ref))
 
   @JSExport
-  def isA( term : SparqlDefinition ) : SWDiscoveryJs = { sw.isA(term); this }
+  def isA( term : SparqlDefinition ) : SWDiscoveryJs = SWDiscoveryJs(config,sw.isA(term))
 
   @JSExport
   def isLinkFrom( uri : URI , ref : String = sw.getUniqueRef ) : SWDiscoveryJs = SWDiscoveryJs(config,sw.isLinkFrom(uri,ref))

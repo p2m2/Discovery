@@ -135,6 +135,7 @@ object StatementConfiguration {
 
 }
 
+@JSExportTopLevel(name="StatementConfiguration")
 case class StatementConfiguration(
                                    conf : ConfigurationObject.StatementConfigurationJson =
                                    new ConfigurationObject.StatementConfigurationJson(

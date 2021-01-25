@@ -87,7 +87,7 @@ case class QueryManager(config : StatementConfiguration)
     config.sources().length match {
       case 0 => {
         Future {
-          throw SWDiscoveryException(" ** No sources available ** ")
+          throw SWDiscoveryException(" ** No source available ** ")
         }
       }
       case 1 => {
