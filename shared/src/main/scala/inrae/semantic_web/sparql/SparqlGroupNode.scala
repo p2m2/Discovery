@@ -1,5 +1,5 @@
 package inrae.semantic_web.sparql
-import inrae.semantic_web.internal.RdfNode
+import inrae.semantic_web.internal._
 
 class SparqlGroupNode {
   def whois() : String = {
@@ -52,4 +52,3 @@ class SparqlGroupNode {
 case class BgpGroupe(lnodes : Seq[RdfNode]) extends SparqlGroupNode
 case class OrGroupe(lbgp   : Seq[SparqlGroupNode]) extends SparqlGroupNode
 case class AndGroupe(lbgp : Seq[SparqlGroupNode]) extends SparqlGroupNode
-

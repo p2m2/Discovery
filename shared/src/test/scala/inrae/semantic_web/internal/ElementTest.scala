@@ -1,6 +1,5 @@
 package inrae.semantic_web.internal
 
-import inrae.semantic_web.internal._
 import inrae.semantic_web.rdf._
 import utest._
 
@@ -22,8 +21,8 @@ object ElementTest extends TestSuite {
       test("Root getRdfNode") {
         val v : Root = Root()
         val n = SubjectOf("1234",new URI("test"))
-        v.addChildren(n)
-        v.getRdfNode("1234") match {
+
+        v.addChildren(n).getRdfNode("1234") match {
           case Some(v) => assert(v == n )
           case None => assert(false)
         }

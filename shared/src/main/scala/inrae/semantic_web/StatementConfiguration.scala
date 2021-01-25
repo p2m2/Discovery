@@ -12,15 +12,8 @@ final case class StatementConfigurationException(private val message: String = "
                                             private val cause: Throwable = None.orNull) extends Exception(message,cause)
 
 
-/**
- * using doc to validate JSON config:
- * see https://www.playframework.com/documentation/2.8.x/ScalaJson
- *
- * @param json_conf
- */
-
-
 object ConfigurationObject {
+
   /* sources configuration */
   case class StatementConfigurationJson(
                                          sources : Seq[Source],
@@ -48,14 +41,14 @@ object ConfigurationObject {
     val method_legal = List("post","get")
 
     method.toLowerCase() match {
-      case a if ! method_legal.contains(a) => throw StatementConfigurationException(s"method source unknown :${method}")
+      case a if ! method_legal.contains(a) => throw StatementConfigurationException("method source unknown :" + method)
       case _ =>
     }
 
     val auth_legal = List("basic", "digest", "bearer", "proxy","")
 
     auth.toLowerCase() match {
-      case a if ! auth_legal.contains(a) => throw StatementConfigurationException(s"auth source not managed :${auth}")
+      case a if ! auth_legal.contains(a) => throw StatementConfigurationException(s"auth source not managed :$auth")
       case _ =>
     }
 
@@ -69,7 +62,7 @@ object ConfigurationObject {
                       pageSize : Int = 20
                     ) {
 
-    def getHttpDriver() : HttpRequestDriver = {
+    def getHttpDriver: HttpRequestDriver = {
       import org.portablescala.reflect._
       Reflect.lookupInstantiatableClass(driver) match {
         case Some( cls ) => cls.newInstance().asInstanceOf[HttpRequestDriver]
@@ -77,9 +70,9 @@ object ConfigurationObject {
       }
     }
     /* check if driver exist when config is loaded . */
-    getHttpDriver()
+    getHttpDriver
 
-    def getLogLevel() : LogLevel = logLevel.toLowerCase() match {
+    def getLogLevel: LogLevel = logLevel.toLowerCase() match {
       case "debug" | "d" => LogLevel.DEBUG
       case "info" | "i" => LogLevel.INFO
       case "warn" | "w" => LogLevel.WARN
@@ -87,10 +80,9 @@ object ConfigurationObject {
       case "trace" | "t" => LogLevel.TRACE
       case "all" => LogLevel.ALL
       case "off" => LogLevel.OFF
-      case _ => {
+      case _ =>
         warn("[config.settings.logLevel] possible value : trace, debug, info, warn, error, all, off . find ["+logLevel+"]")
         LogLevel.WARN
-      }
     }
 
     if ( pageSize<=0 ) {
@@ -119,46 +111,47 @@ object ConfigurationObject {
 }
 
 @JSExportTopLevel(name="SWDiscoveryConfiguration")
-case class StatementConfiguration() {
-
-  var conf: ConfigurationObject.StatementConfigurationJson =
-    new ConfigurationObject.StatementConfigurationJson(
-      Seq[ConfigurationObject.Source](),ConfigurationObject.GeneralSetting())
-
+object StatementConfiguration {
+  implicit val rw: RW[StatementConfiguration] = macroRW
   /**
    * Set a config using class definition
-   * @param conf
+   * @param conf_ext : configuration
    */
   @JSExport
-  def setConfig(conf_ext : ConfigurationObject.StatementConfigurationJson) : StatementConfiguration = {
-    conf = conf_ext
-    this
-  }
+  def setConfig(conf_ext : ConfigurationObject.StatementConfigurationJson) : StatementConfiguration = StatementConfiguration(conf_ext)
 
   /**
    * set a config using string configuration
-   * @param json_conf
+   * @param json_conf : configuration in json format
    */
   @JSExport
   def setConfigString(json_conf: String) : StatementConfiguration = {
-      conf = util.Try(upickle.default.read[ConfigurationObject.StatementConfigurationJson](json_conf))
-      match {
-        case Success(v) => v
-        case Failure(e) => throw StatementConfigurationException(e.getMessage())
-      }
-
-    this
-  }
-
-  def source(idname : String) : ConfigurationObject.Source = {
-    conf.sources.find(source => source.id == idname ) match {
-      case Some(v : ConfigurationObject.Source) => v
-      case None => throw new StatementConfigurationException("Unknown source id:"+idname )
+    util.Try(upickle.default.read[ConfigurationObject.StatementConfigurationJson](json_conf))
+    match {
+      case Success(v) => StatementConfiguration(v)
+      case Failure(e) => throw StatementConfigurationException(e.getMessage)
     }
   }
 
-  def sources() : Seq[ConfigurationObject.Source] = {
-    conf.sources
+}
+
+@JSExportTopLevel(name="StatementConfiguration")
+case class StatementConfiguration(
+                                   conf : ConfigurationObject.StatementConfigurationJson =
+                                   new ConfigurationObject.StatementConfigurationJson(
+                                     Seq[ConfigurationObject.Source](),ConfigurationObject.GeneralSetting())
+                                 ) {
+  override def toString: String = "StatementConfiguration => conf:"+conf.toString
+
+
+
+  def source(idName : String) : ConfigurationObject.Source = {
+    conf.sources.find(source => source.id == idName ) match {
+      case Some(v : ConfigurationObject.Source) => v
+      case None => throw StatementConfigurationException("Unknown source id:"+idName )
+    }
   }
+
+  def sources() : Seq[ConfigurationObject.Source] = conf.sources
 
 }

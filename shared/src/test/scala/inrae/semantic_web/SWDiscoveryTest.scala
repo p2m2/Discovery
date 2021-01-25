@@ -34,8 +34,7 @@ object SWDiscoveryTest extends TestSuite {
   def tests = Tests {
     test("No sources definition") {
       insert_data.map(_ => {
-        val config: StatementConfiguration = StatementConfiguration()
-        config.setConfigString(""" { "sources" : [] } """)
+        val config: StatementConfiguration = StatementConfiguration.setConfigString(""" { "sources" : [] } """)
         SWDiscovery(config).something("h1")
           .select(List("h1"))
           .commit()

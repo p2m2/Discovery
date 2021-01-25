@@ -2,19 +2,14 @@ package inrae.semantic_web.driver
 
 import inrae.data.DataTestFactory
 import inrae.semantic_web.sparql.ConfigurationHttpRequest
-import utest.{TestSuite, Tests, test}
+import utest.{TestRunner, TestSuite, Tests, test}
 import wvlet.log.{LogLevel, Logger}
-import wvlet.log.Logger.rootLogger.error
-
-import scala.util.{Failure, Success}
 
 
 object JenaRequestDriverTest extends TestSuite {
   implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
 
-  DataTestFactory.delete_virtuoso1(this.getClass.getSimpleName)
-
-  DataTestFactory.insert_virtuoso1(
+  val insert_data = DataTestFactory.insert_virtuoso1(
     """
       <aaJenaRequestDriverTest> <bb> <cc> .
       """.stripMargin, this.getClass.getSimpleName)
@@ -27,95 +22,78 @@ object JenaRequestDriverTest extends TestSuite {
   def tests = Tests {
 
     test("get") {
+      insert_data.map(_ => {
       JenaRequestDriver().get(query, ConfigurationHttpRequest(url = DataTestFactory.url_endpoint))
-        .onComplete {
-          case Success(qr) => {
+        .map( qr => {
             assert(qr.json("results")("bindings").arr(0)("b")("value").value=="bb")
             assert(qr.json("results")("bindings").arr(0)("c")("value").value=="cc")
-          }
-          case Failure(e) => {
-            error(e.getMessage())
-            assert(false)
-          }
-        }
+        })
+      }).flatten
     }
 
     test("get bad request") {
-      JenaRequestDriver().get("bad request", ConfigurationHttpRequest(url = DataTestFactory.url_endpoint))
-        .onComplete {
-          case Success(_) => {
-            assert(false)
-          }
-          case Failure(_) => {
-            assert(true)
-          }
-        }
+      insert_data.map(_ => {
+        JenaRequestDriver().get("bad request", ConfigurationHttpRequest(url = DataTestFactory.url_endpoint))
+         .map( qr => assert(false) )
+          .recover( _ => assert(true))
+      }).flatten
     }
 
     test("get malformed endpoint") {
+      insert_data.map(_ => {
       JenaRequestDriver().get(query, ConfigurationHttpRequest(url = "bidon"))
-        .onComplete {
-          case Success(_) => {
-            assert(false)
-          }
-          case Failure(_) => {
-            assert(true)
-          }
-        }
+        .map( qr => assert(false) )
+        .recover( _ => assert(true))
+      }).flatten
     }
 
     test("get endpoint does not exist") {
+      insert_data.map(_ => {
       JenaRequestDriver().get(query, ConfigurationHttpRequest(url = "http://bidon.com"))
-        .onComplete {
-          case Success(_) => {
-            assert(false)
-          }
-          case Failure(_) => {
-            assert(true)
-          }
-        }
+        .map( qr => assert(false) )
+        .recover( _ => assert(true))
+      }).flatten
     }
 
     test("post") {
+      insert_data.map(_ => {
       JenaRequestDriver().post(query, ConfigurationHttpRequest(url = DataTestFactory.url_endpoint))
         .map( qr => {
             assert(qr.json("results")("bindings").arr(0)("b")("value").value=="bb")
             assert(qr.json("results")("bindings").arr(0)("c")("value").value=="cc")
           })
+      }).flatten
     }
 
 
     test("post bad request") {
-      //NOSONAR
+      insert_data.map(_ => {
       JenaRequestDriver().post("bad request", ConfigurationHttpRequest(url = DataTestFactory.url_endpoint))
         .map( _ => {
             assert(false)
         }).recover( _ => assert(true))
+      }).flatten
     }
 
     test("post malformed endpoint") {
-      //NOSONAR
+      insert_data.map(_ => {
       JenaRequestDriver().post(query, ConfigurationHttpRequest(url = "bidon"))
-        .onComplete {
-          case Success(_) => {
-            assert(false)
-          }
-          case Failure(_) => {
-            assert(true)
-          }
-        }
+        .map( qr => assert(false) )
+        .recover( _ => assert(true))
+      }).flatten
     }
 
     test("post endpoint does not exist") {
+      insert_data.map(_ => {
       JenaRequestDriver().post(query, ConfigurationHttpRequest(url = "http://bidon.com"))
-        .onComplete {
-          case Success(_) => {
-            assert(false)
-          }
-          case Failure(_) => {
-            assert(true)
-          }
-        }
+        .map( qr => assert(false) )
+        .recover( _ => assert(true))
+      }).flatten
     }
+  }
+
+  TestRunner.runAsync(tests).map { _ => {
+    DataTestFactory.delete_virtuoso1(this.getClass.getSimpleName)
+  }
   }
 }

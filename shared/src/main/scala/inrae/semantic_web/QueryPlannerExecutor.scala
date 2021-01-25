@@ -1,13 +1,11 @@
 package inrae.semantic_web
-import wvlet.log.Logger.rootLogger._
-import java.util.UUID.randomUUID
-
-import inrae.semantic_web.internal.{Node, Root, Something, pm}
 import inrae.semantic_web.QueryPlanner.{AND_RESULTS_SET, INTERSECTION_RESULTS_SET, ORDONNANCEMENT_RESULTS_SET, OR_RESULTS_SET}
+import inrae.semantic_web.internal.{Node, Root, Something, pm}
 import inrae.semantic_web.rdf.IRI
 import inrae.semantic_web.sparql.{QueryResult, _}
+import wvlet.log.Logger.rootLogger._
 
-import scala.annotation.tailrec
+import java.util.UUID.randomUUID
 import scala.concurrent.{Future, Promise}
 import scala.util.Success
 
@@ -35,7 +33,7 @@ object QueryPlannerExecutor {
     } else if ( lbgp.length == 1 ) {
       lbgp(0)
     } else {
-      lbgp(0).addChildren(buildRootNode(swRootNode,lbgp.drop(1)))
+      lbgp(0).addChildren(lbgp(0).reference(),buildRootNode(swRootNode,lbgp.drop(1)))
     }
   }
 
@@ -82,8 +80,8 @@ object QueryPlannerExecutor {
         for ((source,lbgp) <- bgps.lns) {
           /* reconstruction d'une requete au format easySparql */
           // todo : Verifier qu'on ne casse jamais de lien de parenté
-          var r :Root = Root()
-          r.addChildren(buildRootNode(root,lbgp))
+          var r :Root = Root("__new__")
+                        .addChildren("__new__",buildRootNode(root,lbgp))
           trace(r.toString())
           val refToIdentifier = pm.SparqlGenerator.correspondenceVariablesIdentifier(root)
             ._1.view.filterKeys( k => listVariables.contains(k) ).toMap

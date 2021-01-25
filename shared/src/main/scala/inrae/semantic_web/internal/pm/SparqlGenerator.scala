@@ -1,8 +1,6 @@
 package inrae.semantic_web.internal.pm
 import wvlet.log.Logger.rootLogger._
 
-import inrae.semantic_web._
-import inrae.semantic_web.internal.Node.references
 import inrae.semantic_web.internal._
 import inrae.semantic_web.rdf.{IRI, QueryVariable, SparqlDefinition}
 
@@ -21,7 +19,7 @@ object SparqlGenerator  {
     }
 
     def queryFormSelect(listVariables : Seq[String] = Seq[String]()) : String = {
-        if (listVariables.length == 0 ) {
+        if (listVariables.isEmpty ) {
             "SELECT *"
         } else {
             "SELECT DISTINCT" + listVariables.foldLeft(" ")( (acc,identifier) => acc+"?"+identifier+" ")
@@ -36,10 +34,10 @@ object SparqlGenerator  {
 
     def solutionModifier (limit : Int, offset : Int) : String = {
         "}" + { limit match {
-            case n if n>0 => " LIMIT "+limit.toString()
+            case n if n>0 => " LIMIT "+limit.toString
             case _ => ""
         }} + { offset match {
-            case n if n>0 => " OFFSET "+offset.toString()
+            case n if n>0 => " OFFSET "+offset.toString
             case _ => ""
         }}
     }
@@ -65,19 +63,20 @@ object SparqlGenerator  {
         trace(varIdSire+" - "+variableName)
          n match {
             case node : SubjectOf          => "\t?" + varIdSire + " " +
-              queryVariableTransform(node.term,referenceToIdentifier).toString() + " " + "?"+ variableName + " .\n"
+              queryVariableTransform(node.term,referenceToIdentifier).toString + " " + "?"+ variableName + " .\n"
             case node : ObjectOf           => "\t?" + variableName + " " +
-              queryVariableTransform(node.term,referenceToIdentifier).toString() + " " + "?"+ varIdSire + " .\n"
-            case node : LinkTo           => "\t?"+ varIdSire + " " + "?" + variableName + " " + queryVariableTransform(node.term,referenceToIdentifier).toString() + " .\n"
-            case node : LinkFrom           => queryVariableTransform(node.term,referenceToIdentifier).toString() + " " + "?" + variableName + " " + "?"+ varIdSire + " .\n"
+              queryVariableTransform(node.term,referenceToIdentifier).toString + " " + "?"+ varIdSire + " .\n"
+            case node : LinkTo           => "\t?"+ varIdSire + " " + "?" + variableName + " " + queryVariableTransform(node.term,referenceToIdentifier).toString + " .\n"
+            case node : LinkFrom           => queryVariableTransform(node.term,referenceToIdentifier).toString + " " + "?" + variableName + " " + "?"+ varIdSire + " .\n"
             case node : Value              => node.term match {
-                case _ : QueryVariable => "BIND ( ?" + varIdSire +  " AS " + queryVariableTransform(node.term,referenceToIdentifier).toString() + ")"
-                case _  =>  "VALUES ?" +varIdSire+ " { " + queryVariableTransform(node.term,referenceToIdentifier).toString() + " } .\n" }
+                case _ : QueryVariable => "BIND ( ?" + varIdSire +  " AS " + queryVariableTransform(node.term,referenceToIdentifier).toString + ")"
+                case _  =>  "VALUES ?" +varIdSire+ " { " + queryVariableTransform(node.term,referenceToIdentifier).toString + " } .\n" }
             case node : ListValues         => "VALUES ?" +varIdSire+ " { " + node.terms.map(t => t.sparql()).mkString(" ") + " } .\n"
             case node : FilterNode         => "FILTER ( " + {
-                node.negation match {
-                    case true => "!"
-                    case false => ""
+                if (node.negation) {
+                    "!"
+                } else {
+                    ""
                 }
             } + {
                 node match {
@@ -93,7 +92,7 @@ object SparqlGenerator  {
                     case _ : isBlank            => "isBlank(" + "?" +varIdSire + ")"
                     case _ : isURI              => "isURI(" + "?" +varIdSire + ")"
                     case _ : isLiteral          => "isLiteral(" + "?" +varIdSire + ")"
-                    case _ => throw new Exception("SparqlGenerator::sparqlNode . [Devel error] Node undefined ["+n.toString()+"]")
+                    case _ => throw new Exception("SparqlGenerator::sparqlNode . [Devel error] Node undefined ["+n.toString+"]")
                 }
             } + " )\n"
             case _ : Root| _ : Something         => ""
@@ -128,10 +127,9 @@ object SparqlGenerator  {
         } else {
             val genericName = generic_name(n)
             genericName match {
-                case s: String => {
+                case s: String =>
                     val v = ms.getOrElse(s, 0)
                     Some(genericName + n.reference(), ms + (s -> (v + 1)))
-                }
             }
         }
     }
@@ -139,7 +137,7 @@ object SparqlGenerator  {
     /**
      *
      * @param n : Get Variable Node
-     * @param buildMap
+     * @param buildMap : Iterator/index
      * @return
      *              Map[String,String] : Correspondence reference -> variableName
      *              Map[String,Int] : Iterator/index to increment new variable for a RdfNode
@@ -147,7 +145,7 @@ object SparqlGenerator  {
     def correspondenceVariablesIdentifier(n:Node, buildMap : Map[String,Int]= Map[String,Int]())
                                        : (Map[String,String],Map[String,Int]) = {
         val resLoc : (Map[String,String],Map[String,Int]) = n match {
-            case rdf : RdfNode => {
+            case rdf : RdfNode =>
                 val name = generic_name(rdf)
                 val newBuildMap : Map[String,Int] = {
                     buildMap.get(name) match {
@@ -156,7 +154,6 @@ object SparqlGenerator  {
                     }
                 }
                 (Map(rdf.reference() -> (name + newBuildMap(name).toString)),newBuildMap)
-                }
             case _ => (Map(),buildMap)
             }
 
@@ -173,15 +170,15 @@ object SparqlGenerator  {
              varIdSire : String = "" /* sire variable */
             )  : String = {
         val variableName : String = n match {
-            case rdf : RdfNode => {
+            case rdf : RdfNode =>
                 referenceToIdentifier.get(rdf.reference()) match {
                     case Some(value) => value
                     case None => varIdSire
-            } }
+            }
             case _ => varIdSire
         }
 
-        trace(n.toString())
+        trace(n.toString)
         trace("varIdSire:"+varIdSire)
         trace("variableName:"+variableName)
         val triplet : String = sparqlNode(n,referenceToIdentifier,varIdSire,variableName)
