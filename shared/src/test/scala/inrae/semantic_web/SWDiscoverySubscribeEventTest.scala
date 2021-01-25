@@ -71,8 +71,8 @@ object SWDiscoverySubscribeEventTest extends TestSuite {
     }
 
     test("DiscoveryRequestEvent ERROR_HTTP_REQUEST") {
-      val config: StatementConfiguration = StatementConfiguration()
-      config.setConfigString(s""" {
+      val config: StatementConfiguration =
+      StatementConfiguration.setConfigString(s""" {
                                |         "sources" : [{
                                |           "id"       : "badtps",
                                |           "url"      : "http://bidon",
@@ -96,7 +96,6 @@ object SWDiscoverySubscribeEventTest extends TestSuite {
 
       swr.commit().raw.map( _=> assert(false))
         .recover( _ => {
-          println(swr.currentRequestEvent)
           assert(swr.currentRequestEvent == "ERROR_HTTP_REQUEST") } )
     }
   }

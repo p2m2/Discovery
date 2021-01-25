@@ -1,13 +1,14 @@
 package inrae.semantic_web
 
 import inrae.semantic_web.internal._
-import inrae.semantic_web.internal.pm.SelectNode
+import inrae.semantic_web.internal.pm.{SelectNode, SerializationBuilder}
 import inrae.semantic_web.rdf._
 import wvlet.log.Logger
 import wvlet.log.Logger.rootLogger._
 
 import java.util.UUID.randomUUID
 import scala.concurrent.Future
+import upickle.default.{macroRW, ReadWriter => RW}
 
 final case class SWDiscoveryException(private val message: String = "",
                                       private val cause: Throwable = None.orNull) extends Exception(message,cause)
@@ -16,12 +17,19 @@ object SWDiscovery {
 
   private val version : String = SWDiscoveryVersionAtBuildTime.version
 
+  implicit val rw: RW[SWDiscovery] = macroRW
+
   info(" --------------------------------------------------" )
   info(" ---- Discovery :"+ SWDiscovery.version + "         -----------" )
   info(" --------------------------------------------------" )
+
 }
 
-case class SWDiscovery(config: StatementConfiguration,rootNode : Root = Root(), fn : Option[String] = None) {
+case class SWDiscovery(
+                        config: StatementConfiguration=StatementConfiguration(),
+                        rootNode : Root = Root(),
+                        fn : Option[String] = None)
+{
   implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
 
   val focusNode : String = fn match {
@@ -57,7 +65,7 @@ case class SWDiscovery(config: StatementConfiguration,rootNode : Root = Root(), 
 
   //private val logger = Logger.of[SWDiscovery]
   // Set the root logger's log level
-  Logger.setDefaultLogLevel(config.conf.settings.getLogLevel())
+  Logger.setDefaultLogLevel(config.conf.settings.getLogLevel)
 
   def help() : SWDiscovery = {
     println(" ---------------- SWDiscovery "+SWDiscovery.version+" ---------------------------")
@@ -130,20 +138,7 @@ case class SWDiscovery(config: StatementConfiguration,rootNode : Root = Root(), 
   }
 
   def focusManagement(n : Node, forward: Boolean = true) : SWDiscovery = {
-    trace("-- focusManagement --")
-
-    /****
-     *
-     *   MANIPULER UN ID POUR LE FOCUS NODE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-     *   creer le nouveau root avec l arbre en sortie de addChildren
-     *
-     *
-     *
-     */
-
     val newRootNode = rootNode.addChildren(focusNode,n)
-
-
     /* current node is the focusNode */
     if (forward) {
       SWDiscovery(config,newRootNode,Some(n.reference()))
@@ -206,6 +201,12 @@ case class SWDiscovery(config: StatementConfiguration,rootNode : Root = Root(), 
     checkQueryVariable(term).focusManagement(Value(term),forward = false)
 
   def setList( uris : Seq[URI] ) : SWDiscovery = focusManagement(ListValues(uris),forward = false)
+
+
+  def getSerializedQuery : String = SerializationBuilder.serialize(this)
+
+
+  def setSerializedQuery(query : String) : SWDiscovery = SerializationBuilder.deserialize(query)
 
 
   def console() : SWDiscovery = {

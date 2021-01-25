@@ -1,5 +1,5 @@
 package inrae.semantic_web.rdf
-
+import upickle.default.{ReadWriter => RW, macroRW}
 import scala.scalajs.js.annotation.JSExportTopLevel
 import scala.language.implicitConversions
 import scala.util.{Failure, Success, Try}
@@ -8,9 +8,7 @@ case class Graph(triples : Set[Triple])
 
 case class Triple(s: SparqlDefinition, p: SparqlDefinition, o: SparqlDefinition)
 
-
-
-trait SparqlDefinition {
+sealed trait SparqlDefinition {
 
   def sparql() : String
 
@@ -18,12 +16,27 @@ trait SparqlDefinition {
 }
 
 object SparqlDefinition {
+
+  implicit val rw: RW[SparqlDefinition] = RW.merge(
+    IRI.rw,
+    URI.rw,
+    Anonymous.rw,
+    PropertyPath.rw,
+    Literal.rw,
+    QueryVariable.rw,
+  )
+
   def cleanString(str : String) = {
     str.replaceAll("^\"","")
       .replaceAll("\"$","")
       .replaceAll("^<","")
       .replaceAll(">$","")
   }
+}
+
+object IRI {
+  implicit def fromString(s: String): IRI = IRI(s)
+  implicit val rw: RW[IRI] = macroRW
 }
 
 @JSExportTopLevel(name="IRI")
@@ -38,9 +51,14 @@ case class IRI (var iri : String) extends SparqlDefinition {
 
 }
 
-object IRI {
-  implicit def fromString(s: String): IRI = IRI(s)
+object URI {
+  implicit val rw: RW[URI] = macroRW
+
+  implicit def fromString(s: String): URI = URI(s)
+
+  val empty = new URI("")
 }
+
 
 @JSExportTopLevel(name="URI")
 case class URI (localNameUser : String,nameSpaceUser : String = "") extends SparqlDefinition {
@@ -74,11 +92,13 @@ case class URI (localNameUser : String,nameSpaceUser : String = "") extends Spar
   def naiveLabel() : String = localName.split("[/#]").last
 }
 
-object URI {
-  implicit def fromString(s: String): URI = URI(s)
-  val empty = new URI("")
-}
 
+object Anonymous {
+
+  implicit val rw: RW[Anonymous] = macroRW
+
+  implicit def fromString(s: String): Anonymous = Anonymous(s)
+}
 
 @JSExportTopLevel(name="Anonymous")
 case class Anonymous(var value : String) extends SparqlDefinition {
@@ -103,7 +123,20 @@ case class PropertyPath(var value : String) extends SparqlDefinition {
 }
 
 object PropertyPath {
+
+  implicit val rw: RW[PropertyPath] = macroRW
+
   implicit def fromString(s: String): PropertyPath = PropertyPath(s)
+}
+
+object Literal {
+  implicit val rw: RW[Literal] = macroRW
+
+  implicit def fromString(s: String): Literal = Literal(s)
+  implicit def fromString(s: Int): Literal = Literal(s.toString,URI("integer","xsd"))
+  implicit def fromString(s: Boolean): Literal = Literal(s.toString,URI("boolean","xsd"))
+  implicit def fromString(s: Double): Literal = Literal(s.toString,URI("double","xsd"))
+  implicit def fromString(s: Float): Literal = Literal(s.toString,URI("float","xsd"))
 }
 
 @JSExportTopLevel(name="Literal")
@@ -130,12 +163,8 @@ case class Literal(var value : String,var datatype : URI = URI.empty,var tag : S
   def naiveLabel() : String = value
 }
 
-object Literal {
-  implicit def fromString(s: String): Literal = Literal(s)
-  implicit def fromString(s: Int): Literal = Literal(s.toString,URI("integer","xsd"))
-  implicit def fromString(s: Boolean): Literal = Literal(s.toString,URI("boolean","xsd"))
-  implicit def fromString(s: Double): Literal = Literal(s.toString,URI("double","xsd"))
-  implicit def fromString(s: Float): Literal = Literal(s.toString,URI("float","xsd"))
+object QueryVariable {
+implicit val rw: RW[QueryVariable] = macroRW
 }
 
 @JSExportTopLevel(name="QueryVariable")

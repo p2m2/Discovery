@@ -3,7 +3,6 @@ package inrae.semantic_web.sparql
 import inrae.semantic_web.ConfigurationObject
 import inrae.semantic_web.ConfigurationObject.GeneralSetting
 import inrae.semantic_web.event.{DiscoveryRequestEvent, DiscoveryStateRequestEvent, Publisher, Subscriber}
-import inrae.semantic_web.sparql.{QueryResult, QueryResultManager}
 
 import scala.concurrent.Future
 
@@ -47,7 +46,7 @@ case class QueryRunner(source: ConfigurationObject.Source,settings : GeneralSett
 
       case None => {
         /* request */
-        val httpDriver = settings.getHttpDriver()
+        val httpDriver = settings.getHttpDriver
         /* subscribe */
         httpDriver.subscribe(this.asInstanceOf[Subscriber[DiscoveryRequestEvent,Publisher[DiscoveryRequestEvent]]])
         /* request */

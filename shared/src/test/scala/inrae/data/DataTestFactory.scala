@@ -83,7 +83,7 @@ object DataTestFactory  {
 
 
   def getConfigVirtuoso1() : StatementConfiguration = {
-    StatementConfiguration().setConfigString(
+    StatementConfiguration.setConfigString(
       s"""
         {
          "sources" : [{
@@ -103,7 +103,7 @@ object DataTestFactory  {
   }
 
   def getConfigVirtuoso2() : StatementConfiguration = {
-    StatementConfiguration().setConfigString(
+    StatementConfiguration.setConfigString(
       s"""
         {
          "sources" : [{
@@ -140,7 +140,7 @@ object DataTestFactory  {
             """.stripMargin.stripMargin
 
   def getDbpediaConfig() : StatementConfiguration = {
-    StatementConfiguration().setConfigString(dbpedia_config_string)
+    StatementConfiguration.setConfigString(dbpedia_config_string)
   }
   //   "driver" : "inrae.semantic_web.driver.JenaRequestDriver",
 }

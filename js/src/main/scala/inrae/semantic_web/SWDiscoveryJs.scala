@@ -11,71 +11,77 @@ import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
 
 
 @JSExportTopLevel(name="SWDiscovery")
-class SWDiscoveryJs(var config: StatementConfiguration) {
+case class SWDiscoveryJs(config: StatementConfiguration=StatementConfiguration(),sw: SWDiscovery = SWDiscovery()) {
   implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
 
-  val sw: SWDiscovery = SWDiscovery(config)
+  //val sw: SWDiscovery = SWDiscovery(config)
 
   @JSExport
   val filter = new FilterIncrementJs(this)
 
   @JSExport
-  def help() : SWDiscoveryJs = { sw.help() ; this }
+  def help() : SWDiscoveryJs = SWDiscoveryJs(config,SWDiscovery(config).help())
 
   @JSExport
-  def focus(ref : String) : SWDiscoveryJs = { sw.focus(ref) ; this }
+  def focus(ref : String) : SWDiscoveryJs = SWDiscoveryJs(config,sw.focus(ref))
 
   @JSExport
-  def focusManagement(n : Node) : SWDiscoveryJs = { sw.focusManagement(n) ; this }
+  def focusManagement(n : Node) : SWDiscoveryJs = SWDiscoveryJs(config,sw.focusManagement(n))
 
   @JSExport
-  def prefix(short : String, long : IRI ) : SWDiscoveryJs = { sw.prefix(short,long) ; this }
+  def prefix(short : String, long : IRI ) : SWDiscoveryJs = SWDiscoveryJs(config,sw.prefix(short,long))
 
   @JSExport
-  def graph(graph : IRI) : SWDiscoveryJs = { sw.graph(graph) ; this }
+  def graph(graph : IRI) : SWDiscoveryJs = SWDiscoveryJs(config,sw.graph(graph))
 
   @JSExport
-  def namedGraph(graph : IRI ) : SWDiscoveryJs = { sw.namedGraph(graph) ; this }
+  def namedGraph(graph : IRI ) : SWDiscoveryJs = SWDiscoveryJs(config,sw.namedGraph(graph))
   /* start a request */
   @JSExport
-  def something( ref : String = sw.getUniqueRef ) : SWDiscoveryJs = { sw.something(ref) ; this }
+  def something( ref : String = sw.getUniqueRef ) : SWDiscoveryJs = SWDiscoveryJs(config,sw.something(ref))
 
   /* create node which focus is the subject : ?focusId <uri> ?target */
   @JSExport
-  def isSubjectOf( uri : URI , ref : String = sw.getUniqueRef ) : SWDiscoveryJs = { sw.isSubjectOf(uri,ref) ; this }
+  def isSubjectOf( uri : URI , ref : String = sw.getUniqueRef ) : SWDiscoveryJs = SWDiscoveryJs(config,sw.isSubjectOf(uri,ref))
 
   /* create node which focus is the subject : ?focusId <uri> ?target */
   @JSExport
-  def isObjectOf( uri : URI , ref : String = sw.getUniqueRef ) : SWDiscoveryJs = { sw.isObjectOf(uri,ref); this }
+  def isObjectOf( uri : URI , ref : String = sw.getUniqueRef ) : SWDiscoveryJs = SWDiscoveryJs(config,sw.isObjectOf(uri,ref))
 
   @JSExport
-  def isLinkTo( uri : URI , ref : String = sw.getUniqueRef ) : SWDiscoveryJs = { sw.isLinkTo(uri,ref); this }
+  def isLinkTo( uri : URI , ref : String = sw.getUniqueRef ) : SWDiscoveryJs = SWDiscoveryJs(config,sw.isLinkTo(uri,ref))
 
   @JSExport
   def isA( term : SparqlDefinition ) : SWDiscoveryJs = { sw.isA(term); this }
 
   @JSExport
-  def isLinkFrom( uri : URI , ref : String = sw.getUniqueRef ) : SWDiscoveryJs = { sw.isLinkFrom(uri,ref); this }
+  def isLinkFrom( uri : URI , ref : String = sw.getUniqueRef ) : SWDiscoveryJs = SWDiscoveryJs(config,sw.isLinkFrom(uri,ref))
   /* set */
   @JSExport
-  def set( uri : URI ) : SWDiscoveryJs = { sw.set(uri) ; this }
+  def set( uri : URI ) : SWDiscoveryJs = SWDiscoveryJs(config,sw.set(uri))
 
   @JSExport
-  def datatype( uri : URI, ref : String ) : SWDiscoveryJs = { sw.datatype(uri,ref) ; this }
+  def datatype( uri : URI, ref : String ) : SWDiscoveryJs = SWDiscoveryJs(config,sw.datatype(uri,ref))
 
   @JSExport
-  def debug() : SWDiscoveryJs = { sw.console() ; this  }
+  def debug() : SWDiscoveryJs = SWDiscoveryJs(config,sw.console())
 
   @JSExport
-  def sparql() : String = { sw.sparql() }
+  def sparql() : String = sw.sparql()
 
   @JSExport
-  def select(lRef: String*): SWTransactionJs = { SWTransactionJs(sw.select(lRef)) }
+  def getSerializedQuery: String = sw.getSerializedQuery
 
   @JSExport
-  def select(lRef: Seq[String], limit : Int = 0, offset : Int = 0): SWTransactionJs = {
+  def setSerializedQuery(query : String): SWDiscoveryJs = SWDiscoveryJs(config,sw.setSerializedQuery(query))
+
+  @JSExport
+  def select(lRef: String*): SWTransactionJs = SWTransactionJs(sw.select(lRef))
+
+  @JSExport
+  def select(lRef: Seq[String], limit : Int = 0, offset : Int = 0): SWTransactionJs =
     SWTransactionJs(sw.select(lRef,limit,offset))
-  }
+
 
   @JSExport
   def selectByPage(lRef: String*)  : Promise[(Int,js.Array[SWTransactionJs])] = {
