@@ -24,18 +24,5 @@ object QueryResultManagerTest extends TestSuite {
         case _ => assert(false)
       }
     }
-
-/*
-    test("Compression long string") {
-      val json_f = Source.fromResource("./json_results/dbpedia_a_isa_concept_10000.json").mkString
-
-      val qrm = QueryResultManager()
-      qrm.set("",json_f)
-
-      qrm.get("") match {
-        case Some(r) if r == json_f => assert(true)
-        case _ => assert(false)
-      }
-    }*/
   }
 }

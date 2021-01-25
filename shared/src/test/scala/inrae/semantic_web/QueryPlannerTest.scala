@@ -1,7 +1,7 @@
 package inrae.semantic_web
 
 import inrae.semantic_web.QueryPlanner.factorize
-import inrae.semantic_web.internal.{Root, Something, SubjectOf, UnionBlock}
+import inrae.semantic_web.internal.{Root, Something, SourcesNode, SubjectOf, UnionBlock}
 import inrae.semantic_web.rdf.URI
 import inrae.semantic_web.sparql.{BgpGroupe, OrGroupe}
 import utest._
@@ -324,21 +324,23 @@ object QueryPlannerTest extends TestSuite {
                  S2
                1 etp
      */
-    /*
+
     test("AND - Check variable .1")  {
-      val r : Root = Root()
+
       val s1 = Something("s1")
       val s2 = SubjectOf("s2",new URI("uri2"))
-      val r2 = r.addChildren(s1)
-      val s3 = s1.addChildren(s2)
+
+      val r : Root = Root().addChildren(s1.addChildren(s2))
+
       val plan = QueryPlanner.buildPlanning(r)
+
 
       assert(
         plan == BgpGroupe(List(s1,s2))
       )
+
       val r3 = r.addSourceNode(SourcesNode(s1.reference(),List("etp1")))
                 .addSourceNode(SourcesNode(s2.reference(),List("etp1")))
-
 
       val y = QueryPlanner.ordonnanceBySource(plan,r3)
 
@@ -355,21 +357,21 @@ object QueryPlannerTest extends TestSuite {
                2 etp
      */
     test("AND - Check variable .2")  {
-      val r : Root = Root()
+
       val s1 = Something("s1")
       val s2 = SubjectOf("s2",new URI("uri2"))
-      r.addChildren(s1)
-      s1.addChildren(s2)
+
+      val r : Root = Root().addChildren(s1.addChildren(s2))
+
       val plan = QueryPlanner.buildPlanning(r)
 
       assert(
         plan == BgpGroupe(List(s1,s2))
       )
+      val r2 = r.addSourceNode(SourcesNode(s1.reference(),List("etp1","etp2")))
+        .addSourceNode(SourcesNode(s2.reference(),List("etp1","etp2")))
 
-      r.lSourcesNodes = r.lSourcesNodes ++ List(new SourcesNode(s1.reference(),List("etp1","etp2")))
-      r.lSourcesNodes = r.lSourcesNodes ++ List(new SourcesNode(s2.reference(),List("etp1","etp2")))
-
-      val y = QueryPlanner.ordonnanceBySource(plan,r)
+      val y = QueryPlanner.ordonnanceBySource(plan,r2)
 
       assert(
         y == QueryPlanner.INTERSECTION_RESULTS_SET(
@@ -385,21 +387,21 @@ object QueryPlannerTest extends TestSuite {
                    1 etp on S2
          */
     test("AND - Check variable .3")  {
-      val r : Root = Root()
+
       val s1 = Something("s1")
       val s2 = SubjectOf("s2",new URI("uri2"))
-      r.addChildren(s1)
-      s1.addChildren(s2)
+
+      val r : Root =  Root().addChildren(s1.addChildren(s2))
+
       val plan = QueryPlanner.buildPlanning(r)
 
       assert(
         plan == BgpGroupe(List(s1,s2))
       )
+      val r2 = r.addSourceNode(SourcesNode(s1.reference(),List("etp1","etp2")))
+        .addSourceNode(SourcesNode(s2.reference(),List("etp1")))
 
-      r.lSourcesNodes = r.lSourcesNodes ++ List(new SourcesNode(s1.reference(),List("etp1","etp2")))
-      r.lSourcesNodes = r.lSourcesNodes ++ List(new SourcesNode(s2.reference(),List("etp1")))
-
-      val y = QueryPlanner.ordonnanceBySource(plan,r)
+      val y = QueryPlanner.ordonnanceBySource(plan,r2)
 
       assert(
         y == QueryPlanner.INTERSECTION_RESULTS_SET(
@@ -414,21 +416,23 @@ object QueryPlannerTest extends TestSuite {
                    2 etp // on S1,S2
          */
     test("AND - Check variable .4")  {
-      val r : Root = Root()
+
       val s1 = Something("s1")
       val s2 = SubjectOf("s2",new URI("uri2"))
-      r.addChildren(s1)
-      s1.addChildren(s2)
+
+      val r : Root = Root().addChildren(s1.addChildren(s2))
+
+
       val plan = QueryPlanner.buildPlanning(r)
 
       assert(
         plan == BgpGroupe(List(s1,s2))
       )
 
-      r.lSourcesNodes = r.lSourcesNodes ++ List(new SourcesNode(s1.reference(),List("etp1")))
-      r.lSourcesNodes = r.lSourcesNodes ++ List(new SourcesNode(s2.reference(),List("etp2")))
+      val r2 = r.addSourceNode(SourcesNode(s1.reference(),List("etp1")))
+        .addSourceNode(SourcesNode(s2.reference(),List("etp2")))
 
-      val y = QueryPlanner.ordonnanceBySource(plan,r)
+      val y = QueryPlanner.ordonnanceBySource(plan,r2)
 
       assert(
         y == QueryPlanner.INTERSECTION_RESULTS_SET(
@@ -445,16 +449,17 @@ object QueryPlannerTest extends TestSuite {
                   S4 -> ETP1,ETP2
          */
     test("AND - Check variable .5")  {
-      val r : Root = Root()
+
       val s1 = Something("s1")
       val s2 = SubjectOf("s2",new URI("uri2"))
       val s3 = SubjectOf("s3",new URI("uri3"))
       val s4 = SubjectOf("s4",new URI("uri4"))
 
-      r.addChildren(s1)
-      s1.addChildren(s2)
-      s1.addChildren(s3)
-      s1.addChildren(s4)
+      val r : Root = Root().addChildren(
+        s1.addChildren(s2)
+          .addChildren(s3)
+          .addChildren(s4))
+
 
       val plan = QueryPlanner.buildPlanning(r)
 
@@ -462,12 +467,13 @@ object QueryPlannerTest extends TestSuite {
         plan == BgpGroupe(List(s1,s2,s3,s4))
       )
 
-      r.lSourcesNodes = r.lSourcesNodes ++ List(new SourcesNode(s1.reference(),List("etp1","etp2")))
-      r.lSourcesNodes = r.lSourcesNodes ++ List(new SourcesNode(s2.reference(),List("etp1")))
-      r.lSourcesNodes = r.lSourcesNodes ++ List(new SourcesNode(s3.reference(),List("etp2")))
-      r.lSourcesNodes = r.lSourcesNodes ++ List(new SourcesNode(s4.reference(),List("etp1","etp2")))
+      val r2 = r
+        .addSourceNode(SourcesNode(s1.reference(),List("etp1","etp2")))
+        .addSourceNode(SourcesNode(s2.reference(),List("etp1")))
+        .addSourceNode(SourcesNode(s3.reference(),List("etp2")))
+        .addSourceNode(SourcesNode(s4.reference(),List("etp1","etp2")))
 
-      val y = QueryPlanner.ordonnanceBySource(plan,r)
+      val y = QueryPlanner.ordonnanceBySource(plan,r2)
 
       assert(
         y == QueryPlanner.INTERSECTION_RESULTS_SET(
@@ -488,21 +494,22 @@ object QueryPlannerTest extends TestSuite {
    */
 
     test("OR - Check variable .1")  {
-      val r : Root = Root()
+
       val s1 = Something("s1")
-      val u = new UnionBlock(s1)
-      s1.addChildren(u)
+      val u = UnionBlock(s1)
 
-      val s2 = SubjectOf("s2",new URI("uri2"))
-      val s3 = SubjectOf("s3",new URI("uri3"))
-      val s4 = SubjectOf("s4",new URI("uri4"))
-      val s5 = SubjectOf("s5",new URI("uri5"))
+      val s2 = SubjectOf("s2",URI("uri2"))
+      val s3 = SubjectOf("s3",URI("uri3"))
+      val s4 = SubjectOf("s4",URI("uri4"))
+      val s5 = SubjectOf("s5",URI("uri5"))
 
-      r.addChildren(s1)
-      u.addChildren(s2)
-      u.addChildren(s3)
-      u.addChildren(s4)
-      u.addChildren(s5)
+      val r : Root = Root().addChildren(
+        s1.addChildren(
+          u.addChildren(s2)
+            .addChildren(s3)
+            .addChildren(s4)
+            .addChildren(s5)
+        ))
 
       val plan = QueryPlanner.buildPlanning(r)
       assert(
@@ -513,13 +520,14 @@ object QueryPlannerTest extends TestSuite {
             BgpGroupe(List(s1,s5))))
       )
 
-      r.lSourcesNodes = r.lSourcesNodes ++ List(new SourcesNode(s1.reference(),List("etp1","etp2")))
-      r.lSourcesNodes = r.lSourcesNodes ++ List(new SourcesNode(s2.reference(),List("etp1")))
-      r.lSourcesNodes = r.lSourcesNodes ++ List(new SourcesNode(s3.reference(),List("etp2")))
-      r.lSourcesNodes = r.lSourcesNodes ++ List(new SourcesNode(s4.reference(),List("etp1")))
-      r.lSourcesNodes = r.lSourcesNodes ++ List(new SourcesNode(s5.reference(),List("etp1","etp2")))
+      val r2 = r
+        .addSourceNode(SourcesNode(s1.reference(),List("etp1","etp2")))
+        .addSourceNode(SourcesNode(s2.reference(),List("etp1")))
+        .addSourceNode(SourcesNode(s3.reference(),List("etp2")))
+        .addSourceNode(SourcesNode(s4.reference(),List("etp1")))
+        .addSourceNode(SourcesNode(s5.reference(),List("etp1","etp2")))
 
-      val y = QueryPlanner.ordonnanceBySource(plan,r)
+      val y = QueryPlanner.ordonnanceBySource(plan,r2)
 
       assert(
         y == QueryPlanner.OR_RESULTS_SET(List(
@@ -539,6 +547,6 @@ object QueryPlannerTest extends TestSuite {
         )
       )
     }
-*/
+
   }
 }
