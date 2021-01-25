@@ -2,14 +2,12 @@ package inrae.semantic_web.driver
 
 import inrae.data.DataTestFactory
 import inrae.semantic_web.sparql.ConfigurationHttpRequest
-import utest.{TestSuite, Tests, test}
+import utest.{TestRunner, TestSuite, Tests, test}
 import wvlet.log.{LogLevel, Logger}
 
 
 object JenaRequestDriverTest extends TestSuite {
   implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
-
-  DataTestFactory.delete_virtuoso1(this.getClass.getSimpleName)
 
   val insert_data = DataTestFactory.insert_virtuoso1(
     """
@@ -92,5 +90,10 @@ object JenaRequestDriverTest extends TestSuite {
         .recover( _ => assert(true))
       }).flatten
     }
+  }
+
+  TestRunner.runAsync(tests).map { _ => {
+    DataTestFactory.delete_virtuoso1(this.getClass.getSimpleName)
+  }
   }
 }
