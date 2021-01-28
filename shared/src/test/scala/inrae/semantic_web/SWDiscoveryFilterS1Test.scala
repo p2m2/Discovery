@@ -46,9 +46,4 @@ object SWDiscoveryFilterS1Test extends TestSuite {
       }).flatten
     }
   }
-
-  TestRunner.runAsync(tests).map { _ => {
-    DataTestFactory.delete_virtuoso1(this.getClass.getSimpleName)
-  }
-  }
 }

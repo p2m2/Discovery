@@ -5,12 +5,10 @@ lazy val utestVersion = "0.7.7"
 lazy val upickleVersion  = "1.2.2"
 lazy val airframeLogVersion = "20.11.0"
 lazy val scalaParserCombinatorVersion = "1.1.2"
-lazy val scalaReflectVersion = "1.0.0"
 lazy val RosHttpVersion = "3.0.0"
 lazy val scalaJsDOMVersion = "1.1.0"
 lazy val scalaStubVersion = "1.0.0"
 lazy val scalatagVersion = "0.9.2"
-lazy val jenaVersion = "3.16.0"
 lazy val rdf4jVersion = "3.6.0-M2"
 
 releaseIgnoreUntrackedFiles := true
@@ -93,8 +91,7 @@ lazy val discovery=crossProject(JSPlatform, JVMPlatform).in(file("."))
       "com.lihaoyi" %%% "upickle" % upickleVersion,
       "org.wvlet.airframe" %%% "airframe-log" % airframeLogVersion,
       "org.scala-lang.modules" %%% "scala-parser-combinators" % scalaParserCombinatorVersion,
-      "org.portable-scala" %%% "portable-scala-reflect" % scalaReflectVersion,
-      "fr.hmil" %%% "roshttp" % RosHttpVersion,
+      "fr.hmil" %%% "roshttp" % RosHttpVersion ,
       "com.softwaremill.sttp.client3" %%% "core" % "3.0.0"
     ),
     testFrameworks += new TestFramework("utest.runner.Framework"),
@@ -118,7 +115,6 @@ lazy val discovery=crossProject(JSPlatform, JVMPlatform).in(file("."))
   .jvmSettings(
     libraryDependencies ++= Seq(
       "org.scala-js" %% "scalajs-stubs" % scalaStubVersion % "provided",
-      "org.apache.jena" % "apache-jena" % jenaVersion pomOnly(),
       "org.slf4j" % "slf4j-api" % "1.7.9",
       "org.slf4j" % "slf4j-simple" % "1.7.9",
       "org.eclipse.rdf4j" % "rdf4j-storage" % rdf4jVersion,

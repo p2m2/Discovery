@@ -28,6 +28,7 @@ case class Rdf4jSparqlRequestDriver(idName: String,
 
   def request(query: String): Future[QueryResult] = {
       Future {
+        println("====> Start")
         publish(DiscoveryRequestEvent(DiscoveryStateRequestEvent.START_HTTP_REQUEST))
         publish(DiscoveryRequestEvent(DiscoveryStateRequestEvent.PROCESS_HTTP_REQUEST))
         val out = new ByteArrayOutputStream()
@@ -44,6 +45,7 @@ case class Rdf4jSparqlRequestDriver(idName: String,
             publish(DiscoveryRequestEvent(DiscoveryStateRequestEvent.RESULTS_BUILD))
             val response = inrae.semantic_web.sparql.QueryResult(out.toString())
             publish(DiscoveryRequestEvent(DiscoveryStateRequestEvent.RESULTS_DONE))
+            println("====> END")
             response
           }
           case Failure(e) => {

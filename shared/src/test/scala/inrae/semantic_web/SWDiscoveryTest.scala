@@ -140,9 +140,4 @@ object SWDiscoveryTest extends TestSuite {
     }
   }
 
-  TestRunner.runAsync(tests).map { _ => {
-    DataTestFactory.delete_virtuoso1(this.getClass.getSimpleName)
-    }
-  }
-
 }

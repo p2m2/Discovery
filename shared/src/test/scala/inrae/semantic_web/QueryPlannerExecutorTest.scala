@@ -54,9 +54,4 @@ object QueryPlannerExecutorTest extends TestSuite {
       ).flatten
     }
   }
-  TestRunner.runAsync(tests).map { _ => {
-      DataTestFactory.delete_virtuoso1(this.getClass.getSimpleName)
-      DataTestFactory.delete_virtuoso2(this.getClass.getSimpleName)
-    }
-  }
 }

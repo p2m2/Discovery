@@ -2,12 +2,9 @@ package inrae.semantic_web.driver
 
 import inrae.semantic_web.ConfigurationObject.Source
 import inrae.semantic_web.SWDiscoveryException
-import org.eclipse.rdf4j.repository.Repository
-import org.eclipse.rdf4j.repository.manager.LocalRepositoryManager
-import org.eclipse.rdf4j.repository.sail.config.SailRepositoryConfig
+import org.eclipse.rdf4j.repository.sail.SailRepository
 import org.eclipse.rdf4j.rio.RDFFormat
-import org.eclipse.rdf4j.sail.memory.config.MemoryStoreConfig
-import org.eclipse.rdf4j.repository.config.RepositoryConfig
+import org.eclipse.rdf4j.sail.nativerdf.NativeStore
 import wvlet.log.Logger.rootLogger.debug
 
 import java.io.File
@@ -15,38 +12,9 @@ import java.net.URL
 import scala.util.{Failure, Success, Try}
 
 object RequestDriverFactory  {
-/*
 
 
-  val datadir3 = new File("./mytest_stream_rdf")
-  val repo3 = new SailRepository(new NativeStore(datadir3))
-*/
-
-    val pathManagerRepo = "./manager_repo"
-    val baseDir = new File(pathManagerRepo)
-    val manager = new LocalRepositoryManager(baseDir)
-
-    manager.init()
-
-    val persist = true
-    val backendConfig = new MemoryStoreConfig(persist)
-    // stack an inferencer config on top of our backend-config
-    //backendConfig = new SchemaCachingRDFSInferencerConfig(backendConfig);
-
-    // create a configuration for the repository implementation
-    val repositoryTypeSpec : SailRepositoryConfig = new SailRepositoryConfig(backendConfig);
-
-
-
-    val repositoryId = "local-discovery"
-
-    val repConfig = new RepositoryConfig(repositoryId, repositoryTypeSpec)
-    manager.addRepositoryConfig(repConfig)
-    val repository: Repository = manager.getRepository(repositoryId)
-
-
-
-
+  lazy val repository = new SailRepository(new NativeStore())
 
   def build( source : Source ) : RequestDriver = {
 
