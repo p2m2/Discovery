@@ -11,24 +11,24 @@ import scala.language.postfixOps
 object SWDiscoverySelectIterable extends TestSuite {
 
   val data = """
-      <aa> <bb> 1 .
-      <aa> <bb> 2 .
-      <aa> <bb> 3 .
-      <aa> <bb> 4 .
-      <aa> <bb> 5 .
-      <aa> <bb> 6 .
-      <aa> <bb> 7 .
-      <aa> <bb> 8 .
-      <aa> <bb> 9 .
-      <aa> <bb> 10 .
-      <aa> <bb> 11 .
-      <aa> <bb> 12 .
+      <http://aa> <http://bb> 1 .
+      <http://aa> <http://bb> 2 .
+      <http://aa> <http://bb> 3 .
+      <http://aa> <http://bb> 4 .
+      <http://aa> <http://bb> 5 .
+      <http://aa> <http://bb> 6 .
+      <http://aa> <http://bb> 7 .
+      <http://aa> <http://bb> 8 .
+      <http://aa> <http://bb> 9 .
+      <http://aa> <http://bb> 10 .
+      <http://aa> <http://bb> 11 .
+      <http://aa> <http://bb> 12 .
 
       """.stripMargin
 
   val insert_data = DataTestFactory.insert_virtuoso1(data, this.getClass.getSimpleName)
 
-  val nbValues = data.split(" ").filter( _ == "<aa>").length
+  val nbValues = data.split(" ").filter( _ == "<http://aa>").length
 
   val pageSize = 5
 
@@ -58,8 +58,8 @@ object SWDiscoverySelectIterable extends TestSuite {
         SWDiscovery(config)
           .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
           .something()
-          .set(URI("<aa>"))
-          .isSubjectOf(URI("bb"), "obj")
+          .set(URI("http://aa"))
+          .isSubjectOf(URI("http://bb"), "obj")
           .selectByPage(List("obj"))
           .map(args => {
             val nb = args._1

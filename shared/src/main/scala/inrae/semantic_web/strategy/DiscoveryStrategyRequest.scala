@@ -14,6 +14,8 @@ case class DiscoveryStrategyRequest(source : Source) extends StrategyRequest {
 
   val driver : RequestDriver = RequestDriverFactory.build(source)
 
+  driver.subscribe(this.asInstanceOf[Subscriber[DiscoveryRequestEvent,Publisher[DiscoveryRequestEvent]]])
+
   def execute(swt : SWTransaction) : Future[QueryResult] = {
     val (refToIdentifier, _) = pm.SparqlGenerator.correspondenceVariablesIdentifier(swt.sw.rootNode)
     trace(refToIdentifier.toString())

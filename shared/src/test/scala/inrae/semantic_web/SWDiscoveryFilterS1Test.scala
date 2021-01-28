@@ -10,13 +10,13 @@ object SWDiscoveryFilterS1Test extends TestSuite {
   val insert_data =
     DataTestFactory.insert_virtuoso1(
       """
-      <aaSWFilterTest> a <http://www.w3.org/2002/07/owl#Thing> .
-      <aaSWFilterTest> <some> "test" .
-      <aaSWFilterTest2> a <url_w3_class_stuff> .
-      <aaSWFilterTest2> <some> "test" .
+      <http://aaSWFilterTest> a <http://www.w3.org/2002/07/owl#Thing> .
+      <http://aaSWFilterTest> <http://some> "test" .
+      <http://aaSWFilterTest2> a <http://url_w3_class_stuff> .
+      <http://aaSWFilterTest2> <http://some> "test" .
 
       <http://www.w3.org/2002/07/owl#Thing> a <http://www.w3.org/2002/07/owl#Class> .
-      <url_w3_class_stuff> a <http://www.w3.org/2002/07/owl#Class> .
+      <http://url_w3_class_stuff> a <http://www.w3.org/2002/07/owl#Class> .
       """.stripMargin, this.getClass.getSimpleName)
 
   val config: StatementConfiguration = DataTestFactory.getConfigVirtuoso1()

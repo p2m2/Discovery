@@ -2,7 +2,7 @@ package inrae.semantic_web.strategy
 
 import inrae.semantic_web.ConfigurationObject.Source
 import inrae.semantic_web.driver.{RequestDriver, RequestDriverFactory}
-import inrae.semantic_web.event.{DiscoveryRequestEvent, DiscoveryStateRequestEvent}
+import inrae.semantic_web.event.{DiscoveryRequestEvent, DiscoveryStateRequestEvent, Publisher, Subscriber}
 import inrae.semantic_web.internal.pm
 import inrae.semantic_web.sparql.QueryResult
 import inrae.semantic_web.{SWTransaction, SparqlQueryBuilder}
@@ -17,6 +17,8 @@ case class Rdf4jFederatedThirdPartyStrategyRequest(sources : Seq[Source]) extend
   implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
 
   val driver : Seq[RequestDriver] = sources.map(RequestDriverFactory.build(_))
+
+  driver.map( _.subscribe(this.asInstanceOf[Subscriber[DiscoveryRequestEvent,Publisher[DiscoveryRequestEvent]]]) )
 
   def execute(swt : SWTransaction) : Future[QueryResult] = {
     val (refToIdentifier, _) = pm.SparqlGenerator.correspondenceVariablesIdentifier(swt.sw.rootNode)

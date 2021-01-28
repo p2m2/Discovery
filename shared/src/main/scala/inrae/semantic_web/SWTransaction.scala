@@ -5,19 +5,18 @@ import inrae.semantic_web.internal.{DatatypeNode, pm}
 import inrae.semantic_web.rdf.SparqlDefinition
 import inrae.semantic_web.sparql.QueryResult
 import inrae.semantic_web.strategy._
-
 import wvlet.log.Logger.rootLogger.{debug, trace}
 
 import scala.concurrent.{Future, Promise}
-import scala.util.{Failure, Success}
+import scala.util.{Failure, Success, Try}
 
 
 case class SWTransaction(sw : SWDiscovery, lRef: Seq[String] = List(), limit : Int = 0, offset : Int = 0)
-    extends Subscriber[DiscoveryRequestEvent,QueryManager]
+    extends Subscriber[DiscoveryRequestEvent,StrategyRequest]
 {
   implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
 
-  def notify (pub: QueryManager, event: DiscoveryRequestEvent) : Unit = {
+  def notify(pub: StrategyRequest, event: DiscoveryRequestEvent) = {
     notify(event)
   }
 
@@ -58,7 +57,6 @@ case class SWTransaction(sw : SWDiscovery, lRef: Seq[String] = List(), limit : I
   }
 
   def notify(event: DiscoveryRequestEvent): Unit = {
-
     currentRequestEvent = event.state.toString()
     countEvent = countEvent + 1
 
@@ -98,54 +96,59 @@ case class SWTransaction(sw : SWDiscovery, lRef: Seq[String] = List(), limit : I
     /* manage variable name */
     val qm = QueryManager(sw.config)
     qm.subscribe(this.asInstanceOf[Subscriber[DiscoveryRequestEvent,Publisher[DiscoveryRequestEvent]]])
+// qr
 
+    Try(StrategyRequestBuilder.build(sw.config)) match {
+      case Failure(e) => _prom_raw failure (e)
+      case Success(driver) => {
+        driver.subscribe(this.asInstanceOf[Subscriber[DiscoveryRequestEvent,Publisher[DiscoveryRequestEvent]]])
+          driver.execute(this)
+          /* manage datatype decoration */
+          .map((qr: QueryResult) => {
+            notify(DiscoveryRequestEvent(DiscoveryStateRequestEvent.DATATYPE_BUILD))
+            /* create an empty set of datatypes */
+            qr.json("results").update("datatypes", ujson.Obj())
+            trace(qr.json)
+            /* manage datatype */
+            trace("  lDatatype ====> " + lDatatype.toString())
 
-    StrategyRequestBuilder.build(sw.config)
-      .execute(this)
-      /* manage datatype decoration */
-      .map( (qr : QueryResult) => {
-        notify(DiscoveryRequestEvent(DiscoveryStateRequestEvent.DATATYPE_BUILD))
-        /* create an empty set of datatypes */
-        qr.json("results").update("datatypes",ujson.Obj())
-        trace(qr.json)
-        /* manage datatype */
-        trace("  lDatatype ====> " + lDatatype.toString())
+            Future.sequence(lDatatype.map(datatypeNode => {
+              trace("datatype node:" + datatypeNode)
 
-        Future.sequence(lDatatype.map(datatypeNode => {
-          trace("datatype node:"+datatypeNode)
+              sw.rootNode.getRdfNode(datatypeNode.refNode) match {
+                case Some(_) => {
 
-          sw.rootNode.getRdfNode(datatypeNode.refNode) match {
-            case Some(_) => {
-
-              /* find uris value inside results to decorate */
-              val lUris : Seq[SparqlDefinition] =
-                try {
-                  qr.getValues(mapId2Var(datatypeNode.refNode))
-                } catch {
-                  case _ : Throwable => {
-                    List()
-                  }
+                  /* find uris value inside results to decorate */
+                  val lUris: Seq[SparqlDefinition] =
+                    try {
+                      qr.getValues(mapId2Var(datatypeNode.refNode))
+                    } catch {
+                      case _: Throwable => {
+                        List()
+                      }
+                    }
+                  Future.sequence(QueryManager(sw.config).process_datatypes(qr, datatypeNode, lUris))
                 }
-              Future.sequence(QueryManager(sw.config).process_datatypes(qr,datatypeNode,lUris))
+                case None => {
+                  Future {}
+                }
+              }
+            })) onComplete {
+              case Success(_) => {
+                notify(DiscoveryRequestEvent(DiscoveryStateRequestEvent.DATATYPE_DONE))
+                qr.v2Ident(mapId2Var)
+                _prom_raw success qr.json
+                notify(DiscoveryRequestEvent(DiscoveryStateRequestEvent.REQUEST_DONE))
+              }
+              case Failure(e) => {
+                _prom_raw failure (e)
+              }
             }
-            case None => {
-              Future { }
-            }
-          }
-        })) onComplete {
-          case Success(_) => {
-            notify(DiscoveryRequestEvent(DiscoveryStateRequestEvent.DATATYPE_DONE))
-            qr.v2Ident(mapId2Var)
-            _prom_raw success qr.json
-            notify(DiscoveryRequestEvent(DiscoveryStateRequestEvent.REQUEST_DONE))
-          }
-          case Failure(e) => {
-            _prom_raw failure(e)
-          }
-        }
-      }).recover( exception => {
-      _prom_raw failure(exception)
-    })
+          }).recover(exception => {
+          _prom_raw failure (exception)
+        })
+      }
+    }
     this
   }
 }
