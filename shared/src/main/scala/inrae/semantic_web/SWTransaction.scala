@@ -2,7 +2,7 @@ package inrae.semantic_web
 
 import inrae.semantic_web.event.{DiscoveryRequestEvent, DiscoveryStateRequestEvent, Publisher, Subscriber}
 import inrae.semantic_web.internal.{DatatypeNode, pm}
-import inrae.semantic_web.rdf.SparqlDefinition
+import inrae.semantic_web.rdf.{SparqlDefinition, URI}
 import inrae.semantic_web.sparql.QueryResult
 import inrae.semantic_web.strategy._
 import wvlet.log.Logger.rootLogger.{debug, trace}
@@ -90,14 +90,39 @@ case class SWTransaction(sw : SWDiscovery, lRef: Seq[String] = List(), limit : I
     }
   }
 
+  def process_datatypes(qr : QueryResult,
+                        datatypeNode : DatatypeNode,
+                        lUris : Seq[SparqlDefinition]) = {
+    debug(" -- process_datatypes --")
+    val labelProperty = datatypeNode.property.reference()
+
+    lUris.grouped(sw.config.conf.settings.sizeBatchProcessing).toList.map(
+      f = lSubUris => {
+        trace(" datatypes:" + lSubUris.toString)
+        /* request using api */
+        SWDiscovery(sw.config)
+          .something("val_uri")
+          .setList(lSubUris.flatMap(
+            _ match {
+              case uri: URI => Some(uri)
+              case _ => None
+            }
+          ))
+          .focusManagement(datatypeNode.property, false)
+          .select(List("val_uri", labelProperty))
+          .commit()
+          .raw
+          .map(json => {
+            qr.setDatatype(labelProperty, json("results")("bindings").arr.map(rec => {
+              rec("val_uri")("value").value.toString -> rec(labelProperty)
+            }).toMap)
+          })
+      })
+  }
+
   def commit() : SWTransaction = {
     notify(DiscoveryRequestEvent(DiscoveryStateRequestEvent.START))
-
-    /* manage variable name */
-    val qm = QueryManager(sw.config)
-    qm.subscribe(this.asInstanceOf[Subscriber[DiscoveryRequestEvent,Publisher[DiscoveryRequestEvent]]])
-// qr
-
+    
     Try(StrategyRequestBuilder.build(sw.config)) match {
       case Failure(e) => _prom_raw failure (e)
       case Success(driver) => {
@@ -127,7 +152,7 @@ case class SWTransaction(sw : SWDiscovery, lRef: Seq[String] = List(), limit : I
                         List()
                       }
                     }
-                  Future.sequence(QueryManager(sw.config).process_datatypes(qr, datatypeNode, lUris))
+                  Future.sequence(process_datatypes(qr, datatypeNode, lUris))
                 }
                 case None => {
                   Future {}

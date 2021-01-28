@@ -21,6 +21,6 @@ case class Rdf4jSparqlRequestDriver(idName: String,
 
   val con = repo.getConnection()
 
-  def request(query: String): Future[QueryResult] = requestConnexionRepository(con,query)
+  def requestOnSWDB(query: String): Future[QueryResult] = requestConnexionRepository(con,query)
 
 }

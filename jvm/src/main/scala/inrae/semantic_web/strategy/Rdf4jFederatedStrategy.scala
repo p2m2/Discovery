@@ -36,7 +36,7 @@ case class Rdf4jFederatedStrategy(sources: Seq[Source])
       }
       case _ =>
     }
-  
+
   val path = RequestDriverFactory.dataDir.getAbsolutePath
   val end = new ManagedRepositoryEndpoint(new NativeRepositoryInformation("local", path),path, EndpointClassification.Local,RequestDriverFactory.repository)
 
@@ -57,9 +57,9 @@ case class Rdf4jFederatedStrategy(sources: Seq[Source])
     publish(DiscoveryRequestEvent(DiscoveryStateRequestEvent.QUERY_BUILD))
     val query: String = SparqlQueryBuilder.selectQueryString(swt.sw.rootNode, refToIdentifier, swt.lSelectVariables, swt.limit, swt.offset)
 
-    request(query)
+    requestOnSWDB(query)
   }
 
-  override def request(query: String): Future[QueryResult] = requestConnexionRepository(con,query)
+  override def requestOnSWDB(query: String): Future[QueryResult] = requestConnexionRepository(con,query)
 
 }

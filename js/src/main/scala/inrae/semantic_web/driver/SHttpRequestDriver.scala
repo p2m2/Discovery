@@ -16,11 +16,10 @@ case class SHttpRequestDriver(
                                token : String,
                                auth : String)
   extends HttpRequestDriver {
-  implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
 
   val backendShttp = FetchBackend
 
-  def request(query: String): Future[QueryResult] = {
+  def requestOnSWDB(query: String): Future[QueryResult] = {
     publish(DiscoveryRequestEvent(DiscoveryStateRequestEvent.START_HTTP_REQUEST))
     debug(" -- HttpRequestDriver > " + this.getClass.getName )
 

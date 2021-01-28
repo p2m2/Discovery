@@ -11,7 +11,6 @@ import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
 trait Rdf4jRequestDriver extends RequestDriver {
-  implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
 
   def requestConnexionRepository(con : RepositoryConnection, query : String): Future[QueryResult] = {
     Future {

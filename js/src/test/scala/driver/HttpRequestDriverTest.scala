@@ -42,7 +42,7 @@ object HttpRequestDriverTest extends TestSuite {
     test("get") {
       insert_data.map(_ => {
         getInstanceDriver(driver, idName = "test", method = "get", url = DataTestFactory.url_endpoint, login = "", password = "", token = "", auth = "")
-          .request(query)
+          .requestOnSWDB(query)
           .map(qr => {
             assert(qr.json("results")("bindings").arr(0)("b")("value").value == "bb")
             assert(qr.json("results")("bindings").arr(0)("c")("value").value == "cc")
@@ -53,7 +53,7 @@ object HttpRequestDriverTest extends TestSuite {
     test("get bad request") {
       insert_data.map(_ => {
         getInstanceDriver(driver, idName = "test", method = "get", url = DataTestFactory.url_endpoint, login = "", password = "", token = "", auth = "")
-          .request("bad request")
+          .requestOnSWDB("bad request")
           .map(qr => assert(false))
           .recover(_ => assert(true))
       }).flatten
@@ -62,7 +62,7 @@ object HttpRequestDriverTest extends TestSuite {
     test("get malformed endpoint") {
       insert_data.map(_ => {
         getInstanceDriver(driver, idName = "test", method = "get", url = "bidon", login = "", password = "", token = "", auth = "")
-          .request(query)
+          .requestOnSWDB(query)
           .map(qr => assert(false))
           .recover(_ => assert(true))
       }).flatten
@@ -71,7 +71,7 @@ object HttpRequestDriverTest extends TestSuite {
     test("get endpoint does not exist") {
       insert_data.map(_ => {
         getInstanceDriver(driver, idName = "test", method = "get", url = "http://bidon.com", login = "", password = "", token = "", auth = "")
-          .request(query)
+          .requestOnSWDB(query)
           .map(qr => assert(false))
           .recover(_ => assert(true))
       }).flatten
@@ -80,7 +80,7 @@ object HttpRequestDriverTest extends TestSuite {
     test("post") {
       insert_data.map(_ => {
         getInstanceDriver(driver, idName = "test", method = "post", url = DataTestFactory.url_endpoint, login = "", password = "", token = "", auth = "")
-          .request(query)
+          .requestOnSWDB(query)
           .map(qr => {
             assert(qr.json("results")("bindings").arr(0)("b")("value").value == "bb")
             assert(qr.json("results")("bindings").arr(0)("c")("value").value == "cc")
@@ -91,7 +91,7 @@ object HttpRequestDriverTest extends TestSuite {
     test("post bad request") {
       insert_data.map(_ => {
         getInstanceDriver(driver, idName = "test", method = "post", url = DataTestFactory.url_endpoint, login = "", password = "", token = "", auth = "")
-          .request("bad request")
+          .requestOnSWDB("bad request")
           .map(qr => assert(false))
           .recover(_ => assert(true))
       }).flatten
@@ -99,7 +99,7 @@ object HttpRequestDriverTest extends TestSuite {
     test("post malformed endpoint") {
       insert_data.map(_ => {
         getInstanceDriver(driver, idName = "test", method = "post", url = "bidon", login = "", password = "", token = "", auth = "")
-          .request(query)
+          .requestOnSWDB(query)
           .map(qr => assert(false))
           .recover(_ => assert(true))
       }).flatten

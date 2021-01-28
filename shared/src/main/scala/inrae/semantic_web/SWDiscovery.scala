@@ -3,6 +3,7 @@ package inrae.semantic_web
 import inrae.semantic_web.internal._
 import inrae.semantic_web.internal.pm.{SelectNode, SerializationBuilder}
 import inrae.semantic_web.rdf._
+import inrae.semantic_web.strategy.StrategyRequestBuilder
 import wvlet.log.Logger
 import wvlet.log.Logger.rootLogger._
 
@@ -222,7 +223,10 @@ case class SWDiscovery(
     this
   }
 
-  def sparql() : String = QueryManager(config).sparql_string(rootNode)
+  def sparql() : String = {
+    val (refToIdentifier,_) = pm.SparqlGenerator.correspondenceVariablesIdentifier(rootNode)
+    SparqlQueryBuilder.selectQueryString(rootNode,refToIdentifier,refToIdentifier.values.toSeq,0,0)
+  }
 
   /**
    * Discovery request
@@ -241,7 +245,7 @@ case class SWDiscovery(
     SWTransaction(this,lRef,limit,offset)
 
   def count() : Future[Int] =
-    QueryManager(config).countNbSolutions(rootNode)
+    StrategyRequestBuilder.build(config).countNbSolutions(rootNode)
 
   /**
    * Give an iterable object to browse and obtain all solution performed by a select.
