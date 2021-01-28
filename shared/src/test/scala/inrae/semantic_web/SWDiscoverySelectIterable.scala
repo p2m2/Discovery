@@ -40,10 +40,7 @@ object SWDiscoverySelectIterable extends TestSuite {
         {
          "sources" : [{
            "id"       : "local",
-           "url"      : "${DataTestFactory.url_endpoint}",
-           "type"     : "tps",
-           "method"   : "POST",
-           "mimetype" : "json"
+           "url"      : "${DataTestFactory.url_endpoint}"
          }],
          "settings" : {
             "driver" : "${DataTestFactory.default_http_driver}",

@@ -1,7 +1,7 @@
 package inrae.semantic_web.driver
 
 import inrae.semantic_web.event.{DiscoveryRequestEvent, DiscoveryStateRequestEvent}
-import inrae.semantic_web.sparql.{ConfigurationHttpRequest, HttpRequestDriver, HttpRequestDriverException, QueryResult}
+import inrae.semantic_web.sparql.{ConfigurationHttpRequest, QueryResult}
 import org.portablescala.reflect.annotation.EnableReflectiveInstantiation
 import sttp.client3._
 

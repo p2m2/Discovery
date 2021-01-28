@@ -88,10 +88,7 @@ object DataTestFactory  {
         {
          "sources" : [{
            "id"       : "local",
-           "url"      : "${DataTestFactory.url_endpoint}",
-           "type"     : "tps",
-           "method"   : "POST",
-           "mimetype" : "json"
+           "url"      : "${DataTestFactory.url_endpoint}"
          }],
          "settings" : {
             "driver" : "${default_http_driver}",
@@ -108,10 +105,7 @@ object DataTestFactory  {
         {
          "sources" : [{
            "id"       : "local",
-           "url"      : "${DataTestFactory.url_endpoint}",
-           "type"     : "tps",
-           "method"   : "POST",
-           "mimetype" : "json"
+           "url"      : "${DataTestFactory.url_endpoint}"
          }],
          "settings" : {
             "driver" : "${default_http_driver}",
@@ -126,9 +120,7 @@ object DataTestFactory  {
             {
              "sources" : [{
                "id"  : "dbpedia",
-               "url" : "https://dbpedia.org/sparql",
-               "type" : "tps",
-               "method" : "POST"
+               "url" : "https://dbpedia.org/sparql"
              }],
             "settings" : {
               "driver" : "inrae.semantic_web.driver.JenaRequestDriver",

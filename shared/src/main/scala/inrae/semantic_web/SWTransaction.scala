@@ -1,9 +1,11 @@
 package inrae.semantic_web
 
 import inrae.semantic_web.event.{DiscoveryRequestEvent, DiscoveryStateRequestEvent, Publisher, Subscriber}
-import inrae.semantic_web.internal.pm
+import inrae.semantic_web.internal.{DatatypeNode, pm}
 import inrae.semantic_web.rdf.SparqlDefinition
 import inrae.semantic_web.sparql.QueryResult
+import inrae.semantic_web.strategy._
+
 import wvlet.log.Logger.rootLogger.{debug, trace}
 
 import scala.concurrent.{Future, Promise}
@@ -22,6 +24,24 @@ case class SWTransaction(sw : SWDiscovery, lRef: Seq[String] = List(), limit : I
   val _prom_raw: Promise[ujson.Value] = Promise[ujson.Value]()
   val raw: Future[ujson.Value] = _prom_raw.future
   var currentRequestEvent: String = DiscoveryStateRequestEvent.START.toString()
+
+  val mapId2Var: Map[String, String] =  pm.SparqlGenerator.correspondenceVariablesIdentifier(sw.rootNode)._1
+
+  val lDatatype: Seq[DatatypeNode] = sw.rootNode.lDatatypeNode.filter(ld => lRef.contains(ld.property.reference()))
+  trace("list datatype : "+lDatatype.toString)
+
+  val lSelectVariables: Seq[String] = {
+    /* select uri type ask with decoration/datatype */
+    lDatatype.map(ld => {
+      mapId2Var(ld.refNode)
+    }) ++ {
+      /* select user ask variable */
+      lRef match {
+        case v if v.length > 0 => v.flatMap(ref => variable(ref))
+        case _ => sw.rootNode.referencesChildren().flatMap(ref => variable(ref))
+      }
+    }
+  }.distinct
 
   private var countEvent: Int = 1
 
@@ -75,32 +95,13 @@ case class SWTransaction(sw : SWDiscovery, lRef: Seq[String] = List(), limit : I
   def commit() : SWTransaction = {
     notify(DiscoveryRequestEvent(DiscoveryStateRequestEvent.START))
 
-    val mapId2Var =  pm.SparqlGenerator.correspondenceVariablesIdentifier(sw.rootNode)._1
-
-    trace("Mapping variable <-> references :\n" + mapId2Var.toString().split(",").mkString("\n"))
-
-    val lDatatype = sw.rootNode.lDatatypeNode.filter(ld => lRef.contains(ld.property.reference()))
-    trace("list datatype : "+lDatatype.toString)
-
-    val lSelectVariables = {
-      /* select uri type ask with decoration/datatype */
-      lDatatype.map(ld => {
-        mapId2Var(ld.refNode)
-      }) ++ {
-        /* select user ask variable */
-        lRef match {
-          case v if v.length > 0 => v.flatMap(ref => variable(ref))
-          case _ => sw.rootNode.referencesChildren().flatMap(ref => variable(ref))
-        }
-      }
-    }.distinct
-
-    trace("lSelectVariables :::" + lSelectVariables.toString())
-
     /* manage variable name */
     val qm = QueryManager(sw.config)
     qm.subscribe(this.asInstanceOf[Subscriber[DiscoveryRequestEvent,Publisher[DiscoveryRequestEvent]]])
-    qm.queryVariables(sw.rootNode,lSelectVariables,limit,offset)
+
+
+    StrategyRequestBuilder.build(sw.config)
+      .execute(this)
       /* manage datatype decoration */
       .map( (qr : QueryResult) => {
         notify(DiscoveryRequestEvent(DiscoveryStateRequestEvent.DATATYPE_BUILD))

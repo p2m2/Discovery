@@ -6,7 +6,7 @@ import fr.hmil.roshttp.exceptions.HttpException
 import fr.hmil.roshttp.response.SimpleHttpResponse
 import inrae.semantic_web.event.{DiscoveryRequestEvent, DiscoveryStateRequestEvent}
 import monix.execution.Scheduler.Implicits.global
-import inrae.semantic_web.sparql.{ConfigurationHttpRequest, HttpRequestDriver, HttpRequestDriverException, QueryResult}
+import inrae.semantic_web.sparql.{QueryResult}
 import org.portablescala.reflect.annotation.EnableReflectiveInstantiation
 import wvlet.log.Logger.rootLogger.debug
 
@@ -14,12 +14,18 @@ import wvlet.log.Logger.rootLogger.debug
 import scala.concurrent.Future
 
 @EnableReflectiveInstantiation
-case class RosHTTPDriver() extends HttpRequestDriver {
+case class RosHTTPDriver(idName: String,
+                         method : String,
+                         url : String,
+                         login: String ,
+                         password: String,
+                         token: String,
+                         auth: String) extends HttpRequestDriver(method) {
 
-  def post(query: String, config: ConfigurationHttpRequest): Future[QueryResult] = {
+  def post(query: String): Future[QueryResult] = {
     publish(DiscoveryRequestEvent(DiscoveryStateRequestEvent.PROCESS_HTTP_REQUEST))
 
-    (HttpRequest(config.url)
+    (HttpRequest(url)
       .withHeader("Accept", "application/json")
       .withHeader("Content-Type", "application/x-www-form-urlencoded")
       .withQueryParameter("query", query)
@@ -43,11 +49,11 @@ case class RosHTTPDriver() extends HttpRequestDriver {
     })
   }
 
-  def get(query: String, config: ConfigurationHttpRequest): Future[QueryResult] = {
+  def get(query: String): Future[QueryResult] = {
 
     publish(DiscoveryRequestEvent(DiscoveryStateRequestEvent.PROCESS_HTTP_REQUEST))
 
-    (HttpRequest(config.url)
+    (HttpRequest(url)
       .withHeader("Accept", "application/json")
       .withMethod(GET)
       .withQueryParameter("query", query)

@@ -1,22 +1,23 @@
 package inrae.semantic_web
+import inrae.semantic_web.driver.RequestDriver
 import inrae.semantic_web.event.{DiscoveryRequestEvent, DiscoveryStateRequestEvent, Publisher, Subscriber}
 import inrae.semantic_web.internal._
 import inrae.semantic_web.rdf._
-import inrae.semantic_web.sparql.{QueryResult, QueryRunner}
+import inrae.semantic_web.driver._
+import inrae.semantic_web.sparql.QueryResult
 import wvlet.log.Logger.rootLogger._
 
-import scala.concurrent.{Future, Promise}
-import scala.util._
+import scala.concurrent.Future
 
 
 case class QueryManager(config : StatementConfiguration)
-  extends Subscriber[DiscoveryRequestEvent,QueryRunner]
+  extends Subscriber[DiscoveryRequestEvent,RequestDriver]
     with Publisher[DiscoveryRequestEvent]
 {
 
   implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
 
-  def notify (pub: QueryRunner, event: DiscoveryRequestEvent) : Unit = {
+  def notify (pub: RequestDriver, event: DiscoveryRequestEvent) : Unit = {
     publish(event)
   }
 
@@ -38,10 +39,11 @@ case class QueryManager(config : StatementConfiguration)
    * @param offset : solution are generated after this offset
    * @return Solutions embedded in QueryResult object as Future
    */
+    /*
   def queryAll(rootRequest : Root,limit : Int, offset : Int) : Future[QueryResult] = {
     debug(" -- queryAll -- ")
     queryVariables(rootRequest,rootRequest.referencesChildren(),limit,offset)
-  }
+  }*/
 
   def countNbSolutions(root : Root) : Future[Int] = {
     debug(" -- countNbSolutions -- ")
@@ -54,11 +56,11 @@ case class QueryManager(config : StatementConfiguration)
       val varCount = "count"
       publish(DiscoveryRequestEvent(DiscoveryStateRequestEvent.QUERY_BUILD))
       val query = SparqlQueryBuilder.countQueryString(root,refToIdentifier,varCount)
-      val qr = QueryRunner(source,config.conf.settings)
+     // val qr = QueryRunner(source,config.conf.settings)
 
-      qr.subscribe(this.asInstanceOf[Subscriber[DiscoveryRequestEvent,Publisher[DiscoveryRequestEvent]]])
+      //qr.subscribe(this.asInstanceOf[Subscriber[DiscoveryRequestEvent,Publisher[DiscoveryRequestEvent]]])
 
-      val res: Future[QueryResult] = qr.query(query)
+      val res: Future[QueryResult] = RequestDriverFactory.build(source).request(query)
       res.map(v => {
         publish(DiscoveryRequestEvent(DiscoveryStateRequestEvent.RESULTS_BUILD))
         SparqlBuilder.createLiteral(v.json("results")("bindings")(0)(varCount)).toInt()
@@ -78,6 +80,7 @@ case class QueryManager(config : StatementConfiguration)
    * @param offset : solution are generated after this offset
    * @return Solutions embedded in QueryResult object as Future
    */
+    /*
   def queryVariables(root: Root,
                      listVariables : Seq[String],limit : Int, offset : Int) : Future[QueryResult] = {
     debug(" -- queryVariables -- ")
@@ -109,13 +112,14 @@ case class QueryManager(config : StatementConfiguration)
       }
     }
   }
-
+*/
   /**
    * Assign a list of source (existence of a remote persistence) if possible
    * @param n
    * @param source
    * @return
    */
+    /*
   def setUpSourcesNode(n: Node,
                        prefixes : Map[String,IRI]): Future[Option[SourcesNode]] = {
 
@@ -163,7 +167,7 @@ case class QueryManager(config : StatementConfiguration)
       case _ => Future(None)
     }
   }
-
+*/
   def process_datatypes(qr : QueryResult,
                         datatypeNode : DatatypeNode,
                         lUris : Seq[SparqlDefinition]) = {
@@ -176,7 +180,12 @@ case class QueryManager(config : StatementConfiguration)
         /* request using api */
         SWDiscovery(config)
           .something("val_uri")
-          .setList(lSubUris.map(_ match { case uri: URI => uri }))
+          .setList(lSubUris.flatMap(
+            _ match {
+              case uri: URI => Some(uri)
+              case _ => None
+            }
+          ))
           .focusManagement(datatypeNode.property, false)
           .select(List("val_uri", labelProperty))
           .commit()

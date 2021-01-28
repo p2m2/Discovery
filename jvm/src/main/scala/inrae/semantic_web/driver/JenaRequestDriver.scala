@@ -1,6 +1,6 @@
 package inrae.semantic_web.driver
 
-import inrae.semantic_web.sparql.{ConfigurationHttpRequest, HttpRequestDriver, HttpRequestDriverException, QueryResult}
+import inrae.semantic_web.sparql.{QueryResult}
 import org.apache.jena.query._
 
 import java.io.ByteArrayOutputStream
@@ -11,10 +11,16 @@ import wvlet.log.Logger.rootLogger.debug
 import scala.util.{Failure, Success, Try}
 
 @EnableReflectiveInstantiation
-case class JenaRequestDriver() extends HttpRequestDriver {
+case class JenaRequestDriver(idName: String,
+                             method : String,
+                             url : String,
+                             login: String ,
+                             password: String,
+                             token: String,
+                             auth: String) extends HttpRequestDriver(method) {
   implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
 
-  def process(queryStr: String, config : ConfigurationHttpRequest): Future[QueryResult] = {
+  def process(queryStr: String): Future[QueryResult] = {
 
     Future {
       /* Graph equiv Model => defined in configuration */
@@ -22,7 +28,7 @@ case class JenaRequestDriver() extends HttpRequestDriver {
       val query = QueryFactory.create(queryStr)
 
       //val authenticator = new Nothing("user", "password".toCharArray)
-      val qexec: QueryExecution = Try(QueryExecutionFactory.sparqlService(config.url, query)) match {
+      val qexec: QueryExecution = Try(QueryExecutionFactory.sparqlService(url, query)) match {
         case Success(result) => result
         case Failure(e) => throw HttpRequestDriverException(e.getMessage())
       }
@@ -44,11 +50,11 @@ case class JenaRequestDriver() extends HttpRequestDriver {
     }
   }
 
-  def get( query: String, config : ConfigurationHttpRequest ) : Future[QueryResult] = {
-    process(query,config)
+  def get( query: String ) : Future[QueryResult] = {
+    process(query)
   }
 
-  def post( query: String, config : ConfigurationHttpRequest ) : Future[QueryResult] = {
-    process(query,config)
+  def post( query: String ) : Future[QueryResult] = {
+    process(query)
   }
 }

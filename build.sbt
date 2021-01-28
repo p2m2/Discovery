@@ -1,7 +1,7 @@
 import sbt.Keys.scalacOptions
 import sbtcrossproject.CrossPlugin.autoImport.crossProject
 
-lazy val utestVersion = "0.7.5"
+lazy val utestVersion = "0.7.7"
 lazy val upickleVersion  = "1.2.2"
 lazy val airframeLogVersion = "20.11.0"
 lazy val scalaParserCombinatorVersion = "1.1.2"
@@ -11,6 +11,7 @@ lazy val scalaJsDOMVersion = "1.1.0"
 lazy val scalaStubVersion = "1.0.0"
 lazy val scalatagVersion = "0.9.2"
 lazy val jenaVersion = "3.16.0"
+lazy val rdf4jVersion = "3.6.0-M2"
 
 releaseIgnoreUntrackedFiles := true
 val version_build = scala.util.Properties.envOrElse("DISCOVERY_VERSION", "local-SNAPSHOT" )
@@ -117,7 +118,11 @@ lazy val discovery=crossProject(JSPlatform, JVMPlatform).in(file("."))
   .jvmSettings(
     libraryDependencies ++= Seq(
       "org.scala-js" %% "scalajs-stubs" % scalaStubVersion % "provided",
-      "org.apache.jena" % "apache-jena" % jenaVersion pomOnly()
+      "org.apache.jena" % "apache-jena" % jenaVersion pomOnly(),
+      "org.slf4j" % "slf4j-api" % "1.7.9",
+      "org.slf4j" % "slf4j-simple" % "1.7.9",
+      "org.eclipse.rdf4j" % "rdf4j-storage" % rdf4jVersion,
+      "org.eclipse.rdf4j" % "rdf4j-tools-federation" % rdf4jVersion
     ))
   //.enablePlugins(ScalaJSBundlerPlugin)
 

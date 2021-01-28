@@ -1,6 +1,5 @@
 package inrae.semantic_web
 
-import inrae.semantic_web.sparql.HttpRequestDriver
 import upickle.default.{macroRW, ReadWriter => RW}
 import wvlet.log.LogLevel
 import wvlet.log.Logger.rootLogger.warn
@@ -22,19 +21,26 @@ object ConfigurationObject {
   case class Source(
                      id:String, /* identify the source endpoint */
                      url: String, /* url access */
-                     `type`: String="tps",  /* tps, ldf, csv, tps */
-                     method: String = "POST", /* POST, POST_ENCODED, GET */
-                     auth : String = "", /* basic, digest, bearer, proxy */
-                     login : String = "" ,
+                     file: String      = "", /* local file access */
+                     content: String   = "", /* online defition */
+                     mimetype: String  = "application/sparql-query",  /* application/sparql-query, 'turtle', 'text/turtle' */
+                     method: String    = "POST", /* POST, POST_ENCODED, GET */
+                     auth : String     = "", /* basic, digest, bearer, proxy */
+                     login : String    = "" ,
                      password : String = "",
-                     token : String = "",
-                     mimetype: String = "application/json"
+                     token : String    = ""
                    ) {
 
-    val type_legal = List("tps", "ldf", "csv", "tps")
+    val mimetype_legal = List(
+      "application/sparql-query",
+      "text/turtle",
+      "text/n3",
+      "text/rdf-xml",
+      "application/rdf+xml"
+    )
 
-    `type` match {
-      case a if ! type_legal.contains(a) => throw StatementConfigurationException(s"type source unknown :${`type`}")
+    mimetype match {
+      case a if ! mimetype_legal.contains(a) => throw StatementConfigurationException(s"type source unknown :${mimetype}")
       case _ =>
     }
 
@@ -55,22 +61,14 @@ object ConfigurationObject {
   }
 
   case class GeneralSetting(
-                      driver: String = "inrae.semantic_web.driver.RosHTTPDriver",
                       cache : Boolean = true,
                       logLevel : String = "warn"          , // trace, debug, info, warn, error, all, off
                       sizeBatchProcessing : Int = 150,
-                      pageSize : Int = 20
+                      pageSize : Int = 20,
+                      proxy : Boolean = false ,  /* send request to a discovery proxy */
+                      urlProxy : String = "http://urlProxy",
                     ) {
 
-    def getHttpDriver: HttpRequestDriver = {
-      import org.portablescala.reflect._
-      Reflect.lookupInstantiatableClass(driver) match {
-        case Some( cls ) => cls.newInstance().asInstanceOf[HttpRequestDriver]
-        case None => throw StatementConfigurationException("Unknown Http Request Driver :"+driver)
-      }
-    }
-    /* check if driver exist when config is loaded . */
-    getHttpDriver
 
     def getLogLevel: LogLevel = logLevel.toLowerCase() match {
       case "debug" | "d" => LogLevel.DEBUG

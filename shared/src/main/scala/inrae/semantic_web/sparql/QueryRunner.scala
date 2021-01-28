@@ -1,11 +1,5 @@
-package inrae.semantic_web.sparql
-
-import inrae.semantic_web.ConfigurationObject
-import inrae.semantic_web.ConfigurationObject.GeneralSetting
-import inrae.semantic_web.event.{DiscoveryRequestEvent, DiscoveryStateRequestEvent, Publisher, Subscriber}
-
-import scala.concurrent.Future
-
+//package inrae.semantic_web.sparql
+/*
 final case class QueryRunnerException(private val message: String = "",
                                             private val cause: Throwable = None.orNull) extends Exception(message,cause)
 
@@ -46,11 +40,11 @@ case class QueryRunner(source: ConfigurationObject.Source,settings : GeneralSett
 
       case None => {
         /* request */
-        val httpDriver = settings.getHttpDriver
+        val httpDriver = settings.getRequestDriver
         /* subscribe */
-        httpDriver.subscribe(this.asInstanceOf[Subscriber[DiscoveryRequestEvent,Publisher[DiscoveryRequestEvent]]])
+     //   httpDriver.subscribe(this.asInstanceOf[Subscriber[DiscoveryRequestEvent,Publisher[DiscoveryRequestEvent]]])
         /* request */
-        httpDriver.request(source.method, queryStr,
+       /* httpDriver.request(source.method, queryStr,
           ConfigurationHttpRequest(
             url = source.url,
             login = source.login,
@@ -61,9 +55,11 @@ case class QueryRunner(source: ConfigurationObject.Source,settings : GeneralSett
             QueryRunner.getQrm(source.url).set(queryStr, resultsQR.results)
           publish(DiscoveryRequestEvent(DiscoveryStateRequestEvent.RESULTS_DONE))
           resultsQR
-        })
+        })*/
+        Future{ QueryResult("") }
       }
     }
   }
 
 }
+*/
