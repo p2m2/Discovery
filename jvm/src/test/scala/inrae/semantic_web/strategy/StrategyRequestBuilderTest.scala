@@ -51,7 +51,7 @@ object StrategyRequestBuilderTest extends TestSuite {
                "mimetype" : "application/sparql-query"
              }]
            }""".stripMargin))) match {
-        case Success(_ : Rdf4jFederatedThirdPartyStrategyRequest) => assert(true)
+        case Success(_ : Rdf4jFederatedStrategy) => assert(true)
         case Success(_) => assert(false)
         case Failure(_) => assert(false)
       }

@@ -100,7 +100,7 @@ lazy val discovery=crossProject(JSPlatform, JVMPlatform).in(file("."))
     coverageMinimum := 70,
     coverageFailOnMinimum := false,
     coverageHighlighting := true,
-
+    parallelExecution in Test := false
   )
   .jsSettings(
     scalaJSLinkerConfig in (Compile, fastOptJS ) ~= {

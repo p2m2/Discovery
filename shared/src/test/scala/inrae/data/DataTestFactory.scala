@@ -18,8 +18,6 @@ object DataTestFactory  {
 
   val url_endpoint = "http://localhost:8890/sparql"
 
-  val default_http_driver = "inrae.semantic_web.driver.RosHTTPDriver"
-
   def put(stringQuery : String, url_endpoint : String) = {
 
     HttpRequest(url_endpoint)
@@ -91,7 +89,6 @@ object DataTestFactory  {
            "url"      : "${DataTestFactory.url_endpoint}"
          }],
          "settings" : {
-            "driver" : "${default_http_driver}",
             "logLevel" : "off",
             "sizeBatchProcessing" : 100
           }
@@ -108,7 +105,6 @@ object DataTestFactory  {
            "url"      : "${DataTestFactory.url_endpoint}"
          }],
          "settings" : {
-            "driver" : "${default_http_driver}",
             "logLevel" : "off",
             "sizeBatchProcessing" : 100
           }

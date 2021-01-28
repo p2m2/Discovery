@@ -44,7 +44,7 @@ object StatementConfigurationTest extends TestSuite {
       val mimetype = "application/sparql-query"
 
       val configDbpediaBasic: StatementConfiguration = StatementConfiguration.setConfig(ConfigurationObject.StatementConfigurationJson(
-        Seq(ConfigurationObject.Source(dbname, url, mimetype))))
+        Seq(ConfigurationObject.Source(id=dbname, url=url, mimetype=mimetype))))
       val source = configDbpediaBasic.source("dbpedia")
 
       assert(source.id == dbname)

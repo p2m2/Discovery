@@ -43,7 +43,6 @@ object SWDiscoverySelectIterable extends TestSuite {
            "url"      : "${DataTestFactory.url_endpoint}"
          }],
          "settings" : {
-            "driver" : "${DataTestFactory.default_http_driver}",
             "logLevel" : "info",
             "sizeBatchProcessing" : 100,
             "pageSize" : ${pageSize}

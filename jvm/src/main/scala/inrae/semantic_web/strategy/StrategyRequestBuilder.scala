@@ -14,7 +14,7 @@ object StrategyRequestBuilder {
       case 0 => throw SWDiscoveryException("No sources specified")
       case _ if config.conf.settings.proxy => ProxyStrategyRequest(config.conf.settings.urlProxy)
       case 1 => DiscoveryStrategyRequest(config.sources()(0))
-      case _ => Rdf4jFederatedThirdPartyStrategyRequest(config.sources())
+      case _ => Rdf4jFederatedStrategy(config.sources())
     }
   }
 }

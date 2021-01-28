@@ -20,7 +20,7 @@ object ConfigurationObject {
                                        )
   case class Source(
                      id:String, /* identify the source endpoint */
-                     url: String, /* url access */
+                     url: String       = "", /* url access */
                      file: String      = "", /* local file access */
                      content: String   = "", /* online defition */
                      mimetype: String  = "application/sparql-query",  /* application/sparql-query, 'turtle', 'text/turtle' */
@@ -57,6 +57,12 @@ object ConfigurationObject {
       case a if ! auth_legal.contains(a) => throw StatementConfigurationException(s"auth source not managed :$auth")
       case _ =>
     }
+
+    if ( url == "" && file == ""&& content == "") throw StatementConfigurationException("url/file/content. one of these parameters must be defined.")
+    if (( url != "" && file != "") ||
+      (url != "" && content != "") ||
+      (file != "" && content != "")
+    ) throw StatementConfigurationException("url/file/content. only one of theses parameters should be defined .")
 
   }
 
