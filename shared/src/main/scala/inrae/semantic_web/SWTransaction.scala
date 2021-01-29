@@ -5,11 +5,16 @@ import inrae.semantic_web.internal.{DatatypeNode, pm}
 import inrae.semantic_web.rdf.{SparqlDefinition, URI}
 import inrae.semantic_web.sparql.QueryResult
 import inrae.semantic_web.strategy._
+import upickle.default.{macroRW, ReadWriter => RW}
 import wvlet.log.Logger.rootLogger.{debug, trace}
 
 import scala.concurrent.{Future, Promise}
 import scala.util.{Failure, Success, Try}
 
+
+object SWTransaction {
+  implicit val rw: RW[SWTransaction] = macroRW
+}
 
 case class SWTransaction(sw : SWDiscovery, lRef: Seq[String] = List(), limit : Int = 0, offset : Int = 0)
     extends Subscriber[DiscoveryRequestEvent,StrategyRequest]

@@ -83,6 +83,14 @@ full example with [table view implementation](https://github.com/p2m2/discovery-
 
 ## note dev
 
+### dependencies
+```bash
+npm install axios --save-dev
+npm install qs --save-dev
+npm install browserify
+```
+### memo
+
 ```
 sbt compile
 sbt run   # run web app http://localhost:9000

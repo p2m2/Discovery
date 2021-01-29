@@ -12,7 +12,7 @@ object RequestDriverFactory  {
 
     source.mimetype match {
       case "application/sparql-query" if source.url != "" =>
-        SHttpRequestDriver(
+        AxiosRequestDriver(
           source.id,
           source.method,
           source.url,

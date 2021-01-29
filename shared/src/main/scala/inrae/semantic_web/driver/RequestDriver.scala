@@ -30,7 +30,10 @@ trait RequestDriver extends Publisher[DiscoveryRequestEvent] {
         QueryResult(resultsString)
       }
       case None => {
+        publish(DiscoveryRequestEvent(DiscoveryStateRequestEvent.START_HTTP_REQUEST))
         requestOnSWDB(query).map(resultsQR => {
+
+          publish(DiscoveryRequestEvent(DiscoveryStateRequestEvent.RESULTS_BUILD))
           RequestDriver.getQrm(this).set(query, resultsQR.results)
           publish(DiscoveryRequestEvent(DiscoveryStateRequestEvent.RESULTS_DONE))
           resultsQR

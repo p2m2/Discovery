@@ -11,6 +11,8 @@ lazy val scalaStubVersion = "1.0.0"
 lazy val scalatagVersion = "0.9.2"
 lazy val rdf4jVersion = "3.6.0-M2"
 
+//https://jitpack.io/
+
 releaseIgnoreUntrackedFiles := true
 val version_build = scala.util.Properties.envOrElse("DISCOVERY_VERSION", "local-SNAPSHOT" )
 val SWDiscoveryVersionAtBuildTimeFile = "./shared/src/main/scala/inrae/semantic_web/SWDiscoveryVersionAtBuildTime.scala"
@@ -102,7 +104,13 @@ lazy val discovery=crossProject(JSPlatform, JVMPlatform).in(file("."))
     coverageHighlighting := true,
     parallelExecution in Test := false
   )
+  .enablePlugins(ScalaJSPlugin)
+  .enablePlugins(ScalaJSBundlerPlugin)
   .jsSettings(
+    npmDependencies in Compile ++= Seq(
+      "axios" -> "0.21.1",
+      "qs" -> "6.9.6"
+    ),
     scalaJSLinkerConfig in (Compile, fastOptJS ) ~= {
       _.withOptimizer(false)
         .withPrettyPrint(true)
@@ -111,7 +119,8 @@ lazy val discovery=crossProject(JSPlatform, JVMPlatform).in(file("."))
     scalaJSLinkerConfig in (Compile, fullOptJS) ~= {
       _.withSourceMap(false)
         .withModuleKind(ModuleKind.CommonJSModule)
-    })
+    }
+  )
   .jvmSettings(
     libraryDependencies ++= Seq(
       "org.scala-js" %% "scalajs-stubs" % scalaStubVersion % "provided",
@@ -120,7 +129,6 @@ lazy val discovery=crossProject(JSPlatform, JVMPlatform).in(file("."))
       "org.eclipse.rdf4j" % "rdf4j-storage" % rdf4jVersion,
       "org.eclipse.rdf4j" % "rdf4j-tools-federation" % rdf4jVersion
     ))
-  //.enablePlugins(ScalaJSBundlerPlugin)
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
 //publishTo in ThisBuild :=

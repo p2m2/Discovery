@@ -1,8 +1,7 @@
-package driver
+package inrae.semantic_web.driver
 
 import inrae.data.DataTestFactory
 import inrae.semantic_web.StatementConfigurationException
-import inrae.semantic_web.driver.HttpRequestDriver
 import org.portablescala.reflect.{InvokableConstructor, Reflect}
 import utest.{TestRunner, TestSuite, Tests, test}
 import wvlet.log.{LogLevel, Logger}
