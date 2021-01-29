@@ -1,6 +1,6 @@
 package inrae.semantic_web.driver
 
-import ext.Axios
+import facade.npm.{Axios, qs}
 import inrae.semantic_web.SWDiscoveryException
 import inrae.semantic_web.event.{DiscoveryRequestEvent, DiscoveryStateRequestEvent}
 import inrae.semantic_web.sparql.QueryResult
@@ -8,14 +8,8 @@ import wvlet.log.Logger.rootLogger.debug
 
 import scala.concurrent.Future
 import scala.scalajs.js
-import scala.scalajs.js.annotation.JSImport
 import scala.scalajs.js.{Dynamic, JSON, URIUtils}
 
-@js.native
-@JSImport("qs", JSImport.Default)
-object qs extends js.Object {
-  def stringify(data: js.Dictionary[String]): String = js.native
-}
 
 case class AxiosRequestDriver(
                                idName : String,

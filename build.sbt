@@ -104,8 +104,7 @@ lazy val discovery=crossProject(JSPlatform, JVMPlatform).in(file("."))
     coverageHighlighting := true,
     parallelExecution in Test := false
   )
-  .enablePlugins(ScalaJSPlugin)
-  .enablePlugins(ScalaJSBundlerPlugin)
+  .jsConfigure(_.enablePlugins(ScalaJSBundlerPlugin))
   .jsSettings(
     npmDependencies in Compile ++= Seq(
       "axios" -> "0.21.1",

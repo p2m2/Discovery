@@ -1,6 +1,6 @@
 package inrae.semantic_web.strategy
 
-import ext.Axios
+import facade.npm.Axios
 import inrae.semantic_web.sparql.QueryResult
 import inrae.semantic_web.{SWDiscoveryException, SWTransaction}
 import upickle.default._

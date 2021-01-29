@@ -1,4 +1,4 @@
-package ext
+package facade.npm
 
 /**
  * https://raw.githubusercontent.com/massung/scala-js-axios/master/src/main/scala/blog/codeninja/scalajs/axios/Axios.scala
