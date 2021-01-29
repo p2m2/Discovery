@@ -1,9 +1,6 @@
 package inrae.semantic_web.driver
 
-import inrae.semantic_web.SparqlQueryBuilder
 import inrae.semantic_web.event.{DiscoveryRequestEvent, DiscoveryStateRequestEvent, Publisher}
-import inrae.semantic_web.internal.{Root, pm}
-import inrae.semantic_web.rdf.SparqlBuilder
 import inrae.semantic_web.sparql.{QueryResult, QueryResultManager}
 
 import scala.concurrent.Future
@@ -42,18 +39,6 @@ trait RequestDriver extends Publisher[DiscoveryRequestEvent] {
 
     }
   }
-
-  def countNbSolutions(root : Root) : Future[Int] = {
-      val (refToIdentifier, _) = pm.SparqlGenerator.correspondenceVariablesIdentifier(root)
-      val varCount = "count"
-      publish(DiscoveryRequestEvent(DiscoveryStateRequestEvent.QUERY_BUILD))
-      val query = SparqlQueryBuilder.countQueryString(root,refToIdentifier,varCount)
-      val res: Future[QueryResult] = request(query)
-      res.map(v => {
-        publish(DiscoveryRequestEvent(DiscoveryStateRequestEvent.RESULTS_BUILD))
-        SparqlBuilder.createLiteral(v.json("results")("bindings")(0)(varCount)).toInt()
-      })
-    }
 
   protected def requestOnSWDB(query: String): Future[QueryResult]
 }

@@ -26,5 +26,4 @@ case class DiscoveryStrategyRequest(source : Source) extends StrategyRequest {
 
   def request(query: String): Future[QueryResult] = driver.request(query)
 
-  def countNbSolutions(root : Root) : Future[Int] = driver.countNbSolutions(root : Root)
 }

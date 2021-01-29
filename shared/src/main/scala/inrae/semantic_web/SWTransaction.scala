@@ -122,7 +122,7 @@ case class SWTransaction(sw : SWDiscovery, lRef: Seq[String] = List(), limit : I
 
   def commit() : SWTransaction = {
     notify(DiscoveryRequestEvent(DiscoveryStateRequestEvent.START))
-    
+
     Try(StrategyRequestBuilder.build(sw.config)) match {
       case Failure(e) => _prom_raw failure (e)
       case Success(driver) => {

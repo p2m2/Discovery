@@ -1,8 +1,10 @@
 package inrae.semantic_web
 
+import inrae.semantic_web.event.{DiscoveryRequestEvent, DiscoveryStateRequestEvent}
 import inrae.semantic_web.internal._
 import inrae.semantic_web.internal.pm.{SelectNode, SerializationBuilder}
 import inrae.semantic_web.rdf._
+import inrae.semantic_web.sparql.QueryResult
 import inrae.semantic_web.strategy.StrategyRequestBuilder
 import wvlet.log.Logger
 import wvlet.log.Logger.rootLogger._
@@ -244,8 +246,15 @@ case class SWDiscovery(
   def select(lRef: Seq[String] = List(), limit : Int = 0, offset : Int = 0) : SWTransaction =
     SWTransaction(this,lRef,limit,offset)
 
-  def count() : Future[Int] =
-    StrategyRequestBuilder.build(config).countNbSolutions(rootNode)
+  def count() : Future[Int] = {
+    val (refToIdentifier, _) = pm.SparqlGenerator.correspondenceVariablesIdentifier(rootNode)
+    val varCount = "count"
+    val query = SparqlQueryBuilder.countQueryString(rootNode,refToIdentifier,varCount)
+    val res: Future[QueryResult] = StrategyRequestBuilder.build(config).request(query)
+    res.map(v => {
+      SparqlBuilder.createLiteral(v.json("results")("bindings")(0)(varCount)).toInt()
+    })
+  }
 
   /**
    * Give an iterable object to browse and obtain all solution performed by a select.

@@ -3,7 +3,6 @@ package inrae.semantic_web.strategy
 import inrae.semantic_web.SWTransaction
 import inrae.semantic_web.driver.RequestDriver
 import inrae.semantic_web.event.{DiscoveryRequestEvent, Publisher, Subscriber}
-import inrae.semantic_web.internal.Root
 import inrae.semantic_web.sparql.QueryResult
 
 import scala.concurrent.Future
@@ -21,8 +20,6 @@ abstract class StrategyRequest()
   def execute(swt : SWTransaction) : Future[QueryResult]
 
   def request(query: String): Future[QueryResult]
-
-  def countNbSolutions(root : Root) : Future[Int]
 
   def notify(pub: RequestDriver, event: DiscoveryRequestEvent): Unit = {
     publish(DiscoveryRequestEvent(event.state))
