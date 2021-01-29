@@ -1,7 +1,13 @@
 #!/bin/bash
 
+rm dist/discovery*.js
+
 sbt discoveryJS/fullOptJS
-cp js/target/scala-2.13/discovery-opt.js dist/discovery.js
+
+newjs=`ls -lat $(find . -name disc*.js) | head -n1 | awk '{print $NF}'`
+echo "Discovery to browserify JS:$newjs"
+
+cp $newjs dist/discovery.js
 
 sed -i "s#$(pwd)#com/github/p2m2#g" dist/discovery.js
 
