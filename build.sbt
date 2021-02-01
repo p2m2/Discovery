@@ -15,7 +15,7 @@ lazy val rdf4jVersion = "3.6.0-M2"
 
 releaseIgnoreUntrackedFiles := true
 
-val version_build = scala.util.Properties.envOrElse("DISCOVERY_VERSION", "Web" )
+val version_build = scala.util.Properties.envOrElse("DISCOVERY_VERSION", "local-SNAPSHOT" )
 val SWDiscoveryVersionAtBuildTimeFile = "./shared/src/main/scala/inrae/semantic_web/SWDiscoveryVersionAtBuildTime.scala"
 
 
@@ -27,7 +27,7 @@ val buildSWDiscoveryVersionAtBuildTimeFile =
       |package inrae.semantic_web
       |
       |object SWDiscoveryVersionAtBuildTime {
-      |   val version : String = "${version_build} - build ${java.time.LocalDate.now.toString}"
+      |   val version : String = " build ${java.time.LocalDate.now.toString}"
       |}""").stripMargin)
 
 
@@ -90,13 +90,12 @@ lazy val discovery=crossProject(JSPlatform, JVMPlatform).in(file("."))
   .settings(
     resolvers += Resolver.bintrayRepo("hmil", "maven"),
     libraryDependencies ++= Seq(
-      "com.lihaoyi" %%% "utest" % utestVersion % "test",
+      "com.lihaoyi" %%% "utest" % utestVersion % Test,
+      "fr.hmil" %%% "roshttp" % RosHttpVersion % Test ,
       "com.lihaoyi" %%% "upickle" % upickleVersion,
       "org.wvlet.airframe" %%% "airframe-log" % airframeLogVersion,
-      "org.scala-lang.modules" %%% "scala-parser-combinators" % scalaParserCombinatorVersion,
-      "com.softwaremill.sttp.client3" %%% "core" % "3.0.0"
+      "org.scala-lang.modules" %%% "scala-parser-combinators" % scalaParserCombinatorVersion
     ),
-    libraryDependencies +=  "fr.hmil" %%% "roshttp" % RosHttpVersion % Test ,
     testFrameworks += new TestFramework("utest.runner.Framework"),
     scalacOptions ++= Seq("-deprecation", "-feature"),
     classLoaderLayeringStrategy := ClassLoaderLayeringStrategy.AllLibraryJars,
@@ -110,8 +109,7 @@ lazy val discovery=crossProject(JSPlatform, JVMPlatform).in(file("."))
     webpackBundlingMode := BundlingMode.LibraryAndApplication(),
     npmDependencies in Compile ++= Seq(
       "axios" -> "0.21.1",
-      "qs" -> "6.9.6",
-      "@comunica/actor-init-sparql" -> "1.19.1"
+      "qs" -> "6.9.6"
     ),
     scalaJSLinkerConfig in (Compile, fastOptJS ) ~= {
       _.withOptimizer(false)
