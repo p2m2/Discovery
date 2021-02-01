@@ -6,6 +6,7 @@ import utest._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.language.postfixOps
+import scala.util.{Failure, Success, Try}
 
 object SWDiscoveryTest extends TestSuite {
 
@@ -32,6 +33,10 @@ object SWDiscoveryTest extends TestSuite {
 
 
   def tests = Tests {
+    test("help") {
+      SWDiscovery(config).something("h1").usage.isObjectOf(URI("something_uri"))
+    }
+
     test("No sources definition") {
       insert_data.map(_ => {
         val config: StatementConfiguration = StatementConfiguration.setConfigString(""" { "sources" : [] } """)
@@ -98,46 +103,35 @@ object SWDiscoveryTest extends TestSuite {
       }).flatten
     }
 
-    test("findClasses") {
-      insert_data.map(_ => {
-        SWDiscovery(config)
-          .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
-          .something("h1")
-          .set(URI("http://aa1"))
-          .findClasses()
-          .map(types => assert(types.length == 1))
-      }).flatten
+    test("bad focus") {
+      Try(SWDiscovery(config)
+        .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
+        .something("h1") //http://rdf.ebi.ac.uk/terms/chembl#BioComponent
+        .focus("h2")) match {
+        case Success(_) => assert(false)
+        case Failure(_) => assert(true)
+      }
     }
 
-    test("findClasses with mother class -> owl:Class") {
-      insert_data.map(_ => {
-        SWDiscovery(config)
-          .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
-          .something("h1")
-          .set(URI("http://aa2"))
-          .findClasses(URI("Class", "owl"))
-          .map(types => assert(types.length == 1))
-      }).flatten
+    test("use named graph") {
+      Try( SWDiscovery(config)
+          .namedGraph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
+          .something("h1") //http://rdf.ebi.ac.uk/terms/chembl#BioComponent
+          .isSubjectOf(URI("http://bb2"))) match {
+        case Success(_) => assert(true)
+        case Failure(_) => assert(false)
+      }
     }
 
-
-    test("findObjectProperties") {
-      insert_data.map(_ => {
-        SWDiscovery(config).something("h1")
-          .set(URI("http://aa"))
-          .findObjectProperties()
-          .map(response => assert(response.length == 2))
-      }).flatten
-    }
-
-    test("findObjectProperties mother class --> owl:ObjectProperty ") {
-      insert_data.map(_ => {
-        SWDiscovery(config).something("h1")
-          .set(URI("http://aa"))
-          .findObjectProperties(URI("ObjectProperty", "owl"))
-          .map(response => assert(response.length == 1))
-      }).flatten
+    test("test console") {
+      Try( SWDiscovery(config)
+        .namedGraph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
+        .something("h1") //http://rdf.ebi.ac.uk/terms/chembl#BioComponent
+        .isSubjectOf(URI("http://bb2"))
+        .console()) match {
+        case Success(_) => assert(true)
+        case Failure(_) => assert(false)
+      }
     }
   }
-
 }

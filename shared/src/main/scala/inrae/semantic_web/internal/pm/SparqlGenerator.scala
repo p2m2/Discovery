@@ -30,7 +30,7 @@ object SparqlGenerator  {
 
     def from(graphs : Seq[IRI]): String = graphs.map( g => "FROM "+g.sparql()).mkString("\n")
 
-    def fromNamed(graphs : Seq[IRI]): String = graphs.map( g => "FROM NAMED"+g.sparql()).mkString("\n")
+    def fromNamed(graphs : Seq[IRI]): String = graphs.map( g => "FROM NAMED "+g.sparql()).mkString("\n")
 
     def solutionModifier (limit : Int, offset : Int) : String = {
         "}" + { limit match {

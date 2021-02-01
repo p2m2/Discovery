@@ -70,7 +70,7 @@ case class SWDiscovery(
   // Set the root logger's log level
   Logger.setDefaultLogLevel(config.conf.settings.getLogLevel)
 
-  def help() : SWDiscovery = {
+  def usage : SWDiscovery = {
     println(" ---------------- SWDiscovery "+SWDiscovery.version+" ---------------------------")
     println("   ")
     println("    -------------  Query Control ----------")
@@ -100,12 +100,13 @@ case class SWDiscovery(
     println(" findDatatypePropertiesOf:")
     println("   ")
     println("  --------------------------------------------------------------" )
-    this
+    SWDiscovery(config,rootNode,Some(focusNode))
   }
 
   /* set focus on root */
   def root(): SWDiscovery  = SWDiscovery(config,rootNode,Some(rootNode.reference()))
 
+  def helper : SWDiscoveryHelper = SWDiscoveryHelper(this)
 
   /* set the current focus on the select node */
   def focus(ref : String) : SWDiscovery = {
@@ -118,9 +119,6 @@ case class SWDiscovery(
       throw new Error("ref unknown :"+ref)
     }
   }
-
-  /* get ref of the current focus */
-  def ref(): String = focusNode
 
   def prefix(short : String, long : IRI ) : SWDiscovery = SWDiscovery(config,rootNode.addPrefix(short , long ),Some(focusNode))
 
@@ -271,69 +269,5 @@ case class SWDiscovery(
           select(lRef,limit,offset)
         }))
       })
-  }
-
-  /**
-   * Discovery functionalities
-   *
-   */
-
-  def findClasses(motherClass: URI = URI("") ) : Future[Seq[URI]] = {
-    debug(" -- findClasses -- ")
-    (motherClass match {
-      case uri : URI if uri == URI("")  => isSubjectOf(URI("a"),"_esp___type")
-      case _ : URI =>  isSubjectOf(URI("a"),"_esp___type")
-                  .isSubjectOf(URI("a"))
-                  .set(motherClass)
-    })
-      .focus("_esp___type")
-      .select(List("_esp___type"))
-      .commit()
-      .raw
-      .map( json => {
-        json("results")("bindings").arr.map(
-          row => SparqlBuilder.createUri(row("_esp___type"))
-        ).toSeq
-      })
-  }
-
-  def findProperties(motherClassProperties: URI = URI("") , kind : String = "objectProperty" ) : Future[Seq[URI]] = {
-    debug(" -- findProperties -- ")
-    val refCurrent = ref()
-
-    var state = root()
-      .something("_esp___type")
-      .focus(refCurrent)
-      .isLinkTo(QueryVariable("_esp___type"),"_esp___property")
-
-    /* inherited from something ??? */
-    if (motherClassProperties != URI("")) {
-      state = state.isSubjectOf(URI("a"))
-          .set(motherClassProperties)
-    }
-
-    /* object or datatype properties owl def. */
-    ( kind  match {
-      case "objectProperty" => state.focus("_esp___type").filter.isUri
-      case "datatypeProperty" => state.focus("_esp___type").filter.isLiteral
-      case _ => state
-    }).select(List("_esp___property"))
-      .commit()
-      .raw
-      .map( json => {
-        json("results")("bindings").arr.map(
-          row => {
-            SparqlBuilder.createUri(row("_esp___property")) }
-        ).toSeq
-      })
-  }
-
-  def findObjectProperties(motherClassProperties: URI = URI("") ) : Future[Seq[URI]] = {
-    debug(" -- findObjectProperties -- ")
-    findProperties(motherClassProperties)
-  }
-  def findDatatypeProperties(motherClassProperties: URI = URI("") ) : Future[Seq[URI]] = {
-    debug(" -- findDatatypeProperties -- ")
-    findProperties(motherClassProperties,"datatypeProperty")
   }
 }
