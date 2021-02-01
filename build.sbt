@@ -14,7 +14,7 @@ lazy val rdf4jVersion = "3.6.0-M2"
 //https://jitpack.io/
 
 releaseIgnoreUntrackedFiles := true
-val version_build = scala.util.Properties.envOrElse("DISCOVERY_VERSION", "local-SNAPSHOT" )
+val version_build = scala.util.Properties.envOrElse("DISCOVERY_VERSION", "Web" )
 val SWDiscoveryVersionAtBuildTimeFile = "./shared/src/main/scala/inrae/semantic_web/SWDiscoveryVersionAtBuildTime.scala"
 
 

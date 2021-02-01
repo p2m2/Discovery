@@ -240,9 +240,11 @@ jobs:
               - v1-dependencies-{{ checksum "build.sbt" }}
               # fallback to using the latest cache if no exact match is found
               - v1-dependencies-
+
         - attach_workspace:
             at: ~/repo
-        -run:
+
+        - run:
             name: Install Node - npm
             command: |
               curl -sL https://deb.nodesource.com/setup_15.x | bash -
