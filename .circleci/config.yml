@@ -260,6 +260,6 @@ jobs:
         - run:
             name: Js Opt Lib generation
             command: |
-              ls ./js/*
+              echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
               npm config set registry http://registry.npmjs.org
               npm publish --access public
