@@ -59,16 +59,16 @@ workflows:
             branches:
               ignore: /.*/
 
-      - publish_npm:
-          requires:
-            - lib_js
-          context:
-            - NPM_CONTEXT
-          filters:
-            tags:
-              only: /.*/
-            branches:
-              only: strategySourceRequest
+#      - publish_npm:
+#          requires:
+#            - lib_js
+#          context:
+#            - NPM_CONTEXT
+#          filters:
+#            tags:
+#              only: /.*/
+#            branches:
+#              only: strategySourceRequest
 
       - check_discovery_valid_fullopjs_cdn_jsdelivr:
           filters:
@@ -254,6 +254,7 @@ jobs:
         - run:
             name: Authenticate with registry
             command: echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
+
         - run:
             name: Js Opt Lib generation
             command: |

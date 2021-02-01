@@ -109,7 +109,8 @@ lazy val discovery=crossProject(JSPlatform, JVMPlatform).in(file("."))
     webpackBundlingMode := BundlingMode.LibraryAndApplication(),
     npmDependencies in Compile ++= Seq(
       "axios" -> "0.21.1",
-      "qs" -> "6.9.6"
+      "qs" -> "6.9.6",
+      "@comunica/actor-init-sparql" -> "1.19.1"
     ),
     scalaJSLinkerConfig in (Compile, fastOptJS ) ~= {
       _.withOptimizer(false)
