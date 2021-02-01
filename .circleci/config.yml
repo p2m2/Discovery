@@ -237,7 +237,11 @@ jobs:
             fi ;
 
   publish_npm:
-    executor: openjdk
+    docker:
+      - image: circleci/node:12.20
+        auth:
+          username: ${DOCKER_USER}
+          password: ${DOCKER_PASS}
     steps:
         - checkout
         - setup_remote_docker
@@ -249,10 +253,6 @@ jobs:
 
         - attach_workspace:
             at: ~/repo
-
-        - node/install-packages:
-            cache-path: ~/project/node_modules
-            override-ci-command: npm install
 
         - run:
             name: Authenticate with registry
