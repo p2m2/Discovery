@@ -26,7 +26,9 @@ case class SWDiscoveryJs(
   val filter = new FilterIncrementJs(this)
 
   @JSExport
-  def help() : SWDiscoveryJs = SWDiscoveryJs(config,SWDiscovery(config).help())
+  def usage() : SWDiscoveryJs = SWDiscoveryJs(config,SWDiscovery(config).usage)
+
+  def helper() :SWDiscoveryHelperJs = SWDiscoveryHelperJs(sw)
 
   @JSExport
   def focus(ref : String) : SWDiscoveryJs = SWDiscoveryJs(config,sw.focus(ref))
@@ -104,21 +106,4 @@ case class SWDiscoveryJs(
 
   @JSExport
   def count(): Promise[Int] = { sw.count().toJSPromise }
-
-  @JSExport
-  def findClasses(uri:URI = URI("")): Promise[js.Array[URI]] = { sw.findClasses(uri).map(array => array.toJSArray).toJSPromise }
-
-  @JSExport
-  def findProperties(motherClassProperties: URI = URI("") ) : Promise[js.Array[URI]] = {
-    sw.findProperties(motherClassProperties).map(array => array.toJSArray).toJSPromise
-  }
-
-  @JSExport
-  def findObjectProperties(motherClassProperties: URI = URI("") ) : Promise[js.Array[URI]] = {
-    sw.findObjectProperties(motherClassProperties).map(array => array.toJSArray).toJSPromise
-  }
-  @JSExport
-  def findDatatypeProperties(motherClassProperties: URI = URI("") ) : Promise[js.Array[URI]] = {
-    sw.findDatatypeProperties(motherClassProperties).map(array => array.toJSArray).toJSPromise
-  }
 }
