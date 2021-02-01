@@ -136,6 +136,7 @@ jobs:
 
   lib_js:
     executor: openjdk
+    working_directory: ~/repo
     steps:
       - checkout
       - setup_remote_docker
@@ -150,15 +151,10 @@ jobs:
       - run:
           name: fullOptJS
           command: cat /dev/null | sbt discoveryJS/fullOptJS
-      - save_cache:
-          paths:
-            - node_modules
-            - js/target
-          key: v1-dependencies-{{ checksum "build.sbt" }}
 
       - persist_to_workspace:
-          root: ~/repo
-          paths: .
+          root: ./js/target/scala-2.13/scalajs-bundler/main/
+          paths: discovery-opt.js
 
   test_and_coverage_jvm:
     executor: virtuoso_environment_executor
@@ -252,7 +248,7 @@ jobs:
               - v1-dependencies-
 
         - attach_workspace:
-            at: ~/repo
+            at: ~/repo/js/target/scala-2.13/scalajs-bundler/main/
 
         - run:
             name: Authenticate with registry
@@ -261,4 +257,5 @@ jobs:
             name: Js Opt Lib generation
             command: |
               npm config set registry http://registry.npmjs.org
+              npm version ${CIRCLE_TAG}
               npm publish --access public
