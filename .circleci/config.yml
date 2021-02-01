@@ -259,4 +259,7 @@ jobs:
             command: echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/repo/.npmrc
         - run:
             name: Js Opt Lib generation
-            command: npm publish --access public
+            command: |
+              ls ./js/*
+              npm config set registry http://registry.npmjs.org
+              npm publish --access public
