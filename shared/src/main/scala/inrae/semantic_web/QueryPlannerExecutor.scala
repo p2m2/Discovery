@@ -3,6 +3,7 @@ import inrae.semantic_web.QueryPlanner.{AND_RESULTS_SET, INTERSECTION_RESULTS_SE
 import inrae.semantic_web.internal.{Node, Root, Something, pm}
 import inrae.semantic_web.rdf.IRI
 import inrae.semantic_web.sparql.{QueryResult, _}
+import inrae.semantic_web.driver._
 import wvlet.log.Logger.rootLogger._
 
 import java.util.UUID.randomUUID
@@ -85,7 +86,7 @@ object QueryPlannerExecutor {
           trace(r.toString())
           val refToIdentifier = pm.SparqlGenerator.correspondenceVariablesIdentifier(root)
             ._1.view.filterKeys( k => listVariables.contains(k) ).toMap
-          val qr = QueryRunner(config.source(source),config.conf.settings).query(
+          val qr = RequestDriverFactory.build(config.source(source)).request(
             SparqlQueryBuilder.selectQueryString(r,refToIdentifier,refToIdentifier.values.toSeq,500,0)
           )
         }

@@ -83,15 +83,26 @@ full example with [table view implementation](https://github.com/p2m2/discovery-
 
 ## note dev
 
+### dependencies
+```bash
+npm install axios --save-dev
+npm install qs --save-dev
+npm install browserify
+```
+### memo
+
 ```
 sbt compile
-sbt run   # run web app http://localhost:9000
-sbt package
-sbt test
-sbt fastOptJS => generer le JS
+sbt discoveryJS/test
+sbt discoveryJVM/test
+sbt discoveryJS/fastOptJS 
+sbt discoveryJS/fullOptJS
+sbt discoveryJS/fastOptJS::webpack
+sbt discoveryJS/fullOptJS::webpack
 sbt discoveryJVM/testOnly inrae.semantic_web.QueryPlannerTest
 ## local publication -> .ivy2
 sbt publishLocal
 ## osssonatype maven centra repository publication
 sbt publish
+npm publish --access public
 ```

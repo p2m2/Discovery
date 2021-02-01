@@ -13,8 +13,8 @@ object SWDiscoverySubscribeEventTest extends TestSuite {
 
   DataTestFactory.insert_virtuoso1(
     """
-      <aaSWSubscribeEventTest> <bb> <cc> .
-      <aa> <datatype> "testdatatype" .
+      <http://aaSWSubscribeEventTest> <http://bb> <http://cc> .
+      <http://aa> <http://datatype> "testdatatype" .
       """.stripMargin, this.getClass.getSimpleName)
 
   val config: StatementConfiguration = DataTestFactory.getConfigVirtuoso1()
@@ -42,7 +42,7 @@ object SWDiscoverySubscribeEventTest extends TestSuite {
     val sw = SWDiscovery(config)
 
     val swr = sw.something("h1")
-      .isSubjectOf(URI("bb"))
+      .isSubjectOf(URI("http://bb"))
       .select(List("h1"))
 
     if(! unsubscribe) {
@@ -72,18 +72,11 @@ object SWDiscoverySubscribeEventTest extends TestSuite {
 
     test("DiscoveryRequestEvent ERROR_HTTP_REQUEST") {
       val config: StatementConfiguration =
-      StatementConfiguration.setConfigString(s""" {
+      StatementConfiguration.setConfigString(""" {
                                |         "sources" : [{
                                |           "id"       : "badtps",
-                               |           "url"      : "http://bidon",
-                               |           "type"     : "tps",
-                               |           "method"   : "POST",
-                               |           "mimetype" : "json"
-                               |         }],
-                               |         "settings" : {
-                               |            "driver" : "${DataTestFactory.default_http_driver}"
-                               |          }
-                               |         } """.stripMargin)
+                               |           "url"      : "http://bidon"
+                               |         }]} """.stripMargin)
 
       var stepDiscovery : Map[String,Boolean] = Map(
         "ERROR_HTTP_REQUEST" -> false
@@ -91,11 +84,12 @@ object SWDiscoverySubscribeEventTest extends TestSuite {
 
        val swr =
         SWDiscovery(config).something("h1")
-        .isSubjectOf(URI("bb"))
+        .isSubjectOf(URI("http://bb"))
         .select(List("h1"))
 
       swr.commit().raw.map( _=> assert(false))
-        .recover( _ => {
+        .recover( a => {
+          println(swr.currentRequestEvent)
           assert(swr.currentRequestEvent == "ERROR_HTTP_REQUEST") } )
     }
   }

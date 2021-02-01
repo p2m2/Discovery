@@ -18,8 +18,6 @@ object DataTestFactory  {
 
   val url_endpoint = "http://localhost:8890/sparql"
 
-  val default_http_driver = "inrae.semantic_web.driver.RosHTTPDriver"
-
   def put(stringQuery : String, url_endpoint : String) = {
 
     HttpRequest(url_endpoint)
@@ -88,13 +86,9 @@ object DataTestFactory  {
         {
          "sources" : [{
            "id"       : "local",
-           "url"      : "${DataTestFactory.url_endpoint}",
-           "type"     : "tps",
-           "method"   : "POST",
-           "mimetype" : "json"
+           "url"      : "${DataTestFactory.url_endpoint}"
          }],
          "settings" : {
-            "driver" : "${default_http_driver}",
             "logLevel" : "off",
             "sizeBatchProcessing" : 100
           }
@@ -108,13 +102,9 @@ object DataTestFactory  {
         {
          "sources" : [{
            "id"       : "local",
-           "url"      : "${DataTestFactory.url_endpoint}",
-           "type"     : "tps",
-           "method"   : "POST",
-           "mimetype" : "json"
+           "url"      : "${DataTestFactory.url_endpoint}"
          }],
          "settings" : {
-            "driver" : "${default_http_driver}",
             "logLevel" : "off",
             "sizeBatchProcessing" : 100
           }
@@ -126,9 +116,7 @@ object DataTestFactory  {
             {
              "sources" : [{
                "id"  : "dbpedia",
-               "url" : "https://dbpedia.org/sparql",
-               "type" : "tps",
-               "method" : "POST"
+               "url" : "https://dbpedia.org/sparql"
              }],
             "settings" : {
               "driver" : "inrae.semantic_web.driver.JenaRequestDriver",

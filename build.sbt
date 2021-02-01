@@ -1,19 +1,21 @@
 import sbt.Keys.scalacOptions
 import sbtcrossproject.CrossPlugin.autoImport.crossProject
 
-lazy val utestVersion = "0.7.5"
+lazy val utestVersion = "0.7.7"
 lazy val upickleVersion  = "1.2.2"
 lazy val airframeLogVersion = "20.11.0"
 lazy val scalaParserCombinatorVersion = "1.1.2"
-lazy val scalaReflectVersion = "1.0.0"
 lazy val RosHttpVersion = "3.0.0"
 lazy val scalaJsDOMVersion = "1.1.0"
 lazy val scalaStubVersion = "1.0.0"
 lazy val scalatagVersion = "0.9.2"
-lazy val jenaVersion = "3.16.0"
+lazy val rdf4jVersion = "3.6.0-M2"
+
+//https://jitpack.io/
 
 releaseIgnoreUntrackedFiles := true
-val version_build = scala.util.Properties.envOrElse("DISCOVERY_VERSION", "SNAPSHOT" )
+
+val version_build = scala.util.Properties.envOrElse("DISCOVERY_VERSION", "Web" )
 val SWDiscoveryVersionAtBuildTimeFile = "./shared/src/main/scala/inrae/semantic_web/SWDiscoveryVersionAtBuildTime.scala"
 
 
@@ -92,8 +94,7 @@ lazy val discovery=crossProject(JSPlatform, JVMPlatform).in(file("."))
       "com.lihaoyi" %%% "upickle" % upickleVersion,
       "org.wvlet.airframe" %%% "airframe-log" % airframeLogVersion,
       "org.scala-lang.modules" %%% "scala-parser-combinators" % scalaParserCombinatorVersion,
-      "org.portable-scala" %%% "portable-scala-reflect" % scalaReflectVersion,
-      "fr.hmil" %%% "roshttp" % RosHttpVersion,
+      "fr.hmil" %%% "roshttp" % RosHttpVersion ,
       "com.softwaremill.sttp.client3" %%% "core" % "3.0.0"
     ),
     testFrameworks += new TestFramework("utest.runner.Framework"),
@@ -102,9 +103,16 @@ lazy val discovery=crossProject(JSPlatform, JVMPlatform).in(file("."))
     coverageMinimum := 70,
     coverageFailOnMinimum := false,
     coverageHighlighting := true,
-
+    parallelExecution in Test := false
   )
+  .jsConfigure(_.enablePlugins(ScalaJSBundlerPlugin))
   .jsSettings(
+    webpackBundlingMode := BundlingMode.LibraryAndApplication(),
+    npmDependencies in Compile ++= Seq(
+      "axios" -> "0.21.1",
+      "qs" -> "6.9.6",
+      "@comunica/actor-init-sparql" -> "1.19.1"
+    ),
     scalaJSLinkerConfig in (Compile, fastOptJS ) ~= {
       _.withOptimizer(false)
         .withPrettyPrint(true)
@@ -113,13 +121,16 @@ lazy val discovery=crossProject(JSPlatform, JVMPlatform).in(file("."))
     scalaJSLinkerConfig in (Compile, fullOptJS) ~= {
       _.withSourceMap(false)
         .withModuleKind(ModuleKind.CommonJSModule)
-    })
+    }
+  )
   .jvmSettings(
     libraryDependencies ++= Seq(
       "org.scala-js" %% "scalajs-stubs" % scalaStubVersion % "provided",
-      "org.apache.jena" % "apache-jena" % jenaVersion pomOnly()
+      "org.slf4j" % "slf4j-api" % "1.7.9",
+      "org.slf4j" % "slf4j-simple" % "1.7.9",
+      "org.eclipse.rdf4j" % "rdf4j-storage" % rdf4jVersion,
+      "org.eclipse.rdf4j" % "rdf4j-tools-federation" % rdf4jVersion
     ))
-  //.enablePlugins(ScalaJSBundlerPlugin)
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
 //publishTo in ThisBuild :=

@@ -8,5 +8,6 @@ addSbtPlugin("com.typesafe.sbt"   % "sbt-gzip"                      % "1.0.2")
 addSbtPlugin("com.typesafe.sbt"   % "sbt-digest"                    % "1.1.4")
 addSbtPlugin("org.scoverage"      % "sbt-scoverage"                 % "1.6.1")
 addSbtPlugin("com.github.gseitz"  % "sbt-release"                   % "1.0.13")
+addSbtPlugin("ch.epfl.scala"      % "sbt-scalajs-bundler"           % "0.20.0")
 
 libraryDependencies += "org.scala-js" %% "scalajs-env-jsdom-nodejs" % "1.1.0"

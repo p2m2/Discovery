@@ -11,11 +11,10 @@ object StatementConfigurationTest extends TestSuite {
              "sources" : [{
                "id"  : "dbpedia",
                "url" : "https://dbpedia.org/sparql",
-               "type" : "tps",
+               "mimetype" : "application/sparql-query",
                "method" : "POST"
              }],
              "settings" : {
-               "driver" : "inrae.semantic_web.driver.RosHTTPDriver",
                "cache" : true,
                "logLevel" : "info",
                "sizeBatchProcessing" : 10,
@@ -42,15 +41,15 @@ object StatementConfigurationTest extends TestSuite {
 
       val dbname = "dbpedia"
       val url = "http://test"
-      val `type` = "tps"
+      val mimetype = "application/sparql-query"
 
       val configDbpediaBasic: StatementConfiguration = StatementConfiguration.setConfig(ConfigurationObject.StatementConfigurationJson(
-        Seq(ConfigurationObject.Source(dbname, url, `type`))))
+        Seq(ConfigurationObject.Source(id=dbname, url=url, mimetype=mimetype))))
       val source = configDbpediaBasic.source("dbpedia")
 
       assert(source.id == dbname)
       assert(source.url == url)
-      assert(source.`type` == `type`)
+      assert(source.mimetype == mimetype)
     }
 
     test("Create a config with a bad tag ") {
@@ -61,29 +60,6 @@ object StatementConfigurationTest extends TestSuite {
            "hello" : [{
            }]}
           """.stripMargin)) match {
-        case Success(_) => assert(false)
-        case Failure(_) => assert(true)
-      }
-    }
-
-    test("Create a request config without source ") {
-      Try(StatementConfiguration
-        .setConfigString(
-          """
-            {
-             "settings" : {
-                "driver" : "hello.world"
-             }
-            """.stripMargin)) match {
-        case Success(_) => assert(false)
-        case Failure(_) => assert(true)
-      }
-    }
-
-    test("Create a request config with an unknown driver ") {
-      Try(StatementConfiguration
-        .setConfigString(config_base.replace("inrae.semantic_web.driver.RosHTTPDriver",
-          "hello.world"))) match {
         case Success(_) => assert(false)
         case Failure(_) => assert(true)
       }

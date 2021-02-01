@@ -11,21 +11,21 @@ object SWDiscoveryTest extends TestSuite {
 
   val insert_data = DataTestFactory.insert_virtuoso1(
     """
-      <aa> <bb> <cc> .
-      <aa> <bb2> <cc2> .
-      <aa> <bb2> <cc3> .
+      <http://aa> <http://bb> <http://cc> .
+      <http://aa> <http://bb2> <http://cc2> .
+      <http://aa> <http://bb2> <http://cc3> .
 
-      <bb2> a owl:ObjectProperty .
+      <http://bb2> a owl:ObjectProperty .
 
-      <aa1> a <LeafType> .
+      <http://aa1> a <http://LeafType> .
 
-      <aa2> a <LeafType> .
-      <aa2> a <OwlClass> .
+      <http://aa2> a <http://LeafType> .
+      <http://aa2> a <http://OwlClass> .
 
 
-      <aa3> <propDatatype> "test" .
+      <http://aa3> <http://propDatatype> "test" .
 
-      <OwlClass> a owl:Class .
+      <http://OwlClass> a owl:Class .
       """.stripMargin, this.getClass.getSimpleName)
 
   val config: StatementConfiguration = DataTestFactory.getConfigVirtuoso1()
@@ -59,14 +59,14 @@ object SWDiscoveryTest extends TestSuite {
         SWDiscovery(config)
           .something("h1")
           .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
-          .set(URI("aa"))
-          .isSubjectOf(URI("bb"), "var")
+          .set(URI("http://aa"))
+          .isSubjectOf(URI("http://bb"), "var")
           .select(List("var"))
           .commit()
           .raw
           .map(result => {
             assert(result("results")("bindings").arr.length == 1)
-            assert(SparqlBuilder.createUri(result("results")("bindings")(0)("var")).localName == "cc")
+            assert(SparqlBuilder.createUri(result("results")("bindings")(0)("var")).localName == "http://cc")
           })
       }).flatten
     }
@@ -74,14 +74,14 @@ object SWDiscoveryTest extends TestSuite {
     test("datatype") {
       insert_data.map(_ => {
         SWDiscovery(config).something("h1")
-          .set(URI("aa3"))
-          .datatype(URI("propDatatype"), "d")
+          .set(URI("http://aa3"))
+          .datatype(URI("http://propDatatype"), "d")
           .select(List("d"))
           .commit()
           .raw
           .map(
             response => {
-              assert(response("results")("datatypes")("d")("aa3")(0)("value").toString().length > 0)
+              assert(response("results")("datatypes")("d")("http://aa3")(0)("value").toString().length > 0)
             }
           )
       }).flatten
@@ -92,7 +92,7 @@ object SWDiscoveryTest extends TestSuite {
         SWDiscovery(config)
           .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
           .something("h1") //http://rdf.ebi.ac.uk/terms/chembl#BioComponent
-          .isSubjectOf(URI("bb2"))
+          .isSubjectOf(URI("http://bb2"))
           .count()
           .map(count => assert(count == 2))
       }).flatten
@@ -103,7 +103,7 @@ object SWDiscoveryTest extends TestSuite {
         SWDiscovery(config)
           .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
           .something("h1")
-          .set(URI("aa1"))
+          .set(URI("http://aa1"))
           .findClasses()
           .map(types => assert(types.length == 1))
       }).flatten
@@ -114,7 +114,7 @@ object SWDiscoveryTest extends TestSuite {
         SWDiscovery(config)
           .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
           .something("h1")
-          .set(URI("aa2"))
+          .set(URI("http://aa2"))
           .findClasses(URI("Class", "owl"))
           .map(types => assert(types.length == 1))
       }).flatten
@@ -124,7 +124,7 @@ object SWDiscoveryTest extends TestSuite {
     test("findObjectProperties") {
       insert_data.map(_ => {
         SWDiscovery(config).something("h1")
-          .set(URI("aa"))
+          .set(URI("http://aa"))
           .findObjectProperties()
           .map(response => assert(response.length == 2))
       }).flatten
@@ -133,15 +133,10 @@ object SWDiscoveryTest extends TestSuite {
     test("findObjectProperties mother class --> owl:ObjectProperty ") {
       insert_data.map(_ => {
         SWDiscovery(config).something("h1")
-          .set(URI("aa"))
+          .set(URI("http://aa"))
           .findObjectProperties(URI("ObjectProperty", "owl"))
           .map(response => assert(response.length == 1))
       }).flatten
-    }
-  }
-
-  TestRunner.runAsync(tests).map { _ => {
-    DataTestFactory.delete_virtuoso1(this.getClass.getSimpleName)
     }
   }
 
