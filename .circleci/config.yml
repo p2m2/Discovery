@@ -12,6 +12,9 @@
 #  CREDENTIAL_CONTEXT used by build.sbt
 #   - REALM_CREDENTIAL,HOST_CREDENTIAL,LOGIN_CREDENTIAL,PASSWORD_CREDENTIAL
 #
+#  NPM_CONTEXT
+#   - NPM_TOKEN : token (from ~/.npmrc) to publish nodejs lib
+#
 version: 2.1
 workflows:
   compile-workflow:
@@ -57,8 +60,8 @@ workflows:
               ignore: /.*/
 
       - publish_npm:
-          requires:
-            - lib_js
+          #requires:
+          #  - lib_js
           context:
             - NPM_CONTEXT
           filters:
@@ -105,6 +108,9 @@ executors:
             DBA_PASSWORD: dba
             SPARQL_UPDATE: true
             DEFAULT_GRAPH: "graph:test:discovery:default:"
+
+orbs:
+  node: circleci/node@4.1.0
 
 jobs:
   compile:
@@ -244,11 +250,10 @@ jobs:
         - attach_workspace:
             at: ~/repo
 
-        - run:
-            name: Install Node - npm
-            command: |
-              curl -sL https://deb.nodesource.com/setup_15.x | bash -
-              apt-get install -y nodejs
+        - node/install-packages:
+            cache-path: ~/project/node_modules
+            override-ci-command: npm install
+
         - run:
             name: Authenticate with registry
             command: echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/repo/.npmrc
