@@ -106,6 +106,7 @@ lazy val discovery=crossProject(JSPlatform, JVMPlatform).in(file("."))
   )
   .jsConfigure(_.enablePlugins(ScalaJSBundlerPlugin))
   .jsSettings(
+    webpackBundlingMode := BundlingMode.LibraryAndApplication(),
     npmDependencies in Compile ++= Seq(
       "axios" -> "0.21.1",
       "qs" -> "6.9.6"

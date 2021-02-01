@@ -1,21 +1,19 @@
 #!/bin/bash
 
+# clean dist directory
 rm dist/discovery*.js
+# generate build version
+rm ./shared/src/main/scala/inrae/semantic_web/SWDiscoveryVersionAtBuildTime.scala
 
-sbt discoveryJS/fullOptJS
+sbt discoveryJS/fastOptJS::webpack
+sbt discoveryJS/fullOptJS::webpack
 
-newjs=`ls -lat $(find . -name disc*.js) | head -n1 | awk '{print $NF}'`
-echo "Discovery to browserify JS:$newjs"
+cp ./js/target/scala-2.13/scalajs-bundler/main/discovery-fastopt-bundle.js  ./dist/discovery-web-dev.js
+cp ./js/target/scala-2.13/scalajs-bundler/main/discovery-fastopt-bundle.js.map ./dist/discovery-web-dev.js.map
+cp ./js/target/scala-2.13/scalajs-bundler/main/discovery-opt-bundle.js ./dist/discovery-web.js
 
-cp $newjs dist/discovery.js
-
-sed -i "s#$(pwd)#com/github/p2m2#g" dist/discovery.js
-
-if [ ! -f ./node_modules/.bin/browserify ] ;then
-  npm install   browserify
-fi
-
-./node_modules/.bin/browserify -r ./dist/discovery.js -s discovery > dist/discovery-web.js
+sed -i "s#discovery-fastopt-bundle#discovery-web-dev#g" dist/*dev*
+sed -i "s#$(pwd)#com/github/p2m2#g" dist/*
 
 # generate md5sum to check js libraries
 
