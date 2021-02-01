@@ -72,7 +72,7 @@ object SWDiscoverySubscribeEventTest extends TestSuite {
 
     test("DiscoveryRequestEvent ERROR_HTTP_REQUEST") {
       val config: StatementConfiguration =
-      StatementConfiguration.setConfigString(s""" {
+      StatementConfiguration.setConfigString(""" {
                                |         "sources" : [{
                                |           "id"       : "badtps",
                                |           "url"      : "http://bidon"

@@ -28,7 +28,7 @@ object RequestsTest extends TestSuite {
         """.stripMargin)
 
   val config2: StatementConfiguration = StatementConfiguration.setConfigString(
-    s"""
+    """
         {
          "sources" : [{
            "id"       : "local_content",
@@ -43,7 +43,7 @@ object RequestsTest extends TestSuite {
         """.stripMargin)
 
   val config3: StatementConfiguration = StatementConfiguration.setConfigString(
-    s"""
+    """
         {
          "sources" : [{
            "id"       : "local_content",
