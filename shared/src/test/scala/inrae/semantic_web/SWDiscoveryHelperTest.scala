@@ -2,10 +2,9 @@ package inrae.semantic_web
 import inrae.data.DataTestFactory
 import inrae.semantic_web.rdf._
 import utest._
+import scala.concurrent.ExecutionContext.Implicits.global
 
 object SWDiscoveryHelperTest  extends TestSuite  {
-  import scala.concurrent.ExecutionContext.Implicits.global
-
 
   val insert_data = DataTestFactory.insert_virtuoso1(
     """

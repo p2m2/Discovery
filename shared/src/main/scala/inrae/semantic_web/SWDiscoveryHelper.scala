@@ -34,17 +34,19 @@ case class SWDiscoveryHelper(sw : SWDiscovery) {
 
   def findProperties(motherClassProperties: URI = URI("") , kind : String = "objectProperty" ) : Future[Seq[URI]] = {
     debug(" -- findProperties -- ")
-    val refCurrent = sw.focusNode
-
-    var state = sw.root()
-      .something("_esp___type")
-      .focus(refCurrent)
-      .isLinkTo(QueryVariable("_esp___type"),"_esp___property")
 
     /* inherited from something ??? */
-    if (motherClassProperties != URI("")) {
-      state = state.isSubjectOf(URI("a"))
+    val state = if (motherClassProperties != URI("")) {
+      sw.root()
+        .something("_esp___type")
+        .focus(sw.focusNode)
+        .isLinkTo(QueryVariable("_esp___type"),"_esp___property").isSubjectOf(URI("a"))
         .set(motherClassProperties)
+    } else {
+      sw.root()
+        .something("_esp___type")
+        .focus(sw.focusNode)
+        .isLinkTo(QueryVariable("_esp___type"),"_esp___property")
     }
 
     /* object or datatype properties owl def. */
