@@ -94,9 +94,9 @@ lazy val discovery=crossProject(JSPlatform, JVMPlatform).in(file("."))
       "com.lihaoyi" %%% "upickle" % upickleVersion,
       "org.wvlet.airframe" %%% "airframe-log" % airframeLogVersion,
       "org.scala-lang.modules" %%% "scala-parser-combinators" % scalaParserCombinatorVersion,
-      "fr.hmil" %%% "roshttp" % RosHttpVersion ,
       "com.softwaremill.sttp.client3" %%% "core" % "3.0.0"
     ),
+    libraryDependencies +=  "fr.hmil" %%% "roshttp" % RosHttpVersion % Test ,
     testFrameworks += new TestFramework("utest.runner.Framework"),
     scalacOptions ++= Seq("-deprecation", "-feature"),
     classLoaderLayeringStrategy := ClassLoaderLayeringStrategy.AllLibraryJars,
