@@ -70,7 +70,7 @@ case class SWDiscoveryJs(
   def datatype( uri : URI, ref : String ) : SWDiscoveryJs = SWDiscoveryJs(config,sw.datatype(uri,ref))
 
   @JSExport
-  def debug() : SWDiscoveryJs = SWDiscoveryJs(config,sw.console())
+  def console() : SWDiscoveryJs = SWDiscoveryJs(config,sw.console())
 
   @JSExport
   def sparql() : String = sw.sparql()
