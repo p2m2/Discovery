@@ -28,5 +28,5 @@ cat $(find . -name *.scala | sort -V | grep -v SWDiscoveryVersionAtBuildTime.sca
 
 if [ -z "$CI" ];then
   echo " -- commit -- "
-  git commit dist/discovery.js dist/discovery-web.js dist/checksum -m"update cdn js lib." &>/dev/null
+  git commit dist -m"update cdn js lib." &>/dev/null
 fi
