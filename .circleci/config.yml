@@ -242,7 +242,11 @@ jobs:
               - v1-dependencies-
         - attach_workspace:
             at: ~/repo
-            
+        -run:
+            name: Install Node - npm
+            command: |
+              curl -sL https://deb.nodesource.com/setup_15.x | bash -
+              apt-get install -y nodejs
         - run:
             name: Authenticate with registry
             command: echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/repo/.npmrc
