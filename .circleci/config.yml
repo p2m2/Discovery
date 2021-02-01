@@ -56,6 +56,17 @@ workflows:
             branches:
               ignore: /.*/
 
+      - publish_npm:
+          requires:
+            - lib_js
+          context:
+            - NPM_CONTEXT
+          filters:
+            tags:
+              only: /.*/
+            branches:
+              only: strategySourceRequest
+
       - check_discovery_valid_fullopjs_cdn_jsdelivr:
           filters:
             tags:
@@ -64,6 +75,7 @@ workflows:
 executors:
 
   openjdk:
+      working_directory: ~/repo
       docker:
         - image: circleci/openjdk:8-jdk
           auth:
@@ -132,7 +144,15 @@ jobs:
       - run:
           name: fullOptJS
           command: cat /dev/null | sbt discoveryJS/fullOptJS
+      - save_cache:
+          paths:
+            - node_modules
+            - js/target
+          key: v1-dependencies-{{ checksum "build.sbt" }}
 
+      - persist_to_workspace:
+          root: ~/repo
+          paths: .
 
   test_and_coverage_jvm:
     executor: virtuoso_environment_executor
@@ -148,7 +168,7 @@ jobs:
             # fallback to using the latest cache if no exact match is found
             - v1-dependencies-
       - run:
-          name: Test and Coverage
+          name: Test JVM env and Coverage
           command: |
             cat /dev/null | sbt clean coverage discoveryJVM/test:test
             sbt discoveryJVM/coverageReport
@@ -205,8 +225,27 @@ jobs:
             F2=./dist/checksum
 
             if [ "$(diff -q $F1 $F2)" != ""  ]; then
-               echo "discovery and discovery-web have to be updated with update_cdn_libjs.sh !" ;
                echo "current checksum : "$(cat checksum)
                echo "repo checksum    : "$(cat dist/checksum)
                exit 1;
             fi ;
+
+  publish_npm:
+    executor: openjdk
+    steps:
+        - checkout
+        - setup_remote_docker
+        - restore_cache:
+            keys:
+              - v1-dependencies-{{ checksum "build.sbt" }}
+              # fallback to using the latest cache if no exact match is found
+              - v1-dependencies-
+        - attach_workspace:
+            at: ~/repo
+            
+        - run:
+            name: Authenticate with registry
+            command: echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/repo/.npmrc
+        - run:
+            name: Js Opt Lib generation
+            command: npm publish --access public
