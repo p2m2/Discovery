@@ -93,6 +93,10 @@ object SparqlGenerator  {
                 case _ : QueryVariable => "BIND ( ?" + varIdSire +  " AS " + node.term.toString + ")"
                 case _  =>  "VALUES ?" +varIdSire+ " { " + node.term.toString + " } .\n" }
             case node : ListValues         => "VALUES ?" +varIdSire+ " { " + node.terms.map(t => t.sparql()).mkString(" ") + " } .\n"
+            case node : ProjectionExpression  => "(" + sparqlNode(node.expression,node.idRef,variableName) + " AS "+ node.`var` + ") "
+            case node : Bind               => "BIND (" + sparqlNode(node.expression,node.idRef,variableName) + " AS "+ varIdSire + ") "
+            case node : Count              => "COUNT ("+ { if (node.distinct) "DISTINCT" else "" } + " "+ node.idRef +")"
+            case node : CountAll           => "COUNT ("+ { if (node.distinct) "DISTINCT" else "" } + " * )"
             case _ : Distinct              => "DISTINCT "
             case _ : Reduced               => "REDUCED "
             case node : Projection         => node.list.mkString(" ")

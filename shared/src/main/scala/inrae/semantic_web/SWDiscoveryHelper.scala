@@ -12,8 +12,8 @@ case class SWDiscoveryHelper(sw : SWDiscovery) {
     SWTransaction(sw
       .root()
       .projection(Seq())
-      .bind("count")
-      .countAll())
+      .agg_projection("count")
+      .countAll().console())
       .commit()
       .raw
       .map( json => {

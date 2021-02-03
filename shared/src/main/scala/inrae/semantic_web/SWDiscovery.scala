@@ -66,20 +66,29 @@ case class SWDiscovery(
 
   def filter : FilterIncrement = FilterIncrement()
 
-  case class BindIncrement(v : String) {
+  case class BindIncrement() {
 
-    def manage(n:Node,forward : Boolean = false) : SWDiscovery =
+    def manage(n:ExpressionNode,forward : Boolean = false) : SWDiscovery =
       focusManagement(
-        Bind(QueryVariable(v),getUniqueRef())
-        .addChildren(n),forward)
+        Bind(n,getUniqueRef()),false)
 
-    def count(distinct: Boolean=false) : SWDiscovery = manage(Count(distinct,getUniqueRef()))
-    def countAll(distinct: Boolean=false) : SWDiscovery = manage(CountAll(distinct,getUniqueRef()),true)
     def subStr(startingLoc : Int,length : Int ) : SWDiscovery = manage(SubStr(startingLoc,length,getUniqueRef()))
 
   }
 
-  def bind(`var` : String) : BindIncrement = BindIncrement(`var`)
+  def bind : BindIncrement = BindIncrement()
+
+  case class ProjectionExpressionIncrement(v : String) {
+
+    def manage(n:AggregateNode,forward : Boolean = false) : SWDiscovery =
+      focusManagement(
+        ProjectionExpression(QueryVariable(v),n,getUniqueRef()),false)
+
+    def count(distinct: Boolean=false) : SWDiscovery = manage(Count(distinct,getUniqueRef()))
+    def countAll(distinct: Boolean=false) : SWDiscovery = manage(CountAll(distinct,getUniqueRef()),true)
+  }
+
+  def agg_projection(`var` : String) : ProjectionExpressionIncrement = ProjectionExpressionIncrement(`var`)
 
   //private val logger = Logger.of[SWDiscovery]
   // Set the root logger's log level
