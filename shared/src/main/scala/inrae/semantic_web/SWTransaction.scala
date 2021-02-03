@@ -1,7 +1,7 @@
 package inrae.semantic_web
 
 import inrae.semantic_web.event.{DiscoveryRequestEvent, DiscoveryStateRequestEvent, Publisher, Subscriber}
-import inrae.semantic_web.internal.{DatatypeNode, pm}
+import inrae.semantic_web.internal.{DatatypeNode, SubjectOf, pm}
 import inrae.semantic_web.rdf.{SparqlDefinition, URI}
 import inrae.semantic_web.sparql.QueryResult
 import inrae.semantic_web.strategy._
@@ -16,7 +16,7 @@ object SWTransaction {
   implicit val rw: RW[SWTransaction] = macroRW
 }
 
-case class SWTransaction(sw : SWDiscovery, lRef: Seq[String] = List(), limit : Int = 0, offset : Int = 0)
+case class SWTransaction(sw : SWDiscovery)
     extends Subscriber[DiscoveryRequestEvent,StrategyRequest]
 {
   implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
@@ -29,11 +29,9 @@ case class SWTransaction(sw : SWDiscovery, lRef: Seq[String] = List(), limit : I
   val raw: Future[ujson.Value] = _prom_raw.future
   var currentRequestEvent: String = DiscoveryStateRequestEvent.START.toString()
 
-  val mapId2Var: Map[String, String] =  pm.SparqlGenerator.correspondenceVariablesIdentifier(sw.rootNode)._1
-
-  val lDatatype: Seq[DatatypeNode] = sw.rootNode.lDatatypeNode.filter(ld => lRef.contains(ld.property.reference()))
+  val lDatatype: Seq[DatatypeNode] = sw.rootNode.getChild[DatatypeNode](DatatypeNode("",SubjectOf("",URI("")))) //lDatatypeNode.filter(ld => lRef.contains(ld.property.reference()))
   trace("list datatype : "+lDatatype.toString)
-
+/*
   val lSelectVariables: Seq[String] = {
     /* select uri type ask with decoration/datatype */
     lDatatype.map(ld => {
@@ -46,7 +44,7 @@ case class SWTransaction(sw : SWDiscovery, lRef: Seq[String] = List(), limit : I
       }
     }
   }.distinct
-
+*/
   private var countEvent: Int = 1
 
   private var _progressionCallBack = Seq[Double => Unit]()
@@ -81,19 +79,6 @@ case class SWTransaction(sw : SWDiscovery, lRef: Seq[String] = List(), limit : I
     _prom_raw failure(SWDiscoveryException("aborted by the user."))
   }
 
-  private def variable(reference: String) : Option[String] = {
-    debug(" -- variable -- ")
-    val variableNameList = pm.SelectNode.getNodeWithRef(reference, sw.rootNode)
-      .map( v => {
-        pm.SparqlGenerator.correspondenceVariablesIdentifier(sw.rootNode)._1.getOrElse(reference,"")
-      })
-
-    if (variableNameList.filter(_ != "").length==0) {
-      None
-    } else {
-      Some(variableNameList(0))
-    }
-  }
 
   def process_datatypes(qr : QueryResult,
                         datatypeNode : DatatypeNode,
@@ -151,7 +136,7 @@ case class SWTransaction(sw : SWDiscovery, lRef: Seq[String] = List(), limit : I
                   /* find uris value inside results to decorate */
                   val lUris: Seq[SparqlDefinition] =
                     try {
-                      qr.getValues(mapId2Var(datatypeNode.refNode))
+                      qr.getValues(datatypeNode.refNode)
                     } catch {
                       case _: Throwable => {
                         List()
@@ -166,7 +151,6 @@ case class SWTransaction(sw : SWDiscovery, lRef: Seq[String] = List(), limit : I
             })) onComplete {
               case Success(_) => {
                 notify(DiscoveryRequestEvent(DiscoveryStateRequestEvent.DATATYPE_DONE))
-                qr.v2Ident(mapId2Var)
                 _prom_raw success qr.json
                 notify(DiscoveryRequestEvent(DiscoveryStateRequestEvent.REQUEST_DONE))
               }

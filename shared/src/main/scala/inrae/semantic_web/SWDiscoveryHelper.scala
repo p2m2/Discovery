@@ -8,6 +8,19 @@ import scala.concurrent.Future
 case class SWDiscoveryHelper(sw : SWDiscovery) {
   implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
 
+  def count : Future[Int] = {
+    SWTransaction(sw
+      .root()
+      .projection(Seq())
+      .bind("count")
+      .countAll())
+      .commit()
+      .raw
+      .map( json => {
+        SparqlBuilder.createLiteral(json("results")("bindings")(0)("count")).toInt()
+      })
+  }
+
   /**
    * Discovery search functionalities
    *

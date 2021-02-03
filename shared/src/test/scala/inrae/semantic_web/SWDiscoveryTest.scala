@@ -92,16 +92,6 @@ object SWDiscoveryTest extends TestSuite {
       }).flatten
     }
 
-    test("count") {
-      insert_data.map(_ => {
-        SWDiscovery(config)
-          .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
-          .something("h1") //http://rdf.ebi.ac.uk/terms/chembl#BioComponent
-          .isSubjectOf(URI("http://bb2"))
-          .count()
-          .map(count => assert(count == 2))
-      }).flatten
-    }
 
     test("bad focus") {
       Try(SWDiscovery(config)

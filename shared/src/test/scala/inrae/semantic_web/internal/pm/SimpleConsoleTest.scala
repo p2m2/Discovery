@@ -1,6 +1,6 @@
 package inrae.semantic_web.internal.pm
 import inrae.semantic_web.internal._
-import inrae.semantic_web.rdf.{Literal, URI}
+import inrae.semantic_web.rdf.URI
 import utest.{TestSuite, Tests, assert, test}
 object SimpleConsoleTest extends TestSuite {
   def tests = Tests {
@@ -25,7 +25,6 @@ object SimpleConsoleTest extends TestSuite {
       assert(SimpleConsole.get(SupEqual("0.5",true)) != "")
       assert(SimpleConsole.get(DatatypeNode("h",SubjectOf("1234",URI("something_property")))) != "")
       assert(SimpleConsole.get(SourcesNode("h",List("source1","source2"))) != "")
-      assert(SimpleConsole.get(OperatorNode("<")) != "")
     }
   }
 }

@@ -87,6 +87,23 @@ object SimpleConsole  {
             case _ => ""
         }
 
-        labelledLine + children + sourcesNode + datatypeNode
+        val solutionSequenceModifierNode = n match {
+            case r : Root => {
+                "\n" +  prefix + (escape + barrevert) * marge + label + "\n"
+                "==== Solution Modifier === \n" + r.lSolutionSequenceModifierNode.map(child => get(child, marge + 1)).mkString("\n")+ "\n"
+            }
+            case _ => ""
+        }
+
+        val expressionNode = n match {
+            case r : Root => {
+                "\n" +  prefix + (escape + barrevert) * marge + label + "\n"
+                "==== Expression === \n" + r.lBindNode.map(child => get(child, marge + 1)).mkString("\n")+ "\n"
+            }
+            case _ => ""
+        }
+
+
+        labelledLine + children + sourcesNode + datatypeNode + solutionSequenceModifierNode + expressionNode
     }
 }

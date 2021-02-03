@@ -103,10 +103,5 @@ object ElementTest extends TestSuite {
       assert(true)
     }
 
-    test("OperatorNode creation") {
-      OperatorNode("<")
-      assert(true)
-    }
-
   }
 }

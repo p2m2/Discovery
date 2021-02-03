@@ -17,10 +17,9 @@ case class DiscoveryStrategyRequest(source : Source) extends StrategyRequest {
   driver.subscribe(this.asInstanceOf[Subscriber[DiscoveryRequestEvent,Publisher[DiscoveryRequestEvent]]])
 
   def execute(swt : SWTransaction) : Future[QueryResult] = {
-    val (refToIdentifier, _) = pm.SparqlGenerator.correspondenceVariablesIdentifier(swt.sw.rootNode)
-    trace(refToIdentifier.toString())
+
     publish(DiscoveryRequestEvent(DiscoveryStateRequestEvent.QUERY_BUILD))
-    val query: String = SparqlQueryBuilder.selectQueryString(swt.sw.rootNode, refToIdentifier, swt.lSelectVariables,swt.limit,swt.offset)
+    val query: String = SparqlQueryBuilder.selectQueryString(swt.sw.rootNode)
     driver.request(query)
   }
 

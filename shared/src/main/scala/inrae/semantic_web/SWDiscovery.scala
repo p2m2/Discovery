@@ -66,6 +66,21 @@ case class SWDiscovery(
 
   def filter : FilterIncrement = FilterIncrement()
 
+  case class BindIncrement(v : String) {
+
+    def manage(n:Node,forward : Boolean = false) : SWDiscovery =
+      focusManagement(
+        Bind(QueryVariable(v),getUniqueRef())
+        .addChildren(n),forward)
+
+    def count(distinct: Boolean=false) : SWDiscovery = manage(Count(distinct,getUniqueRef()))
+    def countAll(distinct: Boolean=false) : SWDiscovery = manage(CountAll(distinct,getUniqueRef()),true)
+    def subStr(startingLoc : Int,length : Int ) : SWDiscovery = manage(SubStr(startingLoc,length,getUniqueRef()))
+
+  }
+
+  def bind(`var` : String) : BindIncrement = BindIncrement(`var`)
+
   //private val logger = Logger.of[SWDiscovery]
   // Set the root logger's log level
   Logger.setDefaultLogLevel(config.conf.settings.getLogLevel)
@@ -139,35 +154,52 @@ case class SWDiscovery(
   }
 
   def focusManagement(n : Node, forward: Boolean = true) : SWDiscovery = {
-    val newRootNode = rootNode.addChildren(focusNode,n)
-    /* current node is the focusNode */
-    if (forward) {
-      SWDiscovery(config,newRootNode,Some(n.reference()))
-    }  else {
-      SWDiscovery(config,newRootNode,Some(focusNode))
-    }
+    // get all node
+    val current = rootNode.getChild[Node](rootNode.asInstanceOf[Node]).filter( _.idRef == focusNode )
+
+    if ( current.lastOption.map( _.accept(n) ).getOrElse(false)) {
+      val newRootNode = rootNode.addChildren(focusNode,n)
+      /* current node is the focusNode */
+      if (forward) {
+        SWDiscovery(config,newRootNode,Some(n.reference()))
+      }  else {
+        SWDiscovery(config,newRootNode,Some(focusNode))
+      }
+    } else {
+        throw SWDiscoveryException("Can not add this node at the current focus["+focusNode+"]")
+      }
   }
-  def getUniqueRef: String = randomUUID.toString
+
+  def getUniqueRef(baseNameVar : String=""): String = {
+    baseNameVar + (baseNameVar match {
+      case "subject" => rootNode.getChild(SubjectOf("",URI(""))).length
+      case "object" => rootNode.getChild(ObjectOf("",URI(""))).length
+      case "something" => rootNode.getChild(Something("")).length
+      case "linkTo" => rootNode.getChild(LinkTo("",URI(""))).length
+      case "linkFrom" => rootNode.getChild(LinkFrom("",URI(""))).length
+      case _ => randomUUID.toString
+    }).toString
+  }
 
   /* start a request with a variable */
-  def something( ref : String = getUniqueRef ) : SWDiscovery = {
+  def something( ref : String = getUniqueRef("something") ) : SWDiscovery = {
     debug(" -- something -- ")
     focusManagement(Something(ref))
   }
 
   /* create node which focus is the subject : ?focusId <uri> ?target */
-  def isSubjectOf( term : SparqlDefinition , ref : String = getUniqueRef ) : SWDiscovery =
+  def isSubjectOf( term : SparqlDefinition , ref : String = getUniqueRef("subject")  ) : SWDiscovery =
     checkQueryVariable(term).focusManagement(SubjectOf(ref,term))
 
 
   /* create node which focus is the subject : ?target <uri> ?focusId */
-  def isObjectOf( term : SparqlDefinition , ref : String = getUniqueRef ) : SWDiscovery =
+  def isObjectOf( term : SparqlDefinition , ref : String = getUniqueRef("object")  ) : SWDiscovery =
     checkQueryVariable(term).focusManagement(ObjectOf(ref,term))
 
   /* create node which focus is the properties :
   ?focusId ?target <uri>|literal
   */
-  def isLinkTo(term : SparqlDefinition, ref : String = getUniqueRef ) : SWDiscovery =
+  def isLinkTo(term : SparqlDefinition, ref : String = getUniqueRef("linkTo") ) : SWDiscovery =
     checkQueryVariable(term).focusManagement(LinkTo(ref,term))
 
 
@@ -183,7 +215,7 @@ case class SWDiscovery(
   /* create node which focus is the properties :
      <uri> ?target ?focusId
   */
-  def isLinkFrom( term : SparqlDefinition, ref : String = getUniqueRef ) : SWDiscovery =
+  def isLinkFrom( term : SparqlDefinition, ref : String = getUniqueRef("linkFrom")  ) : SWDiscovery =
     checkQueryVariable(term).focusManagement(LinkFrom(ref,term))
 
   /*
@@ -192,10 +224,7 @@ case class SWDiscovery(
   Attribute value is optional
   */
 
-  def datatype( uri : URI, ref : String ) : SWDiscovery =
-    SWDiscovery(config,
-      rootNode.addDatatype(DatatypeNode(focusNode,SubjectOf(ref,uri))),
-      Some(focusNode))
+  def datatype( uri : URI, ref : String ) : SWDiscovery = focusManagement(DatatypeNode(focusNode,SubjectOf(ref,uri)), false)
 
 
   def set( term : SparqlDefinition ) : SWDiscovery =
@@ -223,16 +252,33 @@ case class SWDiscovery(
     this
   }
 
-  def sparql() : String = {
-    val (refToIdentifier,_) = pm.SparqlGenerator.correspondenceVariablesIdentifier(rootNode)
-    SparqlQueryBuilder.selectQueryString(rootNode,refToIdentifier,refToIdentifier.values.toSeq,0,0)
-  }
+  def sparql() : String = SparqlQueryBuilder.selectQueryString(rootNode)
+
+  def projection( ref: String ) : SWDiscovery = focusManagement(Projection(Seq(QueryVariable(ref)),getUniqueRef()))
+
+  def projection( lRef: Seq[String] )  : SWDiscovery = focusManagement(Projection(lRef.map(QueryVariable(_)),getUniqueRef()))
+
+  def distinct : SWDiscovery = focusManagement(Distinct(), false)
+
+  def reduced : SWDiscovery = focusManagement(Reduced(getUniqueRef()), false)
+
+  def limit( value : Int ) : SWDiscovery = focusManagement(Limit(value,getUniqueRef()), false)
+
+  def offset( value : Int ) : SWDiscovery = focusManagement(Offset(value,getUniqueRef()), false)
+
+  def orderByAsc( ref: String ) : SWDiscovery = focusManagement(OrderByAsc(Seq(QueryVariable(ref)),getUniqueRef()), false)
+
+  def orderByAsc( lRef: Seq[String] ) : SWDiscovery = focusManagement(OrderByAsc(lRef.map(QueryVariable(_)),getUniqueRef()), false)
+
+  def orderByDesc( ref: String ) : SWDiscovery = focusManagement(OrderByDesc(Seq(QueryVariable(ref))), false)
+
+  def orderByDesc( lRef: Seq[String] ) : SWDiscovery = focusManagement(OrderByDesc(lRef.map(QueryVariable(_))), false)
+
 
   /**
    * Discovery request
    *
    */
-
 
   /**
    * Return solutions as Future corresponding with the current Node request.
@@ -242,17 +288,11 @@ case class SWDiscovery(
    * @return
    */
   def select(lRef: Seq[String] = List(), limit : Int = 0, offset : Int = 0) : SWTransaction =
-    SWTransaction(this,lRef,limit,offset)
-
-  def count() : Future[Int] = {
-    val (refToIdentifier, _) = pm.SparqlGenerator.correspondenceVariablesIdentifier(rootNode)
-    val varCount = "count"
-    val query = SparqlQueryBuilder.countQueryString(rootNode,refToIdentifier,varCount)
-    val res: Future[QueryResult] = StrategyRequestBuilder.build(config).request(query)
-    res.map(v => {
-      SparqlBuilder.createLiteral(v.json("results")("bindings")(0)(varCount)).toInt()
-    })
-  }
+    SWTransaction(
+      this.root()
+        .limit(limit)
+        .offset(offset)
+        .projection(lRef))
 
   /**
    * Give an iterable object to browse and obtain all solution performed by a select.
@@ -260,9 +300,9 @@ case class SWDiscovery(
    * @return iterable on select function
    */
   def selectByPage(lRef: Seq[String] = List())  : Future[(Int,Seq[SWTransaction])] = {
-    count().map(
-      nsolutions => {
-        val nit : Int = nsolutions / config.conf.settings.pageSize
+    SWDiscoveryHelper(this).count.map(
+      nSolutions => {
+        val nit : Int = nSolutions / config.conf.settings.pageSize
         (nit+1,(0 to nit).map( p =>{
           val limit = config.conf.settings.pageSize
           val offset = p*config.conf.settings.pageSize

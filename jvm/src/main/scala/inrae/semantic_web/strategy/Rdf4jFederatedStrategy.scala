@@ -3,7 +3,6 @@ package inrae.semantic_web.strategy
 import inrae.semantic_web.ConfigurationObject.Source
 import inrae.semantic_web.driver.{Rdf4jRequestDriver, Rdf4jSparqlRequestDriver, RequestDriver, RequestDriverFactory}
 import inrae.semantic_web.event.{DiscoveryRequestEvent, DiscoveryStateRequestEvent, Publisher, Subscriber}
-import inrae.semantic_web.internal.pm
 import inrae.semantic_web.sparql.QueryResult
 import inrae.semantic_web.{SWTransaction, SparqlQueryBuilder}
 import org.eclipse.rdf4j.federated.endpoint.provider.{NativeRepositoryInformation, SPARQLProvider, SPARQLRepositoryInformation}
@@ -52,11 +51,9 @@ case class Rdf4jFederatedStrategy(sources: Seq[Source])
   val con = repositoryFederation.getConnection()
 
   def execute(swt: SWTransaction): Future[QueryResult] = {
-    val (refToIdentifier, _) = pm.SparqlGenerator.correspondenceVariablesIdentifier(swt.sw.rootNode)
 
     publish(DiscoveryRequestEvent(DiscoveryStateRequestEvent.QUERY_BUILD))
-    val query: String = SparqlQueryBuilder.selectQueryString(swt.sw.rootNode, refToIdentifier, swt.lSelectVariables, swt.limit, swt.offset)
-
+    val query: String = SparqlQueryBuilder.selectQueryString(swt.sw.rootNode)
     requestOnSWDB(query)
   }
 
