@@ -212,12 +212,22 @@ case class SWTransaction(sw : SWDiscovery)
 
   def offset( value : Int ) : SWTransaction = sw.root.focusManagement(Offset(value,sw.getUniqueRef()), false).transaction
 
-  def orderByAsc( ref: String ) : SWTransaction = sw.root.focusManagement(OrderByAsc(Seq(QueryVariable(ref)),sw.getUniqueRef()), false).transaction
+  def orderByAsc( ref: String ) : SWTransaction =
+    sw.refExist(ref).root.focusManagement(OrderByAsc(Seq(QueryVariable(ref)),sw.getUniqueRef()), false).transaction
 
-  def orderByAsc( lRef: Seq[String] ) : SWTransaction = sw.root.focusManagement(OrderByAsc(lRef.map(QueryVariable(_)),sw.getUniqueRef()), false).transaction
+  def orderByAsc( lRef: Seq[String] ) : SWTransaction = {
+    lRef.foreach( sw.refExist(_) )
+    sw.root.focusManagement(OrderByAsc(lRef.map(QueryVariable(_)),sw.getUniqueRef()), false).transaction
+  }
 
-  def orderByDesc( ref: String ) : SWTransaction = sw.root.focusManagement(OrderByDesc(Seq(QueryVariable(ref)),sw.getUniqueRef()), false).transaction
+  def orderByDesc( ref: String ) : SWTransaction =
+    sw.refExist(ref).root.focusManagement(OrderByDesc(Seq(QueryVariable(ref)),sw.getUniqueRef()), false).transaction
 
-  def orderByDesc( lRef: Seq[String] ) : SWTransaction = sw.root.focusManagement(OrderByDesc(lRef.map(QueryVariable(_)),sw.getUniqueRef()), false).transaction
+  def orderByDesc( lRef: Seq[String] ) : SWTransaction = {
+    lRef.foreach( sw.refExist(_) )
+    sw.root.focusManagement(OrderByDesc(lRef.map(QueryVariable(_)),sw.getUniqueRef()), false).transaction
+  }
 
+
+  def console : SWTransaction = sw.console.transaction
 }

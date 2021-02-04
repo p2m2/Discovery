@@ -1,30 +1,82 @@
 package inrae.semantic_web
 
 import inrae.data.DataTestFactory
-import inrae.semantic_web.rdf.{IRI, URI}
-import utest.{TestSuite, Tests}
+import inrae.semantic_web.rdf.{IRI, SparqlBuilder, URI}
+import utest.{TestSuite, Tests, test}
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.util.{Failure, Success, Try}
 
 object OrderByTest extends TestSuite {
   val insert_data = DataTestFactory.insert_virtuoso1(
     """
-      <http://aa> <http://bb> "2"^^sd:integer .
-      <http://aa> <http://bb> "3"^^sd:integer .
-      <http://aa> <http://bb> "1"^^sd:integer .
+      <http://aa> <http://bb> 2 .
+      <http://aa> <http://bb> 3 .
+      <http://aa> <http://bb> 1 .
+      <http://aa> <http://bb> 8 .
+      <http://aa> <http://bb> 10 .
       """.stripMargin, this.getClass.getSimpleName)
 
   val config: StatementConfiguration = DataTestFactory.getConfigVirtuoso1()
 
   def tests = Tests {
-    insert_data.map(_ => {
-      SWDiscovery(config)
+    test("order by") {
+      insert_data.map(_ => {
+        SWDiscovery(config)
+          .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
+          .something()
+          .isSubjectOf(URI("http://bb"), "v")
+          .select(Seq("v"))
+          .orderByAsc("v")
+          .commit()
+          .raw.map(r => {
+          assert(r("results")("bindings").arr.length == 5)
+          val tab = r("results")("bindings").arr.map( arrow => SparqlBuilder.createLiteral(arrow("v")).toInt())
+          assert(tab.sorted == tab)
+        })
+      }).flatten
+    }
+
+    test("order by with wrong variable") {
+        Try(SWDiscovery(config)
+          .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
+          .something()
+          .isSubjectOf(URI("http://bb"), "v")
+          .select(Seq("v"))
+          .orderByAsc("v_bad")) match {
+          case Success(_) => println("Success");assert(false)
+          case Failure(_) => println("Failure");assert(true)
+        }
+    }
+
+    test("order by desc") {
+      insert_data.map(_ => {
+        SWDiscovery(config)
+          .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
+          .something()
+          .isSubjectOf(URI("http://bb"), "v")
+          .select(Seq("v"))
+          .orderByDesc("v")
+          .commit()
+          .raw.map(r => {
+          assert(r("results")("bindings").arr.length == 5)
+          val tab = r("results")("bindings").arr.map( arrow => SparqlBuilder.createLiteral(arrow("v")).toInt())
+          assert(tab.sorted.reverse == tab)
+        })
+      }).flatten
+    }
+
+    test("order by desc with wrong variable") {
+      Try(SWDiscovery(config)
         .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
         .something()
-        .isSubjectOf(URI("http://bb"),"v")
+        .isSubjectOf(URI("http://bb"), "v")
         .select(Seq("v"))
-        .commit()
-        .raw.map( r => println(r))
-    }).flatten
+        .orderByDesc("v_bad")) match {
+        case Success(_) => println("Success");assert(false)
+        case Failure(_) => println("Failure");assert(true)
+      }
+    }
+
   }
 }

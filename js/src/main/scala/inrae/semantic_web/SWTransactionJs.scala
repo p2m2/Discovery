@@ -55,4 +55,6 @@ case class SWTransactionJs(transaction : SWTransaction) {
   @JSExport
   def orderByDesc( lRef: Seq[String] )  : SWTransactionJs = SWTransactionJs(transaction.orderByDesc(lRef))
 
+  @JSExport
+  def console() : SWTransactionJs = SWTransactionJs(transaction.console)
 }

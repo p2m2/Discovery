@@ -1,5 +1,6 @@
 package inrae.semantic_web
 
+import inrae.semantic_web
 import inrae.semantic_web.event.{DiscoveryRequestEvent, DiscoveryStateRequestEvent}
 import inrae.semantic_web.internal._
 import inrae.semantic_web.internal.pm.{SelectNode, SerializationBuilder}
@@ -123,12 +124,17 @@ case class SWDiscovery(
   /* set the current focus on the select node */
   def focus(ref : String) : SWDiscovery = {
     trace("focus")
-    if (ref == "") throw new Error("reference can not be empty !")
-    val arrNode = pm.SelectNode.getNodeWithRef(ref, rootNode)
-    if ( arrNode.length > 0 ) {
-      SWDiscovery(config,rootNode,Some(arrNode(0).reference()))
-    } else {
-      throw new Error("ref unknown :"+ref)
+    pm.SelectNode.getNodeWithRef(ref, rootNode).lastOption match {
+      case Some(node) => SWDiscovery(config,rootNode,Some(node.reference()))
+      case None => throw SWDiscoveryException(s"$ref does not exist.")
+    }
+  }
+
+  def refExist(ref:String) : SWDiscovery = {
+
+    pm.SelectNode.getNodeWithRef(ref, rootNode).lastOption match {
+      case Some(_) => SWDiscovery(config,rootNode,Some(focusNode))
+      case None => throw SWDiscoveryException(s"$ref does not exist.")
     }
   }
 
