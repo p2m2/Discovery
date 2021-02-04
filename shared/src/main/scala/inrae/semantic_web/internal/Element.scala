@@ -35,7 +35,7 @@ sealed abstract class Node(val idRef : String,val children: Seq[Node] = Seq[Node
   }
 
   override def toString : String = {
-    this.getClass.getSimpleName+ "@"+idRef + "ooo" + { children.length match {
+    this.getClass.getSimpleName+ "@"+idRef + " - " + { children.length match {
       case l if l>0 => " ["+children.toString()+"]"
       case _ => "**lChildren==0**"
     } }
@@ -241,7 +241,6 @@ abstract class RdfNode(override val idRef : String,override val children: Seq[No
     case _ : Bind       => true
     case _              => false
   }
-
 }
 
 
@@ -364,6 +363,7 @@ case class ListValues(var terms : Seq[SparqlDefinition],override val idRef : Str
 }
 
 /* Logic */
+
 sealed abstract class LogicNode(val sire : Node,idRef : String=randomUUID.toString,override val children: Seq[Node] = Seq[Node]()) extends Node(idRef,children) {
   implicit val rw: RW[LogicNode] = RW.merge(
     UnionBlock.rw,
@@ -388,6 +388,7 @@ case class NotBlock(s : Node,override val idRef : String,override val children: 
 
   def duplicateWithoutChildren(): NotBlock = NotBlock(s,idRef,Seq())
 }
+
 
 object FilterNode {
   implicit val rw: RW[FilterNode] = RW.merge(
@@ -626,7 +627,14 @@ case class Bind(expression : ExpressionNode,
                 override val children: Seq[Node] = Seq[Node]()) extends Node(idRef,children) {
   override def copy(children: Seq[Node]): Node = Bind(expression,idRef,children)
   override def duplicateWithoutChildren(): Node = Bind(expression,idRef,children)
-  override def accept(n: Node): Boolean = false
+  override def accept(n: Node): Boolean = n match {
+    case _ : Something  => false
+    case _ : URIRdfNode => true
+    case _ : FilterNode => true
+    case _ : Value      => true
+    case _ : ListValues => true
+    case _              => false
+  }
 }
 
 object ExpressionNode {

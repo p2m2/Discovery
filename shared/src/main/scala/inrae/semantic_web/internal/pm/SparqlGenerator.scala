@@ -88,11 +88,11 @@ object SparqlGenerator  {
             case node : LinkTo           => "\t?"+ varIdSire + " " + "?" + variableName + " " + node.term.toString + " .\n"
             case node : LinkFrom           => node.term.toString + " " + "?" + variableName + " " + "?"+ varIdSire + " .\n"
             case node : Value              => node.term match {
-                case _ : QueryVariable => "BIND ( ?" + varIdSire +  " AS " + node.term.toString + ")"
-                case _  =>  "VALUES ?" +varIdSire+ " { " + node.term.toString + " } .\n" }
-            case node : ListValues         => "VALUES ?" +varIdSire+ " { " + node.terms.map(t => t.sparql()).mkString(" ") + " } .\n"
+                case _ : QueryVariable => "\tBIND ( ?" + varIdSire +  " AS " + node.term.toString + ")"
+                case _  =>  "\tVALUES ?" +varIdSire+ " { " + node.term.toString + " } .\n" }
+            case node : ListValues         => "\tVALUES ?" +varIdSire+ " { " + node.terms.map(t => t.sparql()).mkString(" ") + " } .\n"
             case node : ProjectionExpression  => "(" + sparqlNode(node.expression,node.idRef,variableName) + " AS "+ node.`var` + ") "
-            case node : Bind               => "BIND (" + sparqlNode(node.expression,node.idRef,variableName) + " AS "+ varIdSire + ") "
+            case node : Bind               => "\tBIND (" + sparqlNode(node.expression,varIdSire,variableName) + " AS "+ "?" + node.idRef + ") \n"
             case node : Count              => "COUNT ("+ { if (node.distinct) "DISTINCT" else "" } + " "+ node.idRef +")"
             case node : CountAll           => "COUNT ("+ { if (node.distinct) "DISTINCT" else "" } + " * )"
             case _ : Distinct              => "DISTINCT "
@@ -102,7 +102,10 @@ object SparqlGenerator  {
             case node : Offset             => "OFFSET " + node.value + " "
             case node : OrderByAsc         => "ORDER BY (" + node.list.mkString(" ") + ")" + " "
             case node : OrderByDesc        => "ORDER BY DESC (" + node.list.mkString(" ") + ")" + " "
-            case node : FilterNode         => "FILTER ( " + {
+              /* Expression Node */
+            case node : SubStr             => "SUBSTR (" + "?"+ varIdSire  + "," + node.start.toString + "," + node.length.toString + ")"
+
+            case node : FilterNode         => "\tFILTER ( " + {
                 if (node.negation) {
                     "!"
                 } else {
@@ -133,15 +136,7 @@ object SparqlGenerator  {
     def body(n: Node, /* current node to browse with children */
              varIdSire : String = "" /* sire variable */
             )  : String = {
-        val variableName : String = n match {
-            case rdf : RdfNode => rdf.reference()
-            case _ => varIdSire
-        }
-
-        trace(n.toString)
-        trace("varIdSire:"+varIdSire)
-        trace("variableName:"+variableName)
-        val triplet : String = sparqlNode(n,varIdSire,variableName)
-        triplet + n.children.map( child => body( child, variableName)).mkString("")
+      val variableName : String = n.idRef
+      sparqlNode(n,varIdSire,variableName) + n.children.map( child => body( child, variableName)).mkString("")
     }
 }

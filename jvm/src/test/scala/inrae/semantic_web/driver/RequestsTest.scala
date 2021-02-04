@@ -85,6 +85,7 @@ object RequestsTest extends TestSuite {
   def tests = Tests {
 
     test("federation") {
+      insert_data.map(_ => {
         SWDiscovery(mixconfig)
           .something("sub")
           .isSubjectOf(URI("http://bbbbbb"),"obj")
@@ -92,12 +93,11 @@ object RequestsTest extends TestSuite {
           .select(List("sub","obj"))
           .commit()
           .raw
-          .map(result =>
-          {
+          .map(result => {
             assert(result("results")("bindings").arr.length == 2)
             assert(SparqlBuilder.createUri(result("results")("bindings")(0)("sub")).localName == "http://aaaaaa")
-          }
-          )
+          })
+      }).flatten
     }
 
     test("inline turtle") {
@@ -109,12 +109,10 @@ object RequestsTest extends TestSuite {
           .select(List("h1","v"))
           .commit()
           .raw
-          .map(result =>
-          {
+          .map(result => {
             assert(result("results")("bindings").arr.length > 1)
             assert(SparqlBuilder.createUri(result("results")("bindings")(0)("h1")).localName == "http://aaaaaa")
-          }
-          )
+          })
       }).flatten
     }
 
@@ -123,14 +121,12 @@ object RequestsTest extends TestSuite {
         SWDiscovery(config3)
           .something("h1")
           .isSubjectOf(URI("http://bbbbbb2"),"v")
-          //.console()
           .select(List("v"))
           .commit()
           .raw
           .map(result => {
             assert(result("results")("bindings").arr.length == 2)
-          }
-          )
+          })
       }).flatten
     }
   }

@@ -67,17 +67,12 @@ case class SWDiscovery(
 
   def filter : FilterIncrement = FilterIncrement()
 
-  case class BindIncrement() {
-
-    def manage(n:ExpressionNode,forward : Boolean = false) : SWDiscovery =
-      focusManagement(
-        Bind(n,getUniqueRef()),false)
-
+  case class BindIncrement(`var` : String) {
+    def manage(n:ExpressionNode,forward : Boolean = true) : SWDiscovery = focusManagement(Bind(n,`var`),forward)
     def subStr(startingLoc : Int,length : Int ) : SWDiscovery = manage(SubStr(startingLoc,length,getUniqueRef()))
-
   }
 
-  def bind : BindIncrement = BindIncrement()
+  def bind(`var` : String) : BindIncrement = BindIncrement(`var`)
 
   //private val logger = Logger.of[SWDiscovery]
   // Set the root logger's log level
