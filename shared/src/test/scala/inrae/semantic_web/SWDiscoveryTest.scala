@@ -166,5 +166,20 @@ object SWDiscoveryTest extends TestSuite {
         case Failure(_) => assert(false)
       }
     }
+
+    test("refExist") {
+      Try(SWDiscovery(config).something("h1").refExist("h1")) match {
+        case Success(_) => assert(true)
+        case Failure(_) => assert(false)
+      }
+    }
+
+    test("refExist2") {
+      Try(SWDiscovery(config).something("h2").refExist("h1")) match {
+        case Success(_) => assert(false)
+        case Failure(_) => assert(true)
+      }
+    }
+
   }
 }

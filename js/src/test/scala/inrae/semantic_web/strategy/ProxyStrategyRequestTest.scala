@@ -1,8 +1,8 @@
 package inrae.semantic_web.strategy
 
 import inrae.data.DataTestFactory
+import inrae.semantic_web.SWDiscovery
 import inrae.semantic_web.rdf.URI
-import inrae.semantic_web.{SWDiscovery, SWTransaction}
 import utest.{TestSuite, Tests, test}
 
 object ProxyStrategyRequestTest extends TestSuite {
@@ -14,7 +14,7 @@ object ProxyStrategyRequestTest extends TestSuite {
       """.stripMargin, this.getClass.getSimpleName)
   def tests = Tests {
     test("test") {
-      val swt : SWTransaction =
+      val swt =
         SWDiscovery()
           .something("h1")
           .isSubjectOf(URI("http://something_else"))

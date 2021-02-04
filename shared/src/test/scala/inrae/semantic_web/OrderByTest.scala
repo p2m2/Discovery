@@ -49,6 +49,23 @@ object OrderByTest extends TestSuite {
         }
     }
 
+    test("order by with list") {
+      insert_data.map(_ => {
+        SWDiscovery(config)
+          .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
+          .something("h")
+          .isSubjectOf(URI("http://bb"), "v")
+          .select(Seq("v"))
+          .orderByAsc(Seq("v","h"))
+          .commit()
+          .raw.map(r => {
+          assert(r("results")("bindings").arr.length == 5)
+          val tab = r("results")("bindings").arr.map( arrow => SparqlBuilder.createLiteral(arrow("v")).toInt())
+          assert(tab.sorted == tab)
+        })
+      }).flatten
+    }
+
     test("order by desc") {
       insert_data.map(_ => {
         SWDiscovery(config)
@@ -57,6 +74,41 @@ object OrderByTest extends TestSuite {
           .isSubjectOf(URI("http://bb"), "v")
           .select(Seq("v"))
           .orderByDesc("v")
+          .commit()
+          .raw.map(r => {
+          assert(r("results")("bindings").arr.length == 5)
+          val tab = r("results")("bindings").arr.map( arrow => SparqlBuilder.createLiteral(arrow("v")).toInt())
+          assert(tab.sorted.reverse == tab)
+        })
+      }).flatten
+    }
+
+    test("order by desc with list") {
+      insert_data.map(_ => {
+        SWDiscovery(config)
+          .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
+          .something("h")
+          .isSubjectOf(URI("http://bb"), "v")
+          .select(Seq("v"))
+          .orderByDesc(Seq("v","h"))
+          .commit()
+          .raw.map(r => {
+          assert(r("results")("bindings").arr.length == 5)
+          val tab = r("results")("bindings").arr.map( arrow => SparqlBuilder.createLiteral(arrow("v")).toInt())
+          assert(tab.sorted.reverse == tab)
+        })
+      }).flatten
+    }
+
+    test("mix order by asc/desc with list") {
+      insert_data.map(_ => {
+        SWDiscovery(config)
+          .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
+          .something("h")
+          .isSubjectOf(URI("http://bb"), "v")
+          .select(Seq("v"))
+          .orderByDesc(Seq("v"))
+          .orderByAsc(Seq("h"))
           .commit()
           .raw.map(r => {
           assert(r("results")("bindings").arr.length == 5)
