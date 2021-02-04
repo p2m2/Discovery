@@ -1,7 +1,7 @@
 package inrae.semantic_web
 
 import inrae.semantic_web.event.{DiscoveryRequestEvent, DiscoveryStateRequestEvent, Publisher, Subscriber}
-import inrae.semantic_web.internal.{DatatypeNode, Projection, SubjectOf, pm}
+import inrae.semantic_web.internal.{AggregateNode, Count, CountAll, DatatypeNode, Distinct, Limit, Offset, OrderByAsc, OrderByDesc, Projection, ProjectionExpression, Reduced, SubjectOf, pm}
 import inrae.semantic_web.rdf.{QueryVariable, SparqlDefinition, URI}
 import inrae.semantic_web.sparql.QueryResult
 import inrae.semantic_web.strategy._
@@ -28,19 +28,6 @@ case class SWTransaction(sw : SWDiscovery)
   val _prom_raw: Promise[ujson.Value] = Promise[ujson.Value]()
   val raw: Future[ujson.Value] = _prom_raw.future
   var currentRequestEvent: String = DiscoveryStateRequestEvent.START.toString()
-
-  val lSelectedVariable : Seq[QueryVariable] = sw.rootNode.getChild(Projection(List(),"")).lastOption match {
-    case Some(proj) => proj.list.distinct
-    case None => throw SWDiscoveryException("Projection node (selected variables) is not defined.")
-  }
-
-  val lDatatype: Seq[DatatypeNode] =
-    sw.rootNode.getChild[DatatypeNode](DatatypeNode("",SubjectOf("",URI("")),"unk"))
-      .filter(ld => lSelectedVariable.map(_.name).contains(ld.property.reference()))
-
-  if ( lDatatype.filter( datatypeNode => lSelectedVariable.map(_.name).contains(datatypeNode.refNode) ).length != lDatatype.length )
-    throw SWDiscoveryException("Select variable with his datatype ["+lDatatype.map( d=>d.idRef + "->"+d.refNode).mkString(" ,")+"]")
-
 
   private var countEvent: Int = 1
 
@@ -110,6 +97,25 @@ case class SWTransaction(sw : SWDiscovery)
   def commit() : SWTransaction = {
     notify(DiscoveryRequestEvent(DiscoveryStateRequestEvent.START))
 
+    val lSelectedVariable : Seq[QueryVariable] = sw.rootNode.getChild(Projection(List(),"")).lastOption match {
+      case Some(proj) => proj.variables.distinct
+      case None => {
+        notify(DiscoveryRequestEvent(DiscoveryStateRequestEvent.ERROR_REQUEST_DEFINITION))
+        throw SWDiscoveryException("projection/selected required variables are not defined.")
+      }
+    }
+
+    val lDatatype: Seq[DatatypeNode] =
+      sw.rootNode.getChild[DatatypeNode](DatatypeNode("",SubjectOf("",URI("")),"unk"))
+        .filter(ld => lSelectedVariable.map(_.name).contains(ld.property.reference()))
+
+    if ( lDatatype.filter( datatypeNode => lSelectedVariable.map(_.name).contains(datatypeNode.refNode) ).length != lDatatype.length )
+      {
+        notify(DiscoveryRequestEvent(DiscoveryStateRequestEvent.ERROR_REQUEST_DEFINITION))
+        throw SWDiscoveryException("Select variable with his datatype ["+lDatatype.map( d=>d.idRef + "->"+d.refNode).mkString(" ,")+"]")
+      }
+
+
     Try(StrategyRequestBuilder.build(sw.config)) match {
       case Failure(e) => _prom_raw failure (e)
       case Success(driver) => {
@@ -162,4 +168,56 @@ case class SWTransaction(sw : SWDiscovery)
     }
     this
   }
+
+  case class ProjectionExpressionIncrement(v : String) {
+
+    def manage(n:AggregateNode,forward : Boolean = false) : SWTransaction = {
+      sw.focusManagement(
+        ProjectionExpression(QueryVariable(v),n,sw.getUniqueRef()),false).transaction
+    }
+
+    def count(distinct: Boolean=false) : SWTransaction = manage(Count(distinct,sw.getUniqueRef()))
+    def countAll(distinct: Boolean=false) : SWTransaction = manage(CountAll(distinct,sw.getUniqueRef()),true)
+  }
+
+  def aggregate(`var` : String) : ProjectionExpressionIncrement = ProjectionExpressionIncrement(`var`)
+
+  def projection  : SWTransaction = {
+    /* check if a projection exist or create a new one */
+    sw.rootNode.getChild(Projection(Seq(),"")).lastOption match {
+      case Some(p) => sw.focus(p.idRef).transaction
+      case None => sw.root.focusManagement(Projection(Seq(),sw.getUniqueRef())).transaction
+    }
+  }
+
+  def projection( lRef: Seq[String] )  : SWTransaction = {
+    /* check if a projection and concat the variables selected list or create a new one */
+    sw.rootNode.getChild(Projection(Seq(),"")).lastOption match {
+      case Some(p) => {
+        val listVariable : Seq[QueryVariable] = p.variables ++  lRef.map(QueryVariable(_))
+        sw.root.focusManagement(
+          Projection(listVariable,p.idRef,p.children))
+          .focus(p.idRef).transaction
+      }
+      case None => sw.root.focusManagement(Projection(lRef.map(QueryVariable(_)),sw.getUniqueRef())).transaction
+    }
+
+  }
+
+  def distinct : SWTransaction = sw.root.focusManagement(Distinct(sw.getUniqueRef()), false).transaction
+
+  def reduced : SWTransaction = sw.root.focusManagement(Reduced(sw.getUniqueRef()), false).transaction
+
+  def limit( value : Int ) : SWTransaction = sw.root.focusManagement(Limit(value,sw.getUniqueRef()), false).transaction
+
+  def offset( value : Int ) : SWTransaction = sw.root.focusManagement(Offset(value,sw.getUniqueRef()), false).transaction
+
+  def orderByAsc( ref: String ) : SWTransaction = sw.root.focusManagement(OrderByAsc(Seq(QueryVariable(ref)),sw.getUniqueRef()), false).transaction
+
+  def orderByAsc( lRef: Seq[String] ) : SWTransaction = sw.root.focusManagement(OrderByAsc(lRef.map(QueryVariable(_)),sw.getUniqueRef()), false).transaction
+
+  def orderByDesc( ref: String ) : SWTransaction = sw.root.focusManagement(OrderByDesc(Seq(QueryVariable(ref)),sw.getUniqueRef()), false).transaction
+
+  def orderByDesc( lRef: Seq[String] ) : SWTransaction = sw.root.focusManagement(OrderByDesc(lRef.map(QueryVariable(_)),sw.getUniqueRef()), false).transaction
+
 }

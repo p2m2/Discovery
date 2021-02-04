@@ -23,7 +23,7 @@ case class SWDiscoveryJs(
   }
 
   @JSExport
-  val filter = new FilterIncrementJs(this)
+  val filter = FilterIncrementJs(this)
 
   @JSExport
   def usage() : SWDiscoveryJs = SWDiscoveryJs(config,SWDiscovery(config).usage)

@@ -50,10 +50,9 @@ object SWDiscoveryFilterTest extends TestSuite {
           .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
           .isSubjectOf(QueryVariable("prop"))
           .filter.isLiteral
-          .root
+          .transaction
           .distinct
           .projection(List("prop"))
-          .transaction
           .commit()
           .raw
           .map(result => {
@@ -86,10 +85,9 @@ object SWDiscoveryFilterTest extends TestSuite {
           .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
           .isSubjectOf(QueryVariable("prop"))
           .filter.isBlank
-          .root
+          .transaction
           .distinct
           .projection(List("prop"))
-          .transaction
           .commit()
           .raw
           .map(result => {

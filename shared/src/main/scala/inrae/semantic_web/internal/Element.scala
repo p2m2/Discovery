@@ -111,7 +111,7 @@ case class Root(
                  namedGraph : Seq[IRI]      = List[IRI](),
                  lDatatypeNode : Seq[DatatypeNode] = List[DatatypeNode](),
                  lSourcesNodes : Seq[SourcesNode] = List[SourcesNode](),
-                 lBindNode : Seq[ProjectionExpression] = List[ProjectionExpression](),
+                 lBindNode : Seq[Bind] = List[Bind](),
                  lSolutionSequenceModifierNode : Seq[SolutionSequenceModifierNode] = List[SolutionSequenceModifierNode](),
                  override val children: Seq[Node] = Seq[Node](),
                ) extends Node(idRef,children) {
@@ -137,7 +137,7 @@ case class Root(
     Root(idRef,prefixes,defaultGraph,namedGraph,lDatatypeNode :+ d,lSourcesNodes,lBindNode,lSolutionSequenceModifierNode,children)
   }
 
-  private def addBindNode(b : ProjectionExpression) : Root = {
+  private def addBindNode(b : Bind) : Root = {
     Root(idRef,prefixes,defaultGraph,namedGraph,lDatatypeNode ,lSourcesNodes,lBindNode :+ b,lSolutionSequenceModifierNode ,children)
   }
 
@@ -165,7 +165,7 @@ case class Root(
     n match {
       case s : SourcesNode => addSourceNode(s)
       case d : DatatypeNode => addDatatype(d)
-      case b : ProjectionExpression => addBindNode(b)
+      case b : Bind => addBindNode(b)
       case s : SolutionSequenceModifierNode => addSolutionSequenceModifierNode(s)
       case _ => super.addChildren(n).asInstanceOf[Root]
     }
@@ -183,7 +183,7 @@ case class Root(
         namedGraph,
         lDatatypeNode.map(_.addChildren(focusId,n).asInstanceOf[DatatypeNode]) ,
         lSourcesNodes.map(_.addChildren(focusId,n).asInstanceOf[SourcesNode]),
-        lBindNode.map(_.addChildren(focusId,n).asInstanceOf[ProjectionExpression]),
+        lBindNode.map(_.addChildren(focusId,n).asInstanceOf[Bind]),
         lSolutionSequenceModifierNode.map(_.addChildren(focusId,n).asInstanceOf[SolutionSequenceModifierNode]),
         children.map(_.addChildren(focusId,n)))
     }
@@ -199,7 +199,7 @@ case class Root(
     case _ : Something => true
     case _ : SourcesNode => true
     case _ : DatatypeNode => true
-    case _ : ProjectionExpression => true
+    case _ : Bind => true
     case _ : SolutionSequenceModifierNode => true
     case _ => false
   }
@@ -238,7 +238,7 @@ abstract class RdfNode(override val idRef : String,override val children: Seq[No
     case _ : FilterNode => true
     case _ : Value      => true
     case _ : ListValues => true
-    case _ : ProjectionExpression       => true
+    case _ : Bind       => true
     case _              => false
   }
 
@@ -618,7 +618,7 @@ case class SourcesNode(refNode : String, sources : Seq[String],override val idRe
 /* Expression */
 
 object Bind {
-  implicit val rw: RW[ProjectionExpression] = macroRW
+  implicit val rw: RW[Bind] = macroRW
 }
 
 case class Bind(expression : ExpressionNode,
@@ -714,7 +714,7 @@ object Projection {
   implicit val rw: RW[Projection] = macroRW
 }
 
-case class Projection(list : Seq[QueryVariable],
+case class Projection(variables : Seq[QueryVariable],
                       override val idRef : String,
                       override val children: Seq[Node]=Seq()) extends SolutionSequenceModifierNode(idRef,children) {
 
@@ -723,9 +723,9 @@ case class Projection(list : Seq[QueryVariable],
     case _ => false
   }
 
-  override def copy(children: Seq[Node]): Node = Projection(list,idRef,children)
+  override def copy(children: Seq[Node]): Node = Projection(variables,idRef,children)
 
-  override def duplicateWithoutChildren(): Node = Projection(list,idRef,children)
+  override def duplicateWithoutChildren(): Node = Projection(variables,idRef,children)
 }
 
 /**

@@ -3,7 +3,7 @@ package inrae.semantic_web
 import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
 
 @JSExportTopLevel("SWFilterIncrement")
-class FilterIncrementJs(swf: SWDiscoveryJs) {
+case class FilterIncrementJs(swf: SWDiscoveryJs) {
   var negation = false
 
   @JSExport

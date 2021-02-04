@@ -10,11 +10,10 @@ case class SWDiscoveryHelper(sw : SWDiscovery) {
 
   def count : Future[Int] = {
     sw
-      .root
-      .projection(Seq())
-      .agg_projection("count")
-      .countAll()
       .transaction
+      .projection
+      .aggregate("count")
+      .countAll()
       .commit()
       .raw
       .map( json => {

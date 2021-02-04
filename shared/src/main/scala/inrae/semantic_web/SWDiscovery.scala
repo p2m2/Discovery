@@ -78,18 +78,6 @@ case class SWDiscovery(
 
   def bind : BindIncrement = BindIncrement()
 
-  case class ProjectionExpressionIncrement(v : String) {
-
-    def manage(n:AggregateNode,forward : Boolean = false) : SWDiscovery =
-      focusManagement(
-        ProjectionExpression(QueryVariable(v),n,getUniqueRef()),false)
-
-    def count(distinct: Boolean=false) : SWDiscovery = manage(Count(distinct,getUniqueRef()))
-    def countAll(distinct: Boolean=false) : SWDiscovery = manage(CountAll(distinct,getUniqueRef()),true)
-  }
-
-  def agg_projection(`var` : String) : ProjectionExpressionIncrement = ProjectionExpressionIncrement(`var`)
-
   //private val logger = Logger.of[SWDiscovery]
   // Set the root logger's log level
   Logger.setDefaultLogLevel(config.conf.settings.getLogLevel)
@@ -175,7 +163,7 @@ case class SWDiscovery(
         SWDiscovery(config,newRootNode,Some(focusNode))
       }
     } else {
-        throw SWDiscoveryException("Can not add this node at the current focus["+focusNode+"]")
+        throw SWDiscoveryException(s"Can not add this node [$n]at the current focus[$current]")
       }
   }
 
@@ -265,27 +253,6 @@ case class SWDiscovery(
 
   def sparql : String = SparqlQueryBuilder.selectQueryString(rootNode)
 
-  def projection( ref: String ) : SWDiscovery = focusManagement(Projection(Seq(QueryVariable(ref)),getUniqueRef()))
-
-  def projection( lRef: Seq[String] )  : SWDiscovery = focusManagement(Projection(lRef.map(QueryVariable(_)),getUniqueRef()))
-
-  def distinct : SWDiscovery = focusManagement(Distinct(getUniqueRef()), false)
-
-  def reduced : SWDiscovery = focusManagement(Reduced(getUniqueRef()), false)
-
-  def limit( value : Int ) : SWDiscovery = focusManagement(Limit(value,getUniqueRef()), false)
-
-  def offset( value : Int ) : SWDiscovery = focusManagement(Offset(value,getUniqueRef()), false)
-
-  def orderByAsc( ref: String ) : SWDiscovery = focusManagement(OrderByAsc(Seq(QueryVariable(ref)),getUniqueRef()), false)
-
-  def orderByAsc( lRef: Seq[String] ) : SWDiscovery = focusManagement(OrderByAsc(lRef.map(QueryVariable(_)),getUniqueRef()), false)
-
-  def orderByDesc( ref: String ) : SWDiscovery = focusManagement(OrderByDesc(Seq(QueryVariable(ref)),getUniqueRef()), false)
-
-  def orderByDesc( lRef: Seq[String] ) : SWDiscovery = focusManagement(OrderByDesc(lRef.map(QueryVariable(_)),getUniqueRef()), false)
-
-
   /**
    * Discovery request
    *
@@ -299,11 +266,10 @@ case class SWDiscovery(
    * @return
    */
   def select(lRef: Seq[String] = List(), limit : Int = 0, offset : Int = 0) : SWTransaction =
-    SWTransaction(
-        root
+        transaction
         .limit(limit)
         .offset(offset)
-        .projection(lRef))
+        .projection(lRef)
 
   /**
    * Give an iterable object to browse and obtain all solution performed by a select.
