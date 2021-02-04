@@ -22,8 +22,6 @@ object SparqlGenerator  {
     def fromNamed(graphs : Seq[IRI]): String = graphs.map( g => "FROM NAMED "+g.sparql()).mkString("\n")
 
     def solutionSequenceModifierStart(root : Root) : String = {
-        println("---------------------------------------------------aaaa")
-        root.lSolutionSequenceModifierNode.map( r => println(r.children) )
 
         "SELECT " + {
             root.lSolutionSequenceModifierNode.filter {

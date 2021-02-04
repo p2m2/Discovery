@@ -76,17 +76,60 @@ object SWDiscoveryTest extends TestSuite {
       }).flatten
     }
 
-    test("datatype") {
+    test("datatype 1") {
       insert_data.map(_ => {
         SWDiscovery(config).something("h1")
           .set(URI("http://aa3"))
           .datatype(URI("http://propDatatype"), "d")
-          .select(List("d"))
+          .select(List("h1","d"))
           .commit()
           .raw
           .map(
             response => {
               assert(response("results")("datatypes")("d")("http://aa3")(0)("value").toString().length > 0)
+            }
+          )
+      }).flatten
+    }
+
+    test("datatype 2") {
+      insert_data.map(_ => {
+        SWDiscovery(config).something("h1")
+          .set(URI("http://aa3"))
+          .datatype(URI("http://propDatatype"), "d")
+          .select(List("d","h1"))
+          .commit()
+          .raw
+          .map(
+            response => {
+              assert(response("results")("datatypes")("d")("http://aa3")(0)("value").toString().length > 0)
+            }
+          )
+      }).flatten
+    }
+
+    test("datatype 3") {
+        Try(SWDiscovery(config).something("h1")
+          .set(URI("http://aa3"))
+          .datatype(URI("http://propDatatype"), "d")
+          .select(List("d"))
+          .commit()) match {
+            case Success(_) => assert(false)
+            case Failure(_) => assert(true)
+          }
+    }
+
+    test("datatype 4") {
+      insert_data.map(_ => {
+        SWDiscovery(config).something("h1")
+          .set(URI("http://aa3"))
+          .datatype(URI("http://propDatatype"), "d")
+          .select(List("h1"))
+          .commit()
+          .raw
+          .map(
+            response => {
+              assert(SparqlBuilder.createUri(response("results")("bindings")(0)("h1")).localName == "http://aa3" )
             }
           )
       }).flatten
@@ -118,7 +161,7 @@ object SWDiscoveryTest extends TestSuite {
         .namedGraph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
         .something("h1") //http://rdf.ebi.ac.uk/terms/chembl#BioComponent
         .isSubjectOf(URI("http://bb2"))
-        .console()) match {
+        .console) match {
         case Success(_) => assert(true)
         case Failure(_) => assert(false)
       }

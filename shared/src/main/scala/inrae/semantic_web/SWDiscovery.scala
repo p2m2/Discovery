@@ -44,22 +44,22 @@ case class SWDiscovery(
 
     def manageFilter(n:Node,forward : Boolean = false) : SWDiscovery = focusManagement(n,forward)
 
-    def isLiteral : SWDiscovery = manageFilter(inrae.semantic_web.internal.isLiteral(this.negation))
-    def isUri : SWDiscovery = manageFilter(inrae.semantic_web.internal.isURI(this.negation))
-    def isBlank : SWDiscovery = manageFilter(inrae.semantic_web.internal.isBlank(this.negation))
+    def isLiteral : SWDiscovery = manageFilter(inrae.semantic_web.internal.isLiteral(this.negation,getUniqueRef()))
+    def isUri : SWDiscovery = manageFilter(inrae.semantic_web.internal.isURI(this.negation,getUniqueRef()))
+    def isBlank : SWDiscovery = manageFilter(inrae.semantic_web.internal.isBlank(this.negation,getUniqueRef()))
 
     /* strings */
-    def contains( string : String ) : SWDiscovery = manageFilter(Contains(string,this.negation))
-    def strStarts( string : String ) : SWDiscovery = manageFilter(StrStarts(string,this.negation))
-    def strEnds( string : String ) : SWDiscovery = manageFilter(StrEnds(string,this.negation))
+    def contains( string : String ) : SWDiscovery = manageFilter(Contains(string,this.negation,getUniqueRef()))
+    def strStarts( string : String ) : SWDiscovery = manageFilter(StrStarts(string,this.negation,getUniqueRef()))
+    def strEnds( string : String ) : SWDiscovery = manageFilter(StrEnds(string,this.negation,getUniqueRef()))
 
     /* numeric */
-    def equal( value : Literal ) : SWDiscovery = manageFilter(Equal(value,this.negation))
-    def notEqual( value : Literal ) : SWDiscovery = manageFilter(NotEqual(value,this.negation))
-    def inf( value : Literal ) : SWDiscovery = manageFilter(Inf(value,this.negation))
-    def infEqual( value : Literal ) : SWDiscovery = manageFilter(InfEqual(value,this.negation))
-    def sup( value : Literal ) : SWDiscovery = manageFilter(Sup(value,this.negation))
-    def supEqual( value : Literal ) : SWDiscovery = manageFilter(SupEqual(value,this.negation))
+    def equal( value : Literal ) : SWDiscovery = manageFilter(Equal(value,this.negation,getUniqueRef()))
+    def notEqual( value : Literal ) : SWDiscovery = manageFilter(NotEqual(value,this.negation,getUniqueRef()))
+    def inf( value : Literal ) : SWDiscovery = manageFilter(Inf(value,this.negation,getUniqueRef()))
+    def infEqual( value : Literal ) : SWDiscovery = manageFilter(InfEqual(value,this.negation,getUniqueRef()))
+    def sup( value : Literal ) : SWDiscovery = manageFilter(Sup(value,this.negation,getUniqueRef()))
+    def supEqual( value : Literal ) : SWDiscovery = manageFilter(SupEqual(value,this.negation,getUniqueRef()))
 
     def not : FilterIncrement = { FilterIncrement(true) }
   }
@@ -128,7 +128,7 @@ case class SWDiscovery(
   }
 
   /* set focus on root */
-  def root(): SWDiscovery  = SWDiscovery(config,rootNode,Some(rootNode.reference()))
+  def root: SWDiscovery  = SWDiscovery(config,rootNode,Some(rootNode.reference()))
 
   def helper : SWDiscoveryHelper = SWDiscoveryHelper(this)
 
@@ -181,11 +181,12 @@ case class SWDiscovery(
 
   def getUniqueRef(baseNameVar : String=""): String = {
     baseNameVar + (baseNameVar match {
-      case "subject" => rootNode.getChild(SubjectOf("",URI(""))).length
-      case "object" => rootNode.getChild(ObjectOf("",URI(""))).length
+      case "object" => rootNode.getChild(SubjectOf("",URI(""))).length
+      case "subject" => rootNode.getChild(ObjectOf("",URI(""))).length
       case "something" => rootNode.getChild(Something("")).length
       case "linkTo" => rootNode.getChild(LinkTo("",URI(""))).length
       case "linkFrom" => rootNode.getChild(LinkFrom("",URI(""))).length
+      case "datatype" => rootNode.getChild(DatatypeNode("",SubjectOf("",URI("")),"")).length
       case _ => randomUUID.toString
     }).toString
   }
@@ -197,12 +198,12 @@ case class SWDiscovery(
   }
 
   /* create node which focus is the subject : ?focusId <uri> ?target */
-  def isSubjectOf( term : SparqlDefinition , ref : String = getUniqueRef("subject")  ) : SWDiscovery =
+  def isSubjectOf( term : SparqlDefinition , ref : String = getUniqueRef("object")  ) : SWDiscovery =
     checkQueryVariable(term).focusManagement(SubjectOf(ref,term))
 
 
   /* create node which focus is the subject : ?target <uri> ?focusId */
-  def isObjectOf( term : SparqlDefinition , ref : String = getUniqueRef("object")  ) : SWDiscovery =
+  def isObjectOf( term : SparqlDefinition , ref : String = getUniqueRef("subject")  ) : SWDiscovery =
     checkQueryVariable(term).focusManagement(ObjectOf(ref,term))
 
   /* create node which focus is the properties :
@@ -233,7 +234,8 @@ case class SWDiscovery(
   Attribute value is optional
   */
 
-  def datatype( uri : URI, ref : String ) : SWDiscovery = focusManagement(DatatypeNode(focusNode,SubjectOf(ref,uri)), false)
+  def datatype( uri : URI, ref : String = getUniqueRef("datatype") ) : SWDiscovery =
+    root.focusManagement(DatatypeNode(focusNode,SubjectOf(ref,uri),ref), false)
 
 
   def set( term : SparqlDefinition ) : SWDiscovery =
@@ -248,26 +250,26 @@ case class SWDiscovery(
   def setSerializedQuery(query : String) : SWDiscovery = SerializationBuilder.deserialize(query)
 
 
-  def console() : SWDiscovery = {
+  def console : SWDiscovery = {
     debug(" -- console -- ")
     println("USER REQUEST\n" +
       pm.SimpleConsole.get(rootNode) + "\n" +
       "FOCUS NODE:"+ focusNode +
       "\nENDPOINT:"+config.sources().map(v => println(v.url)).mkString(",") +"\n\n" +
       "\n -- SPARQL Request -- \n\n" +
-      sparql())
+      sparql)
       //"QUERY PLANNER\n"+
       //"todo....")
     this
   }
 
-  def sparql() : String = SparqlQueryBuilder.selectQueryString(rootNode)
+  def sparql : String = SparqlQueryBuilder.selectQueryString(rootNode)
 
   def projection( ref: String ) : SWDiscovery = focusManagement(Projection(Seq(QueryVariable(ref)),getUniqueRef()))
 
   def projection( lRef: Seq[String] )  : SWDiscovery = focusManagement(Projection(lRef.map(QueryVariable(_)),getUniqueRef()))
 
-  def distinct : SWDiscovery = focusManagement(Distinct(), false)
+  def distinct : SWDiscovery = focusManagement(Distinct(getUniqueRef()), false)
 
   def reduced : SWDiscovery = focusManagement(Reduced(getUniqueRef()), false)
 
@@ -279,16 +281,16 @@ case class SWDiscovery(
 
   def orderByAsc( lRef: Seq[String] ) : SWDiscovery = focusManagement(OrderByAsc(lRef.map(QueryVariable(_)),getUniqueRef()), false)
 
-  def orderByDesc( ref: String ) : SWDiscovery = focusManagement(OrderByDesc(Seq(QueryVariable(ref))), false)
+  def orderByDesc( ref: String ) : SWDiscovery = focusManagement(OrderByDesc(Seq(QueryVariable(ref)),getUniqueRef()), false)
 
-  def orderByDesc( lRef: Seq[String] ) : SWDiscovery = focusManagement(OrderByDesc(lRef.map(QueryVariable(_))), false)
+  def orderByDesc( lRef: Seq[String] ) : SWDiscovery = focusManagement(OrderByDesc(lRef.map(QueryVariable(_)),getUniqueRef()), false)
 
 
   /**
    * Discovery request
    *
    */
-
+  def transaction = SWTransaction(this)
   /**
    * Return solutions as Future corresponding with the current Node request.
    * @param lRef : selected variables
@@ -298,7 +300,7 @@ case class SWDiscovery(
    */
   def select(lRef: Seq[String] = List(), limit : Int = 0, offset : Int = 0) : SWTransaction =
     SWTransaction(
-      this.root()
+        root
         .limit(limit)
         .offset(offset)
         .projection(lRef))

@@ -111,12 +111,13 @@ object RequestsTest extends TestSuite {
           .raw
           .map(result =>
           {
-            assert(result("results")("bindings").arr.length == 1)
+            assert(result("results")("bindings").arr.length > 1)
             assert(SparqlBuilder.createUri(result("results")("bindings")(0)("h1")).localName == "http://aaaaaa")
           }
           )
       }).flatten
     }
+
     test("inline turtle 2") {
       insert_data.map(_ => {
         SWDiscovery(config3)

@@ -35,7 +35,7 @@ sealed abstract class Node(val idRef : String,val children: Seq[Node] = Seq[Node
   }
 
   override def toString : String = {
-    this.getClass.getSimpleName+ "@"+idRef+ { children.length match {
+    this.getClass.getSimpleName+ "@"+idRef + "ooo" + { children.length match {
       case l if l>0 => " ["+children.toString()+"]"
       case _ => "**lChildren==0**"
     } }
@@ -383,7 +383,7 @@ object NotBlock {
   implicit val rw: RW[NotBlock] = macroRW
 }
 
-case class NotBlock(s : Node,override val idRef : String=randomUUID.toString,override val children: Seq[Node] = Seq[Node]()) extends LogicNode(s,idRef,children) {
+case class NotBlock(s : Node,override val idRef : String,override val children: Seq[Node] = Seq[Node]()) extends LogicNode(s,idRef,children) {
   def copy(children : Seq[Node]) : NotBlock = NotBlock(s,idRef,children)
 
   def duplicateWithoutChildren(): NotBlock = NotBlock(s,idRef,Seq())
@@ -392,12 +392,24 @@ case class NotBlock(s : Node,override val idRef : String=randomUUID.toString,ove
 object FilterNode {
   implicit val rw: RW[FilterNode] = RW.merge(
     isBlank.rw,
-    isLiteral.rw)
+    isLiteral.rw,
+    isURI.rw,
+    isBlank.rw,
+    Contains.rw,
+    StrStarts.rw,
+    StrEnds.rw,
+    Equal.rw,
+    NotEqual.rw,
+    Inf.rw,
+    InfEqual.rw,
+    Sup.rw,
+    SupEqual.rw
+  )
 }
 
 /* filter */
 sealed abstract class FilterNode(val negation: Boolean,
-                          idRef : String=randomUUID.toString,
+                          idRef : String,
                           override val children: Seq[Node] = Seq[Node]()) extends Node(idRef,children) {
   override def accept(n: Node): Boolean = n match {
     case _ : FilterNode => true
@@ -410,18 +422,23 @@ object isBlank {
 }
 
 case class isBlank(
-                   override val negation: Boolean) extends FilterNode(negation) {
+                   override val negation: Boolean,
+                   override val idRef : String,
+                   override val children: Seq[Node] = Seq[Node]()) extends FilterNode(negation,idRef,children) {
   override def toString : String = negation.toString + " isBlank"
 
-  def copy(children : Seq[Node]) : isBlank = isBlank(negation)
-  def duplicateWithoutChildren(): isBlank = isBlank(negation)
+  def copy(children : Seq[Node]) : isBlank = isBlank(negation,idRef,children)
+  def duplicateWithoutChildren(): isBlank = isBlank(negation,idRef,children)
 }
 
 object isLiteral {
   implicit val rw: RW[isLiteral] = macroRW
 }
 
-case class isLiteral(override val negation: Boolean,override val idRef : String=randomUUID.toString,override val children: Seq[Node] = Seq[Node]()) extends FilterNode(negation,idRef,children) {
+case class isLiteral(
+                      override val negation: Boolean,
+                      override val idRef : String,
+                      override val children: Seq[Node] = Seq[Node]()) extends FilterNode(negation,idRef,children) {
   override def toString : String = negation.toString + " isLiteral"
 
   def copy(children : Seq[Node]) : Node = isLiteral(negation,idRef,children)
@@ -432,7 +449,10 @@ object isURI {
   implicit val rw: RW[isURI] = macroRW
 }
 
-case class isURI(override val negation: Boolean,override val idRef : String=randomUUID.toString,override val children: Seq[Node] = Seq[Node]()) extends FilterNode(negation,idRef,children) {
+case class isURI(
+                  override val negation: Boolean,
+                  override val idRef : String,
+                  override val children: Seq[Node] = Seq[Node]()) extends FilterNode(negation,idRef,children) {
   override def toString : String = negation.toString + " isURI"
 
   def copy(children : Seq[Node]) : isURI = isURI(negation,idRef,children)
@@ -443,7 +463,11 @@ object Contains {
   implicit val rw: RW[Contains] = macroRW
 }
 
-case class Contains(value :String,override val negation: Boolean,override val idRef : String=randomUUID.toString,override val children: Seq[Node] = Seq[Node]())  extends FilterNode(negation,idRef,children) {
+case class Contains(
+                     value :String,
+                     override val negation: Boolean,
+                     override val idRef : String,
+                     override val children: Seq[Node] = Seq[Node]())  extends FilterNode(negation,idRef,children) {
   override def toString : String =  negation.toString + " Contains ("+value+")"
 
   def copy(children : Seq[Node]) : Contains = Contains(value,negation,idRef,children)
@@ -454,7 +478,11 @@ object StrStarts {
   implicit val rw: RW[StrStarts] = macroRW
 }
 
-case class StrStarts(value :String,override val negation: Boolean,override val idRef : String=randomUUID.toString,override val children: Seq[Node] = Seq[Node]())  extends FilterNode(negation,idRef,children) {
+case class StrStarts(
+                      value :String,
+                      override val negation: Boolean,
+                      override val idRef : String,
+                      override val children: Seq[Node] = Seq[Node]())  extends FilterNode(negation,idRef,children) {
   override def toString : String =  negation.toString + " StrStarts ("+value+")"
 
   def copy(children : Seq[Node]) : StrStarts = StrStarts(value,negation,idRef,children)
@@ -465,7 +493,11 @@ object StrEnds {
   implicit val rw: RW[StrEnds] = macroRW
 }
 
-case class StrEnds(value :String,override val negation: Boolean,override val idRef : String=randomUUID.toString,override val children: Seq[Node] = Seq[Node]())  extends FilterNode(negation,idRef,children) {
+case class StrEnds(
+                    value :String,
+                    override val negation: Boolean,
+                    override val idRef : String,
+                    override val children: Seq[Node] = Seq[Node]())  extends FilterNode(negation,idRef,children) {
   override def toString : String =  negation.toString + " StrEnds ("+value+")"
 
   def copy(children : Seq[Node]) : StrEnds = StrEnds(value,negation,idRef,children)
@@ -476,7 +508,11 @@ object Equal {
   implicit val rw: RW[Equal] = macroRW
 }
 
-case class Equal(value :Literal,override val negation: Boolean,override val idRef : String=randomUUID.toString,override val children: Seq[Node] = Seq[Node]())  extends FilterNode(negation,idRef,children) {
+case class Equal(
+                  value :Literal,
+                  override val negation: Boolean,
+                  override val idRef : String,
+                  override val children: Seq[Node] = Seq[Node]())  extends FilterNode(negation,idRef,children) {
   override def toString : String = negation.toString + " == "+value
 
   def copy(children : Seq[Node]) : Equal = Equal(value,negation,idRef,children)
@@ -487,7 +523,11 @@ object NotEqual {
   implicit val rw: RW[NotEqual] = macroRW
 }
 
-case class NotEqual(value :Literal,override val negation: Boolean,override val idRef : String=randomUUID.toString,override val children: Seq[Node] = Seq[Node]())  extends FilterNode(negation,idRef,children) {
+case class NotEqual(
+                     value :Literal,
+                     override val negation: Boolean,
+                     override val idRef : String,
+                     override val children: Seq[Node] = Seq[Node]())  extends FilterNode(negation,idRef,children) {
   override def toString : String = negation.toString + " == "+value
 
   def copy(children : Seq[Node]) : NotEqual = NotEqual(value,negation,idRef,children)
@@ -499,7 +539,11 @@ object Inf {
 }
 
 
-case class Inf(value :Literal,override val negation: Boolean,override val idRef : String=randomUUID.toString,override val children: Seq[Node] = Seq[Node]())  extends FilterNode(negation,idRef,children) {
+case class Inf(
+                value :Literal,
+                override val negation: Boolean,
+                override val idRef : String,
+                override val children: Seq[Node] = Seq[Node]())  extends FilterNode(negation,idRef,children) {
   override def toString : String = negation.toString + " < "+value
 
   def copy(children : Seq[Node]) : NotEqual = NotEqual(value,negation,idRef,children)
@@ -510,7 +554,11 @@ object InfEqual {
   implicit val rw: RW[InfEqual] = macroRW
 }
 
-case class InfEqual(value :Literal,override val negation: Boolean,override val idRef : String=randomUUID.toString,override val children: Seq[Node] = Seq[Node]())  extends FilterNode(negation,idRef,children) {
+case class InfEqual(
+                     value :Literal,
+                     override val negation: Boolean,
+                     override val idRef : String,
+                     override val children: Seq[Node] = Seq[Node]())  extends FilterNode(negation,idRef,children) {
   override def toString : String = negation.toString + " <= "+value
 
   def copy(children : Seq[Node]) : InfEqual = InfEqual(value,negation,idRef,children)
@@ -521,7 +569,11 @@ object Sup {
   implicit val rw: RW[Sup] = macroRW
 }
 
-case class Sup(value :Literal,override val negation: Boolean,override val idRef : String=randomUUID.toString,override val children: Seq[Node] = Seq[Node]())  extends FilterNode(negation,idRef,children) {
+case class Sup(
+                value :Literal,
+                override val negation: Boolean,
+                override val idRef : String,
+                override val children: Seq[Node] = Seq[Node]())  extends FilterNode(negation,idRef,children) {
   override def toString : String = negation.toString + " > "+value
 
   def copy(children : Seq[Node]) : Sup = Sup(value,negation,idRef,children)
@@ -532,7 +584,11 @@ object SupEqual {
   implicit val rw: RW[SupEqual] = macroRW
 }
 
-case class SupEqual(value :Literal,override val negation: Boolean,override val idRef : String=randomUUID.toString,override val children: Seq[Node] = Seq[Node]())  extends FilterNode(negation,idRef,children) {
+case class SupEqual(
+                     value :Literal,
+                     override val negation: Boolean,
+                     override val idRef : String,
+                     override val children: Seq[Node] = Seq[Node]())  extends FilterNode(negation,idRef,children) {
   override def toString : String = negation.toString + " >= "+value
 
   def copy(children : Seq[Node]) : SupEqual = SupEqual(value,negation,idRef,children)
@@ -544,7 +600,7 @@ object DatatypeNode {
 }
 
 /* Datatype Node */
-case class DatatypeNode(refNode : String, property : SubjectOf,override val idRef : String=randomUUID.toString,override val children: Seq[Node] = Seq[Node]()) extends Node(idRef,children) {
+case class DatatypeNode(refNode : String, property : SubjectOf,override val idRef : String,override val children: Seq[Node] = Seq[Node]()) extends Node(idRef,children) {
   def copy(children : Seq[Node]) : DatatypeNode = DatatypeNode(refNode,property,idRef,children)
   def duplicateWithoutChildren(): DatatypeNode = DatatypeNode(refNode,property,idRef,Seq())
 }
@@ -554,7 +610,7 @@ object SourcesNode {
 }
 
 /* SourcesNode */
-case class SourcesNode(refNode : String, sources : Seq[String],override val idRef : String=randomUUID.toString,override val children: Seq[Node] = Seq[Node]()) extends Node(idRef,children) {
+case class SourcesNode(refNode : String, sources : Seq[String],override val idRef : String,override val children: Seq[Node] = Seq[Node]()) extends Node(idRef,children) {
   def copy(children : Seq[Node]) : SourcesNode = SourcesNode(refNode,sources,idRef,children)
   def duplicateWithoutChildren(): SourcesNode = SourcesNode(refNode,sources,idRef,Seq())
 }
@@ -642,7 +698,7 @@ object OrderByDesc {
 }
 
 case class OrderByDesc(list : Seq[QueryVariable],
-                       override val idRef : String=randomUUID.toString,
+                       override val idRef : String,
                        override val children: Seq[Node] = Seq[Node]()) extends SolutionSequenceModifierNode(idRef,children) {
   override def copy(children: Seq[Node]): Node = OrderByDesc(list,idRef,children)
 
@@ -680,7 +736,7 @@ object Distinct {
   implicit val rw: RW[Distinct] = macroRW
 }
 
-case class Distinct(override val idRef : String=randomUUID.toString,
+case class Distinct(override val idRef : String,
                     override val children: Seq[Node] = Seq[Node]()) extends SolutionSequenceModifierNode(idRef,children) {
   override def copy(children: Seq[Node]): Node = Distinct(idRef,children)
 
@@ -711,7 +767,7 @@ object Offset {
 }
 
 case class Offset(value : Int,
-                  override val idRef : String=randomUUID.toString,
+                  override val idRef : String,
                   override val children: Seq[Node] = Seq[Node]()) extends SolutionSequenceModifierNode(idRef,children) {
   override def copy(children: Seq[Node]): Node = Offset(value,idRef,children)
 

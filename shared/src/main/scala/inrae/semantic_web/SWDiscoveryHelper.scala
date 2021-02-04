@@ -9,11 +9,12 @@ case class SWDiscoveryHelper(sw : SWDiscovery) {
   implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
 
   def count : Future[Int] = {
-    SWTransaction(sw
-      .root()
+    sw
+      .root
       .projection(Seq())
       .agg_projection("count")
-      .countAll().console())
+      .countAll()
+      .transaction
       .commit()
       .raw
       .map( json => {
@@ -50,13 +51,13 @@ case class SWDiscoveryHelper(sw : SWDiscovery) {
 
     /* inherited from something ??? */
     val state = if (motherClassProperties != URI("")) {
-      sw.root()
+      sw.root
         .something("_esp___type")
         .focus(sw.focusNode)
         .isLinkTo(QueryVariable("_esp___type"),"_esp___property").isSubjectOf(URI("a"))
         .set(motherClassProperties)
     } else {
-      sw.root()
+      sw.root
         .something("_esp___type")
         .focus(sw.focusNode)
         .isLinkTo(QueryVariable("_esp___type"),"_esp___property")

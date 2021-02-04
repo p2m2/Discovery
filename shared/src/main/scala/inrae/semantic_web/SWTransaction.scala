@@ -1,8 +1,8 @@
 package inrae.semantic_web
 
 import inrae.semantic_web.event.{DiscoveryRequestEvent, DiscoveryStateRequestEvent, Publisher, Subscriber}
-import inrae.semantic_web.internal.{DatatypeNode, SubjectOf, pm}
-import inrae.semantic_web.rdf.{SparqlDefinition, URI}
+import inrae.semantic_web.internal.{DatatypeNode, Projection, SubjectOf, pm}
+import inrae.semantic_web.rdf.{QueryVariable, SparqlDefinition, URI}
 import inrae.semantic_web.sparql.QueryResult
 import inrae.semantic_web.strategy._
 import upickle.default.{macroRW, ReadWriter => RW}
@@ -29,22 +29,19 @@ case class SWTransaction(sw : SWDiscovery)
   val raw: Future[ujson.Value] = _prom_raw.future
   var currentRequestEvent: String = DiscoveryStateRequestEvent.START.toString()
 
-  val lDatatype: Seq[DatatypeNode] = sw.rootNode.getChild[DatatypeNode](DatatypeNode("",SubjectOf("",URI("")))) //lDatatypeNode.filter(ld => lRef.contains(ld.property.reference()))
-  trace("list datatype : "+lDatatype.toString)
-/*
-  val lSelectVariables: Seq[String] = {
-    /* select uri type ask with decoration/datatype */
-    lDatatype.map(ld => {
-      mapId2Var(ld.refNode)
-    }) ++ {
-      /* select user ask variable */
-      lRef match {
-        case v if v.length > 0 => v.flatMap(ref => variable(ref))
-        case _ => sw.rootNode.referencesChildren().flatMap(ref => variable(ref))
-      }
-    }
-  }.distinct
-*/
+  val lSelectedVariable : Seq[QueryVariable] = sw.rootNode.getChild(Projection(List(),"")).lastOption match {
+    case Some(proj) => proj.list.distinct
+    case None => throw SWDiscoveryException("Projection node (selected variables) is not defined.")
+  }
+
+  val lDatatype: Seq[DatatypeNode] =
+    sw.rootNode.getChild[DatatypeNode](DatatypeNode("",SubjectOf("",URI("")),"unk"))
+      .filter(ld => lSelectedVariable.map(_.name).contains(ld.property.reference()))
+
+  if ( lDatatype.filter( datatypeNode => lSelectedVariable.map(_.name).contains(datatypeNode.refNode) ).length != lDatatype.length )
+    throw SWDiscoveryException("Select variable with his datatype ["+lDatatype.map( d=>d.idRef + "->"+d.refNode).mkString(" ,")+"]")
+
+
   private var countEvent: Int = 1
 
   private var _progressionCallBack = Seq[Double => Unit]()

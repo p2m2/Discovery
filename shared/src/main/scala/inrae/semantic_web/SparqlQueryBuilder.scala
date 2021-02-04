@@ -12,9 +12,6 @@ object SparqlQueryBuilder {
    * @return
    */
   def baseQuery(n: Root) : String = {
-    println("===================================================")
-    println(n)
-
     (pm.SparqlGenerator.solutionSequenceModifierStart(n)) + "\n" +
       pm.SparqlGenerator.body(n) + "\n" +
       pm.SparqlGenerator.solutionSequenceModifierEnd(n)
@@ -35,7 +32,6 @@ object SparqlQueryBuilder {
 
     (pm.SparqlGenerator.prefixes(n.prefixes) + "\n" +
       baseQuery(n)).replace("\n\n","\n")
-
   }
 
 }

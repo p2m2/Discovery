@@ -119,127 +119,127 @@ object SparqlGeneratorTest extends TestSuite {
     }
 
     test("sparqlNode isBlank neg") {
-      val v = SparqlGenerator.sparqlNode(isBlank(negation = true),"nothingSire","nothingVar")
+      val v = SparqlGenerator.sparqlNode(isBlank(negation = true,""),"nothingSire","nothingVar")
       assert(v.trim().split(" ").toList == List("FILTER","(","!isBlank(?nothingSire)",")"))
     }
 
     test("sparqlNode isBlank") {
-      val v = SparqlGenerator.sparqlNode(isBlank(negation = false),"nothingSire","nothingVar")
+      val v = SparqlGenerator.sparqlNode(isBlank(negation = false,""),"nothingSire","nothingVar")
       assert(v.trim().split(" ").toList == List("FILTER","(","isBlank(?nothingSire)",")"))
     }
 
     test("sparqlNode isLiteral neg") {
-      val v = SparqlGenerator.sparqlNode(isLiteral(negation = true),"nothingSire","nothingVar")
+      val v = SparqlGenerator.sparqlNode(isLiteral(negation = true,""),"nothingSire","nothingVar")
       assert(v.trim().split(" ").toList == List("FILTER","(","!isLiteral(?nothingSire)",")"))
     }
 
     test("sparqlNode isLiteral") {
-      val v = SparqlGenerator.sparqlNode(isLiteral(negation = false),"nothingSire","nothingVar")
+      val v = SparqlGenerator.sparqlNode(isLiteral(negation = false,""),"nothingSire","nothingVar")
       assert(v.trim().split(" ").toList == List("FILTER","(","isLiteral(?nothingSire)",")"))
     }
 
 
     test("sparqlNode isURI") {
-      val v = SparqlGenerator.sparqlNode(isURI(negation = false),"nothingSire","nothingVar")
+      val v = SparqlGenerator.sparqlNode(isURI(negation = false,""),"nothingSire","nothingVar")
       assert(v.trim().split(" ").toList == List("FILTER","(","isURI(?nothingSire)",")"))
     }
 
     test("sparqlNode isURI neg") {
-      val v = SparqlGenerator.sparqlNode(isURI(negation = true),"nothingSire","nothingVar")
+      val v = SparqlGenerator.sparqlNode(isURI(negation = true,""),"nothingSire","nothingVar")
       assert(v.trim().split(" ").toList == List("FILTER","(","!isURI(?nothingSire)",")"))
     }
 
     test("sparqlNode Contains") {
 
-      val v = SparqlGenerator.sparqlNode(Contains("h",negation = false),"nothingSire","nothingVar")
+      val v = SparqlGenerator.sparqlNode(Contains("h",negation = false,""),"nothingSire","nothingVar")
       assert(v.trim().split(" ").toList == List("FILTER","(","contains(str(?nothingSire),\"h\")",")"))
     }
 
     test("sparqlNode Contains neg") {
-      val v = SparqlGenerator.sparqlNode(Contains("h",negation = true),"nothingSire","nothingVar")
+      val v = SparqlGenerator.sparqlNode(Contains("h",negation = true,""),"nothingSire","nothingVar")
       assert(v.trim().split(" ").toList == List("FILTER","(","!contains(str(?nothingSire),\"h\")",")"))
     }
 
     test("sparqlNode StrStarts") {
 
-      val v = SparqlGenerator.sparqlNode(StrStarts("h",negation = false),"nothingSire","nothingVar")
+      val v = SparqlGenerator.sparqlNode(StrStarts("h",negation = false,""),"nothingSire","nothingVar")
       assert(v.trim().split(" ").toList == List("FILTER","(","strStarts(str(?nothingSire),\"h\")",")"))
     }
 
     test("sparqlNode StrEnds") {
 
-      val v = SparqlGenerator.sparqlNode(StrEnds("h",negation = false),"nothingSire","nothingVar")
+      val v = SparqlGenerator.sparqlNode(StrEnds("h",negation = false,""),"nothingSire","nothingVar")
       assert(v.trim().split(" ").toList == List("FILTER","(","strEnds(str(?nothingSire),\"h\")",")"))
     }
 
     test("sparqlNode Equal") {
-      val v = SparqlGenerator.sparqlNode(Equal("h",negation = false),"nothingSire","nothingVar")
+      val v = SparqlGenerator.sparqlNode(Equal("h",negation = false,""),"nothingSire","nothingVar")
       assert(v.trim().split(" ").toList == List("FILTER","(","(?nothingSire=\"h\")",")"))
     }
 
     test("sparqlNode Equal neg") {
-      val v = SparqlGenerator.sparqlNode(Equal("h",negation = true),"nothingSire","nothingVar")
+      val v = SparqlGenerator.sparqlNode(Equal("h",negation = true,""),"nothingSire","nothingVar")
       assert(v.trim().split(" ").toList == List("FILTER","(","!(?nothingSire=\"h\")",")"))
     }
 
     test("sparqlNode NotEqual") {
-      val v = SparqlGenerator.sparqlNode(NotEqual("h",negation = false),"nothingSire","nothingVar")
+      val v = SparqlGenerator.sparqlNode(NotEqual("h",negation = false,""),"nothingSire","nothingVar")
       assert(v.trim().split(" ").toList == List("FILTER","(","(?nothingSire!=\"h\")",")"))
     }
 
     test("sparqlNode NotEqual neg") {
-      val v = SparqlGenerator.sparqlNode(NotEqual("h",negation = true),"nothingSire","nothingVar")
+      val v = SparqlGenerator.sparqlNode(NotEqual("h",negation = true,""),"nothingSire","nothingVar")
       assert(v.trim().split(" ").toList == List("FILTER","(","!(?nothingSire!=\"h\")",")"))
     }
 
     test("sparqlNode Inf") {
-      val v = SparqlGenerator.sparqlNode(Inf(0.5,negation = false),"nothingSire","nothingVar")
+      val v = SparqlGenerator.sparqlNode(Inf(0.5,negation = false,""),"nothingSire","nothingVar")
       assert(v.trim().split(" ").toList == List("FILTER","(","(?nothingSire<\"0.5\"^^xsd:double)",")"))
     }
 
     test("sparqlNode Inf with Literal without type ") {
-      val v = SparqlGenerator.sparqlNode(Inf(Literal("0.5"),negation = false),"nothingSire","nothingVar")
+      val v = SparqlGenerator.sparqlNode(Inf(Literal("0.5"),negation = false,""),"nothingSire","nothingVar")
       assert(v.trim().split(" ").toList == List("FILTER","(","(?nothingSire<\"0.5\")",")"))
     }
 
     test("sparqlNode InfEqual neg") {
-      val v = SparqlGenerator.sparqlNode(Inf(0.5,negation = true),"nothingSire","nothingVar")
+      val v = SparqlGenerator.sparqlNode(Inf(0.5,negation = true,""),"nothingSire","nothingVar")
       assert(v.trim().split(" ").toList == List("FILTER","(","!(?nothingSire<\"0.5\"^^xsd:double)",")"))
     }
 
     test("sparqlNode InfEqual") {
-      val v = SparqlGenerator.sparqlNode(InfEqual(0.5,negation = false),"nothingSire","nothingVar")
+      val v = SparqlGenerator.sparqlNode(InfEqual(0.5,negation = false,""),"nothingSire","nothingVar")
       assert(v.trim().split(" ").toList == List("FILTER","(","(?nothingSire<=\"0.5\"^^xsd:double)",")"))
     }
 
     test("sparqlNode InfEqual neg") {
-      val v = SparqlGenerator.sparqlNode(InfEqual(0.5,negation = true),"nothingSire","nothingVar")
+      val v = SparqlGenerator.sparqlNode(InfEqual(0.5,negation = true,""),"nothingSire","nothingVar")
       assert(v.trim().split(" ").toList == List("FILTER","(","!(?nothingSire<=\"0.5\"^^xsd:double)",")"))
     }
 
     test("sparqlNode Sup") {
-      val v = SparqlGenerator.sparqlNode(Sup(0.5,negation = false),"nothingSire","nothingVar")
+      val v = SparqlGenerator.sparqlNode(Sup(0.5,negation = false,""),"nothingSire","nothingVar")
       assert(v.trim().split(" ").toList == List("FILTER","(","(?nothingSire>\"0.5\"^^xsd:double)",")"))
     }
 
     test("sparqlNode Sup neg") {
-      val v = SparqlGenerator.sparqlNode(Sup(0.5,negation = true),"nothingSire","nothingVar")
+      val v = SparqlGenerator.sparqlNode(Sup(0.5,negation = true,""),"nothingSire","nothingVar")
       assert(v.trim().split(" ").toList == List("FILTER","(","!(?nothingSire>\"0.5\"^^xsd:double)",")"))
     }
 
     test("sparqlNode SupEqual") {
-      val v = SparqlGenerator.sparqlNode(SupEqual(0.5,negation = false),"nothingSire","nothingVar")
+      val v = SparqlGenerator.sparqlNode(SupEqual(0.5,negation = false,""),"nothingSire","nothingVar")
       assert(v.trim().split(" ").toList == List("FILTER","(","(?nothingSire>=\"0.5\"^^xsd:double)",")"))
     }
 
     test("sparqlNode SupEqual neg") {
-      val v = SparqlGenerator.sparqlNode(SupEqual(0.5,negation = true),"nothingSire","nothingVar")
+      val v = SparqlGenerator.sparqlNode(SupEqual(0.5,negation = true,""),"nothingSire","nothingVar")
       assert(v.trim().split(" ").toList == List("FILTER","(","!(?nothingSire>=\"0.5\"^^xsd:double)",")"))
     }
 
 
     test("sparqlNode DatatypeNode") {
-      Try(SparqlGenerator.sparqlNode(DatatypeNode("h", SubjectOf("1234", URI("something_property"))),
+      Try(SparqlGenerator.sparqlNode(DatatypeNode("h", SubjectOf("1234", URI("something_property")),""),
         "nothingSire", "nothingVar")) match {
         case Success(_) => assert(false)
         case Failure(_) => assert(true)
@@ -247,7 +247,7 @@ object SparqlGeneratorTest extends TestSuite {
     }
 
     test("sparqlNode SourcesNode") {
-      Try(SparqlGenerator.sparqlNode(SourcesNode("h",List("source1","source2")), "nothingSire", "nothingVar")) match {
+      Try(SparqlGenerator.sparqlNode(SourcesNode("h",List("source1","source2"),""), "nothingSire", "nothingVar")) match {
         case Success(_) => assert(false)
         case Failure(_) => assert(true)
       }

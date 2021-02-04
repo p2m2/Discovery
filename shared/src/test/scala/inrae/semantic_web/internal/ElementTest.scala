@@ -69,37 +69,37 @@ object ElementTest extends TestSuite {
     }
 
     test("isBlank creation") {
-      isBlank(true)
+      isBlank(true,"")
       assert(true)
     }
 
     test("isLiteral creation") {
-      isLiteral(true)
+      isLiteral(true,"")
       assert(true)
     }
 
     test("isURI creation") {
-      isURI(true)
+      isURI(true,"")
       assert(true)
     }
 
     test("Contains creation") {
-      Contains("h",true)
+      Contains("h",true,"")
       assert(true)
     }
 
     test("Equal creation") {
-      Equal("h",true)
+      Equal("h",true,"")
       assert(true)
     }
 
     test("DatatypeNode creation") {
-      DatatypeNode("h",SubjectOf("1234",URI("something_property")))
+      DatatypeNode("h",SubjectOf("1234",URI("something_property")),"")
       assert(true)
     }
 
     test("SourcesNode creation") {
-      SourcesNode("h",List("source1","source2"))
+      SourcesNode("h",List("source1","source2"),"")
       assert(true)
     }
 
