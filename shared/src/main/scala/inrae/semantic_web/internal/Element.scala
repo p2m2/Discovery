@@ -44,9 +44,7 @@ sealed abstract class Node(val idRef : String,val children: Seq[Node] = Seq[Node
   /* everything by default*/
   def accept(n: Node): Boolean = true
 
-  def referencesChildren() : Seq[String] = idRef +: children.flatMap( a => { a.reference() +: a.referencesChildren() } )
-
-  def duplicateWithoutChildren() : Node
+  def referencesChildren() : Seq[String] = idRef +: children.flatMap( a => { a.reference() +: a.referencesChildren() } ).distinct
 
   def getChild[SpecializedNodeType <: Node ](that : SpecializedNodeType)(implicit tag: ClassTag[SpecializedNodeType]) : Seq[SpecializedNodeType]  = {
     {
@@ -67,30 +65,16 @@ object Node {
 
   implicit val rw: RW[Node] = RW.merge(
     Root.rw,
-    Something.rw,
-    SubjectOf.rw,
-    ObjectOf.rw,
-    LinkTo.rw,
-    LinkFrom.rw,
+    RdfNode.rw,
     Value.rw,
     ListValues.rw,
-    UnionBlock.rw,
-    NotBlock.rw,
-    isBlank.rw,
-    isLiteral.rw,
-    isURI.rw,
-    Contains.rw,
-    StrStarts.rw,
-    StrEnds.rw,
-    NotEqual.rw,
-    Equal.rw,
-    Inf.rw,
-    InfEqual.rw,
-    Sup.rw,
-    SupEqual.rw,
+    LogicNode.rw,
+    FilterNode.rw,
     DatatypeNode.rw,
     SourcesNode.rw,
-    ExpressionNode.rw
+    Bind.rw,
+    ExpressionNode.rw,
+    SolutionSequenceModifierNode.rw
   )
 }
 
@@ -204,8 +188,6 @@ case class Root(
     case _ => false
   }
 
-  override def duplicateWithoutChildren() : Node = Root(idRef,prefixes,defaultGraph,namedGraph,lDatatypeNode,lSourcesNodes,lBindNode,Seq())
-
   override def toString : String = {
     super.toString + "\n" +
     "* lDatatypeNode@"+ { lDatatypeNode.length match {
@@ -227,10 +209,18 @@ case class Root(
   }
 }
 
+object RdfNode {
+  implicit val rw: RW[RdfNode] = RW.merge(
+    Something.rw,
+    SubjectOf.rw,
+    ObjectOf.rw,
+    LinkTo.rw,
+    LinkFrom.rw
+  )
+}
+
 /* triplets */
 abstract class RdfNode(override val idRef : String,override val children: Seq[Node] = Seq[Node]()) extends Node(idRef,children) {
-  def duplicateWithoutChildren(): RdfNode
-
   /* everything by default*/
   override def accept(n: Node): Boolean = n match {
     case _ : Something  => false
@@ -253,7 +243,6 @@ object Something {
 }
 
 case class Something(override val idRef: String,override val children: Seq[Node] = Seq[Node]()) extends RdfNode(idRef,children) {
-  override def duplicateWithoutChildren(): Something = Something(idRef,Seq[Node]())
 
   def copy(children : Seq[Node]) : Node = {
     Something(idRef,children)
@@ -269,7 +258,6 @@ case class SubjectOf(
                       override val term : SparqlDefinition,
                       override val children: Seq[Node] = Seq[Node]()) extends URIRdfNode(idRef,term,children) {
 
-  override def duplicateWithoutChildren(): SubjectOf = SubjectOf(idRef,term,Seq[Node]())
   def copy(children : Seq[Node]) : Node = {
     SubjectOf(idRef,term,children)
   }
@@ -284,7 +272,6 @@ case class ObjectOf(
                      override val term : SparqlDefinition,
                      override val children: Seq[Node] = Seq[Node]()) extends URIRdfNode(idRef,term,children) {
 
-  override def duplicateWithoutChildren(): ObjectOf = ObjectOf(idRef,term,Seq[Node]())
   def copy(children : Seq[Node]) : Node = {
     ObjectOf(idRef,term,children)
   }
@@ -298,8 +285,6 @@ case class LinkTo(
                    override val idRef : String,
                    override val term : SparqlDefinition,
                    override val children: Seq[Node] = Seq[Node]()) extends URIRdfNode(idRef,term,children) {
-
-  override def duplicateWithoutChildren(): LinkTo = LinkTo(idRef,term,Seq[Node]())
   def copy(children : Seq[Node]) : Node = {
     LinkTo(idRef,term,children)
   }
@@ -313,8 +298,6 @@ case class LinkFrom(
                      override val idRef : String,
                      override val term : SparqlDefinition,
                      override val children: Seq[Node] = Seq[Node]()) extends URIRdfNode(idRef,term,children) {
-
-  override def duplicateWithoutChildren() : LinkFrom = LinkFrom(idRef,term,Seq[Node]())
 
   def copy(children : Seq[Node]) : Node = {
     LinkFrom(idRef,term,children)
@@ -339,8 +322,6 @@ case class Value(
   }
 
   def copy(children : Seq[Node]) : Node = Value(term,idRef,children)
-
-  override def duplicateWithoutChildren(): Value = Value(term,idRef,Seq())
 }
 
 object ListValues {
@@ -359,10 +340,16 @@ case class ListValues(var terms : Seq[SparqlDefinition],override val idRef : Str
 
   def copy(children : Seq[Node]) : ListValues = ListValues(terms,idRef,children)
 
-  override def duplicateWithoutChildren(): ListValues = ListValues(terms,idRef,Seq())
 }
 
 /* Logic */
+
+object LogicNode {
+  implicit val rw: RW[LogicNode] = RW.merge(
+    UnionBlock.rw,
+    NotBlock.rw
+  )
+}
 
 sealed abstract class LogicNode(val sire : Node,idRef : String=randomUUID.toString,override val children: Seq[Node] = Seq[Node]()) extends Node(idRef,children) {
   implicit val rw: RW[LogicNode] = RW.merge(
@@ -376,7 +363,6 @@ object UnionBlock {
 
 case class UnionBlock(s : Node,override val idRef : String=randomUUID.toString,override val children: Seq[Node] = Seq[Node]()) extends LogicNode(s,idRef,children) {
   def copy(children : Seq[Node]) : Node = UnionBlock(s,idRef,children)
-  def duplicateWithoutChildren(): UnionBlock = UnionBlock(s,idRef,Seq())
 }
 
 object NotBlock {
@@ -385,8 +371,6 @@ object NotBlock {
 
 case class NotBlock(s : Node,override val idRef : String,override val children: Seq[Node] = Seq[Node]()) extends LogicNode(s,idRef,children) {
   def copy(children : Seq[Node]) : NotBlock = NotBlock(s,idRef,children)
-
-  def duplicateWithoutChildren(): NotBlock = NotBlock(s,idRef,Seq())
 }
 
 
@@ -429,7 +413,6 @@ case class isBlank(
   override def toString : String = negation.toString + " isBlank"
 
   def copy(children : Seq[Node]) : isBlank = isBlank(negation,idRef,children)
-  def duplicateWithoutChildren(): isBlank = isBlank(negation,idRef,children)
 }
 
 object isLiteral {
@@ -443,7 +426,6 @@ case class isLiteral(
   override def toString : String = negation.toString + " isLiteral"
 
   def copy(children : Seq[Node]) : Node = isLiteral(negation,idRef,children)
-  def duplicateWithoutChildren(): isLiteral = isLiteral(negation,idRef,Seq())
 }
 
 object isURI {
@@ -457,7 +439,6 @@ case class isURI(
   override def toString : String = negation.toString + " isURI"
 
   def copy(children : Seq[Node]) : isURI = isURI(negation,idRef,children)
-  def duplicateWithoutChildren(): isURI = isURI(negation,idRef,Seq())
 }
 
 object Contains {
@@ -472,7 +453,6 @@ case class Contains(
   override def toString : String =  negation.toString + " Contains ("+value+")"
 
   def copy(children : Seq[Node]) : Contains = Contains(value,negation,idRef,children)
-  def duplicateWithoutChildren(): Contains = Contains(value,negation,idRef,Seq())
 }
 
 object StrStarts {
@@ -487,7 +467,6 @@ case class StrStarts(
   override def toString : String =  negation.toString + " StrStarts ("+value+")"
 
   def copy(children : Seq[Node]) : StrStarts = StrStarts(value,negation,idRef,children)
-  def duplicateWithoutChildren(): StrStarts = StrStarts(value,negation,idRef,Seq())
 }
 
 object StrEnds {
@@ -502,7 +481,6 @@ case class StrEnds(
   override def toString : String =  negation.toString + " StrEnds ("+value+")"
 
   def copy(children : Seq[Node]) : StrEnds = StrEnds(value,negation,idRef,children)
-  def duplicateWithoutChildren(): StrEnds = StrEnds(value,negation,idRef,Seq())
 }
 
 object Equal {
@@ -517,7 +495,6 @@ case class Equal(
   override def toString : String = negation.toString + " == "+value
 
   def copy(children : Seq[Node]) : Equal = Equal(value,negation,idRef,children)
-  def duplicateWithoutChildren(): Equal = Equal(value,negation,idRef,Seq())
 }
 
 object NotEqual {
@@ -532,7 +509,6 @@ case class NotEqual(
   override def toString : String = negation.toString + " == "+value
 
   def copy(children : Seq[Node]) : NotEqual = NotEqual(value,negation,idRef,children)
-  def duplicateWithoutChildren(): NotEqual = NotEqual(value,negation,idRef,Seq())
 }
 
 object Inf {
@@ -548,7 +524,6 @@ case class Inf(
   override def toString : String = negation.toString + " < "+value
 
   def copy(children : Seq[Node]) : NotEqual = NotEqual(value,negation,idRef,children)
-  def duplicateWithoutChildren(): NotEqual = NotEqual(value,negation,idRef,Seq())
 }
 
 object InfEqual {
@@ -563,7 +538,6 @@ case class InfEqual(
   override def toString : String = negation.toString + " <= "+value
 
   def copy(children : Seq[Node]) : InfEqual = InfEqual(value,negation,idRef,children)
-  def duplicateWithoutChildren(): InfEqual = InfEqual(value,negation,idRef,Seq())
 }
 
 object Sup {
@@ -648,8 +622,6 @@ case class OrderByAsc(list : Seq[QueryVariable],
                       override val idRef : String,
                       override val children: Seq[Node]=Seq[Node]()) extends SolutionSequenceModifierNode(idRef,children) {
   override def copy(children: Seq[Node]): Node = OrderByAsc(list,idRef,children)
-
-  override def duplicateWithoutChildren(): Node = OrderByAsc(list,idRef,children)
 }
 
 object OrderByDesc {
@@ -660,8 +632,6 @@ case class OrderByDesc(list : Seq[QueryVariable],
                        override val idRef : String,
                        override val children: Seq[Node] = Seq[Node]()) extends SolutionSequenceModifierNode(idRef,children) {
   override def copy(children: Seq[Node]): Node = OrderByDesc(list,idRef,children)
-
-  override def duplicateWithoutChildren(): Node = OrderByDesc(list,idRef,children)
 }
 
 
@@ -683,8 +653,6 @@ case class Projection(variables : Seq[QueryVariable],
   }
 
   override def copy(children: Seq[Node]): Node = Projection(variables,idRef,children)
-
-  override def duplicateWithoutChildren(): Node = Projection(variables,idRef,children)
 }
 
 /**
@@ -698,8 +666,6 @@ object Distinct {
 case class Distinct(override val idRef : String,
                     override val children: Seq[Node] = Seq[Node]()) extends SolutionSequenceModifierNode(idRef,children) {
   override def copy(children: Seq[Node]): Node = Distinct(idRef,children)
-
-  override def duplicateWithoutChildren(): Node = Distinct(idRef,children)
 }
 
 /**
@@ -713,8 +679,6 @@ object Reduced {
 case class Reduced(override val idRef : String,
                    override val children: Seq[Node] = Seq[Node]()) extends SolutionSequenceModifierNode(idRef,children) {
   override def copy(children: Seq[Node]): Node = Reduced(idRef,children)
-
-  override def duplicateWithoutChildren(): Node = Reduced(idRef,children)
 }
 
 /**
@@ -729,8 +693,6 @@ case class Offset(value : Int,
                   override val idRef : String,
                   override val children: Seq[Node] = Seq[Node]()) extends SolutionSequenceModifierNode(idRef,children) {
   override def copy(children: Seq[Node]): Node = Offset(value,idRef,children)
-
-  override def duplicateWithoutChildren(): Node = Offset(value,idRef,children)
 }
 
 /**
@@ -746,8 +708,6 @@ case class Limit(value : Int,
                  override val idRef : String,
                  override val children: Seq[Node]=Seq[Node]()) extends SolutionSequenceModifierNode(idRef,children) {
   override def copy(children: Seq[Node]): Node = Limit(value,idRef,children)
-
-  override def duplicateWithoutChildren(): Node = Limit(value,idRef,children)
 }
 //--------------------------------------------------------------------------------------------------------------------------
 
@@ -765,7 +725,7 @@ case class Bind(expression : ExpressionNode,
                 override val idRef : String,
                 override val children: Seq[Node] = Seq[Node]()) extends Node(idRef,children) {
   override def copy(children: Seq[Node]): Node = Bind(expression,idRef,children)
-  override def duplicateWithoutChildren(): Node = Bind(expression,idRef,children)
+
   override def accept(n: Node): Boolean = n match {
     case _ : Something  => false
     case _ : URIRdfNode => true
@@ -780,6 +740,7 @@ object ExpressionNode {
   implicit val rw: RW[ExpressionNode] =
     RW.merge(
       FunctionStringNode.rw,
+      FunctionNumericNode.rw,
       BuiltInCallNode.rw
     )
 }
@@ -871,7 +832,6 @@ sealed abstract class PrimaryExpression(override val idRef : String) extends Exp
 
 case class SparqlDefinitionExpression(sd : SparqlDefinition,override val idRef : String ) extends PrimaryExpression(idRef) {
   override def copy(children: Seq[Node]): Node = SparqlDefinitionExpression(sd,idRef)
-  override def duplicateWithoutChildren(): Node = SparqlDefinitionExpression(sd,idRef)
 }
 
 object FunctionStringNode {
@@ -893,7 +853,6 @@ case class SubStr(
                   length : Int,
                   override val idRef : String) extends FunctionStringNode(idRef) {
   override def copy(children: Seq[Node]): Node = SubStr(start,length,idRef)
-  override def duplicateWithoutChildren(): Node = SubStr(start,length,idRef)
 }
 
 object Regex {
@@ -905,7 +864,6 @@ case class Regex(
                   flags : Literal,
                   override val idRef : String) extends FunctionStringNode(idRef) {
   override def copy(children: Seq[Node]): Node = Regex(pattern,flags,idRef)
-  override def duplicateWithoutChildren(): Node = Regex(pattern,flags,idRef)
 }
 
 object Replace {
@@ -919,7 +877,6 @@ case class Replace(
                     flags : Literal="",
                   override val idRef : String) extends FunctionStringNode(idRef) {
   override def copy(children: Seq[Node]): Node = Replace(pattern,replacement,flags,idRef)
-  override def duplicateWithoutChildren(): Node = Replace(pattern,replacement,flags,idRef)
 }
 
 object FunctionNumericNode {
@@ -943,7 +900,6 @@ object Abs {
 case class Abs(
                 override val idRef : String) extends FunctionNumericNode(idRef) {
   override def copy(children: Seq[Node]): Node = Abs(idRef)
-  override def duplicateWithoutChildren(): Node = Abs(idRef)
 }
 
 object Round {
@@ -954,7 +910,6 @@ object Round {
 case class Round(
                 override val idRef : String) extends FunctionNumericNode(idRef) {
   override def copy(children: Seq[Node]): Node = Round(idRef)
-  override def duplicateWithoutChildren(): Node = Round(idRef)
 }
 
 object Ceil {
@@ -964,7 +919,6 @@ object Ceil {
 case class Ceil(
                   override val idRef : String) extends FunctionNumericNode(idRef) {
   override def copy(children: Seq[Node]): Node = Ceil(idRef)
-  override def duplicateWithoutChildren(): Node = Ceil(idRef)
 }
 
 object Floor {
@@ -974,7 +928,6 @@ object Floor {
 case class Floor(
                  override val idRef : String) extends FunctionNumericNode(idRef) {
   override def copy(children: Seq[Node]): Node = Floor(idRef)
-  override def duplicateWithoutChildren(): Node = Floor(idRef)
 }
 
 object Rand {
@@ -983,7 +936,6 @@ object Rand {
 
 case class Rand(override val idRef : String) extends FunctionNumericNode(idRef) {
   override def copy(children: Seq[Node]): Node = Rand(idRef)
-  override def duplicateWithoutChildren(): Node = Rand(idRef)
 }
 
 /* ---------------------------------------------------------------------------------------------------  */
@@ -1005,7 +957,6 @@ case class ProjectionExpression(`var` : QueryVariable,
                                 override val idRef : String,
                                 override val children: Seq[Node] = Seq[Node]()) extends Node(idRef,children) {
   override def copy(children: Seq[Node]): Node = ProjectionExpression(`var`,expression,idRef,children)
-  override def duplicateWithoutChildren(): Node = ProjectionExpression(`var`,expression,idRef,children)
   override def accept(n: Node): Boolean = false
 }
 
@@ -1026,7 +977,6 @@ case class Count(
                  override val idRef : String,
                  ) extends AggregateNode(idRef) {
   override def copy(children: Seq[Node]): Node = Count(varToCount,distinct,idRef)
-  override def duplicateWithoutChildren(): Node = Count(varToCount,distinct,idRef)
 }
 
 object CountAll {
@@ -1035,7 +985,6 @@ object CountAll {
 
 case class CountAll(distinct : Boolean = false,override val idRef : String) extends AggregateNode(idRef) {
   override def copy(children: Seq[Node]): Node = CountAll(distinct,idRef)
-  override def duplicateWithoutChildren(): Node = CountAll(distinct,idRef)
 }
 
 object BuiltInCallNode {
@@ -1059,18 +1008,15 @@ object Str {
 case class Str(term: SparqlDefinition,
                override val idRef : String) extends BuiltInCallNode(idRef) {
   override def copy(children: Seq[Node]): Node = Str(term,idRef)
-  override def duplicateWithoutChildren(): Node = Str(term,idRef)
 }
 
 case class Lang(term: SparqlDefinition,
                override val idRef : String,
                override val children: Seq[Node] = Seq[Node]()) extends BuiltInCallNode(idRef) {
   override def copy(children: Seq[Node]): Node = Lang(term,idRef,children)
-  override def duplicateWithoutChildren(): Node = Lang(term,idRef,children)
 }
 
 case class LangMatches(term: SparqlDefinition,
                override val idRef : String) extends BuiltInCallNode(idRef) {
   override def copy(children: Seq[Node]): Node = LangMatches(term,idRef)
-  override def duplicateWithoutChildren(): Node = LangMatches(term,idRef)
 }

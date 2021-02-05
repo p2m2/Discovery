@@ -147,5 +147,13 @@ object ElementTest extends TestSuite {
       Projection(Seq(),"")
     }
 
+    test("reference children") {
+      val p = Something("h1",
+        Seq(SubjectOf("h2",URI("")),
+          SubjectOf("h3",URI(""),Seq(ObjectOf("h4",URI("")))))).referencesChildren()
+
+      assert (p == List("h1","h2","h3","h4"))
+    }
+
   }
 }
