@@ -446,7 +446,7 @@ object Contains {
 }
 
 case class Contains(
-                     value :String,
+                     value :SparqlDefinition,
                      override val negation: Boolean,
                      override val idRef : String,
                      override val children: Seq[Node] = Seq[Node]())  extends FilterNode(negation,idRef,children) {
@@ -460,7 +460,7 @@ object StrStarts {
 }
 
 case class StrStarts(
-                      value :String,
+                      value :SparqlDefinition,
                       override val negation: Boolean,
                       override val idRef : String,
                       override val children: Seq[Node] = Seq[Node]())  extends FilterNode(negation,idRef,children) {
@@ -474,7 +474,7 @@ object StrEnds {
 }
 
 case class StrEnds(
-                    value :String,
+                    value :SparqlDefinition,
                     override val negation: Boolean,
                     override val idRef : String,
                     override val children: Seq[Node] = Seq[Node]())  extends FilterNode(negation,idRef,children) {
@@ -488,7 +488,7 @@ object Equal {
 }
 
 case class Equal(
-                  value :Literal,
+                  value :SparqlDefinition,
                   override val negation: Boolean,
                   override val idRef : String,
                   override val children: Seq[Node] = Seq[Node]())  extends FilterNode(negation,idRef,children) {
@@ -502,7 +502,7 @@ object NotEqual {
 }
 
 case class NotEqual(
-                     value :Literal,
+                     value :SparqlDefinition,
                      override val negation: Boolean,
                      override val idRef : String,
                      override val children: Seq[Node] = Seq[Node]())  extends FilterNode(negation,idRef,children) {
@@ -517,7 +517,7 @@ object Inf {
 
 
 case class Inf(
-                value :Literal,
+                value :SparqlDefinition,
                 override val negation: Boolean,
                 override val idRef : String,
                 override val children: Seq[Node] = Seq[Node]())  extends FilterNode(negation,idRef,children) {
@@ -531,7 +531,7 @@ object InfEqual {
 }
 
 case class InfEqual(
-                     value :Literal,
+                     value :SparqlDefinition,
                      override val negation: Boolean,
                      override val idRef : String,
                      override val children: Seq[Node] = Seq[Node]())  extends FilterNode(negation,idRef,children) {
@@ -545,7 +545,7 @@ object Sup {
 }
 
 case class Sup(
-                value :Literal,
+                value :SparqlDefinition,
                 override val negation: Boolean,
                 override val idRef : String,
                 override val children: Seq[Node] = Seq[Node]())  extends FilterNode(negation,idRef,children) {
@@ -560,7 +560,7 @@ object SupEqual {
 }
 
 case class SupEqual(
-                     value :Literal,
+                     value :SparqlDefinition,
                      override val negation: Boolean,
                      override val idRef : String,
                      override val children: Seq[Node] = Seq[Node]())  extends FilterNode(negation,idRef,children) {
@@ -849,8 +849,8 @@ object SubStr {
 }
 
 case class SubStr(
-                  start : Int,
-                  length : Int,
+                  start : SparqlDefinition,
+                  length : SparqlDefinition,
                   override val idRef : String) extends FunctionStringNode(idRef) {
   override def copy(children: Seq[Node]): Node = SubStr(start,length,idRef)
 }
@@ -860,8 +860,8 @@ object Regex {
 }
 
 case class Regex(
-                  pattern : Literal,
-                  flags : Literal,
+                  pattern : SparqlDefinition,
+                  flags : SparqlDefinition,
                   override val idRef : String) extends FunctionStringNode(idRef) {
   override def copy(children: Seq[Node]): Node = Regex(pattern,flags,idRef)
 }
@@ -872,9 +872,9 @@ object Replace {
 
 
 case class Replace(
-                    pattern : Literal,
-                    replacement : Literal,
-                    flags : Literal="",
+                    pattern : SparqlDefinition,
+                    replacement : SparqlDefinition,
+                    flags : SparqlDefinition,
                   override val idRef : String) extends FunctionStringNode(idRef) {
   override def copy(children: Seq[Node]): Node = Replace(pattern,replacement,flags,idRef)
 }

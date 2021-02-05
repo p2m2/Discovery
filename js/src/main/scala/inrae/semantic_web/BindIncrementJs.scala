@@ -1,19 +1,21 @@
 package inrae.semantic_web
 
+import inrae.semantic_web.rdf.SparqlDefinition
+
 import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
 
 @JSExportTopLevel("BindIncrement")
 case class BindIncrementJs(swf: SWDiscoveryJs,`var` : String) {
 
   @JSExport
-  def subStr(startingLoc : Int,length : Int ) :  SWDiscoveryJs = SWDiscoveryJs(swf.config,swf.sw.bind(`var`).subStr(startingLoc,length))
+  def subStr(startingLoc : SparqlDefinition,length : SparqlDefinition ) :  SWDiscoveryJs = SWDiscoveryJs(swf.config,swf.sw.bind(`var`).subStr(startingLoc,length))
 
   @JSExport
-  def regex(pattern : String, flags : String="") :  SWDiscoveryJs =
+  def regex(pattern : SparqlDefinition, flags : SparqlDefinition="") :  SWDiscoveryJs =
     SWDiscoveryJs(swf.config,swf.sw.bind(`var`).regex(pattern,flags))
 
   @JSExport
-  def replace(pattern : String, replacement : String, flags : String="") :  SWDiscoveryJs =
+  def replace(pattern : SparqlDefinition, replacement : SparqlDefinition, flags : SparqlDefinition="") :  SWDiscoveryJs =
     SWDiscoveryJs(swf.config,swf.sw.bind(`var`).replace(pattern,replacement,flags))
 
   @JSExport

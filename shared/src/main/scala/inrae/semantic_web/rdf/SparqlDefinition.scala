@@ -1,21 +1,27 @@
 package inrae.semantic_web.rdf
-import upickle.default.{ReadWriter => RW, macroRW}
-import scala.scalajs.js.annotation.JSExportTopLevel
+import upickle.default.{macroRW, ReadWriter => RW}
+
 import scala.language.implicitConversions
+import scala.scalajs.js.annotation.JSExportTopLevel
 import scala.util.{Failure, Success, Try}
 
 case class Graph(triples : Set[Triple])
 
 case class Triple(s: SparqlDefinition, p: SparqlDefinition, o: SparqlDefinition)
 
-sealed trait SparqlDefinition {
+sealed abstract class SparqlDefinition {
 
   def sparql : String
-
   def naiveLabel : String
 }
 
 object SparqlDefinition {
+
+  implicit def fromString(s: String): Literal = Literal(s)
+  implicit def fromString(s: Int): Literal = Literal(s.toString,URI("integer","xsd"))
+  implicit def fromString(s: Boolean): Literal = Literal(s.toString,URI("boolean","xsd"))
+  implicit def fromString(s: Double): Literal = Literal(s.toString,URI("double","xsd"))
+  implicit def fromString(s: Float): Literal = Literal(s.toString,URI("float","xsd"))
 
   implicit val rw: RW[SparqlDefinition] = RW.merge(
     IRI.rw,
@@ -35,6 +41,7 @@ object SparqlDefinition {
 }
 
 object IRI {
+
   implicit def fromString(s: String): IRI = IRI(s)
   implicit val rw: RW[IRI] = macroRW
 }
@@ -131,18 +138,24 @@ object PropertyPath {
 
 object Literal {
   implicit val rw: RW[Literal] = macroRW
-
-  implicit def fromString(s: String): Literal = Literal(s)
-  implicit def fromString(s: Int): Literal = Literal(s.toString,URI("integer","xsd"))
-  implicit def fromString(s: Boolean): Literal = Literal(s.toString,URI("boolean","xsd"))
-  implicit def fromString(s: Double): Literal = Literal(s.toString,URI("double","xsd"))
-  implicit def fromString(s: Float): Literal = Literal(s.toString,URI("float","xsd"))
 }
 
 @JSExportTopLevel(name="Literal")
-case class Literal(var value : String,var datatype : URI = URI.empty,var tag : String="") extends SparqlDefinition {
-  value = SparqlDefinition.cleanString(value)
-  tag = SparqlDefinition.cleanString(tag)
+case class Literal(v : String,datatype : URI = URI.empty,var ta : String="") extends SparqlDefinition {
+  val value = SparqlDefinition.cleanString(v)
+  val tag = SparqlDefinition.cleanString(ta)
+
+  def this(value : Int) = {
+    this(value.toString,URI("integer","xsd"))
+  }
+
+  def this(value : Boolean) = {
+    this(value.toString,URI("boolean","xsd"))
+  }
+
+  def this(value : Double) = {
+    this(value.toString,URI("double","xsd"))
+  }
 
   override def toString() : String = "\""+ value + "\""+ (datatype match {
     case URI.empty => ""
@@ -180,6 +193,7 @@ case class QueryVariable (var name : String) extends SparqlDefinition {
   def naiveLabel : String = s"Variable[$name]"
 }
 
+@JSExportTopLevel(name="SparqlBuilder")
 object SparqlBuilder {
 
   def create(value: ujson.Value): SparqlDefinition = {

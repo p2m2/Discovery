@@ -91,6 +91,13 @@ object SparqlDefinitionTest extends TestSuite {
       assert( value.naiveLabel == "0.5")
     }
 
+    test("Literal implicit int") {
+      val value : Literal = 2
+      assert( value.toString() == "\"2\"^^xsd:integer")
+      assert( value.sparql == "\"2\"^^xsd:integer")
+      assert( value.naiveLabel == "2")
+    }
+
     test("createUri") {
       val value = SparqlBuilder.createUri(ujson.Value("{ \"value\": \"test\"}"))
       assert( value.toString() == "<test>")

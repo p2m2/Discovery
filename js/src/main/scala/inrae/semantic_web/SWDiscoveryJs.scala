@@ -26,6 +26,9 @@ case class SWDiscoveryJs(
   val filter = FilterIncrementJs(this)
 
   @JSExport
+  def bind(`var` : String) : BindIncrementJs = BindIncrementJs(this,`var`)
+
+  @JSExport
   def usage() : SWDiscoveryJs = SWDiscoveryJs(config,SWDiscovery(config).usage)
 
   def helper() :SWDiscoveryHelperJs = SWDiscoveryHelperJs(sw)
@@ -41,6 +44,12 @@ case class SWDiscoveryJs(
 
   @JSExport
   def graph(graph : IRI) : SWDiscoveryJs = SWDiscoveryJs(config,sw.graph(graph))
+
+  @JSExport
+  def root(): SWDiscoveryJs = SWDiscoveryJs(config,sw.root)
+
+  @JSExport
+  def focus() : String = sw.focusNode
 
   @JSExport
   def namedGraph(graph : IRI ) : SWDiscoveryJs = SWDiscoveryJs(config,sw.namedGraph(graph))
@@ -66,7 +75,10 @@ case class SWDiscoveryJs(
   def isLinkFrom( uri : URI , ref : String = sw.getUniqueRef("linkFrom") ) : SWDiscoveryJs = SWDiscoveryJs(config,sw.isLinkFrom(uri,ref))
   /* set */
   @JSExport
-  def set( uri : URI ) : SWDiscoveryJs = SWDiscoveryJs(config,sw.set(uri))
+  def set( term : SparqlDefinition ) : SWDiscoveryJs = SWDiscoveryJs(config,sw.set(term))
+
+  @JSExport
+  def setList( terms : SparqlDefinition* ) : SWDiscoveryJs = SWDiscoveryJs(config,sw.setList(terms))
 
   @JSExport
   def datatype( uri : URI, ref : String ) : SWDiscoveryJs = SWDiscoveryJs(config,sw.datatype(uri,ref))
@@ -103,7 +115,4 @@ case class SWDiscoveryJs(
         }).toJSArray)
       }).toJSPromise
   }
-
-  @JSExport
-  def count(): Promise[Int] = { sw.helper.count.toJSPromise }
 }
