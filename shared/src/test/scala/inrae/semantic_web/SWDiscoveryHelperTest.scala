@@ -2,6 +2,7 @@ package inrae.semantic_web
 import inrae.data.DataTestFactory
 import inrae.semantic_web.rdf._
 import utest._
+
 import scala.concurrent.ExecutionContext.Implicits.global
 
 object SWDiscoveryHelperTest  extends TestSuite  {
@@ -29,6 +30,17 @@ object SWDiscoveryHelperTest  extends TestSuite  {
 
 
   def tests = Tests {
+    test("count") {
+      insert_data.map(_ => {
+        SWDiscovery(config)
+          .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
+          .something("h1") //http://rdf.ebi.ac.uk/terms/chembl#BioComponent
+          .isSubjectOf(URI("http://bb2"))
+          .helper
+          .count
+          .map(count => assert(count == 2))
+      }).flatten
+    }
 
     test("findClasses") {
       insert_data.map(_ => {

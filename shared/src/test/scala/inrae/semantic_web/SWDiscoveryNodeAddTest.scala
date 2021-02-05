@@ -30,9 +30,9 @@ object SWDiscoveryNodeAddTest extends TestSuite {
                .something("h1")
                .isSubjectOf(URI("bb"), "var")
 
-      val triplet: Regex = "\\?something[0-9]+ <bb> \\?object[0-9]+".r
+      val triplet: Regex = "\\?h1+ <bb> \\?var+".r
 
-      triplet.findFirstMatchIn(s.sparql()) match {
+      triplet.findFirstMatchIn(s.sparql) match {
         case Some(_) => assert(true)
         case None => assert(false)
       }
@@ -41,7 +41,7 @@ object SWDiscoveryNodeAddTest extends TestSuite {
     test("isObjectOf on the root") {
       Try(SWDiscovery(config)
         .isObjectOf(URI("bb"), "var")
-        .console()) match {
+        .console) match {
         case Success(_) => assert(false)
         case Failure(_) => assert(true)
       }
@@ -52,9 +52,9 @@ object SWDiscoveryNodeAddTest extends TestSuite {
         .something("h1")
         .isObjectOf(URI("bb"), "var")
 
-      val triplet: Regex = "\\?subject[0-9]+ <bb> \\?something[0-9]+".r
+      val triplet: Regex = "\\?var <bb> \\?h1".r
 
-      triplet.findFirstMatchIn(s.sparql()) match {
+      triplet.findFirstMatchIn(s.sparql) match {
         case Some(_) => assert(true)
         case None => assert(false)
       }
@@ -73,9 +73,9 @@ object SWDiscoveryNodeAddTest extends TestSuite {
         .something("h1")
         .isLinkTo(URI("bb"), "var")
 
-      val triplet: Regex = "\\?something[0-9]+ \\?linkto[0-9]+ <bb>".r
+      val triplet: Regex = "\\?h1 \\?var+ <bb>".r
 
-      triplet.findFirstMatchIn(s.sparql()) match {
+      triplet.findFirstMatchIn(s.sparql) match {
         case Some(_) => assert(true)
         case None => assert(false)
       }
@@ -93,9 +93,9 @@ object SWDiscoveryNodeAddTest extends TestSuite {
         .something("h1")
         .isLinkFrom(URI("bb"), "var")
 
-      val triplet: Regex = "<bb> \\?linkfrom[0-9]+ \\?something[0-9]+".r
+      val triplet: Regex = "<bb> \\?var \\?h1".r
 
-      triplet.findFirstMatchIn(s.sparql()) match {
+      triplet.findFirstMatchIn(s.sparql) match {
         case Some(_) => assert(true)
         case None => assert(false)
       }
@@ -113,9 +113,9 @@ object SWDiscoveryNodeAddTest extends TestSuite {
         .something("h1")
         .isA(URI("class"))
 
-      val triplet: Regex = "\\?something[0-9]+ a \\?object[0-9]+".r
+      val triplet: Regex = "\\?h1 a \\?object[0-9]+".r
 
-      triplet.findFirstMatchIn(s.sparql()) match {
+      triplet.findFirstMatchIn(s.sparql) match {
         case Some(_) => assert(true)
         case None => assert(false)
       }

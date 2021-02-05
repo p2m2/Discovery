@@ -76,12 +76,12 @@ object SWDiscoveryTest extends TestSuite {
       }).flatten
     }
 
-    test("datatype") {
+    test("datatype 1") {
       insert_data.map(_ => {
         SWDiscovery(config).something("h1")
           .set(URI("http://aa3"))
           .datatype(URI("http://propDatatype"), "d")
-          .select(List("d"))
+          .select(List("h1","d"))
           .commit()
           .raw
           .map(
@@ -92,16 +92,49 @@ object SWDiscoveryTest extends TestSuite {
       }).flatten
     }
 
-    test("count") {
+    test("datatype 2") {
       insert_data.map(_ => {
-        SWDiscovery(config)
-          .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
-          .something("h1") //http://rdf.ebi.ac.uk/terms/chembl#BioComponent
-          .isSubjectOf(URI("http://bb2"))
-          .count()
-          .map(count => assert(count == 2))
+        SWDiscovery(config).something("h1")
+          .set(URI("http://aa3"))
+          .datatype(URI("http://propDatatype"), "d")
+          .select(List("d","h1"))
+          .commit()
+          .raw
+          .map(
+            response => {
+              assert(response("results")("datatypes")("d")("http://aa3")(0)("value").toString().length > 0)
+            }
+          )
       }).flatten
     }
+
+    test("datatype 3") {
+        Try(SWDiscovery(config).something("h1")
+          .set(URI("http://aa3"))
+          .datatype(URI("http://propDatatype"), "d")
+          .select(List("d"))
+          .commit()) match {
+            case Success(_) => assert(false)
+            case Failure(_) => assert(true)
+          }
+    }
+
+    test("datatype 4") {
+      insert_data.map(_ => {
+        SWDiscovery(config).something("h1")
+          .set(URI("http://aa3"))
+          .datatype(URI("http://propDatatype"), "d")
+          .select(List("h1"))
+          .commit()
+          .raw
+          .map(
+            response => {
+              assert(SparqlBuilder.createUri(response("results")("bindings")(0)("h1")).localName == "http://aa3" )
+            }
+          )
+      }).flatten
+    }
+
 
     test("bad focus") {
       Try(SWDiscovery(config)
@@ -128,10 +161,25 @@ object SWDiscoveryTest extends TestSuite {
         .namedGraph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
         .something("h1") //http://rdf.ebi.ac.uk/terms/chembl#BioComponent
         .isSubjectOf(URI("http://bb2"))
-        .console()) match {
+        .console) match {
         case Success(_) => assert(true)
         case Failure(_) => assert(false)
       }
     }
+
+    test("refExist") {
+      Try(SWDiscovery(config).something("h1").refExist("h1")) match {
+        case Success(_) => assert(true)
+        case Failure(_) => assert(false)
+      }
+    }
+
+    test("refExist2") {
+      Try(SWDiscovery(config).something("h2").refExist("h1")) match {
+        case Success(_) => assert(false)
+        case Failure(_) => assert(true)
+      }
+    }
+
   }
 }

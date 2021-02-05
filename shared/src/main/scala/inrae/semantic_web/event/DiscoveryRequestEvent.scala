@@ -15,6 +15,7 @@ object DiscoveryStateRequestEvent extends Enumeration {
   RESULTS_DONE,
   REQUEST_DONE,
 
+  ERROR_REQUEST_DEFINITION,
   ERROR_HTTP_REQUEST,
   ABORTED_BY_THE_USER
   = Value

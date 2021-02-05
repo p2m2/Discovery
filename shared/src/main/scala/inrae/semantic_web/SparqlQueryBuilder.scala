@@ -1,7 +1,6 @@
 package inrae.semantic_web
-import wvlet.log.Logger.rootLogger._
 import inrae.semantic_web.internal.{Root, pm}
-import inrae.semantic_web.rdf.IRI
+import wvlet.log.Logger.rootLogger._
 
 object SparqlQueryBuilder {
   /**
@@ -12,13 +11,10 @@ object SparqlQueryBuilder {
    * @param offset : solution are generated after this offset
    * @return
    */
-  def baseQuery(n: Root,refToIdentifier : Map[String,String],limit : Int, offset : Int) : String = {
-
-    (pm.SparqlGenerator.from(n.defaultGraph) + "\n" +
-      pm.SparqlGenerator.fromNamed(n.namedGraph) + "\n" +
-      pm.SparqlGenerator.start_where() + "\n" +
-      pm.SparqlGenerator.body(n, refToIdentifier) + "\n" +
-      pm.SparqlGenerator.solutionModifier(limit,offset))
+  def baseQuery(n: Root) : String = {
+    (pm.SparqlGenerator.solutionSequenceModifierStart(n)) + "\n" +
+      pm.SparqlGenerator.body(n) + "\n" +
+      pm.SparqlGenerator.solutionSequenceModifierEnd(n)
   }
 
   /**
@@ -31,27 +27,11 @@ object SparqlQueryBuilder {
    * @param offset : solution are generated after this offset
    * @return
    */
-  def selectQueryString(n: Root,
-                  refToIdentifier : Map[String,String],
-                  listVariables : Seq[String],
-                        limit : Int,
-                        offset : Int): String = {
+  def selectQueryString(n: Root): String = {
     debug(" -- selectQueryString -- ")
 
     (pm.SparqlGenerator.prefixes(n.prefixes) + "\n" +
-      pm.SparqlGenerator.queryFormSelect(listVariables) + "\n" +
-      baseQuery(n,refToIdentifier,limit,offset)).replace("\n\n","\n")
-
+      baseQuery(n)).replace("\n\n","\n")
   }
 
-  def countQueryString(n: Root,
-                        refToIdentifier : Map[String,String],
-                       varCount : String): String = {
-    debug(" -- countQueryString -- ")
-
-    (pm.SparqlGenerator.prefixes(n.prefixes) + "\n" +
-      pm.SparqlGenerator.prologCountSelection(varCount) + "\n" +
-      baseQuery(n,refToIdentifier,0,0)).replace("\n\n","\n")
-
-  }
 }

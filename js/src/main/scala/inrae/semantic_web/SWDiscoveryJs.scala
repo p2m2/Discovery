@@ -23,7 +23,7 @@ case class SWDiscoveryJs(
   }
 
   @JSExport
-  val filter = new FilterIncrementJs(this)
+  val filter = FilterIncrementJs(this)
 
   @JSExport
   def usage() : SWDiscoveryJs = SWDiscoveryJs(config,SWDiscovery(config).usage)
@@ -46,24 +46,24 @@ case class SWDiscoveryJs(
   def namedGraph(graph : IRI ) : SWDiscoveryJs = SWDiscoveryJs(config,sw.namedGraph(graph))
   /* start a request */
   @JSExport
-  def something( ref : String = sw.getUniqueRef ) : SWDiscoveryJs = SWDiscoveryJs(config,sw.something(ref))
+  def something( ref : String = sw.getUniqueRef("something") ) : SWDiscoveryJs = SWDiscoveryJs(config,sw.something(ref))
 
   /* create node which focus is the subject : ?focusId <uri> ?target */
   @JSExport
-  def isSubjectOf( uri : URI , ref : String = sw.getUniqueRef ) : SWDiscoveryJs = SWDiscoveryJs(config,sw.isSubjectOf(uri,ref))
+  def isSubjectOf( uri : URI , ref : String = sw.getUniqueRef("object") ) : SWDiscoveryJs = SWDiscoveryJs(config,sw.isSubjectOf(uri,ref))
 
   /* create node which focus is the subject : ?focusId <uri> ?target */
   @JSExport
-  def isObjectOf( uri : URI , ref : String = sw.getUniqueRef ) : SWDiscoveryJs = SWDiscoveryJs(config,sw.isObjectOf(uri,ref))
+  def isObjectOf( uri : URI , ref : String = sw.getUniqueRef("subject") ) : SWDiscoveryJs = SWDiscoveryJs(config,sw.isObjectOf(uri,ref))
 
   @JSExport
-  def isLinkTo( uri : URI , ref : String = sw.getUniqueRef ) : SWDiscoveryJs = SWDiscoveryJs(config,sw.isLinkTo(uri,ref))
+  def isLinkTo( uri : URI , ref : String = sw.getUniqueRef("linkTo") ) : SWDiscoveryJs = SWDiscoveryJs(config,sw.isLinkTo(uri,ref))
 
   @JSExport
   def isA( term : SparqlDefinition ) : SWDiscoveryJs = SWDiscoveryJs(config,sw.isA(term))
 
   @JSExport
-  def isLinkFrom( uri : URI , ref : String = sw.getUniqueRef ) : SWDiscoveryJs = SWDiscoveryJs(config,sw.isLinkFrom(uri,ref))
+  def isLinkFrom( uri : URI , ref : String = sw.getUniqueRef("linkFrom") ) : SWDiscoveryJs = SWDiscoveryJs(config,sw.isLinkFrom(uri,ref))
   /* set */
   @JSExport
   def set( uri : URI ) : SWDiscoveryJs = SWDiscoveryJs(config,sw.set(uri))
@@ -72,10 +72,10 @@ case class SWDiscoveryJs(
   def datatype( uri : URI, ref : String ) : SWDiscoveryJs = SWDiscoveryJs(config,sw.datatype(uri,ref))
 
   @JSExport
-  def console() : SWDiscoveryJs = SWDiscoveryJs(config,sw.console())
+  def console() : SWDiscoveryJs = SWDiscoveryJs(config,sw.console)
 
   @JSExport
-  def sparql() : String = sw.sparql()
+  def sparql() : String = sw.sparql
 
   @JSExport
   def getSerializedQuery: String = sw.getSerializedQuery
@@ -93,7 +93,7 @@ case class SWDiscoveryJs(
 
   @JSExport
   def selectByPage(lRef: String*)  : Promise[(Int,js.Array[SWTransactionJs])] = {
-    sw.count().map(
+    sw.helper.count.map(
       nSolutions => {
         val nit : Int = nSolutions / config.conf.settings.pageSize
         (nit+1,(0 to nit).map( p =>{
@@ -105,5 +105,5 @@ case class SWDiscoveryJs(
   }
 
   @JSExport
-  def count(): Promise[Int] = { sw.count().toJSPromise }
+  def count(): Promise[Int] = { sw.helper.count.toJSPromise }
 }

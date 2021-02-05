@@ -10,10 +10,10 @@ object ElementTest extends TestSuite {
   def tests = Tests {
     test("Root creation") {
         val v : Root = Root()
-        assert(true)
+
         assert(v.toString() != "")
         Try(v.addChildren(Root())) match {
-          case Success(_) => assert(true)
+          case Success(_) =>
           case Failure(_) => assert(false)
         }
     }
@@ -30,82 +30,129 @@ object ElementTest extends TestSuite {
 
     test("Something creation with ID") {
       Something("1234")
-      assert(true)
     }
 
     test("SubjectOf creation") {
       SubjectOf("1234",URI("test"))
-      assert(true)
     }
 
     test("ObjectOf creation") {
       ObjectOf("1234",URI("test"))
-      assert(true)
     }
 
     test("LinkTo creation") {
       LinkTo("1234",URI("test"))
-      assert(true)
     }
 
     test("LinkFrom creation") {
       LinkFrom("1234",URI("test"))
-      assert(true)
     }
 
     test("Value creation with uri") {
       Value(URI("test"))
-      assert(true)
     }
 
     test("Value creation with Literal") {
       Value(Literal("test"))
-      assert(true)
     }
 
     test("ListValues creation") {
       ListValues(List(URI("test"),URI("test2"),Literal("test")))
-      assert(true)
+    }
+
+    test("Union creation") {
+      UnionBlock(Something("test"),"")
+    }
+
+    test("Not creation") {
+      NotBlock(Something("test"),"")
     }
 
     test("isBlank creation") {
-      isBlank(true)
-      assert(true)
+      isBlank(true,"")
+
     }
 
     test("isLiteral creation") {
-      isLiteral(true)
-      assert(true)
+      isLiteral(true,"")
     }
 
     test("isURI creation") {
-      isURI(true)
-      assert(true)
+      isURI(true,"")
     }
 
     test("Contains creation") {
-      Contains("h",true)
-      assert(true)
+      Contains("h",true,"")
+    }
+
+    test("StrStarts creation") {
+      StrStarts("",false,"")
+    }
+
+    test("StrEnds creation") {
+      StrEnds("",false,"")
     }
 
     test("Equal creation") {
-      Equal("h",true)
-      assert(true)
+      Equal("h",true,"")
+    }
+
+    test("NotEqual creation") {
+      NotEqual("h",true,"")
+    }
+
+    test("Inf creation") {
+      Inf("h",true,"")
+    }
+
+    test("InfEqual creation") {
+      InfEqual("h",true,"")
+    }
+
+    test("Sup creation") {
+      Sup("h",true,"")
+    }
+
+    test("SupEqual creation") {
+      SupEqual("h",true,"")
     }
 
     test("DatatypeNode creation") {
-      DatatypeNode("h",SubjectOf("1234",URI("something_property")))
-      assert(true)
+      DatatypeNode("h",SubjectOf("1234",URI("something_property")),"")
+
     }
 
     test("SourcesNode creation") {
-      SourcesNode("h",List("source1","source2"))
-      assert(true)
+      SourcesNode("h",List("source1","source2"),"")
+
     }
 
-    test("OperatorNode creation") {
-      OperatorNode("<")
-      assert(true)
+    test("SubStr creation") {
+      SubStr(1,1,"")
+    }
+
+    test("Bind creation") {
+      Bind(SubStr(1,1,""),"")
+    }
+
+    test("OrderByAsc creation") {
+      OrderByAsc(Seq(),"")
+    }
+
+    test("OrderByDesc creation") {
+      OrderByDesc(Seq(),"")
+    }
+
+    test("Projection creation") {
+      Projection(Seq(),"")
+    }
+
+    test("reference children") {
+      val p = Something("h1",
+        Seq(SubjectOf("h2",URI("")),
+          SubjectOf("h3",URI(""),Seq(ObjectOf("h4",URI("")))))).referencesChildren()
+
+      assert (p == List("h1","h2","h3","h4"))
     }
 
   }

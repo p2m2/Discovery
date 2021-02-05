@@ -51,20 +51,6 @@ object QueryResultTest extends TestSuite {
       assert(QueryResult(json).json("results")("bindings")(0)("title")("value") == ujson.Value("\"Harry Potter and the Half-Blood Prince\""))
     }
 
-    test("QueryResultTest v2Ident change variable name book with userDefinedBook") {
-      val qr = QueryResult(json)
-      qr.v2Ident(Map("userDefinedBook" -> "book"))
-
-      assert(qr.json("results")("bindings").arr.length == 1)
-      assert(qr.json("head")("vars")(0) == ujson.Value("\"userDefinedBook\""))
-      assert(qr.json("head")("vars")(1) == ujson.Value("\"title\""))
-      assert(qr.json("results")("bindings")(0)("userDefinedBook")("type") == ujson.Value("\"uri\""))
-      assert(qr.json("results")("bindings")(0)("userDefinedBook")("value") == ujson.Value("\"http://example.org/book/book6\""))
-      assert(qr.json("results")("bindings")(0)("title")("type") == ujson.Value("\"literal\""))
-      assert(qr.json("results")("bindings")(0)("title")("value") == ujson.Value("\"Harry Potter and the Half-Blood Prince\""))
-
-    }
-
     test("QueryResultTest getValues ") {
 
       Try(println(QueryResult(json).getValues("badVar"))) match {

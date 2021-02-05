@@ -1,33 +1,86 @@
 package inrae.semantic_web
 
+import inrae.semantic_web.rdf.Literal
+
 import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
 
 @JSExportTopLevel("SWFilterIncrement")
-class FilterIncrementJs(swf: SWDiscoveryJs) {
-  var negation = false
+case class FilterIncrementJs(swf: SWDiscoveryJs,negation : Boolean = false) {
 
   @JSExport
-  def isLiteral: SWDiscoveryJs = {
-    swf.sw.filter.isLiteral; swf
+  def isLiteral: SWDiscoveryJs = negation match {
+    case true => SWDiscoveryJs(swf.config,swf.sw.filter.not.isLiteral)
+    case false => SWDiscoveryJs(swf.config,swf.sw.filter.isLiteral)
   }
 
   @JSExport
-  def isUri: SWDiscoveryJs = {
-    swf.sw.filter.isUri; swf
+  def isUri: SWDiscoveryJs = negation match {
+    case true => SWDiscoveryJs(swf.config,swf.sw.filter.not.isUri)
+    case false => SWDiscoveryJs(swf.config,swf.sw.filter.isUri)
   }
 
   @JSExport
-  def isBlank: SWDiscoveryJs = {
-    swf.sw.filter.isBlank; swf
+  def isBlank: SWDiscoveryJs = negation match {
+    case true => SWDiscoveryJs(swf.config,swf.sw.filter.not.isBlank)
+    case false => SWDiscoveryJs(swf.config,swf.sw.filter.isUri)
   }
 
   @JSExport
-  def contains(l: String): SWDiscoveryJs = {
-    swf.sw.filter.contains(l); swf
+  def contains(l: String): SWDiscoveryJs = negation match {
+    case true => SWDiscoveryJs(swf.config,swf.sw.filter.not.contains(l))
+    case false => SWDiscoveryJs(swf.config,swf.sw.filter.contains(l))
   }
 
   @JSExport
-  def not: FilterIncrementJs = {
-    swf.sw.filter.not; this
+  def strStarts( string : String ) : SWDiscoveryJs = negation match {
+    case true => SWDiscoveryJs(swf.config,swf.sw.filter.not.strStarts(string))
+    case false => SWDiscoveryJs(swf.config,swf.sw.filter.strStarts(string))
   }
+
+  @JSExport
+  def strEnds( string : String ) : SWDiscoveryJs = negation match {
+    case true => SWDiscoveryJs(swf.config,swf.sw.filter.not.strEnds(string))
+    case false => SWDiscoveryJs(swf.config,swf.sw.filter.strEnds(string))
+  }
+
+  @JSExport
+  def equal( value : Literal ) : SWDiscoveryJs = negation match {
+    case true => SWDiscoveryJs(swf.config,swf.sw.filter.not.equal(value))
+    case false => SWDiscoveryJs(swf.config,swf.sw.filter.equal(value))
+  }
+
+  @JSExport
+  def notEqual( value : Literal ) : SWDiscoveryJs = negation match {
+    case true => SWDiscoveryJs(swf.config,swf.sw.filter.not.notEqual(value))
+    case false => SWDiscoveryJs(swf.config,swf.sw.filter.notEqual(value))
+  }
+
+  @JSExport
+  def inf( value : Literal ) : SWDiscoveryJs = negation match {
+    case true => SWDiscoveryJs(swf.config,swf.sw.filter.not.inf(value))
+    case false => SWDiscoveryJs(swf.config,swf.sw.filter.inf(value))
+  }
+
+  @JSExport
+  def infEqual( value : Literal ) : SWDiscoveryJs = negation match {
+    case true => SWDiscoveryJs(swf.config,swf.sw.filter.not.infEqual(value))
+    case false => SWDiscoveryJs(swf.config,swf.sw.filter.infEqual(value))
+  }
+
+  @JSExport
+  def sup( value : Literal ) : SWDiscoveryJs = negation match {
+    case true => SWDiscoveryJs(swf.config,swf.sw.filter.not.sup(value))
+    case false => SWDiscoveryJs(swf.config,swf.sw.filter.sup(value))
+  }
+
+  @JSExport
+  def supEqual( value : Literal ) : SWDiscoveryJs = negation match {
+    case true => SWDiscoveryJs(swf.config,swf.sw.filter.not.supEqual(value))
+    case false => SWDiscoveryJs(swf.config,swf.sw.filter.supEqual(value))
+  }
+
+  @JSExport
+  def not: FilterIncrementJs = FilterIncrementJs(swf,!negation)
+
+  //swf.sw.filter.not
 }

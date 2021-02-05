@@ -63,6 +63,7 @@ object RequestDriverFactory  {
               }
 
             } else if ( source.content != "" ) {
+
               val targetStream = new java.io.ByteArrayInputStream(source.content.getBytes(java.nio.charset.StandardCharsets.UTF_8.name))
               Try(con.add(targetStream, "http://user/content/", RequestDriverFactory.mimetypeToRdfFormat(source.mimetype))) match {
                 case Success(_) =>

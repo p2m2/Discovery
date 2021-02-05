@@ -8,6 +8,19 @@ import scala.concurrent.Future
 case class SWDiscoveryHelper(sw : SWDiscovery) {
   implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
 
+  def count : Future[Int] = {
+    sw
+      .transaction
+      .projection
+      .aggregate("count")
+      .countAll()
+      .commit()
+      .raw
+      .map( json => {
+        SparqlBuilder.createLiteral(json("results")("bindings")(0)("count")).toInt
+      })
+  }
+
   /**
    * Discovery search functionalities
    *
@@ -37,13 +50,13 @@ case class SWDiscoveryHelper(sw : SWDiscovery) {
 
     /* inherited from something ??? */
     val state = if (motherClassProperties != URI("")) {
-      sw.root()
+      sw.root
         .something("_esp___type")
         .focus(sw.focusNode)
         .isLinkTo(QueryVariable("_esp___type"),"_esp___property").isSubjectOf(URI("a"))
         .set(motherClassProperties)
     } else {
-      sw.root()
+      sw.root
         .something("_esp___type")
         .focus(sw.focusNode)
         .isLinkTo(QueryVariable("_esp___type"),"_esp___property")
@@ -55,6 +68,7 @@ case class SWDiscoveryHelper(sw : SWDiscovery) {
       case "datatypeProperty" => state.focus("_esp___type").filter.isLiteral
       case _ => state
     }).select(List("_esp___property"))
+      .distinct
       .commit()
       .raw
       .map( json => {

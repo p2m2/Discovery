@@ -1,8 +1,8 @@
 package inrae.semantic_web
 
-import inrae.semantic_web.event.{DiscoveryRequestEvent, DiscoveryStateRequestEvent, Publisher, Subscriber}
-import inrae.semantic_web.internal.{DatatypeNode, pm}
-import inrae.semantic_web.rdf.{SparqlDefinition, URI}
+import inrae.semantic_web.event._
+import inrae.semantic_web.internal._
+import inrae.semantic_web.rdf.{QueryVariable, SparqlDefinition, URI}
 import inrae.semantic_web.sparql.QueryResult
 import inrae.semantic_web.strategy._
 import upickle.default.{macroRW, ReadWriter => RW}
@@ -16,7 +16,7 @@ object SWTransaction {
   implicit val rw: RW[SWTransaction] = macroRW
 }
 
-case class SWTransaction(sw : SWDiscovery, lRef: Seq[String] = List(), limit : Int = 0, offset : Int = 0)
+case class SWTransaction(sw : SWDiscovery)
     extends Subscriber[DiscoveryRequestEvent,StrategyRequest]
 {
   implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
@@ -28,24 +28,6 @@ case class SWTransaction(sw : SWDiscovery, lRef: Seq[String] = List(), limit : I
   val _prom_raw: Promise[ujson.Value] = Promise[ujson.Value]()
   val raw: Future[ujson.Value] = _prom_raw.future
   var currentRequestEvent: String = DiscoveryStateRequestEvent.START.toString()
-
-  val mapId2Var: Map[String, String] =  pm.SparqlGenerator.correspondenceVariablesIdentifier(sw.rootNode)._1
-
-  val lDatatype: Seq[DatatypeNode] = sw.rootNode.lDatatypeNode.filter(ld => lRef.contains(ld.property.reference()))
-  trace("list datatype : "+lDatatype.toString)
-
-  val lSelectVariables: Seq[String] = {
-    /* select uri type ask with decoration/datatype */
-    lDatatype.map(ld => {
-      mapId2Var(ld.refNode)
-    }) ++ {
-      /* select user ask variable */
-      lRef match {
-        case v if v.length > 0 => v.flatMap(ref => variable(ref))
-        case _ => sw.rootNode.referencesChildren().flatMap(ref => variable(ref))
-      }
-    }
-  }.distinct
 
   private var countEvent: Int = 1
 
@@ -81,19 +63,6 @@ case class SWTransaction(sw : SWDiscovery, lRef: Seq[String] = List(), limit : I
     _prom_raw failure(SWDiscoveryException("aborted by the user."))
   }
 
-  private def variable(reference: String) : Option[String] = {
-    debug(" -- variable -- ")
-    val variableNameList = pm.SelectNode.getNodeWithRef(reference, sw.rootNode)
-      .map( v => {
-        pm.SparqlGenerator.correspondenceVariablesIdentifier(sw.rootNode)._1.getOrElse(reference,"")
-      })
-
-    if (variableNameList.filter(_ != "").length==0) {
-      None
-    } else {
-      Some(variableNameList(0))
-    }
-  }
 
   def process_datatypes(qr : QueryResult,
                         datatypeNode : DatatypeNode,
@@ -128,6 +97,25 @@ case class SWTransaction(sw : SWDiscovery, lRef: Seq[String] = List(), limit : I
   def commit() : SWTransaction = {
     notify(DiscoveryRequestEvent(DiscoveryStateRequestEvent.START))
 
+    val lSelectedVariable : Seq[QueryVariable] = sw.rootNode.getChild(Projection(List(),"")).lastOption match {
+      case Some(proj) => proj.variables.distinct
+      case None => {
+        notify(DiscoveryRequestEvent(DiscoveryStateRequestEvent.ERROR_REQUEST_DEFINITION))
+        throw SWDiscoveryException("projection/selected required variables are not defined.")
+      }
+    }
+
+    val lDatatype: Seq[DatatypeNode] =
+      sw.rootNode.getChild[DatatypeNode](DatatypeNode("",SubjectOf("",URI("")),"unk"))
+        .filter(ld => lSelectedVariable.map(_.name).contains(ld.property.reference()))
+
+    if ( lDatatype.filter( datatypeNode => lSelectedVariable.map(_.name).contains(datatypeNode.refNode) ).length != lDatatype.length )
+      {
+        notify(DiscoveryRequestEvent(DiscoveryStateRequestEvent.ERROR_REQUEST_DEFINITION))
+        throw SWDiscoveryException("Select variable with his datatype ["+lDatatype.map( d=>d.idRef + "->"+d.refNode).mkString(" ,")+"]")
+      }
+
+
     Try(StrategyRequestBuilder.build(sw.config)) match {
       case Failure(e) => _prom_raw failure (e)
       case Success(driver) => {
@@ -151,7 +139,7 @@ case class SWTransaction(sw : SWDiscovery, lRef: Seq[String] = List(), limit : I
                   /* find uris value inside results to decorate */
                   val lUris: Seq[SparqlDefinition] =
                     try {
-                      qr.getValues(mapId2Var(datatypeNode.refNode))
+                      qr.getValues(datatypeNode.refNode)
                     } catch {
                       case _: Throwable => {
                         List()
@@ -166,7 +154,6 @@ case class SWTransaction(sw : SWDiscovery, lRef: Seq[String] = List(), limit : I
             })) onComplete {
               case Success(_) => {
                 notify(DiscoveryRequestEvent(DiscoveryStateRequestEvent.DATATYPE_DONE))
-                qr.v2Ident(mapId2Var)
                 _prom_raw success qr.json
                 notify(DiscoveryRequestEvent(DiscoveryStateRequestEvent.REQUEST_DONE))
               }
@@ -181,4 +168,66 @@ case class SWTransaction(sw : SWDiscovery, lRef: Seq[String] = List(), limit : I
     }
     this
   }
+
+  case class ProjectionExpressionIncrement(v : String) {
+
+    def manage(n:AggregateNode,forward : Boolean = false) : SWTransaction = {
+      sw.focusManagement(
+        ProjectionExpression(QueryVariable(v),n,sw.getUniqueRef()),false).transaction
+    }
+
+    def count(ref : String, distinct: Boolean=false) : SWTransaction = manage(Count(QueryVariable(ref),distinct,sw.getUniqueRef()))
+    def countAll(distinct: Boolean=false) : SWTransaction = manage(CountAll(distinct,sw.getUniqueRef()),true)
+  }
+
+  def aggregate(`var` : String) : ProjectionExpressionIncrement = ProjectionExpressionIncrement(`var`)
+
+  def projection  : SWTransaction = {
+    /* check if a projection exist or create a new one */
+    sw.rootNode.getChild(Projection(Seq(),"")).lastOption match {
+      case Some(p) => sw.focus(p.idRef).transaction
+      case None => sw.root.focusManagement(Projection(Seq(),sw.getUniqueRef())).transaction
+    }
+  }
+
+  def projection( lRef: Seq[String] )  : SWTransaction = {
+    /* check if a projection and concat the variables selected list or create a new one */
+    sw.rootNode.getChild(Projection(Seq(),"")).lastOption match {
+      case Some(p) => {
+        val listVariable : Seq[QueryVariable] = p.variables ++  lRef.map(QueryVariable(_))
+        sw.root.focusManagement(
+          Projection(listVariable,p.idRef,p.children))
+          .focus(p.idRef).transaction
+      }
+      case None => sw.root.focusManagement(Projection(lRef.map(QueryVariable(_)),sw.getUniqueRef())).transaction
+    }
+
+  }
+
+  def distinct : SWTransaction = sw.root.focusManagement(Distinct(sw.getUniqueRef()), false).transaction
+
+  def reduced : SWTransaction = sw.root.focusManagement(Reduced(sw.getUniqueRef()), false).transaction
+
+  def limit( value : Int ) : SWTransaction = sw.root.focusManagement(Limit(value,sw.getUniqueRef()), false).transaction
+
+  def offset( value : Int ) : SWTransaction = sw.root.focusManagement(Offset(value,sw.getUniqueRef()), false).transaction
+
+  def orderByAsc( ref: String ) : SWTransaction =
+    sw.refExist(ref).root.focusManagement(OrderByAsc(Seq(QueryVariable(ref)),sw.getUniqueRef()), false).transaction
+
+  def orderByAsc( lRef: Seq[String] ) : SWTransaction = {
+    lRef.foreach( sw.refExist(_) )
+    sw.root.focusManagement(OrderByAsc(lRef.map(QueryVariable(_)),sw.getUniqueRef()), false).transaction
+  }
+
+  def orderByDesc( ref: String ) : SWTransaction =
+    sw.refExist(ref).root.focusManagement(OrderByDesc(Seq(QueryVariable(ref)),sw.getUniqueRef()), false).transaction
+
+  def orderByDesc( lRef: Seq[String] ) : SWTransaction = {
+    lRef.foreach( sw.refExist(_) )
+    sw.root.focusManagement(OrderByDesc(lRef.map(QueryVariable(_)),sw.getUniqueRef()), false).transaction
+  }
+
+
+  def console : SWTransaction = sw.console.transaction
 }
