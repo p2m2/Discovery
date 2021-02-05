@@ -69,7 +69,7 @@ object SWDiscoverySelectIterable extends TestSuite {
                   r => {
                     assert(r("results")("bindings").arr.length<=pageSize)
                     r("results")("bindings").arr.map( json => SparqlBuilder.createLiteral(json("obj")))
-                                                .map( lit => lit.toInt() )}
+                                                .map( lit => lit.toInt )}
                 })
               })).map( list => {
                   assert(list.flatten.sorted == List(1,2,3,4,5,6,7,8,9,10,11,12))

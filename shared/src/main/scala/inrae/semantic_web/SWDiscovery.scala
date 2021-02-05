@@ -68,8 +68,23 @@ case class SWDiscovery(
   def filter : FilterIncrement = FilterIncrement()
 
   case class BindIncrement(`var` : String) {
-    def manage(n:ExpressionNode,forward : Boolean = true) : SWDiscovery = focusManagement(Bind(n,`var`),forward)
+    def manage(n:ExpressionNode,forward : Boolean = true) : SWDiscovery =
+      focusManagement(Bind(n,`var`),forward).root.something(`var`).focus(`var`)
+    /* primary expression */
+
+    /* String fun */
     def subStr(startingLoc : Int,length : Int ) : SWDiscovery = manage(SubStr(startingLoc,length,getUniqueRef()))
+    def regex(pattern : String, flags : String="") : SWDiscovery =
+      manage(Regex(pattern,flags,getUniqueRef()))
+    def replace(pattern : String, replacement : String, flags : String="") : SWDiscovery =
+      manage(Replace(pattern,replacement,flags,getUniqueRef()))
+
+    /* Numeric  fun */
+    def abs() : SWDiscovery = manage(Abs(getUniqueRef()))
+    def round() : SWDiscovery = manage(Round(getUniqueRef()))
+    def ceil() : SWDiscovery = manage(Ceil(getUniqueRef()))
+    def floor() : SWDiscovery = manage(Floor(getUniqueRef()))
+    def rand() : SWDiscovery = manage(Rand(getUniqueRef()))
   }
 
   def bind(`var` : String) : BindIncrement = BindIncrement(`var`)

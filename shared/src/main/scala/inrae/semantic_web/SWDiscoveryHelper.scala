@@ -17,7 +17,7 @@ case class SWDiscoveryHelper(sw : SWDiscovery) {
       .commit()
       .raw
       .map( json => {
-        SparqlBuilder.createLiteral(json("results")("bindings")(0)("count")).toInt()
+        SparqlBuilder.createLiteral(json("results")("bindings")(0)("count")).toInt
       })
   }
 

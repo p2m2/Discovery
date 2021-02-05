@@ -13,13 +13,13 @@ object SparqlGenerator  {
 
   def prefixes(prefixes : Map[String,IRI]) : String = {
     prefixes.map {
-      case (k,v) => "PREFIX "+k+": "+v.sparql()
+      case (k,v) => "PREFIX "+k+": "+v.sparql
     }.mkString("\n")
   }
 
-  def from(graphs : Seq[IRI]): String = graphs.map( g => "FROM "+g.sparql()).mkString("\n")
+  def from(graphs : Seq[IRI]): String = graphs.map( g => "FROM "+g.sparql).mkString("\n")
 
-  def fromNamed(graphs : Seq[IRI]): String = graphs.map( g => "FROM NAMED "+g.sparql()).mkString("\n")
+  def fromNamed(graphs : Seq[IRI]): String = graphs.map( g => "FROM NAMED "+g.sparql).mkString("\n")
 
   def solutionSequenceModifierStart(root : Root) : String = {
 
@@ -99,10 +99,10 @@ object SparqlGenerator  {
       case node : Value              => node.term match {
         case _ : QueryVariable => "\tBIND ( ?" + varIdSire +  " AS " + node.term.toString + ")"
         case _  =>  "\tVALUES ?" +varIdSire+ " { " + node.term.toString + " } .\n" }
-      case node : ListValues         => "\tVALUES ?" +varIdSire+ " { " + node.terms.map(t => t.sparql()).mkString(" ") + " } .\n"
+      case node : ListValues         => "\tVALUES ?" +varIdSire+ " { " + node.terms.map(t => t.sparql).mkString(" ") + " } .\n"
       case node : ProjectionExpression  => "(" + sparqlNode(node.expression,node.idRef,variableName) + " AS "+ node.`var` + ") "
       case node : Bind               => "\tBIND (" + sparqlNode(node.expression,varIdSire,variableName) + " AS "+ "?" + node.idRef + ") \n"
-      case node : Count              => "COUNT ("+ { if (node.distinct) "DISTINCT" else "" } + " "+ node.idRef +")"
+      case node : Count              => "COUNT ("+ { if (node.distinct) "DISTINCT" else "" } + " "+ node.varToCount.sparql +")"
       case node : CountAll           => "COUNT ("+ { if (node.distinct) "DISTINCT" else "" } + " * )"
       case _ : Distinct              => "DISTINCT "
       case _ : Reduced               => "REDUCED "
@@ -113,6 +113,13 @@ object SparqlGenerator  {
       case node : OrderByDesc        => "DESC (" + node.list.mkString(") DESC (") + ")"
       /* Expression Node */
       case node : SubStr             => "SUBSTR (" + "?"+ varIdSire  + "," + node.start.toString + "," + node.length.toString + ")"
+      case node : Regex              => "REGEX (" + "?"+ varIdSire  + "," + node.pattern.sparql + "," + node.flags.sparql + ")"
+      case node : Replace            => "REPLACE (" + "?"+ varIdSire  + "," + node.pattern.sparql + "," + node.replacement.sparql + ","+ node.flags.sparql + ")"
+      case _ : Abs                   => "ABS (" + "?"+ varIdSire  +  ")"
+      case _ : Round                 => "ROUND (" + "?"+ varIdSire  +  ")"
+      case _ : Floor                 => "FLOOR (" + "?"+ varIdSire  +  ")"
+      case _ : Ceil                  => "CEIL (" + "?"+ varIdSire  +  ")"
+      case _ : Rand                  => "RAND ()"
 
       case node : FilterNode         => "\tFILTER ( " + {
         if (node.negation) {

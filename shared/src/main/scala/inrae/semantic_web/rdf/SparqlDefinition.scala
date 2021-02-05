@@ -10,9 +10,9 @@ case class Triple(s: SparqlDefinition, p: SparqlDefinition, o: SparqlDefinition)
 
 sealed trait SparqlDefinition {
 
-  def sparql() : String
+  def sparql : String
 
-  def naiveLabel() : String
+  def naiveLabel : String
 }
 
 object SparqlDefinition {
@@ -42,12 +42,12 @@ object IRI {
 @JSExportTopLevel(name="IRI")
 case class IRI (var iri : String) extends SparqlDefinition {
   iri = SparqlDefinition.cleanString(iri)
-  override def toString() : String = {
+  override def toString : String = {
       "<"+iri+">"
   }
-  def sparql() : String = toString
+  def sparql : String = toString
 
-  def naiveLabel() : String = iri.split("[/#]").last
+  def naiveLabel : String = iri.split("[/#]").last
 
 }
 
@@ -79,7 +79,7 @@ case class URI (localNameUser : String,nameSpaceUser : String = "") extends Spar
     case _ => nameSpaceUser
   }
 
-  override def toString() : String = {
+  override def toString : String = {
     (localName,nameSpace) match {
       case ("a",_) => "a"
       case (_,"") => "<"+localName+">"
@@ -87,9 +87,9 @@ case class URI (localNameUser : String,nameSpaceUser : String = "") extends Spar
     }
   }
 
-  def sparql() : String = toString
+  def sparql : String = toString
 
-  def naiveLabel() : String = localName.split("[/#]").last
+  def naiveLabel : String = localName.split("[/#]").last
 }
 
 
@@ -104,22 +104,22 @@ object Anonymous {
 case class Anonymous(var value : String) extends SparqlDefinition {
   value = SparqlDefinition.cleanString(value)
 
-  override def toString() : String = value
+  override def toString : String = value
 
-  def sparql() : String = toString
+  def sparql : String = toString
 
-  def naiveLabel() : String = s"Anonymous[$value]"
+  def naiveLabel : String = s"Anonymous[$value]"
 }
 
 @JSExportTopLevel(name="PropertyPath")
 case class PropertyPath(var value : String) extends SparqlDefinition {
   value = SparqlDefinition.cleanString(value)
 
-  override def toString() : String = value
+  override def toString : String = value
 
-  def sparql() : String = toString
+  def sparql : String = toString
 
-  def naiveLabel() : String = s"PropertyPath[$value]"
+  def naiveLabel : String = s"PropertyPath[$value]"
 }
 
 object PropertyPath {
@@ -154,13 +154,15 @@ case class Literal(var value : String,var datatype : URI = URI.empty,var tag : S
     case _ => "@"+tag
   })
 
-  def toInt() : Int = value.toInt
+  def toInt : Int = value.toInt
 
-  def toBoolean() : Boolean = value.toBoolean
+  def toDouble : Double = value.toDouble
 
-  def sparql() : String = toString
+  def toBoolean : Boolean = value.toBoolean
 
-  def naiveLabel() : String = value
+  def sparql : String = toString
+
+  def naiveLabel : String = value
 }
 
 object QueryVariable {
@@ -173,9 +175,9 @@ case class QueryVariable (var name : String) extends SparqlDefinition {
   override def toString() : String = {
     "?"+name
   }
-  def sparql() : String = toString
+  def sparql : String = toString
 
-  def naiveLabel() : String = s"Variable[$name]"
+  def naiveLabel : String = s"Variable[$name]"
 }
 
 object SparqlBuilder {

@@ -615,55 +615,6 @@ case class SourcesNode(refNode : String, sources : Seq[String],override val idRe
   def copy(children : Seq[Node]) : SourcesNode = SourcesNode(refNode,sources,idRef,children)
   def duplicateWithoutChildren(): SourcesNode = SourcesNode(refNode,sources,idRef,Seq())
 }
-/* ----------------------------------------------------------------------------------------------------------------------------- */
-/* Expression */
-
-object Bind {
-  implicit val rw: RW[Bind] = macroRW
-}
-
-case class Bind(expression : ExpressionNode,
-                override val idRef : String,
-                override val children: Seq[Node] = Seq[Node]()) extends Node(idRef,children) {
-  override def copy(children: Seq[Node]): Node = Bind(expression,idRef,children)
-  override def duplicateWithoutChildren(): Node = Bind(expression,idRef,children)
-  override def accept(n: Node): Boolean = n match {
-    case _ : Something  => false
-    case _ : URIRdfNode => true
-    case _ : FilterNode => true
-    case _ : Value      => true
-    case _ : ListValues => true
-    case _              => false
-  }
-}
-
-object ExpressionNode {
-  implicit val rw: RW[ExpressionNode] =
-    RW.merge(
-      SubStr.rw
-    )
-}
-
-
-sealed abstract class ExpressionNode(override val idRef : String, override val children: Seq[Node] = Seq[Node]()) extends Node(idRef,children)  {
-  override def accept(n: Node): Boolean = false
-}
-
-object SubStr {
-  implicit val rw: RW[SubStr] = macroRW
-}
-
-case class SubStr(
-                  start : Int,
-                  length : Int,
-                  override val idRef : String,
-                  override val children: Seq[Node] = Seq[Node]()) extends ExpressionNode(idRef,children) {
-  override def copy(children: Seq[Node]): Node = SubStr(start,length,idRef,children)
-
-  override def duplicateWithoutChildren(): Node = SubStr(start,length,idRef,children)
-}
-
-
 
 /* ----------------------------------------------------------------------------------------------------------------------------- */
 /* Solution Sequence Modifier */
@@ -680,8 +631,8 @@ object SolutionSequenceModifierNode {
 }
 
 sealed abstract class SolutionSequenceModifierNode(
-                                 idRef : String,
-                                 override val children: Seq[Node]) extends Node(idRef,children) {
+                                                    idRef : String,
+                                                    override val children: Seq[Node]) extends Node(idRef,children) {
   override def accept(n: Node): Boolean = false
 }
 
@@ -802,6 +753,242 @@ case class Limit(value : Int,
 
 
 
+
+/* ----------------------------------------------------------------------------------------------------------------------------- */
+/* Expression */
+
+object Bind {
+  implicit val rw: RW[Bind] = macroRW
+}
+
+case class Bind(expression : ExpressionNode,
+                override val idRef : String,
+                override val children: Seq[Node] = Seq[Node]()) extends Node(idRef,children) {
+  override def copy(children: Seq[Node]): Node = Bind(expression,idRef,children)
+  override def duplicateWithoutChildren(): Node = Bind(expression,idRef,children)
+  override def accept(n: Node): Boolean = n match {
+    case _ : Something  => false
+    case _ : URIRdfNode => true
+    case _ : FilterNode => true
+    case _ : Value      => true
+    case _ : ListValues => true
+    case _              => false
+  }
+}
+
+object ExpressionNode {
+  implicit val rw: RW[ExpressionNode] =
+    RW.merge(
+      FunctionStringNode.rw,
+      BuiltInCallNode.rw
+    )
+}
+
+
+sealed abstract class ExpressionNode(
+                             override val idRef : String
+                           ) extends Node(idRef,Seq[Node]())
+
+
+sealed abstract class ConditionalOrExpression(
+                                               listAndExpression : Seq[ConditionalAndExpression],
+                                               override val idRef : String
+                                             ) extends ExpressionNode(idRef)
+
+sealed abstract class ConditionalAndExpression(
+                                               listValueLogical : Seq[ValueLogical],
+                                               override val idRef : String
+                                             ) extends ExpressionNode(idRef)
+
+sealed abstract class ValueLogical(
+                                                relationExpression : relationExpression,
+                                                override val idRef : String
+                                  ) extends ExpressionNode(idRef)
+
+sealed trait OpNumericExpression
+
+class EqualNumericExpression extends OpNumericExpression // =
+class DiffNumericExpression extends OpNumericExpression // !=
+class InfNumericExpression extends OpNumericExpression // <
+class SupNumericExpression extends OpNumericExpression // >
+class InfEqualNumericExpression extends OpNumericExpression // <=
+class SupEqualNumericExpression extends OpNumericExpression // >=
+/* note : NOT and IN not implemented */
+
+sealed abstract class relationExpression(
+                                          ne : NumericExpression,
+                                          listNextOpExp : Seq[(OpNumericExpression,NumericExpression)],
+                                          override val idRef : String
+                                        ) extends ExpressionNode(idRef)
+
+sealed abstract class NumericExpression(
+                                          exp : AdditiveExpression,
+                                          override val idRef : String
+                                        ) extends ExpressionNode(idRef)
+
+sealed trait OpMultiplicativeExpression
+
+class AddMultiplicativeExpression( v : MultiplicativeExpression) extends OpMultiplicativeExpression // '+' MultiplicativeExpression
+
+class MinusMultiplicativeExpression( v : MultiplicativeExpression) extends OpMultiplicativeExpression //  '-' MultiplicativeExpression
+
+// ( NumericLiteralPositive | NumericLiteralNegative )  '*' UnaryExpression
+//l numeric
+class MulMultiplicativeExpression( l : Literal,
+                            v : MultiplicativeExpression,
+                            u: UnaryExpression) extends OpMultiplicativeExpression
+// ( NumericLiteralPositive | NumericLiteralNegative )  '*' UnaryExpression
+class DivMultiplicativeExpression( l : Literal,
+                            v : MultiplicativeExpression,
+                            u: UnaryExpression) extends OpMultiplicativeExpression
+
+
+sealed abstract class AdditiveExpression(
+                                          exp : MultiplicativeExpression,
+                                          listNextOpExp : Seq[(OpMultiplicativeExpression,NumericExpression)],
+                                          override val idRef : String
+                                        ) extends ExpressionNode(idRef)
+
+sealed abstract class MultiplicativeExpression (
+                                                 exp : MultiplicativeExpression,
+                                                 override val idRef : String
+                                               )extends ExpressionNode(idRef)
+
+sealed trait OpUnaryExpression
+class NotUnaryExpression extends OpUnaryExpression // =
+class AddUnaryExpression extends OpUnaryExpression // !=
+class MinusUnaryExpression extends OpUnaryExpression // <
+
+sealed abstract class UnaryExpression(
+                                        op : Option[OpUnaryExpression],
+                                        p : PrimaryExpression,
+                                        override val idRef : String
+                                      ) extends ExpressionNode(idRef)
+
+
+sealed abstract class PrimaryExpression(override val idRef : String) extends ExpressionNode(idRef)
+
+
+case class SparqlDefinitionExpression(sd : SparqlDefinition,override val idRef : String ) extends PrimaryExpression(idRef) {
+  override def copy(children: Seq[Node]): Node = SparqlDefinitionExpression(sd,idRef)
+  override def duplicateWithoutChildren(): Node = SparqlDefinitionExpression(sd,idRef)
+}
+
+object FunctionStringNode {
+  implicit val rw: RW[FunctionStringNode] =  RW.merge(
+    SubStr.rw,
+    Regex.rw,
+    Replace.rw
+  )
+}
+
+sealed abstract class FunctionStringNode(override val idRef : String) extends PrimaryExpression(idRef)
+
+object SubStr {
+  implicit val rw: RW[SubStr] = macroRW
+}
+
+case class SubStr(
+                  start : Int,
+                  length : Int,
+                  override val idRef : String) extends FunctionStringNode(idRef) {
+  override def copy(children: Seq[Node]): Node = SubStr(start,length,idRef)
+  override def duplicateWithoutChildren(): Node = SubStr(start,length,idRef)
+}
+
+object Regex {
+  implicit val rw: RW[Regex] = macroRW
+}
+
+case class Regex(
+                  pattern : Literal,
+                  flags : Literal,
+                  override val idRef : String) extends FunctionStringNode(idRef) {
+  override def copy(children: Seq[Node]): Node = Regex(pattern,flags,idRef)
+  override def duplicateWithoutChildren(): Node = Regex(pattern,flags,idRef)
+}
+
+object Replace {
+  implicit val rw: RW[Replace] = macroRW
+}
+
+
+case class Replace(
+                    pattern : Literal,
+                    replacement : Literal,
+                    flags : Literal="",
+                  override val idRef : String) extends FunctionStringNode(idRef) {
+  override def copy(children: Seq[Node]): Node = Replace(pattern,replacement,flags,idRef)
+  override def duplicateWithoutChildren(): Node = Replace(pattern,replacement,flags,idRef)
+}
+
+object FunctionNumericNode {
+  implicit val rw: RW[FunctionNumericNode] =  RW.merge(
+    Abs.rw,
+    Round.rw,
+    Ceil.rw,
+    Floor.rw,
+    Rand.rw
+  )
+}
+
+sealed abstract class FunctionNumericNode(override val idRef : String) extends PrimaryExpression(idRef)
+
+
+object Abs {
+  implicit val rw: RW[Abs] = macroRW
+}
+
+
+case class Abs(
+                override val idRef : String) extends FunctionNumericNode(idRef) {
+  override def copy(children: Seq[Node]): Node = Abs(idRef)
+  override def duplicateWithoutChildren(): Node = Abs(idRef)
+}
+
+object Round {
+  implicit val rw: RW[Round] = macroRW
+}
+
+
+case class Round(
+                override val idRef : String) extends FunctionNumericNode(idRef) {
+  override def copy(children: Seq[Node]): Node = Round(idRef)
+  override def duplicateWithoutChildren(): Node = Round(idRef)
+}
+
+object Ceil {
+  implicit val rw: RW[Ceil] = macroRW
+}
+
+case class Ceil(
+                  override val idRef : String) extends FunctionNumericNode(idRef) {
+  override def copy(children: Seq[Node]): Node = Ceil(idRef)
+  override def duplicateWithoutChildren(): Node = Ceil(idRef)
+}
+
+object Floor {
+  implicit val rw: RW[Floor] = macroRW
+}
+
+case class Floor(
+                 override val idRef : String) extends FunctionNumericNode(idRef) {
+  override def copy(children: Seq[Node]): Node = Floor(idRef)
+  override def duplicateWithoutChildren(): Node = Floor(idRef)
+}
+
+object Rand {
+  implicit val rw: RW[Rand] = macroRW
+}
+
+case class Rand(override val idRef : String) extends FunctionNumericNode(idRef) {
+  override def copy(children: Seq[Node]): Node = Rand(idRef)
+  override def duplicateWithoutChildren(): Node = Rand(idRef)
+}
+
+/* ---------------------------------------------------------------------------------------------------  */
+
+
 object AggregateNode {
   implicit val rw: RW[AggregateNode] = RW.merge(
     Count.rw,
@@ -825,9 +1012,7 @@ case class ProjectionExpression(`var` : QueryVariable,
 /*
  * ------------------------------------  Aggregate
  */
-sealed abstract class AggregateNode(
-                                     idRef : String,
-                                     override val children: Seq[Node]) extends Node(idRef,children) {
+sealed abstract class AggregateNode(idRef : String) extends Node(idRef,Seq()) {
   override def accept(n: Node): Boolean = false
 }
 
@@ -835,22 +1020,22 @@ object Count {
   implicit val rw: RW[Count] = macroRW
 }
 
-case class Count(distinct : Boolean = false,
+case class Count(
+                 varToCount : QueryVariable,
+                 distinct : Boolean = false,
                  override val idRef : String,
-                 override val children: Seq[Node] = Seq[Node]()) extends AggregateNode(idRef,children) {
-  override def copy(children: Seq[Node]): Node = Count(distinct,idRef,children)
-  override def duplicateWithoutChildren(): Node = Count(distinct,idRef,children)
+                 ) extends AggregateNode(idRef) {
+  override def copy(children: Seq[Node]): Node = Count(varToCount,distinct,idRef)
+  override def duplicateWithoutChildren(): Node = Count(varToCount,distinct,idRef)
 }
 
 object CountAll {
   implicit val rw: RW[CountAll] = macroRW
 }
 
-case class CountAll(distinct : Boolean = false,
-                    override val idRef : String,
-                    override val children: Seq[Node] = Seq[Node]()) extends AggregateNode(idRef,children) {
-  override def copy(children: Seq[Node]): Node = CountAll(distinct,idRef,children)
-  override def duplicateWithoutChildren(): Node = CountAll(distinct,idRef,children)
+case class CountAll(distinct : Boolean = false,override val idRef : String) extends AggregateNode(idRef) {
+  override def copy(children: Seq[Node]): Node = CountAll(distinct,idRef)
+  override def duplicateWithoutChildren(): Node = CountAll(distinct,idRef)
 }
 
 object BuiltInCallNode {
@@ -863,9 +1048,7 @@ object BuiltInCallNode {
  * ------------------------------------  BuiltInCallNode
  */
 
-sealed abstract class BuiltInCallNode(
-                                     idRef : String,
-                                     override val children: Seq[Node] = Seq[Node]()) extends Node(idRef,children) {
+sealed abstract class BuiltInCallNode(idRef : String) extends PrimaryExpression(idRef){
   override def accept(n: Node): Boolean = false
 }
 
@@ -874,9 +1057,20 @@ object Str {
 }
 
 case class Str(term: SparqlDefinition,
-               override val idRef : String,
-               override val children: Seq[Node] = Seq[Node]()) extends BuiltInCallNode(idRef,children) {
-  override def copy(children: Seq[Node]): Node = Str(term,idRef,children)
+               override val idRef : String) extends BuiltInCallNode(idRef) {
+  override def copy(children: Seq[Node]): Node = Str(term,idRef)
+  override def duplicateWithoutChildren(): Node = Str(term,idRef)
+}
 
-  override def duplicateWithoutChildren(): Node = Str(term,idRef,children)
+case class Lang(term: SparqlDefinition,
+               override val idRef : String,
+               override val children: Seq[Node] = Seq[Node]()) extends BuiltInCallNode(idRef) {
+  override def copy(children: Seq[Node]): Node = Lang(term,idRef,children)
+  override def duplicateWithoutChildren(): Node = Lang(term,idRef,children)
+}
+
+case class LangMatches(term: SparqlDefinition,
+               override val idRef : String) extends BuiltInCallNode(idRef) {
+  override def copy(children: Seq[Node]): Node = LangMatches(term,idRef)
+  override def duplicateWithoutChildren(): Node = LangMatches(term,idRef)
 }
