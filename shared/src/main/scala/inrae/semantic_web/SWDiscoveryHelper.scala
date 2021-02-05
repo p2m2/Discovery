@@ -68,6 +68,7 @@ case class SWDiscoveryHelper(sw : SWDiscovery) {
       case "datatypeProperty" => state.focus("_esp___type").filter.isLiteral
       case _ => state
     }).select(List("_esp___property"))
+      .distinct
       .commit()
       .raw
       .map( json => {

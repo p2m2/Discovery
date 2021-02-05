@@ -41,7 +41,7 @@ object SWDiscoveryHelperTest  extends TestSuite  {
           .map(count => assert(count == 2))
       }).flatten
     }
-/*
+
     test("findClasses") {
       insert_data.map(_ => {
         SWDiscovery(config)
@@ -85,7 +85,7 @@ object SWDiscoveryHelperTest  extends TestSuite  {
           .findObjectProperties(URI("ObjectProperty", "owl"))
           .map(response => assert(response.length == 1))
       }).flatten
-    }*/
+    }
   }
 
 }
