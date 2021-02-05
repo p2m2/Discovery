@@ -40,12 +40,15 @@ object BindTest extends TestSuite {
     test("bind replace") {
       val pat = "defg"
       val repl ="aaaaa"
+      val req = SWDiscovery(config)
+        .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
+        .something()
+        .isSubjectOf(URI("http://bb"),"r")
+        .bind("rep").replace(pat,repl)
+
+
       insert_data.map(_ => {
-        SWDiscovery(config)
-          .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
-          .something()
-          .isSubjectOf(URI("http://bb"),"r")
-          .bind("rep").replace(pat,repl)
+        req
           .select(Seq("rep"))
           .distinct
           .commit()
@@ -53,6 +56,17 @@ object BindTest extends TestSuite {
           assert(r("results")("bindings").arr.filter( v=> v("rep")("value").toString.contains(repl) ).length == 2)
         })
       }).flatten
+
+      insert_data.map(_ => {
+        SWDiscovery().setSerializedQuery(req.getSerializedQuery)
+          .select(Seq("rep"))
+          .distinct
+          .commit()
+          .raw.map(r => {
+          assert(r("results")("bindings").arr.filter( v=> v("rep")("value").toString.contains(repl) ).length == 2)
+        })
+      }).flatten
+
     }
 
     test("bind abs") {
