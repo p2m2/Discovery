@@ -795,11 +795,11 @@ class MinusMultiplicativeExpression( v : MultiplicativeExpression) extends OpMul
 
 // ( NumericLiteralPositive | NumericLiteralNegative )  '*' UnaryExpression
 //l numeric
-class MulMultiplicativeExpression( l : Literal,
+class MulMultiplicativeExpression[T]( l : Literal[T],
                             v : MultiplicativeExpression,
                             u: UnaryExpression) extends OpMultiplicativeExpression
 // ( NumericLiteralPositive | NumericLiteralNegative )  '*' UnaryExpression
-class DivMultiplicativeExpression( l : Literal,
+class DivMultiplicativeExpression[T]( l : Literal[T],
                             v : MultiplicativeExpression,
                             u: UnaryExpression) extends OpMultiplicativeExpression
 

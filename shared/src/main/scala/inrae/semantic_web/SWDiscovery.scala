@@ -3,7 +3,7 @@ package inrae.semantic_web
 import inrae.semantic_web
 import inrae.semantic_web.event.{DiscoveryRequestEvent, DiscoveryStateRequestEvent}
 import inrae.semantic_web.internal._
-import inrae.semantic_web.internal.pm.{SelectNode, SerializationBuilder}
+import inrae.semantic_web.internal.pm.SelectNode
 import inrae.semantic_web.rdf._
 import inrae.semantic_web.sparql.QueryResult
 import inrae.semantic_web.strategy.StrategyRequestBuilder
@@ -12,7 +12,7 @@ import wvlet.log.Logger.rootLogger._
 
 import java.util.UUID.randomUUID
 import scala.concurrent.Future
-import upickle.default.{macroRW, ReadWriter => RW}
+import upickle.default.{macroRW, read, write, ReadWriter => RW}
 
 final case class SWDiscoveryException(private val message: String = "",
                                       private val cause: Throwable = None.orNull) extends Exception(message,cause)
@@ -251,10 +251,8 @@ case class SWDiscovery(
   def setList( terms : Seq[SparqlDefinition] ) : SWDiscovery = focusManagement(ListValues(terms),forward = false)
 
 
-  def getSerializedQuery : String = SerializationBuilder.serialize(this)
-
-
-  def setSerializedQuery(query : String) : SWDiscovery = SerializationBuilder.deserialize(query)
+  def getSerializedString : String = write(this)
+  def setSerializedString(query : String) : SWDiscovery = read[SWDiscovery](query)
 
 
   def console : SWDiscovery = {

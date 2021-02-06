@@ -103,10 +103,10 @@ case class SWDiscoveryJs(
   def sparql() : String = sw.sparql
 
   @JSExport
-  def getSerializedQuery: String = sw.getSerializedQuery
+  def getSerializedString: String = sw.getSerializedString
 
   @JSExport
-  def setSerializedQuery(query : String): SWDiscoveryJs = SWDiscoveryJs(config,sw.setSerializedQuery(query))
+  def setSerializedString(query : String): SWDiscoveryJs = SWDiscoveryJs(config,sw.setSerializedString(query))
 
   @JSExport
   def select(lRef: String*): SWTransactionJs = SWTransactionJs(sw.select(lRef))

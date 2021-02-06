@@ -1,5 +1,6 @@
 package inrae.semantic_web.rdf
 import inrae.semantic_web.SWDiscoveryException
+//import upickle.default.{macroRW, ReadWriter => RW, Reader => R, Writer => W}
 import upickle.default.{macroRW, ReadWriter => RW}
 
 import scala.language.implicitConversions
@@ -18,25 +19,30 @@ sealed abstract class SparqlDefinition {
 
 object SparqlDefinition {
 
-  implicit def fromAny( any : Any ): SparqlDefinition = any match {
-    case v: SparqlDefinition => v
-    case num: Int => Literal(num.toString, URI("integer", "xsd"))
-    case dec: Double => Literal(dec.toString, URI("double", "xsd"))
-    case bool: Boolean => Literal(bool.toString, URI("boolean", "xsd"))
-    case stringVar: String
-      if stringVar.startsWith("?") &&
-        stringVar.length > 1 => QueryVariable(stringVar.substring(1, stringVar.length))
-    case uri: String if !uri.contains("://") && uri.contains(":") => URI(uri)
-    case string: String => string
+  implicit def fromAny( any : Any ): SparqlDefinition =
+    any match {
+      case v: SparqlDefinition => v
+      case num: Int => Literal(num)
+      case dec: Double => Literal(dec)
+      case bool: Boolean => Literal(bool)
+      case stringVar: String
+        if (stringVar.startsWith("?")||stringVar.startsWith("$")) &&
+          stringVar.length > 1 => QueryVariable(stringVar.substring(1, stringVar.length))
+      case string: String if string.startsWith("<")&&string.endsWith(">") => URI(string)
+      case string: String if string.contains(":") && string.matches("\\S+") => URI(string)
+      case string: String => Literal(string)
 
-    case _ => throw SWDiscoveryException(any.toString + " can not be cast into Sparql Def type.")
-  }
+      case _ => throw SWDiscoveryException(any.toString + " can not be cast into Sparql Def type.")
+    }
 
-  implicit def fromString(s: String): Literal = Literal(s)
-  implicit def fromString(s: Int): Literal = Literal(s.toString,URI("integer","xsd"))
-  implicit def fromString(s: Boolean): Literal = Literal(s.toString,URI("boolean","xsd"))
-  implicit def fromString(s: Double): Literal = Literal(s.toString,URI("double","xsd"))
-  implicit def fromString(s: Float): Literal = Literal(s.toString,URI("float","xsd"))
+
+  implicit def fromString(s: String): Literal[String] = Literal(s)
+  implicit def fromString(s: Int): Literal[Int] = Literal(s)
+  implicit def fromString(s: Boolean): Literal[Boolean] = Literal(s)
+  implicit def fromString(s: Double): Literal[Double] = Literal(s)
+  implicit def fromString(s: Float): Literal[Float] = Literal(s)
+
+  implicit def fromLiteralDouble(s: Literal[Double]): Literal[String] = Literal(s.value.toString,URI("double","xsd"))
 
   implicit val rw: RW[SparqlDefinition] = RW.merge(
     IRI.rw,
@@ -52,6 +58,7 @@ object SparqlDefinition {
       .replaceAll("\"$","")
       .replaceAll("^<","")
       .replaceAll(">$","")
+      .replaceAll("^\\?","")
   }
 }
 
@@ -149,47 +156,39 @@ object PropertyPath {
   implicit def fromString(s: String): PropertyPath = PropertyPath(s)
 }
 
+
 object Literal {
-  implicit val rw: RW[Literal] = macroRW
+  implicit val rw: RW[Literal[String]] = macroRW
 }
 
 @JSExportTopLevel(name="Literal")
-case class Literal(v : String,datatype : URI = URI.empty,var ta : String="") extends SparqlDefinition {
-  val value: String = SparqlDefinition.cleanString(v)
+case class Literal[T](value : T,datatype : URI = URI.empty,ta : String="") extends SparqlDefinition {
+  private val valueString : String = SparqlDefinition.cleanString(value.toString)
   val tag: String = SparqlDefinition.cleanString(ta)
 
-  def this(value : Int) = {
-    this(value.toString,URI("integer","xsd"))
+  override def toString : String = value match {
+    case _ : String => "\""+ valueString + "\""+ (datatype match {
+        case URI.empty => ""
+        case _ if tag == "" => "^^"+datatype.toString()
+        case _ => ""
+
+      }) + ( tag match {
+        case "" => ""
+        case _ => "@"+tag
+      })
+
+    case _ => value.toString
   }
 
-  def this(value : Boolean) = {
-    this(value.toString,URI("boolean","xsd"))
-  }
-
-  def this(value : Double) = {
-    this(value.toString,URI("double","xsd"))
-  }
-
-  override def toString : String = "\""+ value + "\""+ (datatype match {
-    case URI.empty => ""
-    case _ if tag == "" => "^^"+datatype.toString()
-    case _ => ""
-
-  }) + ( tag match {
-    case "" => ""
-    case _ => "@"+tag
-  })
-
-  def toInt : Int = value.toInt
-
-  def toDouble : Double = value.toDouble
-
-  def toBoolean : Boolean = value.toBoolean
+  def toInt: Int = valueString.toInt
+  def toFloat: Float = valueString.toFloat
+  def toDouble: Double = valueString.toDouble
+  def toBoolean: Boolean = valueString.toBoolean
 
   def sparql : String = toString
-
-  def naiveLabel : String = value
+  def naiveLabel : String = valueString
 }
+
 
 object QueryVariable {
 implicit val rw: RW[QueryVariable] = macroRW
@@ -222,7 +221,7 @@ object SparqlBuilder {
 
   def createUri(value: ujson.Value): URI = URI(value("value").value.toString)
 
-  def createLiteral(value: ujson.Value): Literal = {
+  def createLiteral(value: ujson.Value): Literal[String] = {
     val datatype = try { SparqlDefinition.cleanString(value("datatype").toString) match {
         case v if v.length<=0 => URI.empty
         case v => URI(v)

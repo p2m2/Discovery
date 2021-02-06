@@ -31,7 +31,10 @@ object OrderByTest extends TestSuite {
           .commit()
           .raw.map(r => {
           assert(r("results")("bindings").arr.length == 5)
-          val tab = r("results")("bindings").arr.map( arrow => SparqlBuilder.createLiteral(arrow("v")).toInt)
+
+          val tab = r("results")("bindings").arr.map( arrow => {
+            SparqlBuilder.createLiteral(arrow("v")).toInt
+          })
           assert(tab.sorted == tab)
         })
       }).flatten

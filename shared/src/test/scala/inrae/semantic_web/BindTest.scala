@@ -32,7 +32,7 @@ object BindTest extends TestSuite {
           .distinct
           .commit()
           .raw.map(r => {
-          assert(r("results")("bindings").arr.filter( v=> v("r")("value").toString.contains(regex) ).length == 2)
+          assert(r("results")("bindings").arr.count(v => v("r")("value").toString.contains(regex)) == 2)
         })
       }).flatten
     }
@@ -53,17 +53,17 @@ object BindTest extends TestSuite {
           .distinct
           .commit()
           .raw.map(r => {
-          assert(r("results")("bindings").arr.filter( v=> v("rep")("value").toString.contains(repl) ).length == 2)
-        })
+          assert(r("results")("bindings").arr.count(v => v("rep")("value").toString.contains(repl)) == 2)
+        }).recover(e => println(e))
       }).flatten
 
       insert_data.map(_ => {
-        SWDiscovery().setSerializedQuery(req.getSerializedQuery)
+        SWDiscovery().setSerializedString(req.getSerializedString)
           .select(Seq("rep"))
           .distinct
           .commit()
           .raw.map(r => {
-          assert(r("results")("bindings").arr.filter( v=> v("rep")("value").toString.contains(repl) ).length == 2)
+          assert(r("results")("bindings").arr.count(v => v("rep")("value").toString.contains(repl)) == 2)
         })
       }).flatten
 
@@ -79,7 +79,7 @@ object BindTest extends TestSuite {
           .select(Seq("new_value"))
           .commit()
           .raw.map(r => {
-          assert(SparqlBuilder.createLiteral(r("results")("bindings").arr(0)("new_value")).value == "5.5")
+          assert(SparqlBuilder.createLiteral(r("results")("bindings").arr(0)("new_value")).toDouble == 5.5)
         })
       }).flatten
     }
@@ -94,7 +94,7 @@ object BindTest extends TestSuite {
           .select(Seq("new_value"))
           .commit()
           .raw.map(r => {
-          assert(SparqlBuilder.createLiteral(r("results")("bindings").arr(0)("new_value")).value == "-5")
+          assert(SparqlBuilder.createLiteral(r("results")("bindings").arr(0)("new_value")).toInt == -5)
         })
       }).flatten
     }
@@ -108,7 +108,7 @@ object BindTest extends TestSuite {
           .select(Seq("new_value"))
           .commit()
           .raw.map(r => {
-          assert(SparqlBuilder.createLiteral(r("results")("bindings").arr(0)("new_value")).value == "-5")
+          assert(SparqlBuilder.createLiteral(r("results")("bindings").arr(0)("new_value")).toInt == -5)
         })
       }).flatten
     }
@@ -123,7 +123,7 @@ object BindTest extends TestSuite {
           .select(Seq("new_value"))
           .commit()
           .raw.map(r => {
-          assert(SparqlBuilder.createLiteral(r("results")("bindings").arr(0)("new_value")).value == "-6")
+          assert(SparqlBuilder.createLiteral(r("results")("bindings").arr(0)("new_value")).toInt == -6)
         })
       }).flatten
     }

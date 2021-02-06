@@ -5,7 +5,7 @@ import inrae.semantic_web.internal._
 import inrae.semantic_web.rdf.{QueryVariable, SparqlDefinition, URI}
 import inrae.semantic_web.sparql.QueryResult
 import inrae.semantic_web.strategy._
-import upickle.default.{macroRW, ReadWriter => RW}
+import upickle.default.{macroRW, read, write, ReadWriter => RW}
 import wvlet.log.Logger.rootLogger.{debug, trace}
 
 import scala.concurrent.{Future, Promise}
@@ -16,7 +16,7 @@ object SWTransaction {
   implicit val rw: RW[SWTransaction] = macroRW
 }
 
-case class SWTransaction(sw : SWDiscovery)
+case class SWTransaction(sw : SWDiscovery = SWDiscovery())
     extends Subscriber[DiscoveryRequestEvent,StrategyRequest]
 {
   implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
@@ -25,8 +25,8 @@ case class SWTransaction(sw : SWDiscovery)
     notify(event)
   }
 
-  val _prom_raw: Promise[ujson.Value] = Promise[ujson.Value]()
-  val raw: Future[ujson.Value] = _prom_raw.future
+  private val _prom_raw: Promise[ujson.Value] = Promise[ujson.Value]()
+  val raw: Future[ujson.Value] =  _prom_raw.future
   var currentRequestEvent: String = DiscoveryStateRequestEvent.START.toString()
 
   private var countEvent: Int = 1
@@ -228,6 +228,8 @@ case class SWTransaction(sw : SWDiscovery)
     sw.root.focusManagement(OrderByDesc(lRef.map(QueryVariable(_)),sw.getUniqueRef()), false).transaction
   }
 
+  def getSerializedString : String = write(this)
+  def setSerializedString(query : String) : SWTransaction = read[SWTransaction](query)
 
   def console : SWTransaction = sw.console.transaction
 }

@@ -181,5 +181,12 @@ object SWDiscoveryTest extends TestSuite {
       }
     }
 
+    test("focus root") {
+      val sw = SWDiscovery(config)
+      assert(sw.rootNode.idRef == sw.focus())
+      assert(sw.something("h").focus() == "h")
+    }
+
+
   }
 }
