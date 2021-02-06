@@ -1,4 +1,5 @@
 package inrae.semantic_web.rdf
+import inrae.semantic_web.SWDiscoveryException
 import upickle.default.{macroRW, ReadWriter => RW}
 
 import scala.language.implicitConversions
@@ -17,6 +18,20 @@ sealed abstract class SparqlDefinition {
 
 object SparqlDefinition {
 
+  implicit def fromAny( any : Any ): SparqlDefinition = any match {
+    case v: SparqlDefinition => v
+    case num: Int => Literal(num.toString, URI("integer", "xsd"))
+    case dec: Double => Literal(dec.toString, URI("double", "xsd"))
+    case bool: Boolean => Literal(bool.toString, URI("boolean", "xsd"))
+    case stringVar: String
+      if stringVar.startsWith("?") &&
+        stringVar.length > 1 => QueryVariable(stringVar.substring(1, stringVar.length))
+    case uri: String if !uri.contains("://") && uri.contains(":") => URI(uri)
+    case string: String => string
+
+    case _ => throw SWDiscoveryException(any.toString + " can not be cast into Sparql Def type.")
+  }
+
   implicit def fromString(s: String): Literal = Literal(s)
   implicit def fromString(s: Int): Literal = Literal(s.toString,URI("integer","xsd"))
   implicit def fromString(s: Boolean): Literal = Literal(s.toString,URI("boolean","xsd"))
@@ -32,7 +47,7 @@ object SparqlDefinition {
     QueryVariable.rw,
   )
 
-  def cleanString(str : String) = {
+  def cleanString(str : String): String = {
     str.replaceAll("^\"","")
       .replaceAll("\"$","")
       .replaceAll("^<","")
@@ -69,20 +84,18 @@ object URI {
 
 @JSExportTopLevel(name="URI")
 case class URI (localNameUser : String,nameSpaceUser : String = "") extends SparqlDefinition {
-  val localName = nameSpaceUser match {
-    case "" if (!localNameUser.contains("://")) => {
-      SparqlDefinition.cleanString(localNameUser.split(":").last)
-    }
+  val localName: String = nameSpaceUser match {
+    case "" if !localNameUser.contains("://") => SparqlDefinition.cleanString(localNameUser.split(":").last)
     case _ => SparqlDefinition.cleanString(localNameUser)
   }
 
-  val nameSpace = nameSpaceUser match {
-    case "" if (!localNameUser.contains("://")) => {
+  val nameSpace: String = nameSpaceUser match {
+    case "" if !localNameUser.contains("://") =>
       localNameUser.split(":") match {
-        case arr if (arr.length==2) => arr(0)
+        case arr if arr.length==2 => arr(0)
         case _ => "" /* something wrong if arity if different that 2 */
       }
-    }
+
     case _ => nameSpaceUser
   }
 
@@ -142,8 +155,8 @@ object Literal {
 
 @JSExportTopLevel(name="Literal")
 case class Literal(v : String,datatype : URI = URI.empty,var ta : String="") extends SparqlDefinition {
-  val value = SparqlDefinition.cleanString(v)
-  val tag = SparqlDefinition.cleanString(ta)
+  val value: String = SparqlDefinition.cleanString(v)
+  val tag: String = SparqlDefinition.cleanString(ta)
 
   def this(value : Int) = {
     this(value.toString,URI("integer","xsd"))
@@ -157,9 +170,9 @@ case class Literal(v : String,datatype : URI = URI.empty,var ta : String="") ext
     this(value.toString,URI("double","xsd"))
   }
 
-  override def toString() : String = "\""+ value + "\""+ (datatype match {
+  override def toString : String = "\""+ value + "\""+ (datatype match {
     case URI.empty => ""
-    case _ if (tag == "") => "^^"+datatype.toString()
+    case _ if tag == "" => "^^"+datatype.toString()
     case _ => ""
 
   }) + ( tag match {
@@ -185,7 +198,7 @@ implicit val rw: RW[QueryVariable] = macroRW
 @JSExportTopLevel(name="QueryVariable")
 case class QueryVariable (var name : String) extends SparqlDefinition {
   name = SparqlDefinition.cleanString(name)
-  override def toString() : String = {
+  override def toString : String = {
     "?"+name
   }
   def sparql : String = toString
