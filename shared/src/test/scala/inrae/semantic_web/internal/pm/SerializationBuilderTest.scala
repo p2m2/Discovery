@@ -1,7 +1,7 @@
 package inrae.semantic_web.internal.pm
 
 import inrae.data.DataTestFactory
-import inrae.semantic_web.SWDiscovery
+import inrae.semantic_web.{SWDiscovery, SWTransaction}
 import inrae.semantic_web.internal.Root
 import inrae.semantic_web.rdf.{Literal, QueryVariable, URI}
 import utest.{TestSuite, Tests, test}
@@ -11,12 +11,16 @@ object SerializationBuilderTest extends TestSuite  {
   def tests: Tests = Tests {
     test("serialization basic 1") {
       val sw = SWDiscovery( DataTestFactory.getConfigVirtuoso1(),Root(),Some("test"))
-      SerializationBuilder.deserialize(SerializationBuilder.serialize(sw)) == sw
+      assert(SWDiscovery().setSerializedString(sw.getSerializedString) == sw)
+      val swt : SWTransaction = sw.select()
+      assert(SWTransaction().setSerializedString(swt.getSerializedString) == swt)
     }
 
     test("serialization basic 2") {
       val sw = SWDiscovery( DataTestFactory.getConfigVirtuoso1())
-      SerializationBuilder.deserialize(SerializationBuilder.serialize(sw)) == sw
+      assert(SWDiscovery().setSerializedString(sw.getSerializedString) == sw)
+      val swt : SWTransaction = sw.select()
+      assert(SWTransaction().setSerializedString(swt.getSerializedString) == swt)
     }
 
     test("serialization Something") {
@@ -24,7 +28,9 @@ object SerializationBuilderTest extends TestSuite  {
         SWDiscovery( DataTestFactory.getConfigVirtuoso1())
           .something ("h1" )
 
-      SerializationBuilder.deserialize(SerializationBuilder.serialize(sw)) == sw
+      assert(SWDiscovery().setSerializedString(sw.getSerializedString) == sw)
+      val swt : SWTransaction = sw.select()
+      assert(SWTransaction().setSerializedString(swt.getSerializedString) == swt)
     }
 
     test("serialization SubjectOf") {
@@ -33,7 +39,9 @@ object SerializationBuilderTest extends TestSuite  {
           .something ("h1" )
           .isSubjectOf(URI("bb"))
 
-      SerializationBuilder.deserialize(SerializationBuilder.serialize(sw)) == sw
+      assert(SWDiscovery().setSerializedString(sw.getSerializedString) == sw)
+      val swt : SWTransaction = sw.select()
+      assert(SWTransaction().setSerializedString(swt.getSerializedString) == swt)
     }
 
     test("serialization ObjectOf") {
@@ -42,7 +50,9 @@ object SerializationBuilderTest extends TestSuite  {
           .something ("h1" )
           .isObjectOf(URI("bb"))
 
-      SerializationBuilder.deserialize(SerializationBuilder.serialize(sw)) == sw
+      assert(SWDiscovery().setSerializedString(sw.getSerializedString) == sw)
+      val swt : SWTransaction = sw.select()
+      assert(SWTransaction().setSerializedString(swt.getSerializedString) == swt)
     }
 
     test("serialization LinkTo") {
@@ -51,7 +61,9 @@ object SerializationBuilderTest extends TestSuite  {
           .something ("h1" )
           .isLinkTo(URI("bb"))
 
-      SerializationBuilder.deserialize(SerializationBuilder.serialize(sw)) == sw
+      assert(SWDiscovery().setSerializedString(sw.getSerializedString) == sw)
+      val swt : SWTransaction = sw.select()
+      assert(SWTransaction().setSerializedString(swt.getSerializedString) == swt)
     }
 
     test("serialization LinkFrom") {
@@ -60,7 +72,9 @@ object SerializationBuilderTest extends TestSuite  {
           .something ("h1" )
           .isLinkFrom(QueryVariable("bb"))
 
-      SerializationBuilder.deserialize(SerializationBuilder.serialize(sw)) == sw
+      assert(SWDiscovery().setSerializedString(sw.getSerializedString) == sw)
+      val swt : SWTransaction = sw.select()
+      assert(SWTransaction().setSerializedString(swt.getSerializedString) == swt)
     }
 
     test("serialization Value QueryVariable") {
@@ -69,7 +83,9 @@ object SerializationBuilderTest extends TestSuite  {
           .something ("h1" )
           .set(QueryVariable("bb"))
 
-      SerializationBuilder.deserialize(SerializationBuilder.serialize(sw)) == sw
+      assert(SWDiscovery().setSerializedString(sw.getSerializedString) == sw)
+      val swt : SWTransaction = sw.select()
+      assert(SWTransaction().setSerializedString(swt.getSerializedString) == swt)
     }
 
     test("serialization Value URI") {
@@ -78,7 +94,9 @@ object SerializationBuilderTest extends TestSuite  {
           .something ("h1" )
           .set(URI("bb"))
 
-      SerializationBuilder.deserialize(SerializationBuilder.serialize(sw)) == sw
+      assert(SWDiscovery().setSerializedString(sw.getSerializedString) == sw)
+      val swt : SWTransaction = sw.select()
+      assert(SWTransaction().setSerializedString(swt.getSerializedString) == swt)
     }
 
     test("serialization Literal URI") {
@@ -87,7 +105,9 @@ object SerializationBuilderTest extends TestSuite  {
           .something ("h1" )
           .set(Literal("bb"))
 
-      SerializationBuilder.deserialize(SerializationBuilder.serialize(sw)) == sw
+      assert(SWDiscovery().setSerializedString(sw.getSerializedString) == sw)
+      val swt : SWTransaction = sw.select()
+      assert(SWTransaction().setSerializedString(swt.getSerializedString) == swt)
     }
 
     test("serialization ListValue URI") {
@@ -96,7 +116,9 @@ object SerializationBuilderTest extends TestSuite  {
           .something ("h1" )
           .setList(Seq(URI("bb")))
 
-      SerializationBuilder.deserialize(SerializationBuilder.serialize(sw)) == sw
+      assert(SWDiscovery().setSerializedString(sw.getSerializedString) == sw)
+      val swt : SWTransaction = sw.select()
+      assert(SWTransaction().setSerializedString(swt.getSerializedString) == swt)
     }
 
     test("serialization graph") {
@@ -106,7 +128,9 @@ object SerializationBuilderTest extends TestSuite  {
           .something ("h1" )
           .setList(Seq(URI("bb")))
 
-      SerializationBuilder.deserialize(SerializationBuilder.serialize(sw)) == sw
+      assert(SWDiscovery().setSerializedString(sw.getSerializedString) == sw)
+      val swt : SWTransaction = sw.select()
+      assert(SWTransaction().setSerializedString(swt.getSerializedString) == swt)
     }
 
     test("serialization filter") {
@@ -116,7 +140,9 @@ object SerializationBuilderTest extends TestSuite  {
           .isLinkTo(URI("bb"))
           .filter.not.contains("filter")
 
-      SerializationBuilder.deserialize(SerializationBuilder.serialize(sw)) == sw
+      assert(SWDiscovery().setSerializedString(sw.getSerializedString) == sw)
+      val swt : SWTransaction = sw.select()
+      assert(SWTransaction().setSerializedString(swt.getSerializedString) == swt)
     }
 
     test("serialization datatype") {
@@ -126,7 +152,9 @@ object SerializationBuilderTest extends TestSuite  {
           .isLinkTo(URI("bb"))
           .datatype(URI("some"),"v")
 
-      SerializationBuilder.deserialize(SerializationBuilder.serialize(sw)) == sw
+      assert(SWDiscovery().setSerializedString(sw.getSerializedString) == sw)
+      val swt : SWTransaction = sw.select()
+      assert(SWTransaction().setSerializedString(swt.getSerializedString) == swt)
     }
 
 

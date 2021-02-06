@@ -56,5 +56,12 @@ case class SWTransactionJs(transaction : SWTransaction) {
   def orderByDesc( lRef: Seq[String] )  : SWTransactionJs = SWTransactionJs(transaction.orderByDesc(lRef))
 
   @JSExport
+  def getSerializedString: String = transaction.getSerializedString
+
+  @JSExport
+  def setSerializedString(transaction_string : String): SWTransactionJs =
+    SWTransactionJs(transaction.setSerializedString(transaction_string))
+
+  @JSExport
   def console() : SWTransactionJs = SWTransactionJs(transaction.console)
 }

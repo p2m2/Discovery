@@ -3,7 +3,7 @@ package inrae.semantic_web
 import inrae.semantic_web
 import inrae.semantic_web.event.{DiscoveryRequestEvent, DiscoveryStateRequestEvent}
 import inrae.semantic_web.internal._
-import inrae.semantic_web.internal.pm.{SelectNode, SerializationBuilder}
+import inrae.semantic_web.internal.pm.SelectNode
 import inrae.semantic_web.rdf._
 import inrae.semantic_web.sparql.QueryResult
 import inrae.semantic_web.strategy.StrategyRequestBuilder
@@ -12,7 +12,7 @@ import wvlet.log.Logger.rootLogger._
 
 import java.util.UUID.randomUUID
 import scala.concurrent.Future
-import upickle.default.{macroRW, ReadWriter => RW}
+import upickle.default.{macroRW, read, write, ReadWriter => RW}
 
 final case class SWDiscoveryException(private val message: String = "",
                                       private val cause: Throwable = None.orNull) extends Exception(message,cause)
@@ -50,17 +50,17 @@ case class SWDiscovery(
     def isBlank : SWDiscovery = manageFilter(inrae.semantic_web.internal.isBlank(this.negation,getUniqueRef()))
 
     /* strings */
-    def contains( string : String ) : SWDiscovery = manageFilter(Contains(string,this.negation,getUniqueRef()))
-    def strStarts( string : String ) : SWDiscovery = manageFilter(StrStarts(string,this.negation,getUniqueRef()))
-    def strEnds( string : String ) : SWDiscovery = manageFilter(StrEnds(string,this.negation,getUniqueRef()))
+    def contains( string : SparqlDefinition ) : SWDiscovery = manageFilter(Contains(string,this.negation,getUniqueRef()))
+    def strStarts( string : SparqlDefinition ) : SWDiscovery = manageFilter(StrStarts(string,this.negation,getUniqueRef()))
+    def strEnds( string : SparqlDefinition ) : SWDiscovery = manageFilter(StrEnds(string,this.negation,getUniqueRef()))
 
     /* numeric */
-    def equal( value : Literal ) : SWDiscovery = manageFilter(Equal(value,this.negation,getUniqueRef()))
-    def notEqual( value : Literal ) : SWDiscovery = manageFilter(NotEqual(value,this.negation,getUniqueRef()))
-    def inf( value : Literal ) : SWDiscovery = manageFilter(Inf(value,this.negation,getUniqueRef()))
-    def infEqual( value : Literal ) : SWDiscovery = manageFilter(InfEqual(value,this.negation,getUniqueRef()))
-    def sup( value : Literal ) : SWDiscovery = manageFilter(Sup(value,this.negation,getUniqueRef()))
-    def supEqual( value : Literal ) : SWDiscovery = manageFilter(SupEqual(value,this.negation,getUniqueRef()))
+    def equal( value : SparqlDefinition ) : SWDiscovery = manageFilter(Equal(value,this.negation,getUniqueRef()))
+    def notEqual( value : SparqlDefinition ) : SWDiscovery = manageFilter(NotEqual(value,this.negation,getUniqueRef()))
+    def inf( value : SparqlDefinition ) : SWDiscovery = manageFilter(Inf(value,this.negation,getUniqueRef()))
+    def infEqual( value : SparqlDefinition ) : SWDiscovery = manageFilter(InfEqual(value,this.negation,getUniqueRef()))
+    def sup( value : SparqlDefinition ) : SWDiscovery = manageFilter(Sup(value,this.negation,getUniqueRef()))
+    def supEqual( value : SparqlDefinition ) : SWDiscovery = manageFilter(SupEqual(value,this.negation,getUniqueRef()))
 
     def not : FilterIncrement = { FilterIncrement(true) }
   }
@@ -73,10 +73,10 @@ case class SWDiscovery(
     /* primary expression */
 
     /* String fun */
-    def subStr(startingLoc : Int,length : Int ) : SWDiscovery = manage(SubStr(startingLoc,length,getUniqueRef()))
-    def regex(pattern : String, flags : String="") : SWDiscovery =
+    def subStr(startingLoc : SparqlDefinition,length : SparqlDefinition ) : SWDiscovery = manage(SubStr(startingLoc,length,getUniqueRef()))
+    def regex(pattern : SparqlDefinition, flags : SparqlDefinition="") : SWDiscovery =
       manage(Regex(pattern,flags,getUniqueRef()))
-    def replace(pattern : String, replacement : String, flags : String="") : SWDiscovery =
+    def replace(pattern : SparqlDefinition, replacement : SparqlDefinition, flags : SparqlDefinition="") : SWDiscovery =
       manage(Replace(pattern,replacement,flags,getUniqueRef()))
 
     /* Numeric  fun */
@@ -130,6 +130,9 @@ case class SWDiscovery(
   def root: SWDiscovery  = SWDiscovery(config,rootNode,Some(rootNode.reference()))
 
   def helper : SWDiscoveryHelper = SWDiscoveryHelper(this)
+
+  /* get current focus */
+  def focus() : String = focusNode
 
   /* set the current focus on the select node */
   def focus(ref : String) : SWDiscovery = {
@@ -245,13 +248,11 @@ case class SWDiscovery(
   def set( term : SparqlDefinition ) : SWDiscovery =
     checkQueryVariable(term).focusManagement(Value(term),forward = false)
 
-  def setList( uris : Seq[URI] ) : SWDiscovery = focusManagement(ListValues(uris),forward = false)
+  def setList( terms : Seq[SparqlDefinition] ) : SWDiscovery = focusManagement(ListValues(terms),forward = false)
 
 
-  def getSerializedQuery : String = SerializationBuilder.serialize(this)
-
-
-  def setSerializedQuery(query : String) : SWDiscovery = SerializationBuilder.deserialize(query)
+  def getSerializedString : String = write(this)
+  def setSerializedString(query : String) : SWDiscovery = read[SWDiscovery](query)
 
 
   def console : SWDiscovery = {

@@ -12,6 +12,9 @@ case class SWDiscoveryHelperJs(sw : SWDiscovery) {
   implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
 
   @JSExport
+  def count(): Promise[Int] = { sw.helper.count.toJSPromise }
+
+  @JSExport
   def findClasses(uri:URI = URI("")): Promise[js.Array[URI]] = { sw.helper.findClasses(uri).map(array => array.toJSArray).toJSPromise }
 
   @JSExport

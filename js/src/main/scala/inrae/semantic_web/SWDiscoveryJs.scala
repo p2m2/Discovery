@@ -5,7 +5,6 @@ import inrae.semantic_web.rdf.{IRI, SparqlDefinition, URI}
 
 import scala.scalajs._
 import scala.scalajs.js.JSConverters._
-import scala.scalajs.js._
 import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
 
 
@@ -22,8 +21,24 @@ case class SWDiscoveryJs(
     case v =>v
   }
 
+  def toIRI(any:Any) : IRI = any match {
+    case v : IRI => v
+    case v : URI => IRI(v.sparql)
+    case string : String => string
+    case _ => throw SWDiscoveryException(any.toString + " can not be cast into IRI.")
+  }
+
+  def toURI(any:Any): URI = any match {
+    case v : URI => v
+    case string : String => string
+    case _ => throw SWDiscoveryException(any.toString + " can not be cast into IRI.")
+  }
+
   @JSExport
   val filter = FilterIncrementJs(this)
+
+  @JSExport
+  def bind(`var` : String) : BindIncrementJs = BindIncrementJs(this,`var`)
 
   @JSExport
   def usage() : SWDiscoveryJs = SWDiscoveryJs(config,SWDiscovery(config).usage)
@@ -37,39 +52,49 @@ case class SWDiscoveryJs(
   def focusManagement(n : Node) : SWDiscoveryJs = SWDiscoveryJs(config,sw.focusManagement(n))
 
   @JSExport
-  def prefix(short : String, long : IRI ) : SWDiscoveryJs = SWDiscoveryJs(config,sw.prefix(short,long))
+  def prefix(short : String, long : Any ) : SWDiscoveryJs = SWDiscoveryJs(config,sw.prefix(short,toIRI(long)))
 
   @JSExport
-  def graph(graph : IRI) : SWDiscoveryJs = SWDiscoveryJs(config,sw.graph(graph))
+  def graph(graph : Any) : SWDiscoveryJs = SWDiscoveryJs(config,sw.graph(toIRI(graph)))
 
   @JSExport
-  def namedGraph(graph : IRI ) : SWDiscoveryJs = SWDiscoveryJs(config,sw.namedGraph(graph))
+  def root(): SWDiscoveryJs = SWDiscoveryJs(config,sw.root)
+
+  @JSExport
+  def focus() : String = sw.focusNode
+
+  @JSExport
+  def namedGraph(graph : Any ) : SWDiscoveryJs = SWDiscoveryJs(config,sw.namedGraph(toIRI(graph)))
   /* start a request */
   @JSExport
   def something( ref : String = sw.getUniqueRef("something") ) : SWDiscoveryJs = SWDiscoveryJs(config,sw.something(ref))
 
   /* create node which focus is the subject : ?focusId <uri> ?target */
   @JSExport
-  def isSubjectOf( uri : URI , ref : String = sw.getUniqueRef("object") ) : SWDiscoveryJs = SWDiscoveryJs(config,sw.isSubjectOf(uri,ref))
+  def isSubjectOf( uri : Any , ref : String = sw.getUniqueRef("object") ) : SWDiscoveryJs =
+    SWDiscoveryJs(config,sw.isSubjectOf(uri,ref))
 
   /* create node which focus is the subject : ?focusId <uri> ?target */
   @JSExport
-  def isObjectOf( uri : URI , ref : String = sw.getUniqueRef("subject") ) : SWDiscoveryJs = SWDiscoveryJs(config,sw.isObjectOf(uri,ref))
+  def isObjectOf( uri : Any , ref : String = sw.getUniqueRef("subject") ) : SWDiscoveryJs = SWDiscoveryJs(config,sw.isObjectOf(uri,ref))
 
   @JSExport
-  def isLinkTo( uri : URI , ref : String = sw.getUniqueRef("linkTo") ) : SWDiscoveryJs = SWDiscoveryJs(config,sw.isLinkTo(uri,ref))
+  def isLinkTo( uri : Any , ref : String = sw.getUniqueRef("linkTo") ) : SWDiscoveryJs = SWDiscoveryJs(config,sw.isLinkTo(uri,ref))
 
   @JSExport
-  def isA( term : SparqlDefinition ) : SWDiscoveryJs = SWDiscoveryJs(config,sw.isA(term))
+  def isA( term : Any ) : SWDiscoveryJs = SWDiscoveryJs(config,sw.isA(term))
 
   @JSExport
-  def isLinkFrom( uri : URI , ref : String = sw.getUniqueRef("linkFrom") ) : SWDiscoveryJs = SWDiscoveryJs(config,sw.isLinkFrom(uri,ref))
+  def isLinkFrom( uri : String , ref : String = sw.getUniqueRef("linkFrom") ) : SWDiscoveryJs = SWDiscoveryJs(config,sw.isLinkFrom(uri,ref))
   /* set */
   @JSExport
-  def set( uri : URI ) : SWDiscoveryJs = SWDiscoveryJs(config,sw.set(uri))
+  def set( term : Any ) : SWDiscoveryJs = SWDiscoveryJs(config,sw.set(term))
 
   @JSExport
-  def datatype( uri : URI, ref : String ) : SWDiscoveryJs = SWDiscoveryJs(config,sw.datatype(uri,ref))
+  def setList( terms : Any* ) : SWDiscoveryJs = SWDiscoveryJs(config,sw.setList(terms.map(SparqlDefinition.fromAny)))
+
+  @JSExport
+  def datatype( uri : Any, ref : String ) : SWDiscoveryJs = SWDiscoveryJs(config,sw.datatype(toURI(uri),ref))
 
   @JSExport
   def console() : SWDiscoveryJs = SWDiscoveryJs(config,sw.console)
@@ -78,10 +103,10 @@ case class SWDiscoveryJs(
   def sparql() : String = sw.sparql
 
   @JSExport
-  def getSerializedQuery: String = sw.getSerializedQuery
+  def getSerializedString: String = sw.getSerializedString
 
   @JSExport
-  def setSerializedQuery(query : String): SWDiscoveryJs = SWDiscoveryJs(config,sw.setSerializedQuery(query))
+  def setSerializedString(query : String): SWDiscoveryJs = SWDiscoveryJs(config,sw.setSerializedString(query))
 
   @JSExport
   def select(lRef: String*): SWTransactionJs = SWTransactionJs(sw.select(lRef))
@@ -92,7 +117,7 @@ case class SWDiscoveryJs(
 
 
   @JSExport
-  def selectByPage(lRef: String*)  : Promise[(Int,js.Array[SWTransactionJs])] = {
+  def selectByPage(lRef: String*)  : js.Promise[(Int,js.Array[SWTransactionJs])] = {
     sw.helper.count.map(
       nSolutions => {
         val nit : Int = nSolutions / config.conf.settings.pageSize
@@ -103,7 +128,4 @@ case class SWDiscoveryJs(
         }).toJSArray)
       }).toJSPromise
   }
-
-  @JSExport
-  def count(): Promise[Int] = { sw.helper.count.toJSPromise }
 }

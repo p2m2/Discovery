@@ -193,8 +193,13 @@ object SparqlGeneratorTest extends TestSuite {
     }
 
     test("sparqlNode Inf") {
-      val v = SparqlGenerator.sparqlNode(Inf(0.5,negation = false,""),"nothingSire","nothingVar")
+      val v = SparqlGenerator.sparqlNode(Inf(Literal("0.5","xsd:double"),negation = false,""),"nothingSire","nothingVar")
       assert(v.trim().split(" ").toList == List("FILTER","(","(?nothingSire<\"0.5\"^^xsd:double)",")"))
+    }
+
+    test("sparqlNode Inf") {
+      val v = SparqlGenerator.sparqlNode(Inf(0.5,negation = false,""),"nothingSire","nothingVar")
+      assert(v.trim().split(" ").toList == List("FILTER","(","(?nothingSire<0.5)",")"))
     }
 
     test("sparqlNode Inf with Literal without type ") {
@@ -203,38 +208,53 @@ object SparqlGeneratorTest extends TestSuite {
     }
 
     test("sparqlNode InfEqual neg") {
-      val v = SparqlGenerator.sparqlNode(Inf(0.5,negation = true,""),"nothingSire","nothingVar")
+      val v = SparqlGenerator.sparqlNode(Inf(Literal("0.5","xsd:double"),negation = true,""),"nothingSire","nothingVar")
       assert(v.trim().split(" ").toList == List("FILTER","(","!(?nothingSire<\"0.5\"^^xsd:double)",")"))
+    }
+
+    test("sparqlNode InfEqual neg") {
+      val v = SparqlGenerator.sparqlNode(Inf(0.5,negation = true,""),"nothingSire","nothingVar")
+      assert(v.trim().split(" ").toList == List("FILTER","" + "(","!(?nothingSire<0.5)",")"))
+    }
+
+    test("sparqlNode InfEqual") {
+      val v = SparqlGenerator.sparqlNode(InfEqual(Literal("0.5","xsd:double"),negation = false,""),"nothingSire","nothingVar")
+      assert(v.trim().split(" ").toList == List("FILTER","(","(?nothingSire<=\"0.5\"^^xsd:double)",")"))
     }
 
     test("sparqlNode InfEqual") {
       val v = SparqlGenerator.sparqlNode(InfEqual(0.5,negation = false,""),"nothingSire","nothingVar")
-      assert(v.trim().split(" ").toList == List("FILTER","(","(?nothingSire<=\"0.5\"^^xsd:double)",")"))
+      assert(v.trim().split(" ").toList == List("FILTER","(","(?nothingSire<=0.5)",")"))
     }
 
     test("sparqlNode InfEqual neg") {
-      val v = SparqlGenerator.sparqlNode(InfEqual(0.5,negation = true,""),"nothingSire","nothingVar")
+      val v = SparqlGenerator.sparqlNode(InfEqual(Literal("0.5","xsd:double"),negation = true,""),"nothingSire","nothingVar")
+      assert(v.trim().split(" ").toList == List("FILTER","(","!(?nothingSire<=\"0.5\"^^xsd:double)",")"))
+    }
+
+    test("sparqlNode InfEqual neg") {
+      val v = SparqlGenerator.sparqlNode(InfEqual(Literal("0.5","xsd:double"),negation = true,""),"nothingSire","nothingVar")
       assert(v.trim().split(" ").toList == List("FILTER","(","!(?nothingSire<=\"0.5\"^^xsd:double)",")"))
     }
 
     test("sparqlNode Sup") {
       val v = SparqlGenerator.sparqlNode(Sup(0.5,negation = false,""),"nothingSire","nothingVar")
-      assert(v.trim().split(" ").toList == List("FILTER","(","(?nothingSire>\"0.5\"^^xsd:double)",")"))
+      assert(v.trim().split(" ").toList == List("FILTER","(","(?nothingSire>0.5)",")"))
     }
 
     test("sparqlNode Sup neg") {
-      val v = SparqlGenerator.sparqlNode(Sup(0.5,negation = true,""),"nothingSire","nothingVar")
+      val v = SparqlGenerator.sparqlNode(Sup(Literal("0.5","xsd:double"),negation = true,""),"nothingSire","nothingVar")
       assert(v.trim().split(" ").toList == List("FILTER","(","!(?nothingSire>\"0.5\"^^xsd:double)",")"))
     }
 
     test("sparqlNode SupEqual") {
-      val v = SparqlGenerator.sparqlNode(SupEqual(0.5,negation = false,""),"nothingSire","nothingVar")
+      val v = SparqlGenerator.sparqlNode(SupEqual(Literal("0.5","xsd:double"),negation = false,""),"nothingSire","nothingVar")
       assert(v.trim().split(" ").toList == List("FILTER","(","(?nothingSire>=\"0.5\"^^xsd:double)",")"))
     }
 
     test("sparqlNode SupEqual neg") {
       val v = SparqlGenerator.sparqlNode(SupEqual(0.5,negation = true,""),"nothingSire","nothingVar")
-      assert(v.trim().split(" ").toList == List("FILTER","(","!(?nothingSire>=\"0.5\"^^xsd:double)",")"))
+      assert(v.trim().split(" ").toList == List("FILTER","(","!(?nothingSire>=0.5)",")"))
     }
 
 
