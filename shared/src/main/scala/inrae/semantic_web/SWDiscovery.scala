@@ -50,6 +50,8 @@ case class SWDiscovery(
     def isBlank : SWDiscovery = manageFilter(inrae.semantic_web.internal.isBlank(this.negation,getUniqueRef()))
 
     /* strings */
+    def regex( pattern : SparqlDefinition, flags : SparqlDefinition="" ) : SWDiscovery =
+      manageFilter(Regex(pattern,flags,this.negation,getUniqueRef()))
     def contains( string : SparqlDefinition ) : SWDiscovery = manageFilter(Contains(string,this.negation,getUniqueRef()))
     def strStarts( string : SparqlDefinition ) : SWDiscovery = manageFilter(StrStarts(string,this.negation,getUniqueRef()))
     def strEnds( string : SparqlDefinition ) : SWDiscovery = manageFilter(StrEnds(string,this.negation,getUniqueRef()))
@@ -74,8 +76,6 @@ case class SWDiscovery(
 
     /* String fun */
     def subStr(startingLoc : SparqlDefinition,length : SparqlDefinition ) : SWDiscovery = manage(SubStr(startingLoc,length,getUniqueRef()))
-    def regex(pattern : SparqlDefinition, flags : SparqlDefinition="") : SWDiscovery =
-      manage(Regex(pattern,flags,getUniqueRef()))
     def replace(pattern : SparqlDefinition, replacement : SparqlDefinition, flags : SparqlDefinition="") : SWDiscovery =
       manage(Replace(pattern,replacement,flags,getUniqueRef()))
 

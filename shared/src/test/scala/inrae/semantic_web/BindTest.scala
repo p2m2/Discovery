@@ -18,21 +18,20 @@ object BindTest extends TestSuite {
   val config: StatementConfiguration = DataTestFactory.getConfigVirtuoso1()
 
   def tests = Tests {
-    val regex = "defg"
+    val regexv = "defg"
 
-    test("bind regex") {
+    test("filter regex") {
       insert_data.map(_ => {
         SWDiscovery(config)
           .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
           .something()
           .isSubjectOf(URI("http://bb"),"r")
-          .bind("reg").regex(regex)
-          .filter.equal(Literal("true"))
+          .filter.regex(regexv)
           .select(Seq("r","reg"))
           .distinct
           .commit()
           .raw.map(r => {
-          assert(r("results")("bindings").arr.count(v => v("r")("value").toString.contains(regex)) == 2)
+          assert(r("results")("bindings").arr.count(v => v("r")("value").toString.contains(regexv)) == 2)
         })
       }).flatten
     }

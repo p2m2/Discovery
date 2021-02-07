@@ -380,6 +380,7 @@ object FilterNode {
     isLiteral.rw,
     isURI.rw,
     isBlank.rw,
+    Regex.rw,
     Contains.rw,
     StrStarts.rw,
     StrEnds.rw,
@@ -439,6 +440,19 @@ case class isURI(
   override def toString : String = negation.toString + " isURI"
 
   def copy(children : Seq[Node]) : isURI = isURI(negation,idRef,children)
+}
+
+object Regex {
+  implicit val rw: RW[Regex] = macroRW
+}
+
+
+case class Regex(
+                  pattern : SparqlDefinition,
+                  flags : SparqlDefinition,
+                  override val negation: Boolean,
+                  override val idRef : String) extends FilterNode(negation,idRef) {
+  override def copy(children: Seq[Node]): Node = Regex(pattern,flags,negation,idRef)
 }
 
 object Contains {
@@ -837,7 +851,6 @@ case class SparqlDefinitionExpression(sd : SparqlDefinition,override val idRef :
 object FunctionStringNode {
   implicit val rw: RW[FunctionStringNode] =  RW.merge(
     SubStr.rw,
-    Regex.rw,
     Replace.rw
   )
 }
@@ -853,17 +866,6 @@ case class SubStr(
                   length : SparqlDefinition,
                   override val idRef : String) extends FunctionStringNode(idRef) {
   override def copy(children: Seq[Node]): Node = SubStr(start,length,idRef)
-}
-
-object Regex {
-  implicit val rw: RW[Regex] = macroRW
-}
-
-case class Regex(
-                  pattern : SparqlDefinition,
-                  flags : SparqlDefinition,
-                  override val idRef : String) extends FunctionStringNode(idRef) {
-  override def copy(children: Seq[Node]): Node = Regex(pattern,flags,idRef)
 }
 
 object Replace {

@@ -113,7 +113,6 @@ object SparqlGenerator  {
       case node : OrderByDesc        => "DESC (" + node.list.mkString(") DESC (") + ")"
       /* Expression Node */
       case node : SubStr             => "SUBSTR (" + "?"+ varIdSire  + "," + node.start.toString + "," + node.length.toString + ")"
-      case node : Regex              => "REGEX (" + "?"+ varIdSire  + "," + node.pattern.sparql + "," + node.flags.sparql + ")"
       case node : Replace            => "REPLACE (" + "?"+ varIdSire  + "," + node.pattern.sparql + "," + node.replacement.sparql + ","+ node.flags.sparql + ")"
       case _ : Abs                   => "ABS (" + "?"+ varIdSire  +  ")"
       case _ : Round                 => "ROUND (" + "?"+ varIdSire  +  ")"
@@ -129,6 +128,7 @@ object SparqlGenerator  {
         }
       } + {
         node match {
+          case node : Regex              => "regex (str(" + "?"+ varIdSire  + ")," + node.pattern.sparql + "," + node.flags.sparql + ")"
           case n : Contains           => "contains(str(" + "?" +varIdSire + "),"+ n.value.sparql + ")"
           case n : StrStarts          => "strStarts(str(" + "?" +varIdSire + "),"+ n.value.sparql + ")"
           case n : StrEnds            => "strEnds(str(" + "?" +varIdSire + "),"+ n.value.sparql + ")"

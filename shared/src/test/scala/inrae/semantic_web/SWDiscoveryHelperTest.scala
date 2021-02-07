@@ -61,7 +61,7 @@ object SWDiscoveryHelperTest  extends TestSuite  {
           .something("h1")
           .set(URI("http://aa2"))
           .helper
-          .findClasses(URI("Class", "owl"))
+          .findClasses("",URI("Class", "owl"))
           .map(types => assert(types.length == 1))
       }).flatten
     }
@@ -82,7 +82,7 @@ object SWDiscoveryHelperTest  extends TestSuite  {
         SWDiscovery(config).something("h1")
           .set(URI("http://aa"))
           .helper
-          .findObjectProperties(URI("ObjectProperty", "owl"))
+          .findObjectProperties("",URI("ObjectProperty", "owl"))
           .map(response => assert(response.length == 1))
       }).flatten
     }

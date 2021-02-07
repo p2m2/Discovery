@@ -39,7 +39,7 @@ case class SWDiscoveryJs(
   val filter: FilterIncrementJs = FilterIncrementJs(this)
 
   @JSExport
-  def helper: SWDiscoveryJs = { HtmlView(sw) ; SWDiscoveryJs(config,sw) }
+  def helper(regex : String = ""): SWDiscoveryJs = { HtmlView(sw,regex) ; SWDiscoveryJs(config,sw) }
 
   @JSExport
   def bind(`var` : String) : BindIncrementJs = BindIncrementJs(this,`var`)
