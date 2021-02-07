@@ -2,6 +2,7 @@ package inrae.semantic_web
 
 import inrae.semantic_web.internal.Node
 import inrae.semantic_web.rdf.{IRI, SparqlDefinition, URI}
+import inrae.semantic_web.view.HtmlView
 
 import scala.scalajs._
 import scala.scalajs.js.JSConverters._
@@ -35,7 +36,10 @@ case class SWDiscoveryJs(
   }
 
   @JSExport
-  val filter = FilterIncrementJs(this)
+  val filter: FilterIncrementJs = FilterIncrementJs(this)
+
+  @JSExport
+  def helper(regex : String = ""): SWDiscoveryJs = { HtmlView(sw,regex) ; SWDiscoveryJs(config,sw) }
 
   @JSExport
   def bind(`var` : String) : BindIncrementJs = BindIncrementJs(this,`var`)
@@ -43,7 +47,8 @@ case class SWDiscoveryJs(
   @JSExport
   def usage() : SWDiscoveryJs = SWDiscoveryJs(config,SWDiscovery(config).usage)
 
-  def helper() :SWDiscoveryHelperJs = SWDiscoveryHelperJs(sw)
+  @JSExport
+  def finder :SWDiscoveryHelperJs = SWDiscoveryHelperJs(sw)
 
   @JSExport
   def focus(ref : String) : SWDiscoveryJs = SWDiscoveryJs(config,sw.focus(ref))
@@ -118,7 +123,7 @@ case class SWDiscoveryJs(
 
   @JSExport
   def selectByPage(lRef: String*)  : js.Promise[(Int,js.Array[SWTransactionJs])] = {
-    sw.helper.count.map(
+    sw.finder.count.map(
       nSolutions => {
         val nit : Int = nSolutions / config.conf.settings.pageSize
         (nit+1,(0 to nit).map( p =>{

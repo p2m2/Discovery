@@ -50,6 +50,8 @@ case class SWDiscovery(
     def isBlank : SWDiscovery = manageFilter(inrae.semantic_web.internal.isBlank(this.negation,getUniqueRef()))
 
     /* strings */
+    def regex( pattern : SparqlDefinition, flags : SparqlDefinition="" ) : SWDiscovery =
+      manageFilter(Regex(pattern,flags,this.negation,getUniqueRef()))
     def contains( string : SparqlDefinition ) : SWDiscovery = manageFilter(Contains(string,this.negation,getUniqueRef()))
     def strStarts( string : SparqlDefinition ) : SWDiscovery = manageFilter(StrStarts(string,this.negation,getUniqueRef()))
     def strEnds( string : SparqlDefinition ) : SWDiscovery = manageFilter(StrEnds(string,this.negation,getUniqueRef()))
@@ -74,8 +76,6 @@ case class SWDiscovery(
 
     /* String fun */
     def subStr(startingLoc : SparqlDefinition,length : SparqlDefinition ) : SWDiscovery = manage(SubStr(startingLoc,length,getUniqueRef()))
-    def regex(pattern : SparqlDefinition, flags : SparqlDefinition="") : SWDiscovery =
-      manage(Regex(pattern,flags,getUniqueRef()))
     def replace(pattern : SparqlDefinition, replacement : SparqlDefinition, flags : SparqlDefinition="") : SWDiscovery =
       manage(Replace(pattern,replacement,flags,getUniqueRef()))
 
@@ -129,7 +129,7 @@ case class SWDiscovery(
   /* set focus on root */
   def root: SWDiscovery  = SWDiscovery(config,rootNode,Some(rootNode.reference()))
 
-  def helper : SWDiscoveryHelper = SWDiscoveryHelper(this)
+  def finder : SWDiscoveryHelper = SWDiscoveryHelper(this)
 
   /* get current focus */
   def focus() : String = focusNode
@@ -242,7 +242,10 @@ case class SWDiscovery(
   */
 
   def datatype( uri : URI, ref : String = getUniqueRef("datatype") ) : SWDiscovery =
-    root.focusManagement(DatatypeNode(focusNode,SubjectOf(ref,uri),ref), false)
+    SWDiscovery(
+      config,
+      root.focusManagement(DatatypeNode(focusNode,SubjectOf(ref,uri),ref), false).rootNode,
+      Some(focusNode))
 
 
   def set( term : SparqlDefinition ) : SWDiscovery =
@@ -258,7 +261,7 @@ case class SWDiscovery(
   def console : SWDiscovery = {
     debug(" -- console -- ")
     println("USER REQUEST\n" +
-      pm.SimpleConsole.get(rootNode) + "\n" +
+      pm.SimpleConsole().get(rootNode) + "\n" +
       "FOCUS NODE:"+ focusNode +
       "\nENDPOINT:"+config.sources().map(v => println(v.url)).mkString(",") +"\n\n" +
       "\n -- SPARQL Request -- \n\n" +

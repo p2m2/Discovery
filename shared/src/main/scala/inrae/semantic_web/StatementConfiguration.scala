@@ -17,7 +17,11 @@ object ConfigurationObject {
   case class StatementConfigurationJson(
                                          sources : Seq[Source],
                                          settings : GeneralSetting = new GeneralSetting(),
-                                       )
+                                       ) {
+    override def toString: String = sources.mkString("\n")+
+      "\n\n"  + settings.toString
+
+  }
   case class Source(
                      id:String, /* identify the source endpoint */
                      url: String       = "", /* url access */
@@ -30,6 +34,16 @@ object ConfigurationObject {
                      password : String = "",
                      token : String    = ""
                    ) {
+    override def toString: String = {
+      { "##### ID :" + id +"\n"} +
+        { if (url != "") { " - **url**:" + url +"\n"} else {""} } +
+        { if (file != "") { " - **file**:" + file +"\n"} else {""} } +
+        { if (content != "") { " - **content**:" + content +"\n"} else {""} } +
+        { if (mimetype != "") { " - **mimetype**:" + mimetype +"\n"} else {""} } +
+        { if (method != "") { " - **method**:" + method +"\n"} else {""} } +
+        { if (auth != "") { " - **auth**:" + auth +"\n"} else {""} } +
+        { if (token != "") { " - **method**:" + token +"\n"} else {""} }
+    }
 
     val mimetype_legal = List(
       "application/sparql-query",
@@ -70,11 +84,19 @@ object ConfigurationObject {
                       cache : Boolean = true,
                       logLevel : String = "warn"          , // trace, debug, info, warn, error, all, off
                       sizeBatchProcessing : Int = 150,
-                      pageSize : Int = 20,
+                      pageSize : Int = 10,
                       proxy : Boolean = false ,  /* send request to a discovery proxy */
                       urlProxy : String = "http://urlProxy",
                     ) {
 
+    override def toString: String = {
+      "##### General Settings \n"  +
+      s" - **cache** :$cache \n" +
+        s" - **logLevel** :$logLevel \n" +
+        s" - **sizeBatchProcessing** :$sizeBatchProcessing \n" +
+        s" - **pageSize** :$pageSize \n" +
+        { if (proxy) { " - **urlProxy**:" + urlProxy +"\n"} else {""} }
+    }
 
     def getLogLevel: LogLevel = logLevel.toLowerCase() match {
       case "debug" | "d" => LogLevel.DEBUG
@@ -145,7 +167,7 @@ case class StatementConfiguration(
                                    new ConfigurationObject.StatementConfigurationJson(
                                      Seq[ConfigurationObject.Source](),ConfigurationObject.GeneralSetting())
                                  ) {
-  override def toString: String = "StatementConfiguration => conf:"+conf.toString
+  override def toString: String = conf.toString
 
 
 

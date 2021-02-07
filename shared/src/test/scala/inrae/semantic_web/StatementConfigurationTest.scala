@@ -52,6 +52,62 @@ object StatementConfigurationTest extends TestSuite {
       assert(source.mimetype == mimetype)
     }
 
+    test("unknown mimetype") {
+
+      val dbname = "dbpedia"
+      val url = "http://test"
+      val mimetype = " -- "
+
+      Try(StatementConfiguration.setConfig(ConfigurationObject.StatementConfigurationJson(
+        Seq(ConfigurationObject.Source(id=dbname, url=url, mimetype=mimetype))))) match {
+        case Success(s) => assert(false)
+        case Failure(e) => assert(true)
+      }
+    }
+
+    test("unknown method") {
+
+      val dbname = "dbpedia"
+      val url = "http://test"
+      val method = " -- "
+
+      Try(StatementConfiguration.setConfig(ConfigurationObject.StatementConfigurationJson(
+        Seq(ConfigurationObject.Source(id=dbname, url=url, method=method))))) match {
+        case Success(s) => assert(false)
+        case Failure(e) => assert(true)
+      }
+    }
+
+    test("defined too much source") {
+
+      val dbname = "dbpedia"
+      val url = "http://test"
+
+      Try(StatementConfiguration.setConfig(ConfigurationObject.StatementConfigurationJson(
+        Seq(ConfigurationObject.Source(id=dbname, url=url, file="sss", content="sss"))))) match {
+        case Success(s) => assert(false)
+        case Failure(e) => assert(true)
+      }
+
+      Try(StatementConfiguration.setConfig(ConfigurationObject.StatementConfigurationJson(
+        Seq(ConfigurationObject.Source(id=dbname, file="sss", content="sss"))))) match {
+        case Success(s) => assert(false)
+        case Failure(e) => assert(true)
+      }
+
+      Try(StatementConfiguration.setConfig(ConfigurationObject.StatementConfigurationJson(
+        Seq(ConfigurationObject.Source(id=dbname, url=url, file="sss"))))) match {
+        case Success(s) => assert(false)
+        case Failure(e) => assert(true)
+      }
+
+      Try(StatementConfiguration.setConfig(ConfigurationObject.StatementConfigurationJson(
+        Seq(ConfigurationObject.Source(id=dbname, url=url, content="sss"))))) match {
+        case Success(s) => assert(false)
+        case Failure(e) => assert(true)
+      }
+    }
+
     test("Create a config with a bad tag ") {
       Try(StatementConfiguration
         .setConfigString(

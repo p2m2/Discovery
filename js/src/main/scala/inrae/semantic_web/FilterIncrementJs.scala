@@ -23,6 +23,11 @@ case class FilterIncrementJs(swf: SWDiscoveryJs,negation : Boolean = false) {
     case false => SWDiscoveryJs(swf.config,swf.sw.filter.isUri)
   }
 
+  def regex( pattern : Any, flags : Any = "") : SWDiscoveryJs = negation match {
+    case true => SWDiscoveryJs(swf.config,swf.sw.filter.not.regex(pattern,flags))
+    case false => SWDiscoveryJs(swf.config,swf.sw.filter.regex(pattern,flags))
+  }
+
   @JSExport
   def contains(l: Any): SWDiscoveryJs = negation match {
     case true => SWDiscoveryJs(swf.config,swf.sw.filter.not.contains(l))

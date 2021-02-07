@@ -109,7 +109,8 @@ lazy val discovery=crossProject(JSPlatform, JVMPlatform).in(file("."))
     webpackBundlingMode := BundlingMode.LibraryAndApplication(),
     npmDependencies in Compile ++= Seq(
       "axios" -> "0.21.1",
-      "qs" -> "6.9.6"
+      "qs" -> "6.9.6",
+      "showdown" -> "1.9.1"
     ),
     scalaJSLinkerConfig in (Compile, fastOptJS ) ~= {
       _.withOptimizer(false)
@@ -119,7 +120,10 @@ lazy val discovery=crossProject(JSPlatform, JVMPlatform).in(file("."))
     scalaJSLinkerConfig in (Compile, fullOptJS) ~= {
       _.withSourceMap(false)
         .withModuleKind(ModuleKind.CommonJSModule)
-    }
+    },
+    libraryDependencies ++= Seq(
+      "org.scala-js" %%% "scalajs-dom" % "1.1.0"
+    )
   )
   .jvmSettings(
     libraryDependencies ++= Seq(
