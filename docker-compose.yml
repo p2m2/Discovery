@@ -18,3 +18,26 @@ services:
     ports:
       - "8890:8890"
 
+  ## -------------------------------------------------
+  ## Activating CORS in VIRTUOSO
+  ##
+  selenium_cors:
+    image: inraep2m2/service-allow-cors-virtuoso
+    environment:
+      virtuoso_site: "http://virtuoso:8890/"
+      login: dba
+      passwd: dba
+      chrome_container: chrome
+    depends_on: [ chrome, virtuoso ]
+
+    command: >
+      bash -c 'sleep 15s && echo " **** configure CORS / Virtuoso  ****" && node virtuoso_cors.js'
+
+  ## -------------------------------------------------
+  ## Chrome / Selenium
+  ##
+  chrome:
+    container_name: chrome
+    image: selenium/standalone-chrome
+    environment:
+      START_XVFB: 'false'

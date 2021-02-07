@@ -11,11 +11,10 @@ object StatementConfigurationTest extends TestSuite {
              "sources" : [{
                "id"  : "dbpedia",
                "url" : "https://dbpedia.org/sparql",
-               "type" : "tps",
+               "mimetype" : "application/sparql-query",
                "method" : "POST"
              }],
              "settings" : {
-               "driver" : "inrae.semantic_web.driver.RosHTTPDriver",
                "cache" : true,
                "logLevel" : "info",
                "sizeBatchProcessing" : 10,
@@ -26,11 +25,11 @@ object StatementConfigurationTest extends TestSuite {
 
   def tests = Tests {
     test("Create a simple source with string configuration") {
-      StatementConfiguration().setConfigString(config_base)
+      StatementConfiguration.setConfigString(config_base)
     }
 
     test("Get a unknown source") {
-      val c = StatementConfiguration().setConfigString(config_base)
+      val c = StatementConfiguration.setConfigString(config_base)
 
       Try(c.source("something")) match {
         case Success(_) => assert(false)
@@ -40,22 +39,77 @@ object StatementConfigurationTest extends TestSuite {
 
     test("Create a simple source") {
 
-      val configDbpediaBasic: StatementConfiguration = StatementConfiguration()
       val dbname = "dbpedia"
       val url = "http://test"
-      val `type` = "tps"
+      val mimetype = "application/sparql-query"
 
-      configDbpediaBasic.setConfig(ConfigurationObject.StatementConfigurationJson(
-        Seq(ConfigurationObject.Source(dbname, url, `type`))))
+      val configDbpediaBasic: StatementConfiguration = StatementConfiguration.setConfig(ConfigurationObject.StatementConfigurationJson(
+        Seq(ConfigurationObject.Source(id=dbname, url=url, mimetype=mimetype))))
       val source = configDbpediaBasic.source("dbpedia")
 
       assert(source.id == dbname)
       assert(source.url == url)
-      assert(source.`type` == `type`)
+      assert(source.mimetype == mimetype)
+    }
+
+    test("unknown mimetype") {
+
+      val dbname = "dbpedia"
+      val url = "http://test"
+      val mimetype = " -- "
+
+      Try(StatementConfiguration.setConfig(ConfigurationObject.StatementConfigurationJson(
+        Seq(ConfigurationObject.Source(id=dbname, url=url, mimetype=mimetype))))) match {
+        case Success(s) => assert(false)
+        case Failure(e) => assert(true)
+      }
+    }
+
+    test("unknown method") {
+
+      val dbname = "dbpedia"
+      val url = "http://test"
+      val method = " -- "
+
+      Try(StatementConfiguration.setConfig(ConfigurationObject.StatementConfigurationJson(
+        Seq(ConfigurationObject.Source(id=dbname, url=url, method=method))))) match {
+        case Success(s) => assert(false)
+        case Failure(e) => assert(true)
+      }
+    }
+
+    test("defined too much source") {
+
+      val dbname = "dbpedia"
+      val url = "http://test"
+
+      Try(StatementConfiguration.setConfig(ConfigurationObject.StatementConfigurationJson(
+        Seq(ConfigurationObject.Source(id=dbname, url=url, file="sss", content="sss"))))) match {
+        case Success(s) => assert(false)
+        case Failure(e) => assert(true)
+      }
+
+      Try(StatementConfiguration.setConfig(ConfigurationObject.StatementConfigurationJson(
+        Seq(ConfigurationObject.Source(id=dbname, file="sss", content="sss"))))) match {
+        case Success(s) => assert(false)
+        case Failure(e) => assert(true)
+      }
+
+      Try(StatementConfiguration.setConfig(ConfigurationObject.StatementConfigurationJson(
+        Seq(ConfigurationObject.Source(id=dbname, url=url, file="sss"))))) match {
+        case Success(s) => assert(false)
+        case Failure(e) => assert(true)
+      }
+
+      Try(StatementConfiguration.setConfig(ConfigurationObject.StatementConfigurationJson(
+        Seq(ConfigurationObject.Source(id=dbname, url=url, content="sss"))))) match {
+        case Success(s) => assert(false)
+        case Failure(e) => assert(true)
+      }
     }
 
     test("Create a config with a bad tag ") {
-      Try(StatementConfiguration()
+      Try(StatementConfiguration
         .setConfigString(
           """
           {
@@ -67,39 +121,16 @@ object StatementConfigurationTest extends TestSuite {
       }
     }
 
-    test("Create a request config without source ") {
-      Try(StatementConfiguration()
-        .setConfigString(
-          """
-            {
-             "settings" : {
-                "driver" : "hello.world"
-             }
-            """.stripMargin)) match {
-        case Success(_) => assert(false)
-        case Failure(_) => assert(true)
-      }
-    }
-
-    test("Create a request config with an unknown driver ") {
-      Try(StatementConfiguration()
-        .setConfigString(config_base.replace("inrae.semantic_web.driver.RosHTTPDriver",
-          "hello.world"))) match {
-        case Success(_) => assert(false)
-        case Failure(_) => assert(true)
-      }
-    }
-
     test("Create a request config with an unknown log level ") {
-      assert(StatementConfiguration()
+      assert(StatementConfiguration
         .setConfigString(config_base.replace("\"info\"",
-          "\"hello.world\"")).conf.settings.getLogLevel() == LogLevel.WARN)
+          "\"hello.world\"")).conf.settings.getLogLevel == LogLevel.WARN)
     }
 
     test("Create a request config log level debug ") {
-      Try(StatementConfiguration()
+      Try(StatementConfiguration
         .setConfigString(config_base.replace("\"info\"",
-          "\"debug\"")).conf.settings.getLogLevel() == LogLevel.DEBUG) match {
+          "\"debug\"")).conf.settings.getLogLevel == LogLevel.DEBUG) match {
         case Success(_) => assert(true)
         case Failure(_) => assert(false)
       }
@@ -107,47 +138,47 @@ object StatementConfigurationTest extends TestSuite {
 
     test("Create a request config log level info ") {
 
-      val c = StatementConfiguration()
+      val c = StatementConfiguration
         .setConfigString(config_base)
-      assert(c.conf.settings.getLogLevel() == LogLevel.INFO)
+      assert(c.conf.settings.getLogLevel == LogLevel.INFO)
 
     }
     test("Create a request config log level trace ") {
-      val c = StatementConfiguration()
+      val c = StatementConfiguration
         .setConfigString(config_base.replace("\"info\"",
           "\"trace\""))
-      assert(c.conf.settings.getLogLevel() == LogLevel.TRACE)
+      assert(c.conf.settings.getLogLevel == LogLevel.TRACE)
     }
     test("Create a request config log level warn ") {
-      val c = StatementConfiguration()
+      val c = StatementConfiguration
         .setConfigString(config_base.replace("\"info\"",
           "\"warn\""))
-      assert(c.conf.settings.getLogLevel() == LogLevel.WARN)
+      assert(c.conf.settings.getLogLevel == LogLevel.WARN)
     }
 
     test("Create a request config log level error ") {
-      val c = StatementConfiguration()
+      val c = StatementConfiguration
         .setConfigString(config_base.replace("\"info\"",
           "\"error\""))
-      assert(c.conf.settings.getLogLevel() == LogLevel.ERROR)
+      assert(c.conf.settings.getLogLevel == LogLevel.ERROR)
     }
 
     test("Create a request config log level all ") {
-      val c = StatementConfiguration()
+      val c = StatementConfiguration
         .setConfigString(config_base.replace("\"info\"",
           "\"all\""))
-      assert(c.conf.settings.getLogLevel() == LogLevel.ALL)
+      assert(c.conf.settings.getLogLevel == LogLevel.ALL)
     }
 
     test("Create a request config log level off ") {
-      val c = StatementConfiguration()
+      val c = StatementConfiguration
         .setConfigString(config_base.replace("\"info\"",
           "\"off\""))
-      assert(c.conf.settings.getLogLevel() == LogLevel.OFF)
+      assert(c.conf.settings.getLogLevel == LogLevel.OFF)
     }
 
     test("pageSize can not be negative") {
-      Try(StatementConfiguration()
+      Try(StatementConfiguration
         .setConfigString(config_base.replace("\"pageSize\" : 10",
           "\"pageSize\" : -1"))) match {
         case Success(c) => assert(false)
@@ -155,7 +186,7 @@ object StatementConfigurationTest extends TestSuite {
       }
     }
     test("pageSize can be equal to zero") {
-      Try(StatementConfiguration()
+      Try(StatementConfiguration
         .setConfigString(config_base.replace("\"pageSize\" : 10",
           "\"pageSize\" : 0"))) match {
         case Success(c) => assert(false)
@@ -163,7 +194,7 @@ object StatementConfigurationTest extends TestSuite {
       }
     }
     test("pageSize") {
-      val c = StatementConfiguration()
+      val c = StatementConfiguration
         .setConfigString(config_base.replace("\"pageSize\" : 10",
           "\"pageSize\" : 5"))
       assert(c.conf.settings.pageSize == 5)
