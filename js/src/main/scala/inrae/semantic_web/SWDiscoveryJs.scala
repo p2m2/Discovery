@@ -123,7 +123,7 @@ case class SWDiscoveryJs(
 
   @JSExport
   def selectByPage(lRef: String*)  : js.Promise[(Int,js.Array[SWTransactionJs])] = {
-    sw.helper.count.map(
+    sw.finder.count.map(
       nSolutions => {
         val nit : Int = nSolutions / config.conf.settings.pageSize
         (nit+1,(0 to nit).map( p =>{

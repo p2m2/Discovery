@@ -129,7 +129,7 @@ case class SWDiscovery(
   /* set focus on root */
   def root: SWDiscovery  = SWDiscovery(config,rootNode,Some(rootNode.reference()))
 
-  def helper : SWDiscoveryHelper = SWDiscoveryHelper(this)
+  def finder : SWDiscoveryHelper = SWDiscoveryHelper(this)
 
   /* get current focus */
   def focus() : String = focusNode
@@ -242,7 +242,10 @@ case class SWDiscovery(
   */
 
   def datatype( uri : URI, ref : String = getUniqueRef("datatype") ) : SWDiscovery =
-    root.focusManagement(DatatypeNode(focusNode,SubjectOf(ref,uri),ref), false)
+    SWDiscovery(
+      config,
+      root.focusManagement(DatatypeNode(focusNode,SubjectOf(ref,uri),ref), false).rootNode,
+      Some(focusNode))
 
 
   def set( term : SparqlDefinition ) : SWDiscovery =

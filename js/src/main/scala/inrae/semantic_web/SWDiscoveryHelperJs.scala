@@ -12,25 +12,25 @@ case class SWDiscoveryHelperJs(sw : SWDiscovery) {
   implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
 
   @JSExport
-  def count(): Promise[Int] = { sw.helper.count.toJSPromise }
+  def count(): Promise[Int] = { sw.finder.count.toJSPromise }
 
   @JSExport
   def findClasses(regex : String = "",uri:URI = URI(""), page : Int = 0 ): Promise[js.Array[URI]] =
-  { sw.helper.findClasses(regex,uri,page).map(array => array.toJSArray).toJSPromise }
+  { sw.finder.classes(regex,uri,page).map(array => array.toJSArray).toJSPromise }
 
   @JSExport
   def findObjectProperties(regex : String = "",motherClassProperties: URI = URI(""), page : Int = 0 ) : Promise[js.Array[URI]] = {
-    sw.helper.findObjectProperties(regex,motherClassProperties,page).map(array => array.toJSArray).toJSPromise
+    sw.finder.objectProperties(regex,motherClassProperties,page).map(array => array.toJSArray).toJSPromise
   }
 
   @JSExport
   def findDatatypeProperties(regex : String = "",motherClassProperties: URI = URI("") , page : Int = 0) : Promise[js.Array[URI]] = {
-    sw.helper.findDatatypeProperties(regex,motherClassProperties,page).map(array => array.toJSArray).toJSPromise
+    sw.finder.datatypeProperties(regex,motherClassProperties,page).map(array => array.toJSArray).toJSPromise
   }
 
   @JSExport
   def findSubjectProperties(regex : String = "",motherClassProperties: URI = URI("") , page : Int = 0) : Promise[js.Array[URI]] = {
-    sw.helper.findSubjectProperties(regex,motherClassProperties,page).map(array => array.toJSArray).toJSPromise
+    sw.finder.subjectProperties(regex,motherClassProperties,page).map(array => array.toJSArray).toJSPromise
   }
 
 }

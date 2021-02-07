@@ -33,7 +33,7 @@ case class SWDiscoveryHelper(sw : SWDiscovery) {
    *
    */
 
-  def findClasses(regex : String="", motherClass: URI = URI(""),page : Int =0) : Future[Seq[URI]] = {
+  def classes(regex : String="", motherClass: URI = URI(""), page : Int =0) : Future[Seq[URI]] = {
     debug(" -- findClasses -- ")
     val query = (motherClass match {
       case uri : URI if uri == URI("")  => sw.isSubjectOf(URI("a"),"_esp___type")
@@ -44,10 +44,7 @@ case class SWDiscoveryHelper(sw : SWDiscovery) {
       .filter.not.regex(regex_avoid_prefix)
 
     (if ( regex.trim != "")
-        {
-          query.focus("_esp___type").console
           query.focus("_esp___type").filter.regex(regex)
-        }
       else
         query)
       .selectByPage(List("_esp___type"))
@@ -69,7 +66,7 @@ case class SWDiscoveryHelper(sw : SWDiscovery) {
       })
   }
 
-  def findProperties(regex : String="", motherClassProperties: URI = URI("") , kind : String ,page : Int) : Future[Seq[URI]] = {
+  def properties(regex : String="", motherClassProperties: URI = URI(""), kind : String, page : Int) : Future[Seq[URI]] = {
     debug(" -- findProperties -- ")
 
     /* inherited from something ??? */
@@ -121,18 +118,18 @@ case class SWDiscoveryHelper(sw : SWDiscovery) {
 
   }
 
-  def findObjectProperties(regex : String="", motherClassProperties: URI = URI(""),page : Int = 0 ) : Future[Seq[URI]] = {
+  def objectProperties(regex : String="", motherClassProperties: URI = URI(""), page : Int = 0 ) : Future[Seq[URI]] = {
     debug(" -- findObjectProperties -- ")
-    findProperties(regex,motherClassProperties,"objectProperty",page)
+    properties(regex,motherClassProperties,"objectProperty",page)
   }
 
-  def findDatatypeProperties(regex : String="", motherClassProperties: URI = URI(""),page : Int = 0 ) : Future[Seq[URI]] = {
+  def datatypeProperties(regex : String="", motherClassProperties: URI = URI(""), page : Int = 0 ) : Future[Seq[URI]] = {
     debug(" -- findDatatypeProperties -- ")
-    findProperties(regex,motherClassProperties,"datatypeProperty",page)
+    properties(regex,motherClassProperties,"datatypeProperty",page)
   }
 
   /* backward */
-  def findSubjectProperties(regex : String="", motherClassProperties: URI = URI("") ,page : Int = 0 ) : Future[Seq[URI]] = {
+  def subjectProperties(regex : String="", motherClassProperties: URI = URI(""), page : Int = 0 ) : Future[Seq[URI]] = {
     debug(" -- findSubjectProperties -- ")
 
     val query = (if (motherClassProperties != URI("")) {

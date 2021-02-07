@@ -24,26 +24,26 @@ case class HtmlView(sw: SWDiscovery,regex : String = "") {
   var objectOfProperties: String = waitingForFuture
   var values: String = waitingForFuture
 
-  sw.helper.count.map(c => {
+  sw.finder.count.map(c => {
     count = c.toString
     update()
   })
-//
-  sw.helper.findClasses(regex).map(lUris => {
+
+  sw.finder.classes(regex).map(lUris => {
     classes = " - " + lUris.mkString("\n - ")
     update()
   })
 
-  sw.helper.findObjectProperties(regex).map(lUris => {
+  sw.finder.objectProperties(regex).map(lUris => {
     subjectOfObjectProperties = " - " + lUris.mkString("\n - ")
     update()
   })
-  sw.helper.findDatatypeProperties(regex).map(lUris => {
+  sw.finder.datatypeProperties(regex).map(lUris => {
     subjectOfDatatypeProperties = " - " + lUris.mkString("\n - ")
     update()
   })
 
-  sw.helper.findSubjectProperties(regex).map(lUris => {
+  sw.finder.subjectProperties(regex).map(lUris => {
     objectOfProperties = " - " + lUris.mkString("\n - ")
     update()
   })
@@ -70,7 +70,7 @@ case class HtmlView(sw: SWDiscovery,regex : String = "") {
 
  - **target node**      : ${SelectNode.getNodeWithRef(sw.focusNode,sw.rootNode).mkString(",")}
  - **regex**            : $regex
- - **Number of values** : *$count*
+ - **Number of values** : **$count**
 
 #### Values ${limitValues.toString} .set(`value`) .setList(`value1`,`value1`,..)
 $values
