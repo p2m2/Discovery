@@ -2,6 +2,7 @@ package inrae.semantic_web
 
 import inrae.semantic_web.internal.Node
 import inrae.semantic_web.rdf.{IRI, SparqlDefinition, URI}
+import inrae.semantic_web.view.HtmlView
 
 import scala.scalajs._
 import scala.scalajs.js.JSConverters._
@@ -35,7 +36,10 @@ case class SWDiscoveryJs(
   }
 
   @JSExport
-  val filter = FilterIncrementJs(this)
+  val filter: FilterIncrementJs = FilterIncrementJs(this)
+
+  @JSExport
+  def helper: SWDiscoveryJs = { HtmlView(sw) ; SWDiscoveryJs(config,sw) }
 
   @JSExport
   def bind(`var` : String) : BindIncrementJs = BindIncrementJs(this,`var`)
@@ -43,7 +47,8 @@ case class SWDiscoveryJs(
   @JSExport
   def usage() : SWDiscoveryJs = SWDiscoveryJs(config,SWDiscovery(config).usage)
 
-  def helper() :SWDiscoveryHelperJs = SWDiscoveryHelperJs(sw)
+  @JSExport
+  def finder :SWDiscoveryHelperJs = SWDiscoveryHelperJs(sw)
 
   @JSExport
   def focus(ref : String) : SWDiscoveryJs = SWDiscoveryJs(config,sw.focus(ref))

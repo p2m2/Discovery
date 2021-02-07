@@ -5,7 +5,7 @@ import inrae.semantic_web.internal._
 /**
  *
  */
-object SimpleConsole  {
+case class SimpleConsole(consoleColor : Boolean = true,displayRootStyle : Boolean = true) {
     implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
     //full block
     def fullb : String = new String(Character.toChars(0x2588))
@@ -24,12 +24,24 @@ object SimpleConsole  {
 
     def escape : String  = new String("  ")
 
-    def colorize(n : Node ) : String = n match {
-        case _ : Root               => Console.MAGENTA
-        case _ : RdfNode            => Console.BLUE
-        case _ : FilterNode         => Console.GREEN
-        case _ : Value              => Console.CYAN
-        case _                      => Console.RED
+    def colorReset : String = consoleColor match {
+        case true => Console.RESET
+        case false => ""
+    }
+
+    def colorize(n : Node ) : String = {
+        if ( !consoleColor )
+            ""
+        else
+            n match {
+                case _ : Root               => Console.MAGENTA
+                case _ : RdfNode            => Console.BLUE
+                case _ : FilterNode         => Console.GREEN
+                case _ : Value              => Console.CYAN
+                case _ : AggregateNode      => Console.MAGENTA_B
+                case _ : ExpressionNode     => Console.GREEN_B
+                case _                      => Console.RED
+            }
     }
 
     def Labelled(n: Node ) : String = {
@@ -44,7 +56,7 @@ object SimpleConsole  {
             case node : Value       => "Value ("+node.term.toString +")"
             case node : FilterNode  => "FILTER "+ node.toString()
             case node : DatatypeNode => "DatatypeNode ("+ node.refNode  +" -> " + Labelled(node.property)+ ") "
-            case v                  => "--- Unkown ---"+v.toString
+            case v                  => v.toString
         }
     }
 
@@ -58,9 +70,9 @@ object SimpleConsole  {
         val suffix =  (marge match {
             case 0 => fullb + lowerhb * 100 + "\n"
             case _ => ""
-        }) + Console.RESET
+        }) + colorReset
 
-        val label : String = escape + item + barrehor + " " + colorize(n) + (Labelled(n)) + Console.RESET
+        val label : String = escape + item + barrehor + " " + colorize(n) + (Labelled(n)) + colorReset
 
         val labelledLine = prefix + (escape + barrevert) * marge + label + "\n"
         val children = n.children.length match {
@@ -70,8 +82,9 @@ object SimpleConsole  {
             case _ => ""
         }
 
+
         val sourcesNode = n match {
-            case r : Root => {
+            case r : Root if displayRootStyle => {
                 "\n" + prefix + (escape + barrevert) * marge + label + "\n"
                   "==== SOURCESNODE === \n" + r.lSourcesNodes.map(child => get(child, marge + 1) +
                     " * " + child.sources.mkString(",")  ).mkString("\n") + "\n"
@@ -80,7 +93,7 @@ object SimpleConsole  {
         }
 
         val datatypeNode = n match {
-            case r : Root => {
+            case r : Root if displayRootStyle => {
                 "\n" +  prefix + (escape + barrevert) * marge + label + "\n"
                 "==== DATATYPE === \n" + r.lDatatypeNode.map(child => get(child, marge + 1)).mkString("\n")+ "\n"
             }
@@ -88,7 +101,7 @@ object SimpleConsole  {
         }
 
         val solutionSequenceModifierNode = n match {
-            case r : Root => {
+            case r : Root if displayRootStyle => {
                 "\n" +  prefix + (escape + barrevert) * marge + label + "\n"
                 "==== Solution Modifier === \n" + r.lSolutionSequenceModifierNode.map(child => get(child, marge + 1)).mkString("\n")+ "\n"
             }
@@ -96,7 +109,7 @@ object SimpleConsole  {
         }
 
         val expressionNode = n match {
-            case r : Root => {
+            case r : Root if displayRootStyle => {
                 "\n" +  prefix + (escape + barrevert) * marge + label + "\n"
                 "==== Expression === \n" + r.lBindNode.map(child => get(child, marge + 1)).mkString("\n")+ "\n"
             }

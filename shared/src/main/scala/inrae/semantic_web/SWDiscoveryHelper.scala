@@ -26,7 +26,7 @@ case class SWDiscoveryHelper(sw : SWDiscovery) {
    *
    */
 
-  def findClasses(motherClass: URI = URI("") ) : Future[Seq[URI]] = {
+  def findClasses(motherClass: URI = URI(""),page : Int =0) : Future[Seq[URI]] = {
     debug(" -- findClasses -- ")
     (motherClass match {
       case uri : URI if uri == URI("")  => sw.isSubjectOf(URI("a"),"_esp___type")
@@ -35,17 +35,26 @@ case class SWDiscoveryHelper(sw : SWDiscovery) {
         .set(motherClass)
     })
       .focus("_esp___type")
-      .select(List("_esp___type"))
-      .commit()
-      .raw
-      .map( json => {
-        json("results")("bindings").arr.map(
-          row => SparqlBuilder.createUri(row("_esp___type"))
-        ).toSeq
+      .selectByPage(List("_esp___type"))
+      .flatMap(  v => {
+        val futurePages : Seq[SWTransaction] = v._2
+
+        if ( futurePages.length > page ) {
+          futurePages(page)
+            .commit()
+            .raw
+            .map( json => {
+              json("results")("bindings").arr.map(
+                row => SparqlBuilder.createUri(row("_esp___type"))
+              ).toSeq
+            })
+        } else {
+          Future { Seq[URI]() }
+        }
       })
   }
 
-  def findProperties(motherClassProperties: URI = URI("") , kind : String = "objectProperty" ) : Future[Seq[URI]] = {
+  def findProperties(motherClassProperties: URI = URI("") , kind : String = "objectProperty" ,page : Int =0) : Future[Seq[URI]] = {
     debug(" -- findProperties -- ")
 
     /* inherited from something ??? */
@@ -67,16 +76,26 @@ case class SWDiscoveryHelper(sw : SWDiscovery) {
       case "objectProperty" => state.focus("_esp___type").filter.isUri
       case "datatypeProperty" => state.focus("_esp___type").filter.isLiteral
       case _ => state
-    }).select(List("_esp___property"))
-      .distinct
-      .commit()
-      .raw
-      .map( json => {
-        json("results")("bindings").arr.map(
-          row => {
-            SparqlBuilder.createUri(row("_esp___property")) }
-        ).toSeq
+    }).selectByPage(List("_esp___property"))
+      .flatMap(  v => {
+        val futurePages : Seq[SWTransaction] = v._2
+        if ( futurePages.length > page ) {
+          futurePages(page)
+            .distinct
+            .commit()
+            .raw
+            .map( json => {
+              json("results")("bindings").arr.map(
+                row => {
+                  SparqlBuilder.createUri(row("_esp___property")) }
+              ).toSeq
+            })
+        } else {
+          Future { Seq[URI]() }
+        }
       })
+
+
   }
 
   def findObjectProperties(motherClassProperties: URI = URI("") ) : Future[Seq[URI]] = {

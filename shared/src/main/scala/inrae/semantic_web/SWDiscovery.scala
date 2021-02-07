@@ -258,7 +258,7 @@ case class SWDiscovery(
   def console : SWDiscovery = {
     debug(" -- console -- ")
     println("USER REQUEST\n" +
-      pm.SimpleConsole.get(rootNode) + "\n" +
+      pm.SimpleConsole().get(rootNode) + "\n" +
       "FOCUS NODE:"+ focusNode +
       "\nENDPOINT:"+config.sources().map(v => println(v.url)).mkString(",") +"\n\n" +
       "\n -- SPARQL Request -- \n\n" +
