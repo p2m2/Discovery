@@ -4,10 +4,12 @@ import inrae.data.DataTestFactory
 import utest.{TestRunner, TestSuite, Tests, test}
 import wvlet.log.{LogLevel, Logger}
 
+import scala.concurrent.Future
+
 object HttpRequestDriverTest extends TestSuite {
   implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
 
-  val insert_data = DataTestFactory.insert_virtuoso1(
+  val insert_data : Future[Any] = DataTestFactory.insert_virtuoso1(
     """
       <aaRosHttpDriverTest> <bb> <cc> .
       """.stripMargin, this.getClass.getSimpleName)
@@ -16,11 +18,11 @@ object HttpRequestDriverTest extends TestSuite {
   Logger.setDefaultLogLevel(LogLevel.OFF)
 
 
-  val query = "select ?b ?c where { <aaRosHttpDriverTest> ?b ?c . } limit 1"
+  val query : String = "select ?b ?c where { <aaRosHttpDriverTest> ?b ?c . } limit 1"
 
-  def tests = Tests {
+  def tests: Tests = Tests {
 
-    test("get") {
+    test("AxiosRequestDriver get") {
       insert_data.map(_ => {
         AxiosRequestDriver(idName = "test", method = "get", url = DataTestFactory.url_endpoint, login = "", password = "", token = "", auth = "")
           .request(query)
@@ -31,16 +33,16 @@ object HttpRequestDriverTest extends TestSuite {
       }).flatten
     }
 
-    test("get bad request") {
+    test("AxiosRequestDriver get bad request") {
       insert_data.map(_ => {
         AxiosRequestDriver(idName = "test", method = "get", url = DataTestFactory.url_endpoint, login = "", password = "", token = "", auth = "")
           .request("bad request")
-          .map(qr => assert(false))
+          .map(_ => assert(false))
           .recover(_ => assert(true))
       }).flatten
     }
 /*
-    test("get malformed endpoint") {
+    test("AxiosRequestDriver get malformed endpoint") {
       insert_data.map(_ => {
         AxiosRequestDriver(idName = "test", method = "get", url = "bidon", login = "", password = "", token = "", auth = "")
           .request(query)
@@ -49,7 +51,7 @@ object HttpRequestDriverTest extends TestSuite {
       }).flatten
     }
 
-    test("get endpoint does not exist") {
+    test("AxiosRequestDriver get endpoint does not exist") {
       insert_data.map(_ => {
         AxiosRequestDriver(idName = "test", method = "get", url = "http://bidon.com", login = "", password = "", token = "", auth = "")
           .request(query)
@@ -58,7 +60,7 @@ object HttpRequestDriverTest extends TestSuite {
       }).flatten
     }
 */
-    test("post") {
+    test("AxiosRequestDriver post") {
       insert_data.map(_ => {
         AxiosRequestDriver(idName = "test", method = "post", url = DataTestFactory.url_endpoint, login = "", password = "", token = "", auth = "")
           .request(query)
@@ -69,16 +71,16 @@ object HttpRequestDriverTest extends TestSuite {
       }).flatten
     }
 
-    test("post bad request") {
+    test("AxiosRequestDriver post bad request") {
       insert_data.map(_ => {
         AxiosRequestDriver(idName = "test", method = "post", url = DataTestFactory.url_endpoint, login = "", password = "", token = "", auth = "")
           .request("bad request")
-          .map(qr => assert(false))
+          .map(_ => assert(false))
           .recover(_ => assert(true))
       }).flatten
     }
     /*
-    test("post malformed endpoint") {
+    test("AxiosRequestDriver post malformed endpoint") {
       insert_data.map(_ => {
         AxiosRequestDriver(idName = "test", method = "post", url = "bidon", login = "", password = "", token = "", auth = "")
           .request(query)
@@ -87,7 +89,7 @@ object HttpRequestDriverTest extends TestSuite {
       }).flatten
     }
 
-    test("post endpoint does not exist") {
+    test("AxiosRequestDriver post endpoint does not exist") {
       insert_data.map(_ => {
         AxiosRequestDriver(idName = "test", method = "post", url = "http://bidon.com", login = "", password = "", token = "", auth = "")
           .post(query)
@@ -96,7 +98,58 @@ object HttpRequestDriverTest extends TestSuite {
       }).flatten
     }
  */
+
+    test("ComunicaRequestDriver metabo file") {
+     /*
+      ComunicaRequestDriver(idName = "test", url = "http://localhost:8080/metabo.ttl", login = "", password = "", sourceType="file")
+        .request("select * where { ?a ?b ?c . } limit 5")
+        .map(qr => {
+          assert(qr.json("results")("bindings").arr.length == 5) })
+        .recover(_ => assert(false))*/
+    }
+
+    test("ComunicaRequestDriver TTL") {
+      val url_file = "http://localhost:8080/animals.ttl"
+      ComunicaRequestDriver(idName = "test", url = url_file, content="",mimetype="text/turtle",login = "", password = "", sourceType="file")
+        .request("select * where { ?a ?b ?c . } limit 5")
+        .map(qr => {
+          println(url_file + " --> " + qr.json("results")("bindings").arr.length)
+          assert(qr.json("results")("bindings").arr.length == 5)
+        })
+        .recover(_ => {
+          assert(false)
+        })
+
+    }
+
+    test("ComunicaRequestDriver JSON-LD") {
+      val url_file = "http://localhost:8080/animals.jsonld"
+      ComunicaRequestDriver(idName = "test", url = url_file, content="",mimetype="application/json+ld", login = "", password = "", sourceType="file")
+        .request("select * where { ?a ?b ?c . } limit 5")
+        .map(qr => {
+          println(url_file + " --> " + qr.json("results")("bindings").arr.length)
+          assert(qr.json("results")("bindings").arr.length == 5)
+        })
+        .recover(_ => {
+          assert(false)
+        })
+    }
+
+    test("ComunicaRequestDriver N3") {
+      val url_file = "http://localhost:8080/animals.n3"
+      ComunicaRequestDriver(idName = "test", url = url_file, content="",mimetype="text/n3", login = "", password = "", sourceType="file")
+        .request("select * where { ?a ?b ?c . } limit 5")
+        .map(qr => {
+          println(url_file + " --> " + qr.json("results")("bindings").arr.length)
+          assert(qr.json("results")("bindings").arr.length == 5)
+        })
+        .recover(_ => {
+          assert(false)
+        })
+    }
+
   }
+
 
   TestRunner.runAsync(tests).map { _ => DataTestFactory.delete_virtuoso1(this.getClass.getSimpleName) }
 }

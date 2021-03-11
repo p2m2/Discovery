@@ -32,7 +32,7 @@ object RequestsTest extends TestSuite {
         {
          "sources" : [{
            "id"       : "local_content",
-           "content"  : "<http://aaaaaa> <http://bbbbbb2> <http://cc2> .",
+           "content"  : "<http://iiaaaaaa> <http://iibbbbbb2> <http://iicc2> .",
            "mimetype" : "text/turtle"
          }],
          "settings" : {
@@ -82,15 +82,15 @@ object RequestsTest extends TestSuite {
         """.stripMargin)
 
 
-  def tests = Tests {
+  def tests : Tests = Tests {
 
     test("federation") {
       insert_data.map(_ => {
         SWDiscovery(mixconfig)
           .something("sub")
-          .isSubjectOf(URI("http://bbbbbb"),"obj")
+          .isSubjectOf(URI("http://bbbbbb"), "obj")
           //.console()
-          .select(List("sub","obj"))
+          .select(List("sub", "obj"))
           .commit()
           .raw
           .map(result => {
@@ -104,14 +104,13 @@ object RequestsTest extends TestSuite {
       insert_data.map(_ => {
         SWDiscovery(config2)
           .something("h1")
-          .isSubjectOf(URI("http://bbbbbb2"))
-          //.console()
-          .select(List("h1","v"))
+          .isSubjectOf(URI("http://iibbbbbb2"))
+          .select(List("h1"))
           .commit()
           .raw
           .map(result => {
-            assert(result("results")("bindings").arr.length > 1)
-            assert(SparqlBuilder.createUri(result("results")("bindings")(0)("h1")).localName == "http://aaaaaa")
+            assert(result("results")("bindings").arr.length == 1)
+            assert(SparqlBuilder.createUri(result("results")("bindings")(0)("h1")).localName == "http://iiaaaaaa")
           })
       }).flatten
     }
@@ -120,7 +119,7 @@ object RequestsTest extends TestSuite {
       insert_data.map(_ => {
         SWDiscovery(config3)
           .something("h1")
-          .isSubjectOf(URI("http://bbbbbb2"),"v")
+          .isSubjectOf(URI("http://bbbbbb2"), "v")
           .select(List("v"))
           .commit()
           .raw

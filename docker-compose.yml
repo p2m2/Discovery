@@ -41,3 +41,18 @@ services:
     image: selenium/standalone-chrome
     environment:
       START_XVFB: 'false'
+
+  ## -------------------------------------------------
+  ## Static file server
+  ##
+  static-file-server:
+    container_name: static-file-server
+    image: halverneus/static-file-server:latest
+    environment:
+      CORS: "true"
+      DEBUG: "true"
+    volumes:
+      - ./shared/src/test/resources/:/web
+    ports:
+      - 8080:8080
+

@@ -26,8 +26,8 @@ object ConfigurationObject {
                      id:String, /* identify the source endpoint */
                      url: String       = "", /* url access */
                      file: String      = "", /* local file access */
-                     content: String   = "", /* online defition */
-                     mimetype: String  = "application/sparql-query",  /* application/sparql-query, 'turtle', 'text/turtle' */
+                     content: String   = "", /* online definition */
+                     mimetype: String  = "application/sparql-query",  /* application/sparql-query, 'turtle', 'text/turtle' 'hypermedia' */
                      method: String    = "POST", /* POST, POST_ENCODED, GET */
                      auth : String     = "", /* basic, digest, bearer, proxy */
                      login : String    = "" ,
