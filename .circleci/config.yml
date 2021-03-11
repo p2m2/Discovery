@@ -109,6 +109,18 @@ executors:
             SPARQL_UPDATE: true
             DEFAULT_GRAPH: "graph:test:discovery:default:"
 
+        - image: halverneus/static-file-server:latest
+          auth:
+            username: ${DOCKER_USER}
+            password: ${DOCKER_PASS}
+          environment:
+            CORS: "true"
+            DEBUG: "true"
+            volumes:
+              - ./shared/src/test/resources/:/web
+            ports:
+              - 8080:8080
+
 orbs:
   node: circleci/node@4.1.0
 
@@ -129,10 +141,17 @@ jobs:
       - run:
           name: Compile - JVM
           command: cat /dev/null | sbt discoveryJVM/test:compile
+      - run:
+          name: Test - JVM
+          command: cat /dev/null | sbt discoveryJVM/test
 
       - run:
           name: Compile - JS
           command: cat /dev/null | sbt discoveryJS/test:compile
+
+      - run:
+          name: Test - JS
+          command: cat /dev/null | sbt discoveryJS/test
 
   lib_js:
     executor: openjdk
