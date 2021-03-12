@@ -47,12 +47,10 @@ services:
   ##
   static-file-server:
     container_name: static-file-server
-    image: halverneus/static-file-server:latest
+    image: inraep2m2/service-static-file-server:latest
     environment:
       CORS: "true"
       DEBUG: "true"
-    volumes:
-      - ./shared/src/test/resources/:/web
     ports:
       - 8080:8080
 

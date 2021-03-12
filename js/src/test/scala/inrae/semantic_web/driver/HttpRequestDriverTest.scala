@@ -113,10 +113,12 @@ object HttpRequestDriverTest extends TestSuite {
       ComunicaRequestDriver(idName = "test", url = url_file, content="",mimetype="text/turtle",login = "", password = "", sourceType="file")
         .request("select * where { ?a ?b ?c . } limit 5")
         .map(qr => {
+
           println(url_file + " --> " + qr.json("results")("bindings").arr.length)
           assert(qr.json("results")("bindings").arr.length == 5)
         })
-        .recover(_ => {
+        .recover(err => {
+          println(err)
           assert(false)
         })
 

@@ -14,6 +14,7 @@ lazy val comunica_actor_init_sparql_rdfjs_version = "1.0.0"
 lazy val data_model_rdfjs_version = "1.0.0"
 lazy val n3js_facade_version = "1.0.1"
 lazy val rdfxml_streaming_parser_version = "1.0.0"
+lazy val comunica_version = "1.19.2"
 
 //https://jitpack.io/
 
@@ -110,6 +111,8 @@ lazy val discovery=crossProject(JSPlatform, JVMPlatform).in(file("."))
   )
   .jsConfigure(_.enablePlugins(ScalaJSBundlerPlugin))
   .jsSettings(
+    npmDependencies in Compile ++= Seq(
+      "@comunica/utils-datasource" -> comunica_version),
     libraryDependencies ++= Seq(
       "com.github.p2m2" %%% "comunica-actor-init-sparql-rdfjs" % comunica_actor_init_sparql_rdfjs_version ,
       "com.github.p2m2" %%% "data-model-rdfjs" % data_model_rdfjs_version ,
