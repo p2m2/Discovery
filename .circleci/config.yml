@@ -92,14 +92,6 @@ executors:
             username: ${DOCKER_USER}
             password: ${DOCKER_PASS}
 
-        - image: inraep2m2/service-static-file-server:latest
-          auth:
-            username: ${DOCKER_USER}
-            password: ${DOCKER_PASS}
-          environment:
-              CORS: "true"
-              DEBUG: "true"
-
         - image: tenforce/virtuoso:virtuoso7.2.5
           auth:
             username: ${DOCKER_USER}
