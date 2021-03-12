@@ -28,13 +28,13 @@ workflows:
             - compile
           context:
             - DOCKER_CONTEXT
-            
+
       - test_js:
           requires:
             - compile
           context:
             - DOCKER_CONTEXT
-            -
+            
       - test_and_coverage_jvm:
           requires:
             - compile
