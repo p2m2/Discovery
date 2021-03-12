@@ -109,15 +109,13 @@ executors:
             SPARQL_UPDATE: true
             DEFAULT_GRAPH: "graph:test:discovery:default:"
 
-        - image: halverneus/static-file-server:latest
+        - image: inraep2m2/service-static-file-server:latest
           auth:
             username: ${DOCKER_USER}
             password: ${DOCKER_PASS}
           environment:
             CORS: "true"
             DEBUG: "true"
-          volumes:
-            - ./shared/src/test/resources/:/web
           ports:
             - 8080:8080
 
