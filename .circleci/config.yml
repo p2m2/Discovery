@@ -91,12 +91,12 @@ executors:
           auth:
             username: ${DOCKER_USER}
             password: ${DOCKER_PASS}
-            
+
         - image: inraep2m2/service-static-file-server:latest
-            auth:
-              username: ${DOCKER_USER}
-              password: ${DOCKER_PASS}
-            environment:
+          auth:
+            username: ${DOCKER_USER}
+            password: ${DOCKER_PASS}
+          environment:
               CORS: "true"
               DEBUG: "true"
 
