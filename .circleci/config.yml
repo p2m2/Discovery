@@ -34,7 +34,7 @@ workflows:
             - compile
           context:
             - DOCKER_CONTEXT
-            
+
       - test_and_coverage_jvm:
           requires:
             - compile
@@ -154,6 +154,9 @@ jobs:
     steps:
       - checkout
       - setup_remote_docker
+      - node/install-packages:
+          cache-path: ~/project/node_modules
+          override-ci-command: npm install
       - restore_cache:
           keys:
             - v1-dependencies-{{ checksum "build.sbt" }}
