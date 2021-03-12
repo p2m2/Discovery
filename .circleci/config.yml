@@ -122,6 +122,8 @@ executors:
           environment:
             CORS: "true"
             DEBUG: "true"
+            
+        - image: circleci/node:15.11
 
 orbs:
   node: circleci/node@4.1.0
@@ -203,9 +205,6 @@ jobs:
       steps:
         - checkout
         - setup_remote_docker
-        - node/install-packages:
-            cache-path: ~/project/node_modules
-            override-ci-command: npm install
         - restore_cache:
             keys:
               - v1-dependencies-{{ checksum "build.sbt" }}
