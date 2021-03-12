@@ -116,9 +116,7 @@ executors:
           environment:
             CORS: "true"
             DEBUG: "true"
-          ports:
-            - 8080:8080
-
+            
 orbs:
   node: circleci/node@4.1.0
 
