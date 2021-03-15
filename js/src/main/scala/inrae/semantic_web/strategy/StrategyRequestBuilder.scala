@@ -1,5 +1,6 @@
 package inrae.semantic_web.strategy
 
+import inrae.semantic_web.driver.ComunicaFederatedStrategy
 import inrae.semantic_web.{SWDiscoveryException, StatementConfiguration}
 
 /**
@@ -14,7 +15,7 @@ object StrategyRequestBuilder {
       case 0 => throw SWDiscoveryException("No sources specified")
       case _ if config.conf.settings.proxy => ProxyStrategyRequest(config.conf.settings.urlProxy)
       case 1 => DiscoveryStrategyRequest(config.sources()(0))
-      case _ => throw SWDiscoveryException("too many defined sources. functionality only available on the server side.")
+      case _ => ComunicaFederatedStrategy(config.sources())
     }
   }
 }

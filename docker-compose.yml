@@ -41,3 +41,16 @@ services:
     image: selenium/standalone-chrome
     environment:
       START_XVFB: 'false'
+
+  ## -------------------------------------------------
+  ## Static file server
+  ##
+  static-file-server:
+    container_name: static-file-server
+    image: inraep2m2/service-static-file-server:latest
+    environment:
+      CORS: "true"
+      DEBUG: "true"
+    ports:
+      - 8080:8080
+

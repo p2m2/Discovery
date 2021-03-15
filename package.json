@@ -1,6 +1,5 @@
 {
   "name": "@p2m2/discovery",
-  "version": "0.0.3c",
   "description": "Eases SPARQL query",
   "main": "./js/target/scala-2.13/scalajs-bundler/main/discovery-opt.js",
   "files": [

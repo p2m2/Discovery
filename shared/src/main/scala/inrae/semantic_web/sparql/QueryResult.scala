@@ -6,7 +6,7 @@ import scala.util.{Failure, Success, Try}
 
 case class QueryResult(results: String, mimetype : String = "json") {
 
-  var json =
+  lazy val json =
     Try(ujson.read(results)) match {
       case Success(json) => json
       case Failure(_) => ujson.Obj(
