@@ -125,8 +125,6 @@ executors:
             CORS: "true"
             DEBUG: "true"
 
-        - image: circleci/node:15.11
-
 jobs:
   compile:
     executor: openjdk
