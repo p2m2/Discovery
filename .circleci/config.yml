@@ -94,6 +94,7 @@ executors:
             password: ${DOCKER_PASS}
 
   virtuoso_environment_executor:
+      working_directory: ~/repo
       docker:
         - image: circleci/openjdk:8-jdk
           auth:
@@ -211,6 +212,12 @@ jobs:
         - run:
             name: Test JS
             command: sbt discoveryJS/test
+        #- run:
+        #    name: Set Npm token
+        #    command: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/repo/.npmrc
+        #- run:
+        #    name: Publish package
+        #    command: npm publish
 
   publish_snapshot:
     executor: openjdk

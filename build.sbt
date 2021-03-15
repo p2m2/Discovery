@@ -16,8 +16,6 @@ lazy val n3js_facade_version = "1.0.1"
 lazy val rdfxml_streaming_parser_version = "1.0.0"
 lazy val comunica_version = "1.19.2"
 
-//https://jitpack.io/
-
 releaseIgnoreUntrackedFiles := true
 
 val version_build = scala.util.Properties.envOrElse("DISCOVERY_VERSION", "local-SNAPSHOT" )
