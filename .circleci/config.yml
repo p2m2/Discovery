@@ -16,6 +16,8 @@
 #   - NPM_TOKEN : token (from ~/.npmrc) to publish nodejs lib
 #
 version: 2.1
+orbs:
+  node: circleci/node@4.2.0
 workflows:
   compile-workflow:
     jobs:
@@ -125,9 +127,6 @@ executors:
 
         - image: circleci/node:15.11
 
-orbs:
-  node: circleci/node@4.1.0
-
 jobs:
   compile:
     executor: openjdk
@@ -205,7 +204,7 @@ jobs:
       steps:
         - checkout
         - setup_remote_docker
-        - node/install-packages
+        - node/install
         - restore_cache:
             keys:
               - v1-dependencies-{{ checksum "build.sbt" }}
