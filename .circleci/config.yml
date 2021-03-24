@@ -49,6 +49,7 @@ workflows:
           context:
             - DOCKER_CONTEXT
             - CREDENTIAL_CONTEXT
+            - GPG_CONTEXT
           filters:
             tags:
               ignore: /.*/
@@ -61,6 +62,7 @@ workflows:
           context:
             - DOCKER_CONTEXT
             - CREDENTIAL_CONTEXT
+            - GPG_CONTEXT
           filters:
             tags:
               only: /.*/
@@ -233,6 +235,8 @@ jobs:
           name: Snapshot publication
           command: |
             export DISCOVERY_VERSION="${CIRCLE_BRANCH}-SNAPSHOT"
+            echo "Importing key"
+            echo -e "$GPG_KEY" | gpg --import
             sbt publish
 
   publish_tag_to_sonatype_stagge_for_release:
@@ -249,6 +253,8 @@ jobs:
           name: Snapshot publication
           command: |
             export DISCOVERY_VERSION="${CIRCLE_TAG}"
+            echo "Importing key"
+            echo -e "$GPG_KEY" | gpg --import
             sbt publish
 
   check_discovery_valid_fullopjs_cdn_jsdelivr:
@@ -298,5 +304,4 @@ jobs:
             name: Js Opt Lib generation
             command: |
               npm config set registry http://registry.npmjs.org
-              npm version 0.0.4
               npm publish --access public

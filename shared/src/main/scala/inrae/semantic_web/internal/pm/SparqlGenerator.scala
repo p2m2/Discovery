@@ -144,7 +144,8 @@ object SparqlGenerator  {
           case _ => throw new Exception("SparqlGenerator::sparqlNode . [Devel error] Node undefined ["+n.toString+"]")
         }
       } + " )\n"
-      case _ : Root| _ : Something         => ""
+      case root : Root                   => { "" }
+      case _ : Something              => ""
       case _                               => throw new Error("Not implemented yet :"+n.getClass.getName)
     }
   }
