@@ -22,29 +22,51 @@ object ComunicaRequestDriver {
     },url)
   }
 
-  def sourceFromContent(content: String, mimetype:String) : Future[N3.Store] = {
+  def sourceFromContentN3Parser(content: String, mimetype:String) : Future[N3.Store] = {
     val store = new N3.Store()
     val p = Promise[N3.Store]()
 
-    new N3.Parser(N3Options(baseIRI="http://example.org/",format=(
+    new N3.Parser(N3Options(baseIRI="http://com.github.p2m2.discovery/",format=(
       mimetype match {
         case "text/turtle" => N3FormatOption.Turtle
         case "text/n3" => N3FormatOption.N3
-        case _ => throw SWDiscoveryException(s" ${mimetype} format is not manage")
+        case _ => throw SWDiscoveryException(s" ${mimetype} format is not managed")
       })))
       .parse(content, (error : String , quad : js.UndefOr[Quad] , prefixes : js.UndefOr[js.Object] ) => {
         quad.get match {
           case null => {
-            println("# That's all, folks!")
             p success store
           }
-          case q => {
-            println("QUAD==>"+q.subject.value+" "+q.predicate.value+" "+q.`object`.value+" "+q.graph.value)
-            store.addQuad(q)
-          }
+          case q => store.addQuad(q)
         }
       })
     p.future
+  }
+
+  def sourceFromContentRdfXml(content: String) : Future[N3.Store] = {
+    val store = new N3.Store()
+    val p = Promise[N3.Store]()
+
+    val parser = new RdfXmlParser(RdfXmlParserOptions(baseIRI="http://com.github.p2m2.discovery/"))
+
+    parser.on("data", (quad : Quad) => {
+      store.addQuad(quad)
+    }).on("error", (error : String) => {throw SWDiscoveryException(error)})
+      .on("end", () => {
+        p success store
+      })
+
+    parser.write(content)
+    parser.end()
+
+    p.future
+  }
+
+  def sourceFromContent(content: String, mimetype:String) : Future[N3.Store] = {
+    mimetype match {
+      case "text/rdf-xml" =>sourceFromContentRdfXml(content)
+      case _ => sourceFromContentN3Parser(content,mimetype)
+    }
   }
 
   def requestOnSWDBWithSources(query: String, sources : List[SourceComunica]): Future[QueryResult] =

@@ -61,6 +61,36 @@ object RequestsTest extends TestSuite {
          }
         """.stripMargin)
 
+  val contentXml : String = """<?xml version="1.0" encoding="utf-8"?>
+                              |<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:dc="http://purl.org/dc/elements/1.1/">
+                              |  <rdf:Description rdf:about="http://www.w3.org/TR/rdf-syntax-grammar">
+                              |    <dc:title>RDF/XML Syntax Specification (Revised)</dc:title>
+                              |    <dc:title xml:lang="en">RDF/XML Syntax Specification (Revised)</dc:title>
+                              |    <dc:title xml:lang="en-US">RDF/XML Syntax Specification (Revised)</dc:title>
+                              |  </rdf:Description>
+                              |
+                              |  <rdf:Description rdf:about="http://example.org/buecher/baum" xml:lang="de">
+                              |    <dc:title>Der Baum</dc:title>
+                              |    <dc:description>Das Buch ist außergewöhnlich</dc:description>
+                              |    <dc:title xml:lang="en">The Tree</dc:title>
+                              |  </rdf:Description>
+                              |</rdf:RDF>""".stripMargin.replace("\"","\\\"").replace("\n","")
+
+  val config4: StatementConfiguration = StatementConfiguration.setConfigString(
+    s"""
+        {
+         "sources" : [{
+           "id"       : "local_content",
+           "content"  :"${contentXml}",
+           "mimetype" : "text/rdf-xml"
+         }],
+         "settings" : {
+            "logLevel" : "off",
+            "sizeBatchProcessing" : 100
+          }
+         }
+        """.stripMargin)
+
   val mixconfig: StatementConfiguration = StatementConfiguration.setConfigString(
     s"""
         {
@@ -125,6 +155,24 @@ object RequestsTest extends TestSuite {
           .raw
           .map(result => {
             assert(result("results")("bindings").arr.length == 2)
+          })
+      }).flatten
+    }
+
+    /**
+     * TODO : Repository are mixed. We can get results from other test....work on the partitioning
+     */
+    test("inline rdf-xml") {
+      insert_data.map(_ => {
+        SWDiscovery(config4)
+          .prefix("dc","http://purl.org/dc/elements/1.1/")
+          .something("h1")
+          .isSubjectOf(URI("dc:title"), "v")
+          .select(List("v"))
+          .commit()
+          .raw
+          .map(result => {
+            assert(result("results")("bindings").arr.length == 5)
           })
       }).flatten
     }
