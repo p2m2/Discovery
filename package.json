@@ -1,31 +1,37 @@
 {
-  "name": "@p2m2/discovery",
-  "description": "Eases SPARQL query",
-  "main": "./js/target/scala-2.13/scalajs-bundler/main/discovery-opt.js",
-  "files": [
-    "js/target/scala-2.13/scalajs-bundler/main/discovery-opt.js"
-  ],
-  "dependencies": {
-    "axios": "^0.21.1",
-    "qs": "^6.9.6"
-  },
-  "devDependencies": {},
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/p2m2/Discovery.git"
-  },
-  "keywords": [
-    "sparql",
-    "rdf",
-    "scalajs"
-  ],
-  "author": "Olivier Filangi",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/p2m2/Discovery/issues"
-  },
-  "homepage": "https://github.com/p2m2/Discovery#README.md"
-}
+   "name": "@p2m2/discovery",
+   "description": "Ease Sparql request on the network MetaboHUB/Semantics Databases.",
+   "version": "local-SNAPSHOT",
+   "main": "./js/target/scala-2.13/scalajs-bundler/main/discovery-opt.js",
+   "files": [
+     "js/target/scala-2.13/scalajs-bundler/main/discovery-opt.js"
+   ],
+   "dependencies": {
+    "@comunica/actor-http-proxy": "1.19.2",
+    "@comunica/actor-init-sparql-rdfjs": "1.19.2",
+    "@comunica/bus-query-operation": "1.19.2",
+    "@comunica/logger-pretty": "1.19.2",
+    "@comunica/utils-datasource": "1.19.2",
+    "axios": "0.21.1",
+    "n3": "1.8.1",
+    "qs": "6.9.6",
+    "rdfxml-streaming-parser": "1.4.0",
+    "showdown": "1.9.1"
+   },
+   "repository": {
+     "type": "git",
+     "url": "git+https://github.com/p2m2/Discovery.git"
+   },
+   "keywords": [
+     "sparql",
+     "rdf",
+     "scalajs"
+   ],
+   "author": "Olivier Filangi",
+   "license": "MIT",
+   "bugs": {
+     "url": "https://github.com/p2m2/Discovery/issues"
+   },
+   "homepage": "https://github.com/p2m2/Discovery#README.md"
+ }
+ 
