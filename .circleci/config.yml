@@ -57,6 +57,7 @@ workflows:
               only:
                 - develop
                 - master
+                - n3storejs
 
       - publish_tag_to_sonatype_stagge_for_release:
           context:
