@@ -20,8 +20,27 @@ object RequestDriverFactory  {
           source.password,
           source.token,
           source.auth)
-      case "text/turtle" | "text/n3" | "text/rdf-xml" | "application/rdf+xml" =>
-          throw SWDiscoveryException( source.mimetype+" : functionality only available on the server side")
+      case
+        "application/trig" |
+        "application/n-quads" |
+        "text/turtle" |
+        "application/n-triples" |
+        "text/n3" |
+        "application/ld+json" | "application/json" |
+        "application/rdf+xml" |
+        "text/rdf-xml" |
+        "text/html" |
+        "application/xhtml+xml" |
+        "image/svg+xml" |
+        "application/xml" =>
+          ComunicaRequestDriver(
+            source.id,
+            source.url,
+            source.content,
+            source.mimetype,
+            source.login,
+            source.password,
+            sourceType = "file")
       case _ =>
         throw SWDiscoveryException("Bad definition of source configuration :"+source.toString)
     }

@@ -16,6 +16,8 @@
 #   - NPM_TOKEN : token (from ~/.npmrc) to publish nodejs lib
 #
 version: 2.1
+orbs:
+  node: circleci/node@4.2.0
 workflows:
   compile-workflow:
     jobs:
@@ -24,6 +26,12 @@ workflows:
             - DOCKER_CONTEXT
 
       - lib_js:
+          requires:
+            - compile
+          context:
+            - DOCKER_CONTEXT
+
+      - test_js:
           requires:
             - compile
           context:
@@ -86,6 +94,7 @@ executors:
             password: ${DOCKER_PASS}
 
   virtuoso_environment_executor:
+      working_directory: ~/repo
       docker:
         - image: circleci/openjdk:8-jdk
           auth:
@@ -109,8 +118,13 @@ executors:
             SPARQL_UPDATE: true
             DEFAULT_GRAPH: "graph:test:discovery:default:"
 
-orbs:
-  node: circleci/node@4.1.0
+        - image: inraep2m2/service-static-file-server:latest
+          auth:
+            username: ${DOCKER_USER}
+            password: ${DOCKER_PASS}
+          environment:
+            CORS: "true"
+            DEBUG: "true"
 
 jobs:
   compile:
@@ -148,6 +162,7 @@ jobs:
       - run:
           name: fastOptJS
           command: cat /dev/null | sbt discoveryJS/fastOptJS
+
       - run:
           name: fullOptJS
           command: cat /dev/null | sbt discoveryJS/fullOptJS
@@ -179,6 +194,30 @@ jobs:
 
       - store_artifacts:
           path: discovery/jvm/target/test-reports
+
+  test_js:
+      executor: virtuoso_environment_executor
+      environment:
+        JVM_OPTS: -Xmx3200m
+        TERM: dumb
+      steps:
+        - checkout
+        - setup_remote_docker
+        - node/install
+        - restore_cache:
+            keys:
+              - v1-dependencies-{{ checksum "build.sbt" }}
+              # fallback to using the latest cache if no exact match is found
+              - v1-dependencies-
+        - run:
+            name: Test JS
+            command: sbt discoveryJS/test
+        #- run:
+        #    name: Set Npm token
+        #    command: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/repo/.npmrc
+        #- run:
+        #    name: Publish package
+        #    command: npm publish
 
   publish_snapshot:
     executor: openjdk
