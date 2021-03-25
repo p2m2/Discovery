@@ -12,6 +12,7 @@ object RequestsTest extends TestSuite {
     """
       <http://aaaaaa> <http://bbbbbb> <http://cc> .
       """.stripMargin, this.getClass.getSimpleName)
+  val logLevel = "off"
 
   val config: StatementConfiguration = StatementConfiguration.setConfigString(
     s"""
@@ -21,14 +22,14 @@ object RequestsTest extends TestSuite {
            "url"      : "${DataTestFactory.url_endpoint}"
          }],
          "settings" : {
-            "logLevel" : "off",
+            "logLevel" : "${logLevel}",
             "sizeBatchProcessing" : 100
           }
          }
         """.stripMargin)
 
   val config2: StatementConfiguration = StatementConfiguration.setConfigString(
-    """
+    s"""
         {
          "sources" : [{
            "id"       : "local_content",
@@ -36,14 +37,14 @@ object RequestsTest extends TestSuite {
            "mimetype" : "text/turtle"
          }],
          "settings" : {
-            "logLevel" : "off",
+            "logLevel" : "${logLevel}",
             "sizeBatchProcessing" : 100
           }
          }
         """.stripMargin)
 
   val config3: StatementConfiguration = StatementConfiguration.setConfigString(
-    """
+    s"""
         {
          "sources" : [{
            "id"       : "local_content",
@@ -55,7 +56,7 @@ object RequestsTest extends TestSuite {
            "mimetype" : "text/turtle"
          }],
          "settings" : {
-            "logLevel" : "off",
+            "logLevel" : "${logLevel}",
             "sizeBatchProcessing" : 100
           }
          }
@@ -105,7 +106,7 @@ object RequestsTest extends TestSuite {
            "mimetype" : "text/turtle"
          }],
          "settings" : {
-            "logLevel" : "off",
+            "logLevel" : "${logLevel}",
             "sizeBatchProcessing" : 100
           }
          }
