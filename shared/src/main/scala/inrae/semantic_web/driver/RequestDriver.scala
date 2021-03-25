@@ -2,6 +2,7 @@ package inrae.semantic_web.driver
 
 import inrae.semantic_web.event.{DiscoveryRequestEvent, DiscoveryStateRequestEvent, Publisher}
 import inrae.semantic_web.sparql.{QueryResult, QueryResultManager}
+import wvlet.log.Logger.rootLogger.debug
 
 import scala.concurrent.Future
 
@@ -31,9 +32,15 @@ trait RequestDriver extends Publisher[DiscoveryRequestEvent] {
       }
       case None => {
         publish(DiscoveryRequestEvent(DiscoveryStateRequestEvent.START_HTTP_REQUEST))
+        val dateStart = System.nanoTime
+        val t1 = System.nanoTime
+        debug("RequestDriver Send request "+dateStart+","+t1)
         requestOnSWDB(query).map(resultsQR => {
 
           publish(DiscoveryRequestEvent(DiscoveryStateRequestEvent.RESULTS_BUILD))
+          val duration = (System.nanoTime - t1) / 1e9d
+          debug(s"RequestDriver Receive results  -- Elapsed Time : ${duration}")
+          debug("RequestDriver Memorize (Mb) =>"+(resultsQR.results.length.toDouble/(1024*1024)))
           RequestDriver.getQrm(this).set(query, resultsQR.results)
           publish(DiscoveryRequestEvent(DiscoveryStateRequestEvent.RESULTS_DONE))
           resultsQR
