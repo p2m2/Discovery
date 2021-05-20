@@ -1,9 +1,9 @@
 # Discovery
 
-[![p2m2](https://circleci.com/gh/p2m2/Discovery.svg?style=shield)](https://app.circleci.com/pipelines/github/p2m2)
-[![codecov](https://codecov.io/gh/p2m2/Discovery/branch/develop/graph/badge.svg)](https://codecov.io/gh/p2m2/Discovery)
+[![p2m2](https://circleci.com/gh/p2m2/discovery.svg?style=shield)](https://app.circleci.com/pipelines/github/p2m2)
+[![codecov](https://codecov.io/gh/p2m2/discovery/branch/develop/graph/badge.svg)](https://codecov.io/gh/p2m2/discovery)
 [![CodeFactor](https://www.codefactor.io/repository/github/p2m2/discovery/badge)](https://www.codefactor.io/repository/github/p2m2/discovery)
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/8d8ecb66f9ff4963a22efab3c693b629)](https://www.codacy.com/gh/p2m2/Discovery/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=p2m2/Discovery&amp;utm_campaign=Badge_Grade)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/8d8ecb66f9ff4963a22efab3c693b629)](https://www.codacy.com/gh/p2m2/discovery/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=p2m2/discovery&amp;utm_campaign=Badge_Grade)
 
 
 - easy sparql query construct using a simple editor and a web browser
