@@ -1,7 +1,7 @@
-## Philosophy
+# Philosophy
 
 discovery allows you to build and execute a request to an RDF resource by simply defining 
-a configuration, and a construction unit sequence
+a configuration, and a sequence of building blocks atomic element .
 
 ```html 
 /* ---------------------------------------*/
@@ -47,19 +47,84 @@ let config = SWDiscoveryConfiguration.setConfigString(`
 </script>
 ```
 
-## Configuration
+# Configuration
 
- - mimetype
-``` 
-      "application/sparql-query",
-      "text/turtle",
-      "text/n3",
-      "text/rdf-xml",
-      "application/rdf+xml"
+The configuration have to be defined in a json format. It should a contains a list of "source" definition and a general settings.
+
+```json 
+{
+     "sources" : [{
+       "id"  : "dbpedia",
+       "url" : "https://dbpedia.org/sparql",
+       "mimetype" : "application/sparql-query",
+       "method" : "POST"
+     }],
+     "settings" : {
+       "cache" : true,
+       "logLevel" : "info",
+       "sizeBatchProcessing" : 10,
+       "pageSize" : 10
+     }
+}
 ```
 
+## source definition
 
-## DSL
+### mandatory arguments
+ - `id`       : `<identifyTheSourceEndpoint>`
+
+### RDF resource 
+
+#### SPARQL endpoint
+
+ - `mimetype : "application/sparql-query"`
+ - `url`     :   `<String>`
+
+##### optional argument
+ - `method`    = `"POST"`, `"POST_ENCODED"`, `"GET"`
+
+#### request RDF files
+
+#### request RDF content
+ -  `mimetype` : `"text/turtle"`, `"text/n3"`, `"text/rdf-xml"`
+
+```json
+"sources" : [
+{
+   "id"       : "local_content",
+   "content"  : "<http://example.org/#subject1> <http://example.org/#predicate1> <http://example.org/#object1> .",
+   "mimetype" : "text/turtle"
+ } 
+```
+
+#### authentication
+
+ - `auth`            = `"basic"` | `"digest"` | `"bearer"` | `"proxy"`
+ - `login`           = `<login>`
+ - `password`        = `<password>`
+
+## General settings
+
+### using cache 
+ - `cache`           = `"true"` | `"false"`
+
+### defining a console log level 
+ - `logLevel`        = `"trace"` | `"debug"` | `"info"` | `"warn"` | `"error"` | `"all"` | `"off"`
+
+`"warn"` is the default log level.
+
+### customize pool batch processing (see DSL#datatype) 
+
+ - `sizeBatchProcessing`  = `<Int>`
+default value : 150.
+   
+### customize selectByPage
+
+ - `pageSize`             = `<Int>`
+   default value : 10.
+   
+
+## DSL / Building blocks of request atomic element
 
 see [API (Scaladoc)](./api/index.html)
 
