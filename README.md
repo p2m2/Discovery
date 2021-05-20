@@ -10,7 +10,7 @@
 - display rich information on the web page or console 
 - offers building blocks to facilitate queries
 
-## SBT confi
+## SBT config
 
 ``` 
 libraryDependencies += "com.github.p2m2" %%% "discovery" % "0.1.0",
