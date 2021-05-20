@@ -77,23 +77,23 @@ The configuration have to be defined in a json format. It should a contains a li
 
 #### SPARQL endpoint
 
- - `mimetype : "application/sparql-query"`
- - `url`     :   `<String>`
+ - `mimetype  = "application/sparql-query"`
+ - `url`      =  `<String>`
 
 ##### optional argument
- - `method`    = `"POST"`, `"POST_ENCODED"`, `"GET"`
+ - `method`    = `"POST" | "POST_ENCODED" | "GET"`
 
 #### request RDF files
 
 #### request RDF content
- -  `mimetype` : `"text/turtle"`, `"text/n3"`, `"text/rdf-xml"`
-
+ - `mimetype`  = `"text/turtle"`, `"text/n3"`, `"text/rdf-xml"`
+ - `content`   = `<String>`
 ```json
 "sources" : [
 {
    "id"       : "local_content",
-   "content"  : "<http://example.org/#subject1> <http://example.org/#predicate1> <http://example.org/#object1> .",
-   "mimetype" : "text/turtle"
+   "mimetype" : "text/turtle",
+   "content"  : "<http://example.org/#subject1> <http://example.org/#predicate1> <http://example.org/#object1> ."
  } 
 ```
 
