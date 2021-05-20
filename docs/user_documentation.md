@@ -9,7 +9,7 @@ a configuration, and a sequence of building blocks atomic element .
 /* ---------------------------------------*/
 <script 
         type="text/javascript" 
-        src="https://cdn.jsdelivr.net/gh/p2m2/discovery@master/dist/discovery-web.min.js"> 
+        src="https://cdn.jsdelivr.net/gh/p2m2/discovery@0.2.0/dist/discovery-web.min.js"> 
 </script>
 
 /* ---------------------------------------*/
@@ -32,7 +32,7 @@ let config = SWDiscoveryConfiguration.setConfigString(`
 /* ----------------------*/
  var req = SWDiscovery(config)
              .something("some1")
-               isA("http://dbpedia.org/ontology/Album")
+               .isA("http://dbpedia.org/ontology/Album")
 
 /* ------------------------*/
 /* Part 3. Execute request */
@@ -83,6 +83,13 @@ The configuration have to be defined in a json format. It should a contains a li
 ##### optional argument
  - `method`    = `"POST" | "POST_ENCODED" | "GET"`
 
+
+#### authentication
+
+- `auth`            = `"basic" | "digest" | "bearer" | "proxy"`
+- `login`           = `<login>`
+- `password`        = `<password>`
+
 ##### example
 
 ```json
@@ -121,12 +128,6 @@ The configuration have to be defined in a json format. It should a contains a li
    "content"  : "<http://example.org/#subject1> <http://example.org/#predicate1> <http://example.org/#object1> ."
  } 
 ```
-
-#### authentication
-
- - `auth`            = `"basic" | "digest" | "bearer" | "proxy"`
- - `login`           = `<login>`
- - `password`        = `<password>`
 
 ## General settings
 
