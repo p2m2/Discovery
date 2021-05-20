@@ -86,7 +86,7 @@ The configuration have to be defined in a json format. It should a contains a li
 #### request RDF files
 
 #### request RDF content
- - `mimetype`  = `"text/turtle"`, `"text/n3"`, `"text/rdf-xml"`
+ - `mimetype`  = `"text/turtle" | "text/n3" | "text/rdf-xml"`
  - `content`   = `<String>`
 ```json
 "sources" : [
@@ -99,29 +99,31 @@ The configuration have to be defined in a json format. It should a contains a li
 
 #### authentication
 
- - `auth`            = `"basic"` | `"digest"` | `"bearer"` | `"proxy"`
+ - `auth`            = `"basic" | "digest" | "bearer" | "proxy"`
  - `login`           = `<login>`
  - `password`        = `<password>`
 
 ## General settings
 
 ### using cache 
- - `cache`           = `"true"` | `"false"`
+ - `cache`           = `"true" | "false"`
 
 ### defining a console log level 
- - `logLevel`        = `"trace"` | `"debug"` | `"info"` | `"warn"` | `"error"` | `"all"` | `"off"`
+ - `logLevel`        = `"trace" | "debug" | "info" | "warn" | "error" | "all" | "off"`
 
-`"warn"` is the default log level.
+`"warn"` is the default value.
 
 ### customize pool batch processing (see DSL#datatype) 
 
  - `sizeBatchProcessing`  = `<Int>`
-default value : 150.
+   
+150 is the default value.
    
 ### customize selectByPage
 
  - `pageSize`             = `<Int>`
-   default value : 10.
+   
+10 is the default value.
    
 
 ## DSL / Building blocks of request atomic element
