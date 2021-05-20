@@ -84,12 +84,13 @@ The configuration have to be defined in a json format. It should a contains a li
  - `method`    = `"POST" | "POST_ENCODED" | "GET"`
 
 #### request RDF files
+ - `mimetype`  = `"text/turtle" | "text/n3" | "text/rdf-xml"`
+ - `content`   = `<String>`
 
 #### request RDF content
  - `mimetype`  = `"text/turtle" | "text/n3" | "text/rdf-xml"`
  - `content`   = `<String>`
 ```json
-"sources" : [
 {
    "id"       : "local_content",
    "mimetype" : "text/turtle",
