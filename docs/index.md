@@ -1,4 +1,6 @@
 # What is discovery
+[![GitHub license](https://img.shields.io/github/license/p2m2/discovery.svg)](https://github.com/p2m2/discovery/blob/master/LICENSE)
+[![GitHub release](https://img.shields.io/github/v/release/p2m2/discovery.svg)](https://github.com/p2m2/discovery/releases/)
 
 discovery is a software library which aims to ease the development of decision support tools
 exploiting RDF databases.
@@ -16,7 +18,7 @@ linking to the CHEBI:4167-D-glucopyranose compound. This example uses the follow
 ```html
 <script 
         type="text/javascript" 
-        src="https://cdn.jsdelivr.net/gh/p2m2/discovery@master/dist/discovery-web.min.js"> 
+        src="https://cdn.jsdelivr.net/gh/p2m2/discovery@0.2.0/dist/discovery-web.min.js"> 
 </script>
 <script>
       var config = SWDiscoveryConfiguration.setConfigString(`
