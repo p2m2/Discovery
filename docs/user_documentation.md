@@ -83,13 +83,37 @@ The configuration have to be defined in a json format. It should a contains a li
 ##### optional argument
  - `method`    = `"POST" | "POST_ENCODED" | "GET"`
 
-#### request RDF files
+##### example
+
+```json
+{
+   "id"       : "dbpedia",
+   "url"      : "https://dbpedia.org/sparql",
+   "mimetype" : "application/sparql-query",
+   "method"   : "POST"
+ }
+```
+
+#### RDF files
+ - `mimetype`  = `"text/turtle" | "text/n3" | "text/rdf-xml"`
+ - `file`   = `<String>`
+
+##### example
+
+```json
+{
+   "id"       : "local_content",
+   "mimetype" : "text/turtle",
+   "file"     : "https://raw.githubusercontent.com/p2m2/discovery/develop/shared/src/test/resources/metabo.ttl"
+ } 
+```
+
+#### RDF inline content
  - `mimetype`  = `"text/turtle" | "text/n3" | "text/rdf-xml"`
  - `content`   = `<String>`
 
-#### request RDF content
- - `mimetype`  = `"text/turtle" | "text/n3" | "text/rdf-xml"`
- - `content`   = `<String>`
+##### example
+
 ```json
 {
    "id"       : "local_content",
