@@ -1,1 +1,6 @@
 theme: jekyll-theme-midnight
+# Name of website
+title: discovery
+
+# Your name to show in the footer
+author: Inrae
