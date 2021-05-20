@@ -1,11 +1,11 @@
 # What is discovery
 
-discovery is a software library which aims to facilitate the development of functionalities to exploit RDF databases.
+discovery is a software library which aims to facilitate the development of decision support tools
+exploiting RDF databases.
 The library offers a dedicated query language that can be used in several runtime environments (Browser/JS, Node/JS, JVM/Scala).
 
 discovery is developed as part of the work package "Creating FAIR e-resources for knowledge mining" for [the 
 national infrastructure for metabolomics and fluxomics - MetaboHUB](https://www.metabohub.fr/home.html) 
-
 
 ## Metabolomic example
 
@@ -14,7 +14,10 @@ linking to the CHEBI:4167-D-glucopyranose compound. This example uses the follow
 
 
 ```html
-<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/p2m2/discovery@master/dist/discovery-web.min.js"> </script>
+<script 
+        type="text/javascript" 
+        src="https://cdn.jsdelivr.net/gh/p2m2/discovery@master/dist/discovery-web.min.js"> 
+</script>
 <script>
       var config = SWDiscoveryConfiguration.setConfigString(`
           {
@@ -62,4 +65,7 @@ see [documentation](./api/inrae/semantic_web/StatementConfigurationException.htm
 
 see [documentation](./api/inrae/semantic_web/SWDiscovery.html)
 
-## 
+## Contact/Issues
+
+The software is licensed under MIT and under development.
+Use GitHub form to request bugs, new features or suggest modifications to existing features. 
