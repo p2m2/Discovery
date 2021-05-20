@@ -11,6 +11,7 @@ object SerializationBuilderTest extends TestSuite  {
   def tests: Tests = Tests {
     test("serialization basic 1") {
       val sw = SWDiscovery( DataTestFactory.getConfigVirtuoso1(),Root(),Some("test"))
+      println(sw.getSerializedString)
       assert(SWDiscovery().setSerializedString(sw.getSerializedString) == sw)
       val swt : SWTransaction = sw.select()
       assert(SWTransaction().setSerializedString(swt.getSerializedString) == swt)
