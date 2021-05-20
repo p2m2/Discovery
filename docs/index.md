@@ -56,16 +56,20 @@ linking to the CHEBI:4167-D-glucopyranose compound. This example uses the follow
 https://github.com/p2m2/discovery-scala-executable
 
 # User documentation
+see [User documentation](./user_documentation.md)
 
-## Configuration
+# Implementations
 
-see [documentation](./api/inrae/semantic_web/StatementConfigurationException.html)
-
-## DSL
-
-see [documentation](./api/inrae/semantic_web/SWDiscovery.html)
+ - [ChEBI-discovery](https://github.com/eMetaboHUB/ChEBI-discovery) : ScalaJs implementation of *"Improving lipid mapping in Genome Scale Metabolic Networks using ontologies."* [[1]](#1). 
+   This methodology uses the Chemical Entities of Biological Interest (ChEBI)
 
 ## Contact/Issues
 
+Add [GitHub issue](https://github.com/p2m2/discovery/issues/new) to request bugs, new features or suggest modifications to existing features. 
+
+## Licence
 The software is licensed under MIT and under development.
-Use GitHub form to request bugs, new features or suggest modifications to existing features. 
+
+## References
+<a id="1">[1]</a>
+Poupin, N., Vinson, F., Moreau, A. et al. Improving lipid mapping in Genome Scale Metabolic Networks using ontologies. Metabolomics 16, 44 (2020). https://doi.org/10.1007/s11306-020-01663-5
