@@ -1,6 +1,7 @@
-# What is discovery
 [![GitHub license](https://img.shields.io/github/license/p2m2/discovery.svg)](https://github.com/p2m2/discovery/blob/master/LICENSE)
 [![GitHub release](https://img.shields.io/github/v/release/p2m2/discovery.svg)](https://github.com/p2m2/discovery/releases/)
+
+# What is discovery
 
 discovery is a software library which aims to ease the development of decision support tools
 exploiting RDF databases.
@@ -35,21 +36,23 @@ linking to the CHEBI:4167-D-glucopyranose compound. This example uses the follow
               .isObjectOf(URI("https://www.ebi.ac.uk/metabolights/property#Xref"),"study")
                 .datatype(URI("http://www.w3.org/2000/01/rdf-schema#label"),"label")
           .select("study","label")
-               .commit()
-               .raw().then((response) => {
-          
-          for (let i=0;i<response.results.bindings.length;i++) {
-            let study=response.results.bindings[i]["study"].value;
-            let label=response.results.datatypes["label"][study][0].value; 
-            console.log(study+"-->"+label);
-          }
-
-        }).catch( (error) => {
-          console.error(" -- catch exception --")
-          console.error(error)
-        } );
+             .commit()
+             .raw()
+             .then((response) => {
+                  for (let i=0;i<response.results.bindings.length;i++) {
+                    let study=response.results.bindings[i]["study"].value;
+                    let label=response.results.datatypes["label"][study][0].value; 
+                    console.log(study+"-->"+label);
+                  }
+            }).catch( (error) => {
+              console.error(" -- catch exception --")
+              console.error(error)
+            } );
 </script>
 ```
+
+[js fiddle example](https://jsfiddle.net/uoecqath/5/)
+
 
 ## Scala application with discovery
 
@@ -59,6 +62,19 @@ https://github.com/p2m2/discovery-scala-executable
 
 # User documentation
 see [User documentation](./user_documentation.md)
+
+## html examples
+
+[discovery-tutorial-html-js](https://github.com/p2m2/discovery-tutorial-html-js)
+
+## NodeJs examples
+
+[discovery-tutorial-nodejs](https://github.com/p2m2/discovery-tutorial-nodejs)
+
+## Scala examples
+
+full example with [table view implementation](https://github.com/p2m2/discovery-table-view) using [scalatags](https://github.com/lihaoyi/scalatags)
+
 
 # Implementations
 
