@@ -1,6 +1,4 @@
 theme: jekyll-theme-midnight
-# Name of website
-title: discovery
-
-# Your name to show in the footer
-author: Inrae
+title: Discovery
+description: ease the development of decision support tools exploiting RDF databases
+show_downloads: "true"

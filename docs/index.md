@@ -1,6 +1,6 @@
 # What is discovery
 
-discovery is a software library which aims to facilitate the development of decision support tools
+discovery is a software library which aims to ease the development of decision support tools
 exploiting RDF databases.
 The library offers a dedicated query language that can be used in several runtime environments (Browser/JS, Node/JS, JVM/Scala).
 
