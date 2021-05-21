@@ -56,6 +56,8 @@ let config = SWDiscoveryConfiguration.setConfigString(`
 </script>
 ```
 
+To use discovery, user have some basics of RDF graph databases and SPARQL query language.
+
 - [Configuration](user_docs_configuration.md)
 - [Building query](user_docs_building_block.md)
 - [Executing query](user_docs_transaction.md)
