@@ -58,7 +58,7 @@ linking to the CHEBI:4167-D-glucopyranose compound. This example uses the follow
 ## Scala application with discovery
 
 - [User documentation](user_docs.md)
-- [discovery-tutorial-html-js](https://github.com/p2m2/discovery-tutorial-html-js)
+- [discovery-tutorial-html-js](https://github.com/p2m2/discovery-tutorial-html-js/tree/0.2.0)
 - [discovery-tutorial-nodejs](https://github.com/p2m2/discovery-tutorial-nodejs)
 - [Example using the FORUM DiseasesChem endpoint with discovery](user_docs_forum_example.md)
 - full example with [table view implementation](https://github.com/p2m2/discovery-table-view) using [scalatags](https://github.com/lihaoyi/scalatags)
