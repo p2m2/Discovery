@@ -43,18 +43,14 @@ A query always start this unit block.
 
 ## Query configuration
 
-
-- prefix(`short`,`long`) : set prefix
-- graph(`iri`)
-- namedGraph(`iri`) : set graph or graph named
-
+- prefix(`short`,`long`) : set prefix to avoid long uri during construction
+- graph(`iri`)           : set graph or graph named
+- namedGraph(`iri`)      : set graph or graph named
 
 #### Linking RDF block to browse the semantic graph
 
-```
 - isSubjectOf(`uri`,`var`) 
-- isObjectOf(`uri`,`var`) 
-```
+- isObjectOf(`uri`,`var`)
 
 
 ```
