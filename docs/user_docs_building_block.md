@@ -30,34 +30,36 @@ This request can be translated as "Get something of type compound which are subj
 - focus(`var`) : set the focus with named block `var` 
 - root() : go back to the query root 
 
-## Using named block versus block
+## Using named block
 
-- Some unit block could be named. You named block if you want move to this focus later or to get results about this 
+- Some unit block can be named. You named block if you want move to this focus later or to get results about this 
   unit block at the executing time. 
 
 ## Special unit block "Something"
 
-A query always start this unit block which can be named.
+A query always start this unit block.
 
 - something(`var` = null)
 
-## Block
+## Query configuration
+
 
 ```
-- focus(`var`) : set the focus
-- root() : go back to root
 - prefix(`short`,`long`) : set prefix
-- graph(`iri`), namedGraph(`iri`) : set graph or graph named
+- graph(`iri`)
+- namedGraph(`iri`) : set graph or graph named
 ```
 
-#### Browsing the semantic graph
+#### Linking RDF block to browse the semantic graph
 
 ```
-- something(`var`) : start a query about something
-- isA(`uri`)  : set the focus type/class
-- isSubjectOf(`uri`,`var`) : focus is a subject of a triplet which `uri` is the property
+- isSubjectOf(`uri`,`var`) 
 - isObjectOf(`uri`,`var`) : focus is the object of a triplet which `uri` is the property
+```
 
+
+```
+- isA(`uri`)  : set the focus type/class
 - datatype(`uri`,`var`) : focus is a subject of a triplet which `uri` is a datatype property (OWL)
 ```
 
