@@ -2,6 +2,8 @@
 
 The configuration have to be defined in a json format. It should a contains a list of "source" definition and a general settings.
 
+**example**
+
 ```json 
 {
      "sources" : [{
@@ -19,32 +21,29 @@ The configuration have to be defined in a json format. It should a contains a li
 }
 ```
 
-## source definition
+## Sources definition
 
 each source defined un identifier.
 
 - `id`       : `<identifyTheSourceEndpoint>`
 
-::: tip Titre
 Three types of RDF sources can be exploited : SPARQL endpoint, RDF Files, RDF inlining content
-:::
 
 ### SPARQL endpoint
 
 - `mimetype  = "application/sparql-query"`
-- `url`      =  `<String>`
+- `url`      =  `<URL : String>`
 
-optional argument
+**optional argument**
+
 - `method`    = `"POST" | "POST_ENCODED" | "GET"`
-
-
-#### authentication
-
 - `auth`            = `"basic" | "digest" | "bearer" | "proxy"`
 - `login`           = `<login>`
 - `password`        = `<password>`
 
-##### example
+**example**
+
+source definition to query the DBpedia SPARQL endpoint.
 
 ```json
 {
@@ -55,11 +54,12 @@ optional argument
  }
 ```
 
-#### RDF files
-- `mimetype`  = `"text/turtle" | "text/n3" | "text/rdf-xml"`
-- `file`   = `<String>`
+### RDF files
 
-##### example
+- `mimetype`  = `"text/turtle" | "text/n3" | "text/rdf-xml"`
+- `file`   = `<URL file : String>`
+
+**example**
 
 ```json
 {
@@ -69,11 +69,12 @@ optional argument
  } 
 ```
 
-#### RDF inline content
+### RDF inline content
+
 - `mimetype`  = `"text/turtle" | "text/n3" | "text/rdf-xml"`
 - `content`   = `<String>`
 
-##### example
+**example**
 
 ```json
 {
@@ -85,21 +86,22 @@ optional argument
 
 ## General settings
 
-### using cache
+**disable/unable cache query results**
+
 - `cache`           = `"true" | "false"`
 
-### defining a console log level
+**control the logging output with the log level**
 - `logLevel`        = `"trace" | "debug" | "info" | "warn" | "error" | "all" | "off"`
 
 `"warn"` is the default value.
 
-### customize pool batch processing (see DSL#datatype)
+**customize pool batch processing (see datatype block)**
 
 - `sizeBatchProcessing`  = `<Int>`
 
 150 is the default value.
 
-### customize selectByPage
+**customize selectByPage**
 
 - `pageSize`             = `<Int>`
 
