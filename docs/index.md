@@ -91,9 +91,8 @@ The software is licensed under MIT and under development.
 
 ## Authors
 
-O. Filangi -  IGEPP's Metabolic Profiling and Metabolomic Platform (P2M2, Rennes)
-F. Giacomoni - The Platform "Exploration du Métabolisme" (PFEM, Clermont-Ferrand)
-N. Paulhe - The Platform "Exploration du Métabolisme" (PFEM, Clermont-Ferrand)
+- O. Filangi -  IGEPP's Metabolic Profiling and Metabolomic Platform (P2M2, Rennes)
+- F. Giacomoni, N. Paulhe - The Platform "Exploration du Métabolisme" (PFEM, Clermont-Ferrand)
 
 ## References
 
