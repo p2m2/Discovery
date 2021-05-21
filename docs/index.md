@@ -55,31 +55,14 @@ linking to the CHEBI:4167-D-glucopyranose compound. This example uses the follow
 
 [js fiddle example](https://jsfiddle.net/uoecqath/5/)
 
-
 ## Scala application with discovery
 
-### template
-
-https://github.com/p2m2/discovery-scala-executable
-
-# User documentation
-see [User documentation](user_docs.md)
-
-## html examples
-
-[discovery-tutorial-html-js](https://github.com/p2m2/discovery-tutorial-html-js)
-
-## NodeJs examples
-
-[discovery-tutorial-nodejs](https://github.com/p2m2/discovery-tutorial-nodejs)
-
-## Scala examples
-
-full example with [table view implementation](https://github.com/p2m2/discovery-table-view) using [scalatags](https://github.com/lihaoyi/scalatags)
-
-# Implementations
-
- - [ChEBI-discovery](https://github.com/eMetaboHUB/ChEBI-discovery). ScalaJs implementation of *"Improving lipid mapping in Genome Scale Metabolic Networks using ontologies."* [[1]]. 
+- [User documentation](user_docs.md)
+- [discovery-tutorial-html-js](https://github.com/p2m2/discovery-tutorial-html-js)
+- [discovery-tutorial-nodejs](https://github.com/p2m2/discovery-tutorial-nodejs)
+- [scala project template](https://github.com/p2m2/discovery-scala-executable)
+- full example with [table view implementation](https://github.com/p2m2/discovery-table-view) using [scalatags](https://github.com/lihaoyi/scalatags)
+- [ChEBI-discovery](https://github.com/eMetaboHUB/ChEBI-discovery). ScalaJs implementation of *"Improving lipid mapping in Genome Scale Metabolic Networks using ontologies."* [[1]]. 
    This methodology uses the Chemical Entities of Biological Interest (ChEBI)
 
 ## Contact/Issues
@@ -93,7 +76,7 @@ The software is licensed under MIT and under development.
 
 - O. Filangi -  IGEPP's Metabolic Profiling and Metabolomic Platform (P2M2, Rennes)
 - F. Giacomoni, N. Paulhe - The Platform "Exploration du Métabolisme" (PFEM, Clermont-Ferrand)
-
+   
 ## References
 
 [1] Poupin, N., Vinson, F., Moreau, A. et al. Improving lipid mapping in Genome Scale Metabolic Networks using ontologies. Metabolomics 16, 44 (2020). https://doi.org/10.1007/s11306-020-01663-5
