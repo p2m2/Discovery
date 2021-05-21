@@ -61,6 +61,6 @@ To use discovery, user have some basics of RDF graph databases and SPARQL query 
 - [Configuration](user_docs_configuration.md)
 - [Building query](user_docs_building_block.md)
 - [Executing query](user_docs_transaction.md)
-- [Debugging query](user_docs_transaction.md)
+- [Debugging query](user_docs_debug.md)
 - [API documentation](./api/index.html)
 

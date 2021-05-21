@@ -1,5 +1,4 @@
-#Executing query
-
+# Executing query
 
 - select(`ref1,ref2,ref3,..`)
 - select(`[ref1,ref2,ref3,..]`,`limit`,`offset`) : getResults as a promise (json format)
