@@ -1,3 +1,5 @@
+# Debugging query
 
-- helper : this page
-- console
+- console()
+- sparql()
+- helper()
