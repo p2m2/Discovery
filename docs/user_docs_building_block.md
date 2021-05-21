@@ -51,6 +51,8 @@ A query always start this unit block.
 
 - isSubjectOf(`uri`,`var`) 
 - isObjectOf(`uri`,`var`)
+- isLinkFrom(`uri`,`var`)
+- isLinkTo(`uri`,`var`)
 
 **following block unit don't move focus**
 
