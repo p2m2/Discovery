@@ -10,6 +10,8 @@ The library offers a dedicated query language that can be used in several runtim
 discovery is developed as part of the work package "Creating FAIR e-resources for knowledge mining" for [the 
 national infrastructure for metabolomics and fluxomics - MetaboHUB](https://www.metabohub.fr/home.html) 
 
+
+
 ## Metabolomic example
 
 This example shows how to retrieve "Metabolights Studies" 
@@ -61,7 +63,7 @@ linking to the CHEBI:4167-D-glucopyranose compound. This example uses the follow
 https://github.com/p2m2/discovery-scala-executable
 
 # User documentation
-see [User documentation](./user_documentation.md)
+see [User documentation](user_docs.md)
 
 ## html examples
 
@@ -75,10 +77,9 @@ see [User documentation](./user_documentation.md)
 
 full example with [table view implementation](https://github.com/p2m2/discovery-table-view) using [scalatags](https://github.com/lihaoyi/scalatags)
 
-
 # Implementations
 
- - [ChEBI-discovery](https://github.com/eMetaboHUB/ChEBI-discovery) : ScalaJs implementation of *"Improving lipid mapping in Genome Scale Metabolic Networks using ontologies."* [[1]](#1). 
+ - [ChEBI-discovery](https://github.com/eMetaboHUB/ChEBI-discovery). ScalaJs implementation of *"Improving lipid mapping in Genome Scale Metabolic Networks using ontologies."* [[1]]. 
    This methodology uses the Chemical Entities of Biological Interest (ChEBI)
 
 ## Contact/Issues
@@ -88,6 +89,12 @@ Add [GitHub issue](https://github.com/p2m2/discovery/issues/new) to request bugs
 ## Licence
 The software is licensed under MIT and under development.
 
+## Authors
+
+O. Filangi -  IGEPP's Metabolic Profiling and Metabolomic Platform (P2M2, Rennes)
+F. Giacomoni - The Platform "Exploration du Métabolisme" (PFEM, Clermont-Ferrand)
+N. Paulhe - The Platform "Exploration du Métabolisme" (PFEM, Clermont-Ferrand)
+
 ## References
-<a id="1">[1]</a>
-Poupin, N., Vinson, F., Moreau, A. et al. Improving lipid mapping in Genome Scale Metabolic Networks using ontologies. Metabolomics 16, 44 (2020). https://doi.org/10.1007/s11306-020-01663-5
+
+[1] Poupin, N., Vinson, F., Moreau, A. et al. Improving lipid mapping in Genome Scale Metabolic Networks using ontologies. Metabolomics 16, 44 (2020). https://doi.org/10.1007/s11306-020-01663-5
