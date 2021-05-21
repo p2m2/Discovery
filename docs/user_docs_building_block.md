@@ -26,9 +26,9 @@ This request can be translated as "Get something of type compound which are subj
 
 ## Moving the focus
 
-- focus() : get current focus
-- focus(`var`) : set the focus with named block `var` 
-- root() : go back to the query root 
+- *focus()* : get current focus
+- *focus(`var`)* : set the focus with named block `var` 
+- *root()* : go back to the query root 
 
 ## Using named block
 
@@ -44,17 +44,16 @@ A query always start this unit block.
 ## Query configuration
 
 
-```
 - prefix(`short`,`long`) : set prefix
 - graph(`iri`)
 - namedGraph(`iri`) : set graph or graph named
-```
+
 
 #### Linking RDF block to browse the semantic graph
 
 ```
 - isSubjectOf(`uri`,`var`) 
-- isObjectOf(`uri`,`var`) : focus is the object of a triplet which `uri` is the property
+- isObjectOf(`uri`,`var`) 
 ```
 
 
