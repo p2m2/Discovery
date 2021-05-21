@@ -47,27 +47,24 @@ A query always start this unit block.
 - graph(`iri`)           : set graph or graph named
 - namedGraph(`iri`)      : set graph or graph named
 
-#### Linking RDF block to browse the semantic graph
+## Linking RDF block to browse the semantic graph
 
 - isSubjectOf(`uri`,`var`) 
 - isObjectOf(`uri`,`var`)
 
+**following block unit don't move focus**
 
-```
 - isA(`uri`)  : set the focus type/class
 - datatype(`uri`,`var`) : focus is a subject of a triplet which `uri` is a datatype property (OWL)
-```
 
-#### Setting values
 
-```
+## Values assignment block
+
 - set(`sparqlDef`)
 - setList(`sparqlDef1`,`sparqlDef2`,..)
-```
 
-#### Filtering
+## Filter assignment block
 
-```
 - filter.not.{fun}
 - filter.isLiteral
 - filter.isUri
@@ -82,15 +79,12 @@ A query always start this unit block.
 - filter.infEqual( `literal|var` )
 - filter.sup( `literal|var` )
 - filter.supEqual( `literal|var` )
-```
 
-#### Binding a new variable
+## Creation/Transformation assignment block
 
-```
 - .bind(`var`).subStr(startingLoc : SparqlDefinition,length : SparqlDefinition )
 - .bind(`var`).replace(pattern : SparqlDefinition, replacement : SparqlDefinition, flags : SparqlDefinition="")
 - .bind(`var`).abs()
 - .bind(`var`).ceil()
 - .bind(`var`).floor()
 - .bind(`var`).rand()
-```
