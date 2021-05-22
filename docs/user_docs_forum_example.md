@@ -62,8 +62,5 @@ document.body.innerHTML +="<ul>" ;
    });
 ```
 
-<object data="https://raw.githubusercontent.com/p2m2/discovery-tutorial-html-js/main/metabolomics/forum_example.html" type="text/plain" width="1000px" height="800px">
-</object>
-
 <object data="https://p2m2.github.io/discovery-tutorial-html-js/metabolomics/forum_example.html" type="text/plain" width="1000px" height="800px">
 </object>
