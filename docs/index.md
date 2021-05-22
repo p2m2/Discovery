@@ -55,7 +55,7 @@ linking to the CHEBI:4167-D-glucopyranose compound. This example uses the follow
 
 [js fiddle example](https://jsfiddle.net/uoecqath/5/)
 
-## Scala application with discovery
+## Application
 
 - [User documentation](user_docs.md)
 - [discovery-tutorial-html-js](https://github.com/p2m2/discovery-tutorial-html-js/tree/0.2.0)
@@ -65,6 +65,8 @@ linking to the CHEBI:4167-D-glucopyranose compound. This example uses the follow
 - [ChEBI-discovery](https://github.com/eMetaboHUB/ChEBI-discovery). ScalaJs implementation of *"Improving lipid mapping in Genome Scale Metabolic Networks using ontologies."* [[1]]. 
    This methodology uses the Chemical Entities of Biological Interest (ChEBI)   
 - [scala project template](https://github.com/p2m2/discovery-scala-executable)
+
+
 
 ## Contact/Issues
 
