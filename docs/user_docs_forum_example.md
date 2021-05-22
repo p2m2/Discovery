@@ -5,11 +5,6 @@ FORUM is an open knowledge network aiming at supporting metabolomics results int
 - [about project](https://forum-webapp.semantic-metabolomics.fr/#/about)
 - [run the example](https://p2m2.github.io/discovery-tutorial-html-js/metabolomics/forum_example.html){:target="_blank" rel="noopener"}
 
-@@include[code](https://p2m2.github.io/discovery-tutorial-html-js/metabolomics/forum_example.html)
-
-<object data="https://p2m2.github.io/discovery-tutorial-html-js/metabolomics/forum_example.html" type="text/plain" width="1000px" height="800px">
-</object>
-
 ```html
 <script
         type="text/javascript"
@@ -67,3 +62,8 @@ document.body.innerHTML +="<ul>" ;
    });
 ```
 
+<object data="https://raw.githubusercontent.com/p2m2/discovery-tutorial-html-js/main/metabolomics/forum_example.html" type="text/plain" width="1000px" height="800px">
+</object>
+
+<object data="https://p2m2.github.io/discovery-tutorial-html-js/metabolomics/forum_example.html" type="text/plain" width="1000px" height="800px">
+</object>
