@@ -1,9 +1,14 @@
 # FORUM Knowledge graph Database
 
 FORUM is an open knowledge network aiming at supporting metabolomics results interpretation in biomedical sciences and automated reasoning. Containing more than 8 billion statements, it federate data from several life-science resources such as PubMed, ChEBI and PubChem. Leveraging the bridges in this linked dataset, associations are automatically extract between compound and biomedical concepts, using literature metadata enrichment.
-[about project](https://forum-webapp.semantic-metabolomics.fr/#/about)
-[run the example](https://p2m2.github.io/discovery-tutorial-html-js/metabolomics/forum_example.html){:target="_blank" rel="noopener"}
 
+- [about project](https://forum-webapp.semantic-metabolomics.fr/#/about)
+- [run the example](https://p2m2.github.io/discovery-tutorial-html-js/metabolomics/forum_example.html){:target="_blank" rel="noopener"}
+
+@@include[code](https://p2m2.github.io/discovery-tutorial-html-js/metabolomics/forum_example.html)
+
+<object data="https://p2m2.github.io/discovery-tutorial-html-js/metabolomics/forum_example.html" type="text/plain" width="1000px" height="800px">
+</object>
 
 ```html
 <script
