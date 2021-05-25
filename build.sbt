@@ -50,11 +50,11 @@ ThisBuild / organization := "com.github.p2m2"
 ThisBuild / organizationName := "p2m2"
 ThisBuild / organizationHomepage := Some(url("https://www6.inrae.fr/p2m2"))
 ThisBuild / licenses := Seq("MIT License" -> url("http://www.opensource.org/licenses/mit-license.php"))
-ThisBuild / homepage := Some(url("https://github.com/p2m2/Discovery"))
+ThisBuild / homepage := Some(url("https://github.com/p2m2/discovery"))
 ThisBuild / description := "Ease Sparql request on the network MetaboHUB/Semantics Databases."
 ThisBuild / scmInfo := Some(
     ScmInfo(
-      url("https://github.com/p2m2/Discovery"),
+      url("https://github.com/p2m2/discovery"),
       "scm:git@github.com:p2m2/Discovery.git"
     )
   )
@@ -192,7 +192,7 @@ ${dependencies.mkString("\n")}
    },
    "repository": {
      "type": "git",
-     "url": "git+https://github.com/p2m2/Discovery.git"
+     "url": "git+https://github.com/p2m2/discovery.git"
    },
    "keywords": [
      "sparql",
@@ -202,9 +202,9 @@ ${dependencies.mkString("\n")}
    "author": "Olivier Filangi",
    "license": "MIT",
    "bugs": {
-     "url": "https://github.com/p2m2/Discovery/issues"
+     "url": "https://github.com/p2m2/discovery/issues"
    },
-   "homepage": "https://github.com/p2m2/Discovery#README.md"
+   "homepage": "https://github.com/p2m2/discovery#README.md"
  }
  """).stripMargin)
 }
