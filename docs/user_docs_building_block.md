@@ -30,6 +30,19 @@ This request can be translated as "Get something of type compound which are subj
 - *focus(`var`)* : set the focus with named block `var` 
 - *root()* : go back to the query root 
 
+## types
+
+- `Literal(value)`
+- `URI(value)`
+- `IRI(value)`
+- `PropertyPath(value)`
+- `Anonymous(value)`
+- `QueryVariable(var)`
+
+if there is no ambiguity, string conversion is automatic.
+
+`isObjectOf("<http://something/test>")` `isObjectOf(URI("<http://something/test>"))` equivalent to `.prefix("http://something/","s").isObjectOf("s:test")` equivalent to `.prefix("http://something/","s").isObjectOf(URI("s:test"))`
+
 ## Using named block
 
 - Some unit block can be named. You named block if you want move to this focus later or to get results about this 
@@ -49,20 +62,19 @@ A query always start this unit block.
 
 ## Linking RDF block to browse the semantic graph
 
-- isSubjectOf(`uri`,`var`) 
-- isObjectOf(`uri`,`var`)
-- isLinkFrom(`uri`,`var`)
-- isLinkTo(`uri`,`var`)
+- isSubjectOf(`uri`,`var`). the current focus is set as "subject of triple <focus> <uri> ?var "
+- isObjectOf(`uri`,`var`). the current focus is set a "object of triple ?var <uri> <focus> "
+- isLinkFrom(`uri`,`var`). the current focus is set a "object of triple <uri> ?var <focus>  "
+- isLinkTo(`uri`,`var`). the current focus become a "subject of triple  <focus> ?var <uri>  "
 
-**following block unit don't move focus**
+**focus insensitive**
 
-- isA(`uri`)  : set the focus type/class
-- datatype(`uri`,`var`) : focus is a subject of a triplet which `uri` is a datatype property (OWL)
-
+- isA(`uri`)  : the current focus is set as "subject of triple <focus> a <uri> "
+- datatype(`uri`,`var`) : datatype is processed separately from the request. discovery retrieve datatype information at the last execution time
 
 ## Values assignment block
 
-- set(`sparqlDef`)
+- set(`sparqlDef`) : set the focus with an uri/literal.
 - setList(`sparqlDef1`,`sparqlDef2`,..)
 
 ## Filter assignment block
