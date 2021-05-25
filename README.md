@@ -13,7 +13,7 @@
 ## SBT confi
 
 ``` 
-libraryDependencies += "com.github.p2m2" %%% "discovery" % "0.1.0",
+libraryDependencies += "com.github.p2m2" %%% "discovery" % "0.2.0",
 ```
 
 ### Html/Js example
