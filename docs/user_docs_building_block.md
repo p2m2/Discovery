@@ -62,14 +62,14 @@ A query always start this unit block.
 
 ## Linking RDF block to browse the semantic graph
 
-- isSubjectOf(`uri`,`var`). the current focus is set as "subject of triple <focus> <uri> ?var "
-- isObjectOf(`uri`,`var`). the current focus is set a "object of triple ?var <uri> <focus> "
-- isLinkFrom(`uri`,`var`). the current focus is set a "object of triple <uri> ?var <focus>  "
-- isLinkTo(`uri`,`var`). the current focus become a "subject of triple  <focus> ?var <uri>  "
+- isSubjectOf(`uri`,`var`). the current focus is set as "subject of triple `<focus> <uri> ?var` "
+- isObjectOf(`uri`,`var`). the current focus is set as "object of triple `?var <uri> <focus>` "
+- isLinkFrom(`uri`,`var`). the current focus is set as "object of triple `<uri> ?var <focus>`  "
+- isLinkTo(`uri`,`var`). the current focus is set as "subject of triple  `<focus> ?var <uri>`  "
 
 **focus insensitive**
 
-- isA(`uri`)  : the current focus is set as "subject of triple <focus> a <uri> "
+- isA(`uri`)  : the current focus is set as "subject of triple `<focus> a <uri>` "
 - datatype(`uri`,`var`) : datatype is processed separately from the request. discovery retrieve datatype information at the last execution time
 
 ## Values assignment block

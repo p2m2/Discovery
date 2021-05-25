@@ -58,7 +58,6 @@
 ### datatype results
 
 ```html
-
 .datatype("datatypeSome")
 .select( "some" )
            .commit()
@@ -73,3 +72,8 @@
                   }
                }); // end promise select
 ```
+
+### transport results
+
+- getSerializedString
+- setSerializedString
