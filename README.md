@@ -9,7 +9,6 @@
 - display rich information on the web page or console 
 - offers building blocks system with atomic element to ease query construction
 
-
 ### Html/Js example
 
 #### Html import 
@@ -76,9 +75,11 @@
 
 [js fiddle example](https://jsfiddle.net/uoecqath/5/)
 
+
 ## Import discovery with SBT
 
 ``` 
 libraryDependencies += "com.github.p2m2" %%% "discovery" % "0.2.0"
 ```
+
 
