@@ -8,6 +8,9 @@
 
 ## sparql()
 
+- [run example](https://p2m2.github.io/discovery-tutorial-html-js/helper/sparql.html){:target="_blank" rel="noopener"}
+- [see code](https://github.com/p2m2/discovery-tutorial-html-js/blob/main/helper/sparql.html)
+
 ## helper()
 
 - [run example](https://p2m2.github.io/discovery-tutorial-html-js/helper/helper.html){:target="_blank" rel="noopener"}
@@ -15,7 +18,7 @@
 
 ### methods helper
 
-- count() [run example](https://p2m2.github.io/discovery-tutorial-html-js/helper/findClasses.html){:target="_blank" rel="noopener"} [see code](https://github.com/p2m2/discovery-tutorial-html-js/blob/main/helper/count.html)
+- count() [run example](https://p2m2.github.io/discovery-tutorial-html-js/helper/count.html){:target="_blank" rel="noopener"} [see code](https://github.com/p2m2/discovery-tutorial-html-js/blob/main/helper/count.html)
 - findClasses [run example](https://p2m2.github.io/discovery-tutorial-html-js/helper/findClasses.html){:target="_blank" rel="noopener"} [see code](https://github.com/p2m2/discovery-tutorial-html-js/blob/main/helper/findClasses.html)
 - findClasses 2 [run example](https://p2m2.github.io/discovery-tutorial-html-js/helper/findClassesInherited.html){:target="_blank" rel="noopener"} [see code](https://github.com/p2m2/discovery-tutorial-html-js/blob/main/helper/findClassesInherited.html)
 - findDatatypeProperties [run example](https://p2m2.github.io/discovery-tutorial-html-js/helper/findDatatypeProperties.html){:target="_blank" rel="noopener"} [see code](https://github.com/p2m2/discovery-tutorial-html-js/blob/main/helper/findDatatypeProperties.html)
