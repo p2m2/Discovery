@@ -1,39 +1,15 @@
 package inrae.data
 
-import fr.hmil.roshttp.HttpRequest
-import fr.hmil.roshttp.Method.POST
-import fr.hmil.roshttp.exceptions.HttpException
-import fr.hmil.roshttp.response.SimpleHttpResponse
 import inrae.semantic_web.StatementConfiguration
-import wvlet.log.Logger.rootLogger.error
 
-import java.io.IOException
 import scala.concurrent.Future
 
 final case class DataTestFactoryException(private val message: String = "",
                                           private val cause: Throwable = None.orNull) extends Exception(message,cause)
 
 object DataTestFactory  {
-  import monix.execution.Scheduler.Implicits.global
-
+  implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
   val url_endpoint = "http://localhost:8890/sparql"
-
-  def put(stringQuery : String, url_endpoint : String) = {
-
-    HttpRequest(url_endpoint)
-      //  .withHeader("Authorization", "Basic " + Base64.getEncoder.encodeToString("dba:dba".getBytes))
-      .withMethod(POST)
-      .withQueryParameter("query",stringQuery)
-      .send()
-      .recover {
-        case HttpException(e: SimpleHttpResponse) =>
-          // Here we may have some detailed application-level insight about the error
-          error("There was an issue with your request." +
-            " Here is what the application server says: " )
-        case e: IOException =>
-          error(s"${url_endpoint} is not reachable. ")
-      }
-  }
 
   def graph1(classname: String) = "graph:test:discovery:virtuoso1:" + classname.replace("$","")
   def graph2(classname: String) = "graph:test:discovery:virtuoso2:" + classname.replace("$","")
@@ -41,7 +17,7 @@ object DataTestFactory  {
   private def insert(data : String,
                      graph: String,
                      url_endpoint : String=url_endpoint) : Future[Any] = {
-    put(s"""
+    PostRequest.put(s"""
         PREFIX owl: <http://www.w3.org/2002/07/owl#>
         PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
         PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -54,8 +30,8 @@ object DataTestFactory  {
               }
           }
         """.stripMargin,url_endpoint)
-      .map( _ => { println(s" ------------- ${graph} is loaded ! -------------------- ") })
-      .recover( _ =>  { throw new Error(s"Can not load graph :${graph}") } )
+     // .map( _ => { println(s" ------------- ${graph} is loaded ! -------------------- ") })
+     // .recover( _ =>  { throw new Error(s"Can not load graph :${graph}") } )
   }
 
   def insert_virtuoso1(data : String,
@@ -68,7 +44,7 @@ object DataTestFactory  {
 
   private def delete(graph: String,
                      url_endpoint : String=url_endpoint) : Future[Any] = {
-    put(s"DROP SILENT GRAPH <${graph}>",url_endpoint)
+    PostRequest.put(s"DROP SILENT GRAPH <${graph}>",url_endpoint)
       .map( _ => { println(s" ------------- ${graph} is deleted ! -------------------- ") })
 
   }
