@@ -8,8 +8,6 @@ import scala.scalajs._
 import scala.scalajs.js.JSConverters._
 import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
 
-
-
 @JSExportTopLevel(name="SWDiscovery")
 case class SWDiscoveryJs(
                           config: StatementConfiguration=StatementConfiguration(),
