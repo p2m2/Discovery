@@ -1,7 +1,7 @@
 # Philosophy
 
 discovery allows you to build and execute a request to an RDF resource by simply defining 
-a configuration, and a sequence of building blocks atomic element .
+a configuration, and a sequence of building blocks of atomic element .
 
 ```html 
 /* ---------------------------------------*/
