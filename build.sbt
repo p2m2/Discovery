@@ -6,7 +6,6 @@ lazy val utestVersion = "0.7.7"
 lazy val upickleVersion  = "1.2.2"
 lazy val airframeLogVersion = "20.11.0"
 lazy val scalaParserCombinatorVersion = "1.1.2"
-lazy val RosHttpVersion = "3.0.0"
 lazy val scalaJsDOMVersion = "1.1.0"
 lazy val scalaStubVersion = "1.0.0"
 lazy val scalatagVersion = "0.9.2"
@@ -101,10 +100,9 @@ lazy val root = (project in file("."))
 
 lazy val discovery=crossProject(JSPlatform, JVMPlatform).in(file("."))
   .settings(
-    resolvers += Resolver.bintrayRepo("hmil", "maven"),
     libraryDependencies ++= Seq(
+      "com.softwaremill.sttp.client3" %% "core" % "3.3.4" % Test,
       "com.lihaoyi" %%% "utest" % utestVersion % Test,
-      "fr.hmil" %%% "roshttp" % RosHttpVersion % Test ,
       "com.lihaoyi" %%% "upickle" % upickleVersion,
       "org.wvlet.airframe" %%% "airframe-log" % airframeLogVersion,
       "org.scala-lang.modules" %%% "scala-parser-combinators" % scalaParserCombinatorVersion
