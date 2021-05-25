@@ -9,6 +9,8 @@
 - display rich information on the web page or console 
 - offers building blocks system with atomic element to ease query construction
 
+further information and documentation, visit https://p2m2.github.io/discovery/
+
 ### Html/Js example
 
 #### Html import 
