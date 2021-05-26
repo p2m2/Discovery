@@ -40,9 +40,17 @@ sbt discoveryJS/fullOptJS
 sbt discoveryJS/fastOptJS::webpack
 sbt discoveryJS/fullOptJS::webpack
 sbt discoveryJVM/testOnly inrae.semantic_web.QueryPlannerTest
+```
+
 ## local publication -> .ivy2
+
+``` 
 sbt publishLocal
-## osssonatype maven centra repository publication
+``` 
+## oss.sonatype maven central repository publication
+https://oss.sonatype.org/
+
+``` 
 sbt publish
 ```
 ### NPM publication
