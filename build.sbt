@@ -204,7 +204,7 @@ ${dependencies.mkString("\n")}
    "bugs": {
      "url": "https://github.com/p2m2/discovery/issues"
    },
-   "homepage": "https://github.com/p2m2/discovery#README.md"
+   "homepage": "https://p2m2.github.io/discovery/"
  }
  """).stripMargin)
 }
