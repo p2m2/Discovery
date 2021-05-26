@@ -53,15 +53,19 @@ linking to the CHEBI:4167-D-glucopyranose compound. This example uses the follow
 </script>
 ```
 
-- [js fiddle example](https://jsfiddle.net/uoecqath/5/)
-- [User documentation](user_docs.md)
+[js fiddle example](https://jsfiddle.net/uoecqath/5/)
 
+
+# Documentation
+
+- [User documentation](user_docs.md)
 
 ## Tutorials / Template
 
 - [discovery-tutorial-html-js](https://github.com/p2m2/discovery-tutorial-html-js/tree/0.2.0)
 - [discovery-tutorial-nodejs](https://github.com/p2m2/discovery-tutorial-nodejs/tree/0.2.0)
-- [scala project template](https://github.com/p2m2/discovery-scala-executable)
+- [scalajs project template](https://github.com/p2m2/discovery-scalajs-template)
+- [scala project template](https://github.com/p2m2/discovery-scala-template)
 
 ## Metabolomics Applications 
 
