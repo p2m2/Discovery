@@ -78,12 +78,12 @@ linking to the CHEBI:4167-D-glucopyranose compound. This example uses the follow
 
 this software development is based on [RDFJS (RDF JavaScript Libraries)](https://rdf.js.org/) and [RDF4J](https://rdf4j.org/)
 
-### JavaScript library facades
+### JavaScript library facades to develop ScalaJS app
 
-- [N3.js](https://github.com/rdfjs/N3.js/) [facade](https://github.com/p2m2/N3.js-facade)
-- [data-model-spec](https://github.com/rdfjs/data-model-spec) [facade](https://github.com/p2m2/data-model-rdfjs)
-- [RDF/XML Streaming Parser](https://github.com/rdfjs/rdfxml-streaming-parser.js) [facade](https://github.com/p2m2/rdfxml-streaming-parser-facade)
-- [Comunica SPARQL RDFJS Init Actor](https://github.com/comunica/comunica/tree/master/packages/actor-init-sparql-rdfjs) [facade](https://github.com/p2m2/comunica-actor-init-sparql-rdfjs-facade)
+- [N3.js](https://github.com/p2m2/N3.js-facade) - [source](https://github.com/rdfjs/N3.js/) 
+- [data-model-spec](https://github.com/p2m2/data-model-rdfjs) - [source](https://github.com/rdfjs/data-model-spec) 
+- [RDF/XML Streaming Parser](https://github.com/p2m2/rdfxml-streaming-parser-facade) - [source](https://github.com/rdfjs/rdfxml-streaming-parser.js)
+- [Comunica SPARQL RDFJS Init Actor](https://github.com/p2m2/comunica-actor-init-sparql-rdfjs-facade) [source](https://github.com/comunica/comunica/tree/master/packages/actor-init-sparql-rdfjs)
 
 ## Contact/Issues
 
