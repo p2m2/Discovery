@@ -25,7 +25,7 @@ further information and documentation, visit https://p2m2.github.io/discovery/
           "url" : "https://peakforest.semantic-metabolomics.fr/sparql"
            }]}
           `)
-        let r = SWDiscovery(config)
+      let request = SWDiscovery(config)
                      .prefix("peak_class","https://metabohub.peakforest.org/ontology/class#")
                      .prefix("peak_prop","https://metabohub.peakforest.org/ontology/property#")
                      .root()
@@ -52,7 +52,7 @@ further information and documentation, visit https://p2m2.github.io/discovery/
                      .limit(10);
       
        
-        r.commit().raw().then((response) => {
+        request.commit().raw().then((response) => {
           
           for (let i=0;i<response.results.bindings.length;i++) {
             let m1 =response.results.bindings[i]["m1"].value;

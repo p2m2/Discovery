@@ -4,7 +4,7 @@
 # What is discovery
 
 discovery is a software library which aims to ease the development of decision support tools
-exploiting RDF databases.
+exploiting [omics](https://en.wikipedia.org/wiki/Multiomics) RDF databases.
 The library offers a dedicated query language that can be used in several runtime environments (Browser/JS, Node/JS, JVM/Scala).
 
 discovery is developed as part of the work package "Creating FAIR e-resources for knowledge mining" for [the 
@@ -53,7 +53,7 @@ linking to the CHEBI:4167-D-glucopyranose compound. This example uses the follow
 </script>
 ```
 
-[js fiddle example](https://jsfiddle.net/uoecqath/5/)
+[js fiddle example](https://jsfiddle.net/ofilangi/beuz5rsf)
 
 
 # Documentation
@@ -90,6 +90,7 @@ this software development is based on [RDFJS (RDF JavaScript Libraries)](https:/
 Add [GitHub issue](https://github.com/p2m2/discovery/issues/new) to request bugs, new features or suggest modifications to existing features. 
 
 ## Licence
+
 The software is licensed under MIT and under development.
 
 ## Authors

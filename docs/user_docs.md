@@ -4,18 +4,15 @@ discovery allows you to build and execute a request to an RDF resource by simply
 a configuration, and building blocks sequence of atomic element .
 
 ```html 
+<!--
 /* ---------------------------------------*/
 /* Import javascript library the          */
 /* ---------------------------------------*/
+-->
 <script 
         type="text/javascript" 
         src="https://cdn.jsdelivr.net/gh/p2m2/discovery@0.2.0/dist/discovery-web.min.js"> 
 </script>
-
-/* ---------------------------------------*/
-/* Request your favorite RDF resource     */
-/* ---------------------------------------*/
-
 <script>
 /* -------------------------------*/
 /* Part 1. Setting Configuration  */

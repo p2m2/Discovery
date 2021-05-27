@@ -63,7 +63,7 @@ source definition to query the DBpedia SPARQL endpoint.
 
 ```json
 {
-   "id"       : "local_content",
+   "id"       : "fileMetabo",
    "mimetype" : "text/turtle",
    "file"     : "https://raw.githubusercontent.com/p2m2/discovery/develop/shared/src/test/resources/metabo.ttl"
  } 
