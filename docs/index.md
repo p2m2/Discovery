@@ -74,6 +74,17 @@ linking to the CHEBI:4167-D-glucopyranose compound. This example uses the follow
 - [ChEBI-discovery](https://github.com/eMetaboHUB/ChEBI-discovery). ScalaJs implementation of *"Improving lipid mapping in Genome Scale Metabolic Networks using ontologies."* [1].
   This methodology uses the Chemical Entities of Biological Interest (ChEBI)
 
+## Dependencies - RDF Software libraries 
+
+this software development is based on [RDFJS (RDF JavaScript Libraries)](https://rdf.js.org/) and [RDF4J](https://rdf4j.org/)
+
+### JavaScript library facades
+
+- [N3.js](https://github.com/rdfjs/N3.js/) [facade](https://github.com/p2m2/N3.js-facade)
+- [data-model-spec](https://github.com/rdfjs/data-model-spec) [facade](https://github.com/p2m2/data-model-rdfjs)
+- [RDF/XML Streaming Parser](https://github.com/rdfjs/rdfxml-streaming-parser.js) [facade](https://github.com/p2m2/rdfxml-streaming-parser-facade)
+- [Comunica SPARQL RDFJS Init Actor](https://github.com/comunica/comunica/tree/master/packages/actor-init-sparql-rdfjs) [facade](https://github.com/p2m2/comunica-actor-init-sparql-rdfjs-facade)
+
 ## Contact/Issues
 
 Add [GitHub issue](https://github.com/p2m2/discovery/issues/new) to request bugs, new features or suggest modifications to existing features. 
