@@ -53,24 +53,37 @@ linking to the CHEBI:4167-D-glucopyranose compound. This example uses the follow
 </script>
 ```
 
-- [js fiddle example](https://jsfiddle.net/uoecqath/5/)
-- [User documentation](user_docs.md)
+[js fiddle example](https://jsfiddle.net/uoecqath/5/)
 
+
+# Documentation
+
+- [User documentation](user_docs.md)
 
 ## Tutorials / Template
 
-- [HTML/Js template]
-- [NodeJs]
-- [scala project template](https://github.com/p2m2/discovery-scala-executable)
 - [discovery-tutorial-html-js](https://github.com/p2m2/discovery-tutorial-html-js/tree/0.2.0)
-- [discovery-tutorial-nodejs](https://github.com/p2m2/discovery-tutorial-nodejs)
+- [discovery-tutorial-nodejs](https://github.com/p2m2/discovery-tutorial-nodejs/tree/0.2.0)
+- [scalajs project template](https://github.com/p2m2/discovery-scalajs-template)
+- [scala project template](https://github.com/p2m2/discovery-scala-template)
 
 ## Metabolomics Applications 
 
 - [Example using the FORUM DiseasesChem endpoint with discovery](user_docs_forum_example.md)
-- full example with [table view implementation](https://github.com/p2m2/discovery-table-view) using [scalatags](https://github.com/lihaoyi/scalatags)
-- [ChEBI-discovery](https://github.com/eMetaboHUB/ChEBI-discovery). ScalaJs implementation of *"Improving lipid mapping in Genome Scale Metabolic Networks using ontologies."* [[1]].
+- Full example with [table view implementation](https://github.com/p2m2/discovery-table-view) using [scalatags](https://github.com/lihaoyi/scalatags)
+- [ChEBI-discovery](https://github.com/eMetaboHUB/ChEBI-discovery). ScalaJs implementation of *"Improving lipid mapping in Genome Scale Metabolic Networks using ontologies."* [1].
   This methodology uses the Chemical Entities of Biological Interest (ChEBI)
+
+## Dependencies - RDF Software libraries 
+
+this software development is based on [RDFJS (RDF JavaScript Libraries)](https://rdf.js.org/) and [RDF4J](https://rdf4j.org/)
+
+### JavaScript library facades to develop ScalaJS app
+
+- [N3.js](https://github.com/p2m2/N3.js-facade) - [source](https://github.com/rdfjs/N3.js/) 
+- [data-model-spec](https://github.com/p2m2/data-model-rdfjs) - [source](https://github.com/rdfjs/data-model-spec) 
+- [RDF/XML Streaming Parser](https://github.com/p2m2/rdfxml-streaming-parser-facade) - [source](https://github.com/rdfjs/rdfxml-streaming-parser.js)
+- [Comunica SPARQL RDFJS Init Actor](https://github.com/p2m2/comunica-actor-init-sparql-rdfjs-facade) [source](https://github.com/comunica/comunica/tree/master/packages/actor-init-sparql-rdfjs)
 
 ## Contact/Issues
 
