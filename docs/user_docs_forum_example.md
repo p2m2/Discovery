@@ -4,4 +4,4 @@ FORUM is an open knowledge network aiming at supporting metabolomics results int
 
 - [about project](https://forum-webapp.semantic-metabolomics.fr/#/about)
 - [get mesh term link to "cid:CID336986](https://p2m2.github.io/discovery-tutorial-html-js/metabolomics/forum_example.html){:target="_blank" rel="noopener"}
-- [see code](https://github.com/p2m2/discovery-tutorial-html-js/blob/main/metabolomics/forum_example.html)
+- [see code](https://github.com/p2m2/discovery-tutorial-html-js/blob/0.2.0/metabolomics/forum_example.html)
