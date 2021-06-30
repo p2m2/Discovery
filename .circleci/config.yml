@@ -206,12 +206,6 @@ jobs:
         - checkout
         - setup_remote_docker
         - node/install
-        - restore_cache:
-            keys:
-              - v1-dependencies-{{ checksum "build.sbt" }}
-              # fallback to using the latest cache if no exact match is found
-              - v1-dependencies-
-        - run: node --version
         - run:
             name: Test JS
             command: sbt discoveryJS/test

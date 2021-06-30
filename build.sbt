@@ -131,12 +131,12 @@ lazy val discovery=crossProject(JSPlatform, JVMPlatform).in(file("."))
       "@comunica/utils-datasource" -> npm_comunica_version_datasource
     ),
 
-    scalaJSLinkerConfig in (Compile, fastOptJS ) ~= {
+    Compile / fastOptJS / scalaJSLinkerConfig ~= {
       _.withOptimizer(false)
         .withPrettyPrint(true)
         .withSourceMap(true)
     },
-    scalaJSLinkerConfig in (Compile, fullOptJS) ~= {
+    Compile / fullOptJS / scalaJSLinkerConfig ~= {
       _.withSourceMap(false)
         .withModuleKind(ModuleKind.CommonJSModule)
     },
