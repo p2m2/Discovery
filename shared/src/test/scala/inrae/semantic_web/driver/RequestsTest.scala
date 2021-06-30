@@ -114,7 +114,7 @@ object RequestsTest extends TestSuite {
 
 
   def tests : Tests = Tests {
-
+/*
     test("federation") {
       insert_data.map(_ => {
         SWDiscovery(mixconfig)
@@ -130,7 +130,7 @@ object RequestsTest extends TestSuite {
           })
       }).flatten
     }
-
+*/
     test("inline turtle") {
       insert_data.map(_ => {
         SWDiscovery(config2)
@@ -163,6 +163,7 @@ object RequestsTest extends TestSuite {
     /**
      * TODO : Repository are mixed. We can get results from other test....work on the partitioning
      */
+
     test("inline rdf-xml") {
       insert_data.map(_ => {
         SWDiscovery(config4)
