@@ -10,7 +10,6 @@ import scala.reflect.ClassTag
 
 sealed abstract class Node(val idRef : String,val children: Seq[Node] = Seq[Node]())
 {
-
   def reference(): String = idRef
   def copy(children : Seq[Node]=children) : Node
 
@@ -58,8 +57,6 @@ sealed abstract class Node(val idRef : String,val children: Seq[Node] = Seq[Node
   }
 
 }
-
-
 
 object Node {
 

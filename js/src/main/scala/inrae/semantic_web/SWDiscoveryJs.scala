@@ -100,6 +100,9 @@ case class SWDiscoveryJs(
   def datatype( uri : Any, ref : String ) : SWDiscoveryJs = SWDiscoveryJs(config,sw.datatype(toURI(uri),ref))
 
   @JSExport
+  def remove( focus : String ) : SWDiscoveryJs = SWDiscoveryJs(config,sw.remove(focus))
+
+  @JSExport
   def console() : SWDiscoveryJs = SWDiscoveryJs(config,sw.console)
 
   @JSExport
