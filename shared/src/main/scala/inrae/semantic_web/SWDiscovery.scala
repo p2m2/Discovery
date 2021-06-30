@@ -3,7 +3,7 @@ package inrae.semantic_web
 import inrae.semantic_web
 import inrae.semantic_web.event.{DiscoveryRequestEvent, DiscoveryStateRequestEvent}
 import inrae.semantic_web.internal._
-import inrae.semantic_web.internal.pm.SelectNode
+import inrae.semantic_web.internal.pm.{RemoveNode, SelectNode}
 import inrae.semantic_web.rdf._
 import inrae.semantic_web.sparql.QueryResult
 import inrae.semantic_web.strategy.StrategyRequestBuilder
@@ -253,6 +253,10 @@ case class SWDiscovery(
 
   def setList( terms : Seq[SparqlDefinition] ) : SWDiscovery = focusManagement(ListValues(terms),forward = false)
 
+  def remove( focus : String ) : SWDiscovery = SWDiscovery(
+    config,
+    RemoveNode.run(rootNode,focus)
+  )
 
   def getSerializedString : String = write(this)
   def setSerializedString(query : String) : SWDiscovery = read[SWDiscovery](query)
