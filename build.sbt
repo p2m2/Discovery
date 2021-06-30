@@ -8,7 +8,7 @@ lazy val airframeLogVersion = "20.11.0"
 lazy val scalaParserCombinatorVersion = "1.1.2"
 lazy val scalaJsDOMVersion = "1.1.0"
 lazy val scalaStubVersion = "1.0.0"
-lazy val scalatagVersion = "0.9.2"
+lazy val scalatagVersion = "0.9.4"
 lazy val rdf4jVersion = "3.6.0-M2"
 lazy val slf4j_version = "1.7.9"
 
@@ -22,7 +22,7 @@ lazy val rdfxml_streaming_parser_version = "1.0.0"
 lazy val npm_axios_version = "0.21.1"
 lazy val npm_qs_version = "6.9.6"
 lazy val npm_showdown_version = "1.9.1"
-lazy val npm_comunica_version = "1.19.2"
+lazy val npm_comunica_version_datasource = "1.19.2"
 
 releaseIgnoreUntrackedFiles := true
 
@@ -113,7 +113,7 @@ lazy val discovery=crossProject(JSPlatform, JVMPlatform).in(file("."))
     coverageMinimum := 70,
     coverageFailOnMinimum := false,
     coverageHighlighting := true,
-    parallelExecution in Test := false
+    Test / parallelExecution := false
   )
   .jsConfigure(_.enablePlugins(ScalaJSBundlerPlugin))
   .jsSettings(
@@ -124,11 +124,11 @@ lazy val discovery=crossProject(JSPlatform, JVMPlatform).in(file("."))
       "com.github.p2m2" %%% "rdfxml-streaming-parser" % rdfxml_streaming_parser_version,
     ),
     webpackBundlingMode := BundlingMode.LibraryAndApplication(),
-    npmDependencies in Compile ++= Seq(
+    Compile / npmDependencies  ++= Seq(
       "axios" -> npm_axios_version,
       "qs" -> npm_qs_version,
       "showdown" -> npm_showdown_version,
-      "@comunica/utils-datasource" -> npm_comunica_version
+      "@comunica/utils-datasource" -> npm_comunica_version_datasource
     ),
 
     scalaJSLinkerConfig in (Compile, fastOptJS ) ~= {
