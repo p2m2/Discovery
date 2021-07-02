@@ -64,7 +64,7 @@ object SWDiscoverySelectIterable extends TestSuite {
             val nb = args._1
             val results = args._2
             assert(nb == nblock)
-              val listR = Future.sequence((0 to nblock-1).map( iblock => {
+              Future.sequence((0 to nblock-1).map( iblock => {
                 results(iblock).commit().raw.map({
                   r => {
                     assert(r("results")("bindings").arr.length<=pageSize)
