@@ -27,9 +27,39 @@ object Fix71ArgListEmpty extends TestSuite {
           .isSubjectOf(URI("http://bb"), "v")
           .select(Seq("*"))
           .commit()
-          .raw.map(r => {
+          .raw.map(_ => {
             assert(true)
         })
+      }).flatten
+    }
+
+    test("Fix #73 - 2") {
+      insert_data.map(_ => {
+        SWDiscovery(config)
+          .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
+          .something()
+          .isSubjectOf(URI("http://bb"), "v")
+          .select()
+          .commit()
+          .raw.map(_ => {
+          assert(true)
+        })
+      }).flatten
+    }
+
+    test("Fix #73 - 3") {
+      insert_data.map(_ => {
+        SWDiscovery(config)
+          .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
+          .something()
+          .isSubjectOf(URI("http://bb"), "v")
+          .select(List())
+          .commit()
+          .raw.map(_ => {
+          assert(false)
+        }).recover(
+          _ => assert(true)
+        )
       }).flatten
     }
 
