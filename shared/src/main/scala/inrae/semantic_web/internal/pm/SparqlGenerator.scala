@@ -120,6 +120,10 @@ object SparqlGenerator  {
       case _ : Ceil                  => "CEIL (" + "?"+ varIdSire  +  ")"
       case _ : Rand                  => "RAND ()"
 
+      case _ : Datatype              => "DATATYPE ( " + "?"+ varIdSire  + " )"
+      case _ : Str    if varIdSire.length>0  => "STR ( " + "?"+ varIdSire  + " )"
+      case n : Str                    => "STR ( " + "?"+ n.term.sparql  + " )"
+
       case node : FilterNode         => "\tFILTER ( " + {
         if (node.negation) {
           "!"

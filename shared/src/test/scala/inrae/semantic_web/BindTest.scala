@@ -140,6 +140,43 @@ object BindTest extends TestSuite {
         })
       }).flatten
     }
+    test("datatype") {
+      insertData.map(_ => {
+        SWDiscovery(config)
+          .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
+          .something()
+          .isSubjectOf(URI("http://bb"),"r")
+          .bind("dt").datatype()
+          .select(Seq("dt"))
+          .distinct
+          .commit()
+          .raw.map(r => {
+            assert(
+              SparqlBuilder.createLiteral(r("results")("bindings")(0)("dt")).naiveLabel == "http://www.w3.org/2001/XMLSchema#string"
+            )
+        })
+      }).flatten
+    }
+    test("str") {
+      insertData.map(_ => {
+        SWDiscovery(config)
+          .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
+          .something()
+            .isObjectOf(URI("http://bb"),"r")
+            .bind("convert_str").str()
+          .select(Seq("convert_str"))
+          .distinct
+          .commit()
+          .raw.map(r => {
+          assert(
+            r("results")("bindings")(0)("convert_str")("type").value.toString.contains("literal")
+          )
+          assert(
+            r("results")("bindings")(0)("convert_str")("value").value.toString.contains("http://")
+          )
+        })
+      }).flatten
+    }
   }
 
 }
