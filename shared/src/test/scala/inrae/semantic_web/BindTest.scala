@@ -7,7 +7,7 @@ import utest.{TestSuite, Tests, test}
 import scala.concurrent.ExecutionContext.Implicits.global
 
 object BindTest extends TestSuite {
-  val insert_data = DataTestFactory.insert_virtuoso1(
+  val insertData = DataTestFactory.insert_virtuoso1(
     """
       <http://aa1> <http://bb> "abcdef" .
       <http://aa2> <http://bb> "abcdefghij" .
@@ -21,7 +21,7 @@ object BindTest extends TestSuite {
     val regexv = "defg"
 
     test("filter regex") {
-      insert_data.map(_ => {
+      insertData.map(_ => {
         SWDiscovery(config)
           .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
           .something()
@@ -46,7 +46,7 @@ object BindTest extends TestSuite {
         .bind("rep").replace(pat,repl)
 
 
-      insert_data.map(_ => {
+      insertData.map(_ => {
         req
           .select(Seq("rep"))
           .distinct
@@ -56,7 +56,7 @@ object BindTest extends TestSuite {
         }).recover(e => println(e))
       }).flatten
 
-      insert_data.map(_ => {
+      insertData.map(_ => {
         SWDiscovery().setSerializedString(req.getSerializedString)
           .select(Seq("rep"))
           .distinct
@@ -69,7 +69,7 @@ object BindTest extends TestSuite {
     }
 
     test("bind abs") {
-      insert_data.map(_ => {
+      insertData.map(_ => {
         SWDiscovery(config)
           .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
           .something()
@@ -84,7 +84,7 @@ object BindTest extends TestSuite {
     }
 
     test("bind round") {
-      insert_data.map(_ => {
+      insertData.map(_ => {
         SWDiscovery(config)
           .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
           .something()
@@ -98,7 +98,7 @@ object BindTest extends TestSuite {
       }).flatten
     }
     test("bind ceil") {
-      insert_data.map(_ => {
+      insertData.map(_ => {
         SWDiscovery(config)
           .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
           .something()
@@ -113,7 +113,7 @@ object BindTest extends TestSuite {
     }
 
     test("bind floor") {
-      insert_data.map(_ => {
+      insertData.map(_ => {
         SWDiscovery(config)
           .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
           .something()
@@ -127,7 +127,7 @@ object BindTest extends TestSuite {
       }).flatten
     }
     test("bind rand") {
-      insert_data.map(_ => {
+      insertData.map(_ => {
         SWDiscovery(config)
           .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
           .something()

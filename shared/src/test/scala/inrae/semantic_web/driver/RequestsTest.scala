@@ -8,7 +8,7 @@ import utest.{TestSuite, Tests, test}
 object RequestsTest extends TestSuite {
   implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
 
-  val insert_data = DataTestFactory.insert_virtuoso1(
+  val insertData = DataTestFactory.insert_virtuoso1(
     """
       <http://aaaaaa> <http://bbbbbb> <http://cc> .
       """.stripMargin, this.getClass.getSimpleName)
@@ -19,7 +19,7 @@ object RequestsTest extends TestSuite {
         {
          "sources" : [{
            "id"       : "local_sparql",
-           "url"      : "${DataTestFactory.url_endpoint}"
+           "url"      : "${DataTestFactory.urlEndpoint}"
          }],
          "settings" : {
             "logLevel" : "${logLevel}",
@@ -98,7 +98,7 @@ object RequestsTest extends TestSuite {
          "sources" : [
          {
            "id"       : "local_sparql",
-           "url"      : "${DataTestFactory.url_endpoint}"
+           "url"      : "${DataTestFactory.urlEndpoint}"
          },
          {
            "id"       : "local_content",
@@ -116,7 +116,7 @@ object RequestsTest extends TestSuite {
   def tests : Tests = Tests {
 /*
     test("federation") {
-      insert_data.map(_ => {
+      insertData.map(_ => {
         SWDiscovery(mixconfig)
           .something("sub")
           .isSubjectOf(URI("http://bbbbbb"), "obj")
@@ -132,7 +132,7 @@ object RequestsTest extends TestSuite {
     }
 */
     test("inline turtle") {
-      insert_data.map(_ => {
+      insertData.map(_ => {
         SWDiscovery(config2)
           .something("h1")
           .isSubjectOf(URI("http://iibbbbbb2"))
@@ -147,7 +147,7 @@ object RequestsTest extends TestSuite {
     }
 
     test("inline turtle 2") {
-      insert_data.map(_ => {
+      insertData.map(_ => {
         SWDiscovery(config3)
           .something("h1")
           .isSubjectOf(URI("http://bbbbbb2"), "v")
@@ -165,7 +165,7 @@ object RequestsTest extends TestSuite {
      */
 
     test("inline rdf-xml") {
-      insert_data.map(_ => {
+      insertData.map(_ => {
         SWDiscovery(config4)
           .prefix("dc","http://purl.org/dc/elements/1.1/")
           .something("h1")

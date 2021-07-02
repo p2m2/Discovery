@@ -26,7 +26,7 @@ object SWDiscoverySelectIterable extends TestSuite {
 
       """.stripMargin
 
-  val insert_data = DataTestFactory.insert_virtuoso1(data, this.getClass.getSimpleName)
+  val insertData = DataTestFactory.insert_virtuoso1(data, this.getClass.getSimpleName)
 
   val nbValues = data.split(" ").filter( _ == "<http://aa>").length
 
@@ -40,7 +40,7 @@ object SWDiscoverySelectIterable extends TestSuite {
         {
          "sources" : [{
            "id"       : "local",
-           "url"      : "${DataTestFactory.url_endpoint}"
+           "url"      : "${DataTestFactory.urlEndpoint}"
          }],
          "settings" : {
             "logLevel" : "info",
@@ -53,7 +53,7 @@ object SWDiscoverySelectIterable extends TestSuite {
   def tests = Tests {
 
     test("something") {
-      insert_data.map(_ => {
+      insertData.map(_ => {
         SWDiscovery(config)
           .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
           .something()

@@ -10,7 +10,7 @@ import scala.language.postfixOps
 object SWDiscoveryFilterTest extends TestSuite {
 
 
-  val insert_data = DataTestFactory.insert_virtuoso1(
+  val insertData = DataTestFactory.insert_virtuoso1(
     """
       <http://aaSWFilterTest> <http://propUri> <http://cc> .
       <http://aaSWFilterTest> <http://propLiteral> "test" .
@@ -44,7 +44,7 @@ object SWDiscoveryFilterTest extends TestSuite {
   def tests = Tests {
 
     test("SW Filter isLiteral") {
-      insert_data.map(_ => {
+      insertData.map(_ => {
         SWDiscovery(config)
           .something()
           .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
@@ -62,7 +62,7 @@ object SWDiscoveryFilterTest extends TestSuite {
     }
 
     test("SW Filter isUri") {
-      insert_data.map(_ => {
+      insertData.map(_ => {
         SWDiscovery(config)
           .something()
           .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
@@ -79,7 +79,7 @@ object SWDiscoveryFilterTest extends TestSuite {
     }
 
     test("SW Filter isBlank") {
-      insert_data.map(_ => {
+      insertData.map(_ => {
         SWDiscovery(config)
           .something()
           .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
@@ -98,7 +98,7 @@ object SWDiscoveryFilterTest extends TestSuite {
     }
 
     test("SW Filter contains") {
-      insert_data.map(_ => {
+      insertData.map(_ => {
         SWDiscovery(config)
           .something("x")
           .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
@@ -114,7 +114,7 @@ object SWDiscoveryFilterTest extends TestSuite {
     }
 
     test("SW Filter not contains") {
-      insert_data.map(_ => {
+      insertData.map(_ => {
         SWDiscovery(config)
           .something()
           .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
@@ -129,7 +129,7 @@ object SWDiscoveryFilterTest extends TestSuite {
       }).flatten
     }
     test("SW Filter not contains 2") {
-      insert_data.map(_ => {
+      insertData.map(_ => {
         SWDiscovery(config)
           .something()
           .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
@@ -146,7 +146,7 @@ object SWDiscoveryFilterTest extends TestSuite {
     }
 
     test("SW Filter strStarts") {
-      insert_data.map(_ => {
+      insertData.map(_ => {
         SWDiscovery(config)
           .something()
           .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
@@ -163,7 +163,7 @@ object SWDiscoveryFilterTest extends TestSuite {
     }
 
     test("SW Filter strEnds") {
-      insert_data.map(_ => {
+      insertData.map(_ => {
         SWDiscovery(config)
           .something()
           .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
@@ -180,7 +180,7 @@ object SWDiscoveryFilterTest extends TestSuite {
     }
 
     test("SW Filter equal") {
-      insert_data.map(_ => {
+      insertData.map(_ => {
         SWDiscovery(config)
           .something()
           .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
@@ -197,7 +197,7 @@ object SWDiscoveryFilterTest extends TestSuite {
     }
 
     test("SW Filter notEqual") {
-      insert_data.map(_ => {
+      insertData.map(_ => {
         SWDiscovery(config)
           .something()
           .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
@@ -213,7 +213,7 @@ object SWDiscoveryFilterTest extends TestSuite {
     }
 
     test("SW Filter inf") {
-      insert_data.map(_ => {
+      insertData.map(_ => {
         SWDiscovery(config)
           .something()
           .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
@@ -229,7 +229,7 @@ object SWDiscoveryFilterTest extends TestSuite {
     }
 
     test("SW Filter inf 2") {
-      insert_data.map(_ => {
+      insertData.map(_ => {
         SWDiscovery(config)
           .something()
           .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
@@ -245,7 +245,7 @@ object SWDiscoveryFilterTest extends TestSuite {
     }
 
     test("SW Filter infEqual") {
-      insert_data.map(_ => {
+      insertData.map(_ => {
         SWDiscovery(config)
           .something()
           .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
@@ -261,7 +261,7 @@ object SWDiscoveryFilterTest extends TestSuite {
     }
 
     test("SW Filter Sup") {
-      insert_data.map(_ => {
+      insertData.map(_ => {
         SWDiscovery(config)
           .something()
           .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
@@ -277,7 +277,7 @@ object SWDiscoveryFilterTest extends TestSuite {
     }
 
     test("SW Filter SupEqual") {
-      insert_data.map(_ => {
+      insertData.map(_ => {
         SWDiscovery(config)
           .something()
           .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))

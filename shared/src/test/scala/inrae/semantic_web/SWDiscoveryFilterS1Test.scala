@@ -7,7 +7,7 @@ import utest._
 object SWDiscoveryFilterS1Test extends TestSuite {
   implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
 
-  val insert_data =
+  val insertData =
     DataTestFactory.insert_virtuoso1(
       """
       <http://aaSWFilterTest> a <http://www.w3.org/2002/07/owl#Thing> .
@@ -23,7 +23,7 @@ object SWDiscoveryFilterS1Test extends TestSuite {
 
   def tests = Tests {
     test("SW Filter contains") {
-      insert_data.map(_ => {
+      insertData.map(_ => {
         val trans = SWDiscovery(config)
           .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
           .something("instance")

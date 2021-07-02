@@ -21,7 +21,7 @@ object RequestDriverFactoryTest extends TestSuite {
     }
 
     test("url text/turtle should instantiate Rdf4jRequestDriver") {
-      val source : Source = Source(id="test",url=DataTestFactory.url_endpoint,mimetype="text/turtle")
+      val source : Source = Source(id="test",url=DataTestFactory.urlEndpoint,mimetype="text/turtle")
       Try(RequestDriverFactory.build(source)) match {
         case Success(_ : Rdf4jLocalRequestDriver) => assert(true)
         case Success(c) => assert(false)
