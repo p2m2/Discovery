@@ -106,7 +106,8 @@ object SparqlGenerator  {
       case node : CountAll           => "COUNT ("+ { if (node.distinct) "DISTINCT" else "" } + " * )"
       case _ : Distinct              => "DISTINCT "
       case _ : Reduced               => "REDUCED "
-      case node : Projection         => node.variables.mkString(" ")
+      case node : Projection if node.variables.length>0     => node.variables.mkString(" ")
+      case node : Projection if node.variables.length == 0  => ""
       case node : Limit              => "LIMIT " + node.value + " "
       case node : Offset             => "OFFSET " + node.value + " "
       case node : OrderByAsc         => node.list.mkString(" ")
