@@ -289,7 +289,7 @@ case class SWDiscovery(
    * @param offset : solution are generated after this offset
    * @return
    */
-  def select(lRef: Seq[String] = List(), limit : Int = 0, offset : Int = 0) : SWTransaction =
+  def select(lRef: Seq[String] = List("*"), limit : Int = 0, offset : Int = 0) : SWTransaction =
         transaction
         .limit(limit)
         .offset(offset)
@@ -300,7 +300,7 @@ case class SWDiscovery(
    * @param lRef : selected variables
    * @return iterable on select function
    */
-  def selectByPage(lRef: Seq[String] = List())  : Future[(Int,Seq[SWTransaction])] = {
+  def selectByPage(lRef: Seq[String] = List("*"))  : Future[(Int,Seq[SWTransaction])] = {
     SWDiscoveryHelper(this).count.map(
       nSolutions => {
         val nit : Int = nSolutions / config.conf.settings.pageSize
