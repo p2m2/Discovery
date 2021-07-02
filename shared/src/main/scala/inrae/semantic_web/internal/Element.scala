@@ -752,6 +752,7 @@ object ExpressionNode {
     RW.merge(
       FunctionStringNode.rw,
       FunctionNumericNode.rw,
+      FunctionUriNode.rw,
       BuiltInCallNode.rw
     )
 }
@@ -935,6 +936,23 @@ object Rand {
 
 case class Rand(override val idRef : String) extends FunctionNumericNode(idRef) {
   override def copy(children: Seq[Node]): Node = Rand(idRef)
+}
+/* ---------------------------------------------------------------------------------------------------  */
+
+sealed abstract class FunctionUriNode(override val idRef : String) extends PrimaryExpression(idRef)
+
+object FunctionUriNode {
+  implicit val rw: RW[FunctionUriNode] =  RW.merge(
+    Datatype.rw
+  )
+}
+
+object Datatype {
+  implicit val rw: RW[Datatype] = macroRW
+}
+
+case class Datatype(override val idRef : String) extends FunctionUriNode(idRef) {
+  override def copy(children: Seq[Node]): Node = Datatype(idRef)
 }
 
 /* ---------------------------------------------------------------------------------------------------  */

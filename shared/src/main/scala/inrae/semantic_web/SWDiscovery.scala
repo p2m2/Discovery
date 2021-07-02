@@ -85,6 +85,10 @@ case class SWDiscovery(
     def ceil() : SWDiscovery = manage(Ceil(getUniqueRef()))
     def floor() : SWDiscovery = manage(Floor(getUniqueRef()))
     def rand() : SWDiscovery = manage(Rand(getUniqueRef()))
+
+    /* uri fun */
+    def datatype() : SWDiscovery = manage(Datatype(getUniqueRef()))
+    def str() : SWDiscovery = manage(Str(QueryVariable(`var`),getUniqueRef()))
   }
 
   def bind(`var` : String) : BindIncrement = BindIncrement(`var`)

@@ -9,14 +9,14 @@ final case class DataTestFactoryException(private val message: String = "",
 
 object DataTestFactory  {
   implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
-  val url_endpoint = "http://localhost:8890/sparql"
+  val urlEndpoint = "http://localhost:8890/sparql"
 
   def graph1(classname: String) = "graph:test:discovery:virtuoso1:" + classname.replace("$","")
   def graph2(classname: String) = "graph:test:discovery:virtuoso2:" + classname.replace("$","")
 
   private def insert(data : String,
                      graph: String,
-                     url_endpoint : String=url_endpoint) : Future[Any] = {
+                     url_endpoint : String=urlEndpoint) : Future[Any] = {
     PostRequest.put(s"""
         PREFIX owl: <http://www.w3.org/2002/07/owl#>
         PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
@@ -36,24 +36,24 @@ object DataTestFactory  {
 
   def insert_virtuoso1(data : String,
                        classname: String,
-                       url_endpoint : String=url_endpoint) : Future[Any] = insert(data,graph1(classname),url_endpoint)
+                       url_endpoint : String=urlEndpoint) : Future[Any] = insert(data,graph1(classname),url_endpoint)
 
   def insert_virtuoso2(data : String,
                        classname: String,
-                       url_endpoint : String=url_endpoint): Future[Any]= insert(data,graph2(classname),url_endpoint)
+                       url_endpoint : String=urlEndpoint): Future[Any]= insert(data,graph2(classname),url_endpoint)
 
   private def delete(graph: String,
-                     url_endpoint : String=url_endpoint) : Future[Any] = {
+                     url_endpoint : String=urlEndpoint) : Future[Any] = {
     PostRequest.put(s"DROP SILENT GRAPH <${graph}>",url_endpoint)
       .map( _ => { println(s" ------------- ${graph} is deleted ! -------------------- ") })
 
   }
 
   def delete_virtuoso1(classname: String,
-                       url_endpoint : String=url_endpoint) = delete(graph1(classname),url_endpoint)
+                       url_endpoint : String=urlEndpoint) = delete(graph1(classname),url_endpoint)
 
   def delete_virtuoso2(classname: String,
-                       url_endpoint : String=url_endpoint) = delete(graph2(classname),url_endpoint)
+                       url_endpoint : String=urlEndpoint) = delete(graph2(classname),url_endpoint)
 
 
   def getConfigVirtuoso1() : StatementConfiguration = {
@@ -62,7 +62,7 @@ object DataTestFactory  {
         {
          "sources" : [{
            "id"       : "local",
-           "url"      : "${DataTestFactory.url_endpoint}"
+           "url"      : "${DataTestFactory.urlEndpoint}"
          }],
          "settings" : {
             "logLevel" : "off",
@@ -78,7 +78,7 @@ object DataTestFactory  {
         {
          "sources" : [{
            "id"       : "local",
-           "url"      : "${DataTestFactory.url_endpoint}"
+           "url"      : "${DataTestFactory.urlEndpoint}"
          }],
          "settings" : {
             "logLevel" : "off",

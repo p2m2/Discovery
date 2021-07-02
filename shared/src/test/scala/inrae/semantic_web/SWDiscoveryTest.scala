@@ -10,7 +10,7 @@ import scala.util.{Failure, Success, Try}
 
 object SWDiscoveryTest extends TestSuite {
 
-  val insert_data = DataTestFactory.insert_virtuoso1(
+  val insertData = DataTestFactory.insert_virtuoso1(
     """
       <http://aa> <http://bb> <http://cc> .
       <http://aa> <http://bb2> <http://cc2> .
@@ -38,7 +38,7 @@ object SWDiscoveryTest extends TestSuite {
     }
 
     test("No sources definition") {
-      insert_data.map(_ => {
+      insertData.map(_ => {
         val config: StatementConfiguration = StatementConfiguration.setConfigString(""" { "sources" : [] } """)
         SWDiscovery(config).something("h1")
           .select(List("h1"))
@@ -50,7 +50,7 @@ object SWDiscoveryTest extends TestSuite {
     }
 
     test("something") {
-      insert_data.map(_ => {
+      insertData.map(_ => {
         SWDiscovery(config).something("h1")
           .select(List("h1"))
           .commit()
@@ -60,7 +60,7 @@ object SWDiscoveryTest extends TestSuite {
     }
 
     test("isSubjectOf") {
-      insert_data.map(_ => {
+      insertData.map(_ => {
         SWDiscovery(config)
           .something("h1")
           .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
@@ -77,7 +77,7 @@ object SWDiscoveryTest extends TestSuite {
     }
 
     test("datatype 1") {
-      insert_data.map(_ => {
+      insertData.map(_ => {
         SWDiscovery(config).something("h1")
           .set(URI("http://aa3"))
           .datatype(URI("http://propDatatype"), "d")
@@ -93,7 +93,7 @@ object SWDiscoveryTest extends TestSuite {
     }
 
     test("datatype 2") {
-      insert_data.map(_ => {
+      insertData.map(_ => {
         SWDiscovery(config).something("h1")
           .set(URI("http://aa3"))
           .datatype(URI("http://propDatatype"), "d")
@@ -120,7 +120,7 @@ object SWDiscoveryTest extends TestSuite {
     }
 
     test("datatype 4") {
-      insert_data.map(_ => {
+      insertData.map(_ => {
         SWDiscovery(config).something("h1")
           .set(URI("http://aa3"))
           .datatype(URI("http://propDatatype"), "d")

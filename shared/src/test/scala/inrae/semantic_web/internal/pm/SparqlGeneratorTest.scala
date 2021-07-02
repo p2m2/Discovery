@@ -257,6 +257,15 @@ object SparqlGeneratorTest extends TestSuite {
       assert(v.trim().split(" ").toList == List("FILTER","(","!(?nothingSire>=0.5)",")"))
     }
 
+    test("sparqlNode Datatype") {
+      val v = SparqlGenerator.sparqlNode(Datatype(""),"nothingSire","nothingVar")
+      assert(v.trim().split(" ").toList == List("DATATYPE","(","?nothingSire",")"))
+    }
+
+    test("sparqlNode Str") {
+      val v = SparqlGenerator.sparqlNode(Str(URI("test"),""),"nothingSire","nothingVar")
+      assert(v.trim().split(" ").toList == List("STR","(","?nothingSire",")"))
+    }
 
     test("sparqlNode DatatypeNode") {
       Try(SparqlGenerator.sparqlNode(DatatypeNode("h", SubjectOf("1234", URI("something_property")),""),
@@ -272,13 +281,5 @@ object SparqlGeneratorTest extends TestSuite {
         case Failure(_) => assert(true)
       }
     }
-
-    test("sparqlNode OperatorNode") {
-      Try(SparqlGenerator.sparqlNode(Str(URI("test"),"v"), "nothingSire", "nothingVar")) match {
-        case Success(_) => assert(false)
-        case Failure(_) => assert(true)
-      }
-    }
-
   }
 }
