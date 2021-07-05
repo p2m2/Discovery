@@ -182,6 +182,7 @@ s"""{
    "description": "${(ThisBuild / description).value}",
    "version": "${(ThisBuild / version).value}",
    "main": "./js/target/scala-2.13/scalajs-bundler/main/discovery-opt.js",
+   "types" : "./ts/discovery.d.ts",
    "files": [
      "js/target/scala-2.13/scalajs-bundler/main/discovery-opt.js"
    ],
