@@ -113,12 +113,12 @@ case class SWDiscoveryJs(
   def setSerializedString(query : String): SWDiscoveryJs = SWDiscoveryJs(config,sw.setSerializedString(query))
 
   @JSExport
-  def browse[A](visitor : js.Function2[Dynamic, Integer,A] ) : Seq[A] = {
+  def browse[A](visitor : js.Function2[Dynamic, Integer,A] ) : js.Array[A] = {
     import upickle.default.write
     val visitor2 : (Node, Integer) => A = (n, p) => {
       visitor(JSON.parse(write(n)),p)
     }
-    sw.browse(visitor2)
+    sw.browse(visitor2).toJSArray
   }
 
   @JSExport

@@ -40,12 +40,13 @@ describe('SWDiscovery', () => {
                       .something("h1")
                        .isObjectOf("http://test11")
                          .browse( ( n: any, p : Number) => {
-                          console.log("NODE=>",n)
-                          console.log(n.idRef) 
-                          console.log(n.$type) 
-                          console.log("PROF=>"+p) 
+                          return n.$type + " : " + p
                          })
-    console.log(results)
+    expect(results).toStrictEqual([
+      'inrae.semantic_web.node.Root : 0',
+      'inrae.semantic_web.node.Something : 1',
+      'inrae.semantic_web.node.ObjectOf : 2'
+    ])
 })
     
 });
