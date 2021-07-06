@@ -1,6 +1,6 @@
-package inrae.semantic_web.internal.pm
+package inrae.semantic_web.node.pm
 
-import inrae.semantic_web.internal._
+import inrae.semantic_web.node._
 
 /**
  *

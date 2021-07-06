@@ -1,4 +1,4 @@
-package inrae.semantic_web.internal
+package inrae.semantic_web.node
 
 import inrae.semantic_web.rdf._
 import utest._

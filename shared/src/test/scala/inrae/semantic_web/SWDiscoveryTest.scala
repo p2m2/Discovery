@@ -33,10 +33,6 @@ object SWDiscoveryTest extends TestSuite {
 
 
   def tests = Tests {
-    test("help") {
-      SWDiscovery(config).something("h1").usage.isObjectOf(URI("something_uri"))
-    }
-
     test("No sources definition") {
       insertData.map(_ => {
         val config: StatementConfiguration = StatementConfiguration.setConfigString(""" { "sources" : [] } """)

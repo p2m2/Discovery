@@ -24,13 +24,8 @@ describe('SWDiscovery', () => {
   afterAll(() => {});
   
   test('something', async () => {
-      
       const results = await SWDiscovery(localConf).something("h1").select("h1").commit().raw()
       expect(results.head.vars).toStrictEqual(["h1"])
-  })
-
-  test('usage', () => {
-    SWDiscovery(localConf).usage()
   })
 
   test('getSerializedString/setSerializedString', async () => {
@@ -39,10 +34,18 @@ describe('SWDiscovery', () => {
     expect(results.head.vars).toStrictEqual(["h1"])
   })
 
-  test('#101', async () => {
-    const str : string = SWDiscovery(localConf).something("hello").getSerializedString()
-    const t = SWDiscovery(localConf).setSerializedString(str)
-    t.console()
-  })
+
+  test('browse', () => {
+    const results = SWDiscovery(localConf)
+                      .something("h1")
+                       .isObjectOf("http://test11")
+                         .browse( ( n: any, p : Number) => {
+                          console.log("NODE=>",n)
+                          console.log(n.idRef) 
+                          console.log(n.$type) 
+                          console.log("PROF=>"+p) 
+                         })
+    console.log(results)
+})
     
 });

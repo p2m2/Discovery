@@ -1,8 +1,8 @@
-package inrae.semantic_web.internal.pm
+package inrae.semantic_web.node.pm
 
 import inrae.data.DataTestFactory
 import inrae.semantic_web.{SWDiscovery, SWTransaction}
-import inrae.semantic_web.internal.Root
+import inrae.semantic_web.node.Root
 import inrae.semantic_web.rdf.{Literal, QueryVariable, URI}
 import utest.{TestSuite, Tests, test}
 
