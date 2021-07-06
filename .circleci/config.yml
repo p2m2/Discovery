@@ -207,8 +207,16 @@ jobs:
         - setup_remote_docker
         - node/install
         - run:
-            name: Test JS
+            name: Test ScalaJs/JavaScript
             command: sbt discoveryJS/test
+        - run:
+            name: Test TypeScript
+            command: |
+              sbt "discoveryJS / Compile / fastOptJS / webpack"
+              sbt npmPackageJson
+              npm i
+              npm test
+
         #- run:
         #    name: Set Npm token
         #    command: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/repo/.npmrc

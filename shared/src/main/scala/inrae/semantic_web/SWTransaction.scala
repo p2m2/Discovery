@@ -34,6 +34,7 @@ case class SWTransaction(sw : SWDiscovery = SWDiscovery())
   private var _progressionCallBack = Seq[Double => Unit]()
 
   def progression(  callBack  : Double => Unit  ): Unit = {
+    println(callBack)
     _progressionCallBack = _progressionCallBack :+ callBack
   }
 
