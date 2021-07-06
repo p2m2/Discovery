@@ -17,6 +17,11 @@ cp ./js/target/scala-2.13/scalajs-bundler/main/discovery-fastopt-bundle.js  ./di
 cp ./js/target/scala-2.13/scalajs-bundler/main/discovery-fastopt-bundle.js.map ./dist/discovery-web-dev.js.map
 cp ./js/target/scala-2.13/scalajs-bundler/main/discovery-opt-bundle.js ./dist/discovery-web.js
 
+# typescript test
+sbt npmPackageJson
+npm i
+npm test -- --silent && echo "typescript test ok" || exit 1
+
 sed -i "s#discovery-fastopt-bundle#discovery-web-dev#g" dist/*dev*
 sed -i "s#$(pwd)#com/github/p2m2#g" dist/*
 

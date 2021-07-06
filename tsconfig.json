@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "outDir": "./dist/",
+    "outDir": "./ts/dist/",
     "noImplicitAny": true,
     "module": "es6",
     "target": "es5",
@@ -9,12 +9,5 @@
     "sourceMap": false,
     "declaration": true,
     "esModuleInterop" : true
-  },
-  "include": [
-    "./testsss/**/*.ts"
-  ],
-  "files": [
-    "./discovery.d.ts",
-    "../js/target/scala-2.13/scalajs-bundler/main/discovery-opt.js"
-    ]
+  }
 }

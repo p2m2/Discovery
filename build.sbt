@@ -50,7 +50,7 @@ ThisBuild / organizationName := "p2m2"
 ThisBuild / organizationHomepage := Some(url("https://www6.inrae.fr/p2m2"))
 ThisBuild / licenses := Seq("MIT License" -> url("http://www.opensource.org/licenses/mit-license.php"))
 ThisBuild / homepage := Some(url("https://github.com/p2m2/discovery"))
-ThisBuild / description := "Ease Sparql request on the network MetaboHUB/Semantics Databases."
+ThisBuild / description := "Ease Sparql request to reach semantic database."
 ThisBuild / scmInfo := Some(
     ScmInfo(
       url("https://github.com/p2m2/discovery"),
@@ -126,7 +126,8 @@ lazy val discovery=crossProject(JSPlatform, JVMPlatform).in(file("."))
       "axios" -> npm_axios_version,
       "qs" -> npm_qs_version,
       "showdown" -> npm_showdown_version,
-      "@comunica/utils-datasource" -> npm_comunica_version_datasource
+      "@comunica/utils-datasource" -> npm_comunica_version_datasource,
+      "@types/sax" -> "1.2.1"
     ),
 
     Compile / fastOptJS / scalaJSLinkerConfig ~= {
@@ -174,18 +175,35 @@ npmPackageJson := {
     case (x,idx) if ( (idx > indexStartDependencies) && (idx < indexEndDependencies) ) => x
   }
 
-
-  val file =  reflect.io.File("./package.json").writeAll(
+  reflect.io.File("./package.json").writeAll(
     Predef.augmentString(
 s"""{
    "name": "@${(ThisBuild / organizationName).value}/${(ThisBuild / name).value}",
    "description": "${(ThisBuild / description).value}",
    "version": "${(ThisBuild / version).value}",
    "main": "./js/target/scala-2.13/scalajs-bundler/main/discovery-opt.js",
-   "types" : "./ts/discovery.d.ts",
    "files": [
      "js/target/scala-2.13/scalajs-bundler/main/discovery-opt.js"
    ],
+   "scripts": {
+    "test": "jest --detectOpenHandles"
+    },
+  "devDependencies": {
+    "@types/jest": "^26.0.23",
+    "jest": "^27.0.6",
+    "ts-jest": "^27.0.3"
+  },
+  "jest": {
+    "transform": {
+      ".(ts|tsx)": "ts-jest"
+    },
+    "testRegex": "(ts/__tests__/.*|\\\\.(test|spec))\\\\.(ts|tsx|js)$$",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js"
+    ]
+   },
    "dependencies": {
 ${dependencies.mkString("\n")}
    },

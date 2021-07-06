@@ -1,5 +1,6 @@
 package inrae.semantic_web
 
+import scala.scalajs.js
 import scala.scalajs.js.JSConverters.JSRichFutureNonThenable
 import scala.scalajs.js.Promise
 import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
@@ -9,10 +10,12 @@ case class SWTransactionJs(transaction : SWTransaction) {
   implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
 
   @JSExport
-  def progression(  callBack  : Double => Unit  ): Unit = transaction.progression(callBack)
+  def progression(  callBack  : js.Function1[Double,Unit]  ): Unit = {
+    transaction.progression(callBack)
+  }
 
   @JSExport
-  def requestEvent(callBack  : String => Unit  ): Unit = transaction.requestEvent(callBack)
+  def requestEvent(callBack  : js.Function1[String,Unit]  ): Unit = transaction.requestEvent(callBack)
 
   @JSExport
   def abort(): Unit = transaction.abort()

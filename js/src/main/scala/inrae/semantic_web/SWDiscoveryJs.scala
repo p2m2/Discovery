@@ -109,7 +109,7 @@ case class SWDiscoveryJs(
   def sparql() : String = sw.sparql
 
   @JSExport
-  def getSerializedString: String = sw.getSerializedString
+  def getSerializedString(): String = sw.getSerializedString
 
   @JSExport
   def setSerializedString(query : String): SWDiscoveryJs = SWDiscoveryJs(config,sw.setSerializedString(query))
