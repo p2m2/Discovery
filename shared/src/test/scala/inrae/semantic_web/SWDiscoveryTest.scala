@@ -194,5 +194,42 @@ object SWDiscoveryTest extends TestSuite {
       assert( listBrowse.contains("h2") )
     }
 
+    test("sparql get") {
+       assert( SWDiscovery(config)
+          .something("h1")
+          .isSubjectOf("http://test","h2")
+          .sparql_get.length>0)
+    }
+
+    test("sparql curl") {
+      assert( SWDiscovery(config)
+        .something("h1")
+        .isSubjectOf("http://test","h2")
+        .sparql_curl.length>0)
+    }
+
+    test("prefix") {
+      assert(
+        SWDiscovery(config)
+          .prefix("some","http://something")
+          .getPrefix("some") == IRI("http://something"))
+    }
+    test("prefix 2") {
+      println(SWDiscovery(config)
+        .prefix("some","http://something")
+        .getPrefixes())
+      assert(
+        SWDiscovery(config)
+          .prefix("some","http://something")
+          .getPrefixes().contains("some") )
+    }
+    test("prefix 3") {
+      assert(
+        SWDiscovery(config)
+          .prefixes(Map("some"->"http://something"))
+          .getPrefixes().contains("some") )
+    }
+
+
   }
 }

@@ -85,6 +85,10 @@ object SparqlGeneratorTest extends TestSuite {
 
     test("sparqlNode Something") {
       val v = SparqlGenerator.sparqlNode(Something("1234"),"nothingSire","nothingVar")
+      assert(v.toLowerCase() != "")
+    }
+    test("sparqlNode Something") {
+      val v = SparqlGenerator.sparqlNode(Something("1234", List(SubjectOf("test",URI("http://test")))),"nothingSire","nothingVar")
       assert(v.toLowerCase() == "")
     }
 

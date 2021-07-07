@@ -65,7 +65,8 @@ case class SWTransaction(sw : SWDiscovery = SWDiscovery())
   }
 
 
-  def process_datatypes(qr : QueryResult,
+  def process_datatypes(root: Root,
+                        qr : QueryResult,
                         datatypeNode : DatatypeNode,
                         lUris : Seq[SparqlDefinition]) = {
     debug(" -- process_datatypes --")
@@ -76,6 +77,7 @@ case class SWTransaction(sw : SWDiscovery = SWDiscovery())
         trace(" datatypes:" + lSubUris.toString)
         /* request using api */
         SWDiscovery(sw.config)
+          .prefixes(root.getPrefixes())
           .something("val_uri")
           .setList(lSubUris.flatMap(
             _ match {
@@ -146,7 +148,7 @@ case class SWTransaction(sw : SWDiscovery = SWDiscovery())
                         List()
                       }
                     }
-                  Future.sequence(process_datatypes(qr, datatypeNode, lUris))
+                  Future.sequence(process_datatypes(sw.rootNode,qr, datatypeNode, lUris))
                 }
                 case None => {
                   Future {}

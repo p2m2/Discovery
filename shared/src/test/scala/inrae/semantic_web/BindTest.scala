@@ -83,6 +83,22 @@ object BindTest extends TestSuite {
       }).flatten
     }
 
+    test("bind abs with something linked") {
+      insertData.map(_ => {
+        SWDiscovery(config)
+          .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
+          .something()
+          .set(Literal("-5.5","http://www.w3.org/2001/XMLSchema#decimal"))
+          .bind("new_value").abs()
+          .isObjectOf(URI("http://test"))
+          .select(Seq("new_value"))
+          .commit()
+          .raw.map(r => {
+          assert(r("results")("bindings").arr.length == 0)
+        })
+      }).flatten
+    }
+
     test("bind round") {
       insertData.map(_ => {
         SWDiscovery(config)

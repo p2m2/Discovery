@@ -41,7 +41,7 @@ object SparqlGenerator  {
         (sparqlNode(proj,"","")
           + proj.children.map( child => body( child, "")).mkString(""))
       }
-      ).getOrElse("")
+      ).getOrElse("*")
     } + "\n" +
       from(root.defaultGraph) +"\n"+
       fromNamed(root.namedGraph) +"\n"+
@@ -149,9 +149,12 @@ object SparqlGenerator  {
           case _ => throw new Exception("SparqlGenerator::sparqlNode . [Devel error] Node undefined ["+n.toString+"]")
         }
       } + " )\n"
-      case root : Root                   => { "" }
-      case _ : Something              => ""
-      case _                               => throw new Error("Not implemented yet :"+n.getClass.getName)
+      case root : Root                            => { "" }
+      case s : Something if s.children.length>0   => ""
+      case s : Something if s.children.length==0  => println(varIdSire); "{ " + "{ " + "?"+ variableName + " [] []" +
+                                                            " } UNION { [] " + "?"+ variableName + " [] " + "} UNION { "+
+                                                             "[] [] ?"+ variableName  + " }" + " }"
+      case _                                      => throw new Error("Not implemented yet :"+n.getClass.getName)
     }
   }
 
