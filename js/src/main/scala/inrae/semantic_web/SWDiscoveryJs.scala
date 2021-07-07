@@ -51,9 +51,6 @@ case class SWDiscoveryJs(
   def focus(ref : String) : SWDiscoveryJs = SWDiscoveryJs(config,sw.focus(ref))
 
   @JSExport
-  def focusManagement(n : Node) : SWDiscoveryJs = SWDiscoveryJs(config,sw.focusManagement(n))
-
-  @JSExport
   def prefix(short : String, long : Any ) : SWDiscoveryJs = SWDiscoveryJs(config,sw.prefix(short,toIRI(long)))
 
   @JSExport
@@ -125,9 +122,8 @@ case class SWDiscoveryJs(
   def select(lRef: String*): SWTransactionJs = SWTransactionJs(sw.select(lRef))
 
   @JSExport
-  def select(lRef: Seq[String], limit : Int = 0, offset : Int = 0): SWTransactionJs =
-    SWTransactionJs(sw.select(lRef,limit,offset))
-
+  def select(lRef: js.Array[String], limit : Int = 0, offset : Int = 0): SWTransactionJs =
+    SWTransactionJs(sw.select(lRef.toSeq,limit,offset))
 
   @JSExport
   def selectByPage(lRef: String*)  : js.Promise[(Int,js.Array[SWTransactionJs])] = {
@@ -137,7 +133,7 @@ case class SWDiscoveryJs(
         (nit+1,(0 to nit).map( p =>{
           val limit = config.conf.settings.pageSize
           val offset = p*config.conf.settings.pageSize
-          select(lRef,limit,offset)
+          select(lRef.toJSArray,limit,offset)
         }).toJSArray)
       }).toJSPromise
   }
