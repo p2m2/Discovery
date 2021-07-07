@@ -11,7 +11,7 @@ import scala.util.{Failure, Success, Try}
 
 object SWDiscoveryTest extends TestSuite {
 
-  val insertData = DataTestFactory.insert_virtuoso1(
+  val insertData = DataTestFactory.insertVirtuoso1(
     """
       <http://aa> <http://bb> <http://cc> .
       <http://aa> <http://bb2> <http://cc2> .
@@ -33,7 +33,7 @@ object SWDiscoveryTest extends TestSuite {
   val config: StatementConfiguration = DataTestFactory.getConfigVirtuoso1()
 
   override def utestAfterAll(): Unit = {
-    DataTestFactory.delete_virtuoso1(this.getClass.getSimpleName)
+    DataTestFactory.deleteVirtuoso1(this.getClass.getSimpleName)
   }
 
   def startRequest =

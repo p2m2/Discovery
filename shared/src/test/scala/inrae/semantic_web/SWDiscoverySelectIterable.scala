@@ -26,7 +26,7 @@ object SWDiscoverySelectIterable extends TestSuite {
 
       """.stripMargin
 
-  val insertData = DataTestFactory.insert_virtuoso1(data, this.getClass.getSimpleName)
+  val insertData = DataTestFactory.insertVirtuoso1(data, this.getClass.getSimpleName)
 
   val nbValues = data.split(" ").filter( _ == "<http://aa>").length
 

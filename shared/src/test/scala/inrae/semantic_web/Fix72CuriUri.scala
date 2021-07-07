@@ -7,7 +7,7 @@ import utest.{TestSuite, Tests, test}
 import scala.concurrent.ExecutionContext.Implicits.global
 
 object Fix72CuriUri extends TestSuite {
-  val insert_data = DataTestFactory.insert_virtuoso1(
+  val insert_data = DataTestFactory.insertVirtuoso1(
     """
       <http://aa> <http://bb> <http://cc> .
       <http://aa> <http://test#dd> "test" .
@@ -16,7 +16,7 @@ object Fix72CuriUri extends TestSuite {
   val config: StatementConfiguration = DataTestFactory.getConfigVirtuoso1()
 
   override def utestAfterAll(): Unit = {
-    DataTestFactory.delete_virtuoso1(this.getClass.getSimpleName)
+    DataTestFactory.deleteVirtuoso1(this.getClass.getSimpleName)
   }
 
   def tests = Tests {

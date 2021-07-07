@@ -7,7 +7,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 object SWDiscoveryHelperTest  extends TestSuite  {
 
-  val insertData = DataTestFactory.insert_virtuoso1(
+  val insertData = DataTestFactory.insertVirtuoso1(
     """
       <http://aa> <http://bb> <http://cc> .
       <http://aa> <http://bb2> <http://cc2> .

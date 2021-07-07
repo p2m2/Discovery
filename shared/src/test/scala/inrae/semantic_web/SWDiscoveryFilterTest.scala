@@ -10,7 +10,7 @@ import scala.language.postfixOps
 object SWDiscoveryFilterTest extends TestSuite {
 
 
-  val insertData = DataTestFactory.insert_virtuoso1(
+  val insertData = DataTestFactory.insertVirtuoso1(
     """
       <http://aaSWFilterTest> <http://propUri> <http://cc> .
       <http://aaSWFilterTest> <http://propLiteral> "test" .

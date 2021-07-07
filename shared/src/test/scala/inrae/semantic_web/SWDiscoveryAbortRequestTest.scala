@@ -9,7 +9,7 @@ import scala.language.postfixOps
 
 object SWDiscoveryAbortRequestTest extends TestSuite {
 
-  val insertData = DataTestFactory.insert_virtuoso1(
+  val insertData = DataTestFactory.insertVirtuoso1(
     """
       <aaSWAbortRequestTest> <bb> <cc> .
       <aa> <datatype> "testdatatype" .

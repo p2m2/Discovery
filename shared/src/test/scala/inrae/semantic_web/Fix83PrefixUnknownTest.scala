@@ -7,7 +7,7 @@ import utest.{TestSuite, Tests, assert, test}
 import scala.concurrent.ExecutionContext.Implicits.global
 
 object Fix83PrefixUnknownTest extends TestSuite {
-  val insert_data = DataTestFactory.insert_virtuoso1(
+  val insert_data = DataTestFactory.insertVirtuoso1(
     """
       <http://aa> <http://bb> 2 .
       <http://aa> <http://bb> 3 .

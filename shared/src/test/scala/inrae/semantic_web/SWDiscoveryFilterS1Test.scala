@@ -8,7 +8,7 @@ object SWDiscoveryFilterS1Test extends TestSuite {
   implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
 
   val insertData =
-    DataTestFactory.insert_virtuoso1(
+    DataTestFactory.insertVirtuoso1(
       """
       <http://aaSWFilterTest> a <http://www.w3.org/2002/07/owl#Thing> .
       <http://aaSWFilterTest> <http://some> "test" .

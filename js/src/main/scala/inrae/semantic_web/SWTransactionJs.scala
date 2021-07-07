@@ -10,12 +10,11 @@ case class SWTransactionJs(transaction : SWTransaction) {
   implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
 
   @JSExport
-  def progression(  callBack  : js.Function1[Double,Unit]  ): Unit = {
-    transaction.progression(callBack)
-  }
+  def progression(  callBack  : js.Function1[Double,Unit]  ): SWTransactionJs = SWTransactionJs(transaction.progression(callBack))
+
 
   @JSExport
-  def requestEvent(callBack  : js.Function1[String,Unit]  ): Unit = transaction.requestEvent(callBack)
+  def requestEvent(callBack  : js.Function1[String,Unit]  ): SWTransactionJs = SWTransactionJs(transaction.requestEvent(callBack))
 
   @JSExport
   def abort(): Unit = transaction.abort()

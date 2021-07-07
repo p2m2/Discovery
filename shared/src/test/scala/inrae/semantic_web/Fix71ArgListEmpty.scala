@@ -7,7 +7,7 @@ import utest.{TestSuite, Tests, test}
 import scala.concurrent.ExecutionContext.Implicits.global
 
 object Fix71ArgListEmpty extends TestSuite {
-  val insert_data = DataTestFactory.insert_virtuoso1(
+  val insert_data = DataTestFactory.insertVirtuoso1(
     """
       <http://aa> <http://bb> 2 .
       <http://aa> <http://bb> 3 .

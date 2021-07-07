@@ -34,13 +34,13 @@ object DataTestFactory  {
      // .recover( _ =>  { throw new Error(s"Can not load graph :${graph}") } )
   }
 
-  def insert_virtuoso1(data : String,
-                       classname: String,
-                       url_endpoint : String=urlEndpoint) : Future[Any] = insert(data,graph1(classname),url_endpoint)
+  def insertVirtuoso1(data : String,
+                      classname: String,
+                      url_endpoint : String=urlEndpoint) : Future[Any] = insert(data,graph1(classname),url_endpoint)
 
-  def insert_virtuoso2(data : String,
-                       classname: String,
-                       url_endpoint : String=urlEndpoint): Future[Any]= insert(data,graph2(classname),url_endpoint)
+  def insertVirtuoso2(data : String,
+                      classname: String,
+                      url_endpoint : String=urlEndpoint): Future[Any]= insert(data,graph2(classname),url_endpoint)
 
   private def delete(graph: String,
                      url_endpoint : String=urlEndpoint) : Future[Any] = {
@@ -49,11 +49,11 @@ object DataTestFactory  {
 
   }
 
-  def delete_virtuoso1(classname: String,
-                       url_endpoint : String=urlEndpoint) = delete(graph1(classname),url_endpoint)
+  def deleteVirtuoso1(classname: String,
+                      url_endpoint : String=urlEndpoint) = delete(graph1(classname),url_endpoint)
 
-  def delete_virtuoso2(classname: String,
-                       url_endpoint : String=urlEndpoint) = delete(graph2(classname),url_endpoint)
+  def deleteVirtuoso2(classname: String,
+                      url_endpoint : String=urlEndpoint) = delete(graph2(classname),url_endpoint)
 
 
   def getConfigVirtuoso1() : StatementConfiguration = {
