@@ -29,16 +29,13 @@ case class SWTransactionJs(transaction : SWTransaction) {
   }
 
   @JSExport
-  def projection( lRef: Seq[String]=Seq() )  : SWTransactionJs = SWTransactionJs(transaction.projection(lRef))
-
-  @JSExport
   def aggregate(`var` : String) : ProjectionExpressionIncrementJs = ProjectionExpressionIncrementJs(this,`var`)
 
   @JSExport
-  def distinct  : SWTransactionJs = SWTransactionJs(transaction.distinct)
+  def distinct()  : SWTransactionJs = SWTransactionJs(transaction.distinct)
 
   @JSExport
-  def reduced  : SWTransactionJs = SWTransactionJs(transaction.reduced)
+  def reduced()  : SWTransactionJs = SWTransactionJs(transaction.reduced)
 
   @JSExport
   def limit( value : Int )  : SWTransactionJs = SWTransactionJs(transaction.limit(value))
@@ -50,7 +47,7 @@ case class SWTransactionJs(transaction : SWTransaction) {
   def orderByAsc( ref: String )  : SWTransactionJs = SWTransactionJs(transaction.orderByAsc(ref))
 
   @JSExport
-  def orderByAsc( lRef: Seq[String] )  : SWTransactionJs = SWTransactionJs(transaction.orderByAsc(lRef))
+  def orderByAsc( lRef: js.Array[String] )  : SWTransactionJs = SWTransactionJs(transaction.orderByAsc(lRef.toSeq))
 
   @JSExport
   def orderByDesc( ref: String ) : SWTransactionJs = SWTransactionJs(transaction.orderByDesc(ref))
@@ -59,7 +56,7 @@ case class SWTransactionJs(transaction : SWTransaction) {
   def orderByDesc( lRef: Seq[String] )  : SWTransactionJs = SWTransactionJs(transaction.orderByDesc(lRef))
 
   @JSExport
-  def getSerializedString: String = transaction.getSerializedString
+  def getSerializedString(): String = transaction.getSerializedString
 
   @JSExport
   def setSerializedString(transaction_string : String): SWTransactionJs =

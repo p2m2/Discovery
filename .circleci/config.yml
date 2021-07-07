@@ -189,7 +189,7 @@ jobs:
       - run:
           name: Test JVM env and Coverage
           command: |
-            cat /dev/null | sbt clean coverage discoveryJVM/Test/test discoveryJS/Test/test discoveryJVM/coverageReport discoveryJS/coverageReport
+            cat /dev/null | sbt clean coverage discoveryJVM/Test/test discoveryJVM/coverageReport
             bash <(curl -s https://codecov.io/bash)
             bash <(curl -Ls https://coverage.codacy.com/get.sh) report
 
