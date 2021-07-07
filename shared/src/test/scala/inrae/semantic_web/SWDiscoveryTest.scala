@@ -32,12 +32,21 @@ object SWDiscoveryTest extends TestSuite {
 
   val config: StatementConfiguration = DataTestFactory.getConfigVirtuoso1()
 
+  override def utestAfterAll(): Unit = {
+    DataTestFactory.delete_virtuoso1(this.getClass.getSimpleName)
+  }
+
+  def startRequest =
+    SWDiscovery(config)
+      .graph(DataTestFactory.graph1(this.getClass.getSimpleName))
+      .something("h1")
 
   def tests = Tests {
     test("No sources definition") {
       insertData.map(_ => {
         val config: StatementConfiguration = StatementConfiguration.setConfigString(""" { "sources" : [] } """)
-        SWDiscovery(config).something("h1")
+        SWDiscovery(config)
+          .something("h1")
           .select(List("h1"))
           .commit()
           .raw
@@ -48,7 +57,7 @@ object SWDiscoveryTest extends TestSuite {
 
     test("something") {
       insertData.map(_ => {
-        SWDiscovery(config).something("h1")
+        startRequest
           .select(List("h1"))
           .commit()
           .raw
@@ -58,9 +67,7 @@ object SWDiscoveryTest extends TestSuite {
 
     test("isSubjectOf") {
       insertData.map(_ => {
-        SWDiscovery(config)
-          .something("h1")
-          .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
+        startRequest
           .set(URI("http://aa"))
           .isSubjectOf(URI("http://bb"), "var")
           .select(List("var"))
@@ -75,7 +82,7 @@ object SWDiscoveryTest extends TestSuite {
 
     test("datatype 1") {
       insertData.map(_ => {
-        SWDiscovery(config).something("h1")
+        startRequest
           .set(URI("http://aa3"))
           .datatype(URI("http://propDatatype"), "d")
           .select(List("h1","d"))
@@ -91,7 +98,7 @@ object SWDiscoveryTest extends TestSuite {
 
     test("datatype 2") {
       insertData.map(_ => {
-        SWDiscovery(config).something("h1")
+        startRequest
           .set(URI("http://aa3"))
           .datatype(URI("http://propDatatype"), "d")
           .select(List("d","h1"))
@@ -106,7 +113,8 @@ object SWDiscoveryTest extends TestSuite {
     }
 
     test("datatype 3") {
-        Try(SWDiscovery(config).something("h1")
+        Try(
+          startRequest
           .set(URI("http://aa3"))
           .datatype(URI("http://propDatatype"), "d")
           .select(List("d"))
@@ -118,7 +126,7 @@ object SWDiscoveryTest extends TestSuite {
 
     test("datatype 4") {
       insertData.map(_ => {
-        SWDiscovery(config).something("h1")
+        startRequest
           .set(URI("http://aa3"))
           .datatype(URI("http://propDatatype"), "d")
           .select(List("h1"))
@@ -134,9 +142,7 @@ object SWDiscoveryTest extends TestSuite {
 
 
     test("bad focus") {
-      Try(SWDiscovery(config)
-        .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
-        .something("h1") //http://rdf.ebi.ac.uk/terms/chembl#BioComponent
+      Try(startRequest
         .focus("h2")) match {
         case Success(_) => assert(false)
         case Failure(_) => assert(true)
@@ -144,9 +150,7 @@ object SWDiscoveryTest extends TestSuite {
     }
 
     test("use named graph") {
-      Try( SWDiscovery(config)
-          .namedGraph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
-          .something("h1") //http://rdf.ebi.ac.uk/terms/chembl#BioComponent
+      Try( startRequest
           .isSubjectOf(URI("http://bb2"))) match {
         case Success(_) => assert(true)
         case Failure(_) => assert(false)
@@ -154,9 +158,7 @@ object SWDiscoveryTest extends TestSuite {
     }
 
     test("test console") {
-      Try( SWDiscovery(config)
-        .namedGraph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
-        .something("h1") //http://rdf.ebi.ac.uk/terms/chembl#BioComponent
+      Try( startRequest
         .isSubjectOf(URI("http://bb2"))
         .console) match {
         case Success(_) => assert(true)
@@ -165,29 +167,28 @@ object SWDiscoveryTest extends TestSuite {
     }
 
     test("refExist") {
-      Try(SWDiscovery(config).something("h1").refExist("h1")) match {
+      Try(startRequest.refExist("h1")) match {
         case Success(_) => assert(true)
         case Failure(_) => assert(false)
       }
     }
 
     test("refExist2") {
-      Try(SWDiscovery(config).something("h2").refExist("h1")) match {
+      Try(startRequest.refExist("h2")) match {
         case Success(_) => assert(false)
         case Failure(_) => assert(true)
       }
     }
 
     test("focus root") {
-      val sw = SWDiscovery(config)
+      val sw = startRequest.remove("h1")
       assert(sw.rootNode.idRef == sw.focus())
       assert(sw.something("h").focus() == "h")
     }
 
     test("browse") {
       val listBrowse : Seq[String] =
-        SWDiscovery(config)
-        .something("h1")
+        startRequest
         .isSubjectOf("http://test","h2")
          .browse( (n : Node, p:Integer) => { n.idRef} )
       assert( listBrowse.contains("h1") )
@@ -195,37 +196,33 @@ object SWDiscoveryTest extends TestSuite {
     }
 
     test("sparql get") {
-       assert( SWDiscovery(config)
-          .something("h1")
+       assert( startRequest
           .isSubjectOf("http://test","h2")
           .sparql_get.length>0)
     }
 
     test("sparql curl") {
-      assert( SWDiscovery(config)
-        .something("h1")
+      assert( startRequest
         .isSubjectOf("http://test","h2")
         .sparql_curl.length>0)
     }
 
     test("prefix") {
       assert(
-        SWDiscovery(config)
+        startRequest
           .prefix("some","http://something")
           .getPrefix("some") == IRI("http://something"))
     }
+
     test("prefix 2") {
-      println(SWDiscovery(config)
-        .prefix("some","http://something")
-        .getPrefixes())
       assert(
-        SWDiscovery(config)
+        startRequest
           .prefix("some","http://something")
           .getPrefixes().contains("some") )
     }
     test("prefix 3") {
       assert(
-        SWDiscovery(config)
+        startRequest
           .prefixes(Map("some"->"http://something"))
           .getPrefixes().contains("some") )
     }

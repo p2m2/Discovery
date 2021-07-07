@@ -9,9 +9,7 @@ import wvlet.log.Logger.rootLogger._
 import java.util.UUID.randomUUID
 import scala.concurrent.Future
 import upickle.default.{macroRW, read, write, ReadWriter => RW}
-
-import java.net.URLEncoder
-import java.util.Base64
+import io.lemonlabs.uri.{QueryString, Url}
 
 final case class SWDiscoveryException(private val message: String = "",
                                       private val cause: Throwable = None.orNull) extends Exception(message,cause)
@@ -266,7 +264,10 @@ case class SWDiscovery(
     (config.sources().length match {
       case 1 => config.sources()(0).url
       case _ => ""
-    }) + "?format=json" + "&query=" + (sparql,"UTF-8")
+    }) + Url(path="", query=QueryString.fromPairs(
+      "query"-> sparql,
+      "format"->"json")
+    )
 
   def sparql_curl : String =
     "curl -H \"Accept: application/json\" -G " +  (config.sources().length match {
