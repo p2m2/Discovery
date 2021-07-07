@@ -23,30 +23,30 @@ describe('SWDiscovery', () => {
   
   afterAll(() => {});
   
-  test('something', async () => {
-      const results = await SWDiscovery(localConf).something("h1").select("h1").commit().raw()
-      expect(results.head.vars).toStrictEqual(["h1"])
+  test("something", async () => {
+      const results = await SWDiscovery(localConf).something("h1").select("h1").commit().raw();
+      expect(results.head.vars).toStrictEqual(["h1"]);
   })
 
-  test('getSerializedString/setSerializedString', async () => {
-    const s : string = SWDiscovery(localConf).something("h1").getSerializedString()
-    const results = await SWDiscovery().setSerializedString(s).select("h1").commit().raw()
-    expect(results.head.vars).toStrictEqual(["h1"])
+  test("getSerializedString/setSerializedString", async () => {
+    const s : string = SWDiscovery(localConf).something("h1").getSerializedString();
+    const results = await SWDiscovery().setSerializedString(s).select("h1").commit().raw();
+    expect(results.head.vars).toStrictEqual(["h1"]);
   })
 
 
-  test('browse', () => {
+  test("browse", () => {
     const results = SWDiscovery(localConf)
                       .something("h1")
                        .isObjectOf("http://test11")
                          .browse( ( n: any, p : Number) => {
-                          return n.$type + " : " + p
-                         })
+                          return n.$type + " : " + p;
+                         });
     expect(results).toStrictEqual([
-      'inrae.semantic_web.node.Root : 0',
-      'inrae.semantic_web.node.Something : 1',
-      'inrae.semantic_web.node.ObjectOf : 2'
-    ])
+      "inrae.semantic_web.node.Root : 0",
+      "inrae.semantic_web.node.Something : 1",
+      "inrae.semantic_web.node.ObjectOf : 2"
+    ]);
 })
     
 });

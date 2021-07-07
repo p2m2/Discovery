@@ -22,7 +22,7 @@ sbt npmPackageJson
 npm i
 npm test -- --silent && echo "typescript test ok" || exit 1
 
-sed -i "s#discovery-fastopt-bundle#discovery-web-dev#g" $(find ./dist -type f -name *dev.*)
+sed -i "s#discovery-fastopt-bundle#discovery-web-dev#g" $(find ./dist -type f -name "*dev*")
 sed -i "s#$(pwd)#com/github/p2m2#g" $(find ./dist -type f)
 
 # generate md5sum to check js libraries

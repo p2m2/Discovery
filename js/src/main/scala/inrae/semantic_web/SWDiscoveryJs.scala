@@ -8,6 +8,7 @@ import scala.scalajs._
 import scala.scalajs.js.{Dynamic, JSON}
 import scala.scalajs.js.JSConverters._
 import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
+import upickle.default.write
 
 @JSExportTopLevel(name="SWDiscovery")
 case class SWDiscoveryJs(
@@ -114,7 +115,6 @@ case class SWDiscoveryJs(
 
   @JSExport
   def browse[A](visitor : js.Function2[Dynamic, Integer,A] ) : js.Array[A] = {
-    import upickle.default.write
     val visitor2 : (Node, Integer) => A = (n, p) => {
       visitor(JSON.parse(write(n)),p)
     }
