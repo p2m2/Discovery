@@ -8,7 +8,7 @@ import utest.{TestSuite, Tests, test}
 object RequestsTest extends TestSuite {
   implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
 
-  val insertData = DataTestFactory.insert_virtuoso1(
+  val insertData = DataTestFactory.insertVirtuoso1(
     """
       <http://aaaaaa> <http://bbbbbb> <http://cc> .
       """.stripMargin, this.getClass.getSimpleName)

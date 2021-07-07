@@ -33,15 +33,16 @@ case class SWTransaction(sw : SWDiscovery = SWDiscovery())
 
   private var _progressionCallBack = Seq[Double => Unit]()
 
-  def progression(  callBack  : Double => Unit  ): Unit = {
-    println(callBack)
+  def progression(  callBack  : Double => Unit  ): SWTransaction = {
     _progressionCallBack = _progressionCallBack :+ callBack
+    this
   }
 
   private var _requestEventCallBack = Seq[String => Unit]()
 
-  def requestEvent(callBack  : String => Unit  ): Unit = {
+  def requestEvent(callBack  : String => Unit  ): SWTransaction = {
     _requestEventCallBack = _requestEventCallBack :+ callBack
+    this
   }
 
   def notify(event: DiscoveryRequestEvent): Unit = {
@@ -65,7 +66,8 @@ case class SWTransaction(sw : SWDiscovery = SWDiscovery())
   }
 
 
-  def process_datatypes(qr : QueryResult,
+  def process_datatypes(root: Root,
+                        qr : QueryResult,
                         datatypeNode : DatatypeNode,
                         lUris : Seq[SparqlDefinition]) = {
     debug(" -- process_datatypes --")
@@ -76,6 +78,7 @@ case class SWTransaction(sw : SWDiscovery = SWDiscovery())
         trace(" datatypes:" + lSubUris.toString)
         /* request using api */
         SWDiscovery(sw.config)
+          .prefixes(root.getPrefixes())
           .something("val_uri")
           .setList(lSubUris.flatMap(
             _ match {
@@ -146,7 +149,7 @@ case class SWTransaction(sw : SWDiscovery = SWDiscovery())
                         List()
                       }
                     }
-                  Future.sequence(process_datatypes(qr, datatypeNode, lUris))
+                  Future.sequence(process_datatypes(sw.rootNode,qr, datatypeNode, lUris))
                 }
                 case None => {
                   Future {}

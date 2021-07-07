@@ -54,6 +54,9 @@ case class SWDiscoveryJs(
   def prefix(short : String, long : Any ) : SWDiscoveryJs = SWDiscoveryJs(config,sw.prefix(short,toIRI(long)))
 
   @JSExport
+  def getPrefix(short : String) : Any = sw.getPrefix(short)
+
+  @JSExport
   def graph(graph : Any) : SWDiscoveryJs = SWDiscoveryJs(config,sw.graph(toIRI(graph)))
 
   @JSExport
@@ -103,6 +106,12 @@ case class SWDiscoveryJs(
 
   @JSExport
   def sparql() : String = sw.sparql
+
+  @JSExport
+  def sparql_get() : String = sw.sparql_get
+
+  @JSExport
+  def sparql_curl() : String = sw.sparql_curl
 
   @JSExport
   def getSerializedString(): String = sw.getSerializedString

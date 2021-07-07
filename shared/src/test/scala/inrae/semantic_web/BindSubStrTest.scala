@@ -7,7 +7,7 @@ import utest.{TestSuite, Tests, test}
 import scala.concurrent.ExecutionContext.Implicits.global
 
 object BindSubStrTest extends TestSuite {
-  val insertData = DataTestFactory.insert_virtuoso1(
+  val insertData = DataTestFactory.insertVirtuoso1(
     """
       <http://aa1> <http://bb> "abcdef" .
       <http://aa2> <http://bb> "abcdefghij" .

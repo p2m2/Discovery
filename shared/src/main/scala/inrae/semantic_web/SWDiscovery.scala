@@ -1,11 +1,7 @@
 package inrae.semantic_web
-
-import inrae.semantic_web
-import inrae.semantic_web.event.{DiscoveryRequestEvent, DiscoveryStateRequestEvent}
 import inrae.semantic_web.node._
-import inrae.semantic_web.node.pm.{RemoveNode, NodeVisitor}
+import inrae.semantic_web.node.pm.{NodeVisitor, RemoveNode}
 import inrae.semantic_web.rdf._
-import inrae.semantic_web.sparql.QueryResult
 import inrae.semantic_web.strategy.StrategyRequestBuilder
 import wvlet.log.Logger
 import wvlet.log.Logger.rootLogger._
@@ -13,6 +9,7 @@ import wvlet.log.Logger.rootLogger._
 import java.util.UUID.randomUUID
 import scala.concurrent.Future
 import upickle.default.{macroRW, read, write, ReadWriter => RW}
+import io.lemonlabs.uri.{QueryString, Url}
 
 final case class SWDiscoveryException(private val message: String = "",
                                       private val cause: Throwable = None.orNull) extends Exception(message,cause)
@@ -71,7 +68,8 @@ case class SWDiscovery(
 
   case class BindIncrement(`var` : String) {
     def manage(n:ExpressionNode,forward : Boolean = true) : SWDiscovery =
-      focusManagement(Bind(n,`var`),forward).root.something(`var`).focus(`var`)
+      // focusManagement(Bind(n,`var`),forward).root.something(`var`).focus(`var`)
+      focusManagement(Bind(n,`var`),forward)
     /* primary expression */
 
     /* String fun */
@@ -124,6 +122,16 @@ case class SWDiscovery(
 
   def prefix(short : String, long : IRI ) : SWDiscovery = SWDiscovery(config,rootNode.addPrefix(short , long ),Some(focusNode))
 
+  def prefixes( lPrefixes : Map[String,IRI] ) : SWDiscovery =
+    (lPrefixes map {case (key, value) => prefix(key, value)
+    }).toSeq match {
+      case l if l.length>0 => l(l.length-1)
+      case _ => this
+    }
+
+  def getPrefix(short: String) : IRI = rootNode.getPrefix(short)
+
+  def getPrefixes() : Map[String,IRI] = rootNode.getPrefixes()
 
   def graph(graph : IRI) : SWDiscovery = SWDiscovery(config,rootNode.addDefaultGraph(graph),Some(focusNode))
 
@@ -212,7 +220,7 @@ case class SWDiscovery(
   Attribute value is optional
   */
 
-  def datatype( uri : URI, ref : String = getUniqueRef("datatype") ) : SWDiscovery =
+  def datatype( uri : URI, ref : String ) : SWDiscovery =
     SWDiscovery(
       config,
       root.focusManagement(DatatypeNode(focusNode,SubjectOf(ref,uri),ref), false).rootNode,
@@ -239,14 +247,33 @@ case class SWDiscovery(
       pm.SimpleConsole().get(rootNode) + "\n" +
       "FOCUS NODE:"+ focusNode +
       "\nENDPOINT:"+config.sources().map(v => println(v.url)).mkString(",") +"\n\n" +
-      "\n -- SPARQL Request -- \n\n" +
-      sparql)
+      "\n--------------------------------------------------------------------\n -- HTTP GET -- \n\n" +
+      sparql_get +
+      "\n--------------------------------------------------------------------\n -- HTTP CURL -- \n\n" +
+      sparql_curl+
+      "\n--------------------------------------------------------------------\n"
+       )
       //"QUERY PLANNER\n"+
       //"todo....")
     this
   }
 
-  def sparql : String = SparqlQueryBuilder.selectQueryString(rootNode)
+  def sparql: String = SparqlQueryBuilder.selectQueryString(rootNode).trim
+
+  def sparql_get : String =
+    (config.sources().length match {
+      case 1 => config.sources()(0).url
+      case _ => ""
+    }) + Url(path="", query=QueryString.fromPairs(
+      "query"-> sparql,
+      "format"->"json")
+    )
+
+  def sparql_curl : String =
+    "curl -H \"Accept: application/json\" -G " +  (config.sources().length match {
+        case 1 => config.sources()(0).url
+        case _ => ""
+      }) + " --data-urlencode query='" + sparql + "'"
 
   /**
    * Discovery request

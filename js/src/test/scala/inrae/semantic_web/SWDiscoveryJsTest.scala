@@ -6,7 +6,7 @@ import utest.{TestSuite, Tests, test}
 object SWDiscoveryJsTest extends TestSuite{
   implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
 
-  val insertData = DataTestFactory.insert_virtuoso1(
+  val insertData = DataTestFactory.insertVirtuoso1(
     """<aa> <bb> <cc> .
        <aa> <bb> <dd> .
        <aa> a <ee> .
@@ -16,7 +16,7 @@ object SWDiscoveryJsTest extends TestSuite{
   val config: StatementConfiguration = DataTestFactory.getConfigVirtuoso1()
 
   override def utestAfterAll(): Unit = {
-    DataTestFactory.delete_virtuoso1(this.getClass.getSimpleName)
+    DataTestFactory.deleteVirtuoso1(this.getClass.getSimpleName)
   }
 
   def startRequest =

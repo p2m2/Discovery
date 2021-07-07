@@ -6,7 +6,7 @@ import utest.{TestSuite, Tests, test}
 import scala.concurrent.ExecutionContext.Implicits.global
 
 object SolutionModifierTest extends TestSuite {
-  val insertData = DataTestFactory.insert_virtuoso1(
+  val insertData = DataTestFactory.insertVirtuoso1(
     """
       <http://p1>    <http://xmlns.com/foaf/0.1/name> "Alice" .
       <http://p1>    <http://xmlns.com/foaf/0.1/mbox>  <mailto:alice@example.com> .

@@ -7,7 +7,7 @@ import utest.{TestSuite, Tests, test}
 import scala.concurrent.ExecutionContext.Implicits.global
 
 object BindTest extends TestSuite {
-  val insertData = DataTestFactory.insert_virtuoso1(
+  val insertData = DataTestFactory.insertVirtuoso1(
     """
       <http://aa1> <http://bb> "abcdef" .
       <http://aa2> <http://bb> "abcdefghij" .
@@ -79,6 +79,22 @@ object BindTest extends TestSuite {
           .commit()
           .raw.map(r => {
           assert(SparqlBuilder.createLiteral(r("results")("bindings").arr(0)("new_value")).toDouble == 5.5)
+        })
+      }).flatten
+    }
+
+    test("bind abs with something linked") {
+      insertData.map(_ => {
+        SWDiscovery(config)
+          .graph(IRI(DataTestFactory.graph1(this.getClass.getSimpleName)))
+          .something()
+          .set(Literal("-5.5","http://www.w3.org/2001/XMLSchema#decimal"))
+          .bind("new_value").abs()
+          .isObjectOf(URI("http://test"))
+          .select(Seq("new_value"))
+          .commit()
+          .raw.map(r => {
+          assert(r("results")("bindings").arr.length == 0)
         })
       }).flatten
     }

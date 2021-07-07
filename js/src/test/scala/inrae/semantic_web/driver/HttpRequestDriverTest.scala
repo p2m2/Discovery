@@ -9,7 +9,7 @@ import scala.concurrent.Future
 object HttpRequestDriverTest extends TestSuite {
   implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
 
-  val insertData : Future[Any] = DataTestFactory.insert_virtuoso1(
+  val insertData : Future[Any] = DataTestFactory.insertVirtuoso1(
     """
       <aaRosHttpDriverTest> <bb> <cc> .
       """.stripMargin, this.getClass.getSimpleName)
@@ -153,5 +153,5 @@ object HttpRequestDriverTest extends TestSuite {
   }
 
 
-  TestRunner.runAsync(tests).map { _ => DataTestFactory.delete_virtuoso1(this.getClass.getSimpleName) }
+  TestRunner.runAsync(tests).map { _ => DataTestFactory.deleteVirtuoso1(this.getClass.getSimpleName) }
 }

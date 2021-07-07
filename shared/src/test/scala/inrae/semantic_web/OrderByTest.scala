@@ -8,7 +8,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{Failure, Success, Try}
 
 object OrderByTest extends TestSuite {
-  val insertData = DataTestFactory.insert_virtuoso1(
+  val insertData = DataTestFactory.insertVirtuoso1(
     """
       <http://aa> <http://bb> 2 .
       <http://aa> <http://bb> 3 .

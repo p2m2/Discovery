@@ -103,12 +103,13 @@ lazy val discovery=crossProject(JSPlatform, JVMPlatform).in(file("."))
       "com.softwaremill.sttp.client3" %% "core" % "3.3.4" % Test,
       "com.lihaoyi" %%% "utest" % utestVersion % Test,
       "com.lihaoyi" %%% "upickle" % upickleVersion,
-      "org.wvlet.airframe" %%% "airframe-log" % airframeLogVersion
+      "org.wvlet.airframe" %%% "airframe-log" % airframeLogVersion,
+      "io.lemonlabs" %%% "scala-uri" % "3.5.0"
     ),
     testFrameworks += new TestFramework("utest.runner.Framework"),
     scalacOptions ++= Seq("-deprecation", "-feature"),
     classLoaderLayeringStrategy := ClassLoaderLayeringStrategy.AllLibraryJars,
-    coverageMinimum := 70,
+    coverageMinimumStmtTotal := 70,
     coverageFailOnMinimum := false,
     coverageHighlighting := true,
     Test / parallelExecution := false

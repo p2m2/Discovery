@@ -104,6 +104,10 @@ case class Root(
     Root(idRef,prefixes + (short -> long ),defaultGraph,namedGraph,lDatatypeNode,lSourcesNodes,lBindNode,lSolutionSequenceModifierNode,children)
   }
 
+  def getPrefix(short : String) : IRI = prefixes.getOrElse(short,IRI(""))
+
+  def getPrefixes() : Map[String,IRI] = prefixes
+
   def addDefaultGraph(graph : IRI) : Root = {
     Root(idRef,prefixes,defaultGraph :+ graph,namedGraph,lDatatypeNode,lSourcesNodes,lBindNode,lSolutionSequenceModifierNode,children)
   }
