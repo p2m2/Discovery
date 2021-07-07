@@ -6,11 +6,11 @@ rm dist/discovery*.js
 rm ./shared/src/main/scala/inrae/semantic_web/SWDiscoveryVersionAtBuildTime.scala
 
 # browser lib debug information
-sbt discoveryJS/fastOptJS::webpack
+sbt discoveryJS/fastOptJS/webpack
 # node lib
 sbt discoveryJS/fullOptJS
 # browser lib
-sbt discoveryJS/fullOptJS::webpack
+sbt discoveryJS/fullOptJS/webpack
 
 # browser lib js
 cp ./js/target/scala-2.13/scalajs-bundler/main/discovery-fastopt-bundle.js  ./dist/discovery-web-dev.js
@@ -22,8 +22,8 @@ sbt npmPackageJson
 npm i
 npm test -- --silent && echo "typescript test ok" || exit 1
 
-sed -i "s#discovery-fastopt-bundle#discovery-web-dev#g" dist/*dev*
-sed -i "s#$(pwd)#com/github/p2m2#g" dist/*
+sed -i "s#discovery-fastopt-bundle#discovery-web-dev#g" $(find ./dist -type f -name *dev.*)
+sed -i "s#$(pwd)#com/github/p2m2#g" $(find ./dist -type f)
 
 # generate md5sum to check js libraries
 
