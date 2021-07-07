@@ -1,6 +1,7 @@
 package inrae.semantic_web
 
 import inrae.data.DataTestFactory
+import inrae.semantic_web.node.Node
 import inrae.semantic_web.rdf._
 import utest._
 
@@ -183,6 +184,15 @@ object SWDiscoveryTest extends TestSuite {
       assert(sw.something("h").focus() == "h")
     }
 
+    test("browse") {
+      val listBrowse : Seq[String] =
+        SWDiscovery(config)
+        .something("h1")
+        .isSubjectOf("http://test","h2")
+         .browse( (n : Node, p:Integer) => { n.idRef} )
+      assert( listBrowse.contains("h1") )
+      assert( listBrowse.contains("h2") )
+    }
 
   }
 }
