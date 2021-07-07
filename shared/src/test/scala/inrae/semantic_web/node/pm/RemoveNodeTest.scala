@@ -1,5 +1,5 @@
-package inrae.semantic_web.internal.pm
-import inrae.semantic_web.internal.{Root, SubjectOf}
+package inrae.semantic_web.node.pm
+import inrae.semantic_web.node.{Root, SubjectOf}
 import inrae.semantic_web.rdf.URI
 import utest.{TestSuite, Tests, test}
 object RemoveNodeTest extends TestSuite {

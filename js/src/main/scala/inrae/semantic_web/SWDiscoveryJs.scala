@@ -1,12 +1,14 @@
 package inrae.semantic_web
 
-import inrae.semantic_web.internal.Node
+import inrae.semantic_web.node.Node
 import inrae.semantic_web.rdf.{IRI, SparqlDefinition, URI}
 import inrae.semantic_web.view.HtmlView
 
 import scala.scalajs._
+import scala.scalajs.js.{Dynamic, JSON}
 import scala.scalajs.js.JSConverters._
 import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
+import upickle.default.write
 
 @JSExportTopLevel(name="SWDiscovery")
 case class SWDiscoveryJs(
@@ -41,9 +43,6 @@ case class SWDiscoveryJs(
 
   @JSExport
   def bind(`var` : String) : BindIncrementJs = BindIncrementJs(this,`var`)
-
-  @JSExport
-  def usage() : SWDiscoveryJs = SWDiscoveryJs(config,SWDiscovery(config).usage)
 
   @JSExport
   def finder :SWDiscoveryHelperJs = SWDiscoveryHelperJs(sw)
@@ -113,6 +112,14 @@ case class SWDiscoveryJs(
 
   @JSExport
   def setSerializedString(query : String): SWDiscoveryJs = SWDiscoveryJs(config,sw.setSerializedString(query))
+
+  @JSExport
+  def browse[A](visitor : js.Function2[Dynamic, Integer,A] ) : js.Array[A] = {
+    val visitor2 : (Node, Integer) => A = (n, p) => {
+      visitor(JSON.parse(write(n)),p)
+    }
+    sw.browse(visitor2).toJSArray
+  }
 
   @JSExport
   def select(lRef: String*): SWTransactionJs = SWTransactionJs(sw.select(lRef))

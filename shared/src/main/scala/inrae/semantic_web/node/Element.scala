@@ -1,4 +1,4 @@
-package inrae.semantic_web.internal
+package inrae.semantic_web.node
 
 import inrae.semantic_web.SWDiscoveryException
 import inrae.semantic_web.rdf._
@@ -7,6 +7,7 @@ import wvlet.log.Logger.rootLogger.debug
 
 import java.util.UUID.randomUUID
 import scala.reflect.ClassTag
+import scala.scalajs.js.annotation.JSExportTopLevel
 
 sealed abstract class Node(val idRef : String,val children: Seq[Node] = Seq[Node]())
 {
@@ -80,6 +81,7 @@ object Root {
 }
 
 /* Node case */
+@JSExportTopLevel(name="Root")
 case class Root(
                  override val idRef : String=randomUUID.toString,
                  prefixes : Map[String,IRI] = Map(
@@ -239,6 +241,7 @@ object Something {
   implicit val rw: RW[Something] = macroRW
 }
 
+@JSExportTopLevel(name="Something")
 case class Something(override val idRef: String,override val children: Seq[Node] = Seq[Node]()) extends RdfNode(idRef,children) {
 
   def copy(children : Seq[Node]) : Node = {
@@ -249,6 +252,7 @@ case class Something(override val idRef: String,override val children: Seq[Node]
 object SubjectOf {
   implicit val rw: RW[SubjectOf] = macroRW
 }
+
 
 case class SubjectOf(
                       override val idRef : String = randomUUID.toString,
@@ -264,6 +268,7 @@ object ObjectOf {
   implicit val rw: RW[ObjectOf] = macroRW
 }
 
+@JSExportTopLevel(name="ObjectOf")
 case class ObjectOf(
                      override val idRef : String,
                      override val term : SparqlDefinition,
@@ -274,10 +279,12 @@ case class ObjectOf(
   }
 }
 
+
 object LinkTo {
   implicit val rw: RW[LinkTo] = macroRW
 }
 
+@JSExportTopLevel(name="LinkTo")
 case class LinkTo(
                    override val idRef : String,
                    override val term : SparqlDefinition,
@@ -291,6 +298,7 @@ object LinkFrom {
   implicit val rw: RW[LinkFrom] = macroRW
 }
 
+@JSExportTopLevel(name="LinkFrom")
 case class LinkFrom(
                      override val idRef : String,
                      override val term : SparqlDefinition,

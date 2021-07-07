@@ -1,7 +1,7 @@
 package inrae.semantic_web.view
 
 import facade.npm.Showdown
-import inrae.semantic_web.internal.pm.{SelectNode, SimpleConsole}
+import inrae.semantic_web.node.pm.{NodeVisitor, SimpleConsole}
 import inrae.semantic_web.{SWDiscovery, SWDiscoveryVersionAtBuildTime}
 import org.scalajs.dom.document
 
@@ -68,7 +68,7 @@ case class HtmlView(sw: SWDiscovery,regex : String = "") {
 
 ### New step on focus
 
- - **target node**      : ${SelectNode.getNodeWithRef(sw.focusNode,sw.rootNode).mkString(",")}
+ - **target node**      : ${NodeVisitor.getNodeWithRef(sw.focusNode,sw.rootNode).mkString(",")}
  - **regex**            : $regex
  - **Number of values** : **$count**
 

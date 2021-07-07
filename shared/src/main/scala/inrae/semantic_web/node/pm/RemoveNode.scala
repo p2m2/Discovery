@@ -1,6 +1,6 @@
-package inrae.semantic_web.internal.pm
+package inrae.semantic_web.node.pm
 
-import inrae.semantic_web.internal.{Node, Root}
+import inrae.semantic_web.node.{Node, Root}
 
 case object RemoveNode {
   def run ( root: Root, focus : String ) : Root = {

@@ -1,7 +1,7 @@
 package inrae.semantic_web
 
 import inrae.semantic_web.event._
-import inrae.semantic_web.internal._
+import inrae.semantic_web.node._
 import inrae.semantic_web.rdf.{QueryVariable, SparqlDefinition, URI}
 import inrae.semantic_web.sparql.QueryResult
 import inrae.semantic_web.strategy._

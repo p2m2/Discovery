@@ -2,8 +2,8 @@ package inrae.semantic_web
 
 import inrae.semantic_web
 import inrae.semantic_web.event.{DiscoveryRequestEvent, DiscoveryStateRequestEvent}
-import inrae.semantic_web.internal._
-import inrae.semantic_web.internal.pm.{RemoveNode, SelectNode}
+import inrae.semantic_web.node._
+import inrae.semantic_web.node.pm.{RemoveNode, NodeVisitor}
 import inrae.semantic_web.rdf._
 import inrae.semantic_web.sparql.QueryResult
 import inrae.semantic_web.strategy.StrategyRequestBuilder
@@ -45,9 +45,9 @@ case class SWDiscovery(
 
     def manageFilter(n:Node,forward : Boolean = false) : SWDiscovery = focusManagement(n,forward)
 
-    def isLiteral : SWDiscovery = manageFilter(inrae.semantic_web.internal.isLiteral(this.negation,getUniqueRef()))
-    def isUri : SWDiscovery = manageFilter(inrae.semantic_web.internal.isURI(this.negation,getUniqueRef()))
-    def isBlank : SWDiscovery = manageFilter(inrae.semantic_web.internal.isBlank(this.negation,getUniqueRef()))
+    def isLiteral : SWDiscovery = manageFilter(inrae.semantic_web.node.isLiteral(this.negation,getUniqueRef()))
+    def isUri : SWDiscovery = manageFilter(inrae.semantic_web.node.isURI(this.negation,getUniqueRef()))
+    def isBlank : SWDiscovery = manageFilter(inrae.semantic_web.node.isBlank(this.negation,getUniqueRef()))
 
     /* strings */
     def regex( pattern : SparqlDefinition, flags : SparqlDefinition="" ) : SWDiscovery =
@@ -97,39 +97,6 @@ case class SWDiscovery(
   // Set the root logger's log level
   Logger.setDefaultLogLevel(config.conf.settings.getLogLevel)
 
-  def usage : SWDiscovery = {
-    println(" ---------------- SWDiscovery "+SWDiscovery.version+" ---------------------------")
-    println("   ")
-    println("    -------------  Query Control ----------")
-    println(" something:")
-    println(" focus    :")
-    println("   ")
-    println("    -------------  Add Sparql snippet ----------")
-    println(" isSubjectOf(URI(\"http://relation\")):  ?currentFocus URI(\"http://relation\") ?newFocus")
-    println(" isObjectOf(URI(\"http://relation\")):  ?newFocus URI(\"http://relation\") ?currentFocus")
-    println(" isLinkTo(URI(\"http://object\")):  ?currentFocus ?newFocus URI(\"http://object\")")
-    println(" isLinkTo(XSD(\"type\",\"value\")):  ?currentFocus ?newFocus XSD(\"type\",\"value\")")
-    println(" isLinkFrom(URI(\"http://object\")):  URI(\"http://object\") ?newFocus ?currentFocus")
-    println(" isA ")
-    println(" set ")
-    println("   ")
-    println("    -------------  Print information ----------")
-    println(" debug:")
-    println(" sparql_console:")
-    println("   ")
-    println("    -------------  Request ----------")
-    println(" select:")
-    println(" count:")
-    println("   ")
-    println("    -------------  Explore according the focus ----------")
-    println(" findClassesOf:")
-    println(" findObjectPropertiesOf:")
-    println(" findDatatypePropertiesOf:")
-    println("   ")
-    println("  --------------------------------------------------------------" )
-    SWDiscovery(config,rootNode,Some(focusNode))
-  }
-
   /* set focus on root */
   def root: SWDiscovery  = SWDiscovery(config,rootNode,Some(rootNode.reference()))
 
@@ -141,7 +108,7 @@ case class SWDiscovery(
   /* set the current focus on the select node */
   def focus(ref : String) : SWDiscovery = {
     trace("focus")
-    pm.SelectNode.getNodeWithRef(ref, rootNode).lastOption match {
+    pm.NodeVisitor.getNodeWithRef(ref, rootNode).lastOption match {
       case Some(node) => SWDiscovery(config,rootNode,Some(node.reference()))
       case None => throw SWDiscoveryException(s"$ref does not exist.")
     }
@@ -149,7 +116,7 @@ case class SWDiscovery(
 
   def refExist(ref:String) : SWDiscovery = {
 
-    pm.SelectNode.getNodeWithRef(ref, rootNode).lastOption match {
+    pm.NodeVisitor.getNodeWithRef(ref, rootNode).lastOption match {
       case Some(_) => SWDiscovery(config,rootNode,Some(focusNode))
       case None => throw SWDiscoveryException(s"$ref does not exist.")
     }
@@ -167,7 +134,7 @@ case class SWDiscovery(
     /* Check if QueryVariable is referenced with Element.
      *  add a Something element otherwise */
     term match {
-        case qv : QueryVariable if SelectNode.getNodeWithRef(qv.name,rootNode).length == 0  =>
+        case qv : QueryVariable if NodeVisitor.getNodeWithRef(qv.name,rootNode).length == 0  =>
           SWDiscovery(config,rootNode.addChildren(rootNode.reference(),Something(qv.name)),Some(focusNode))
         case _ => this
       }
@@ -315,4 +282,7 @@ case class SWDiscovery(
         }))
       })
   }
+
+  def browse[A](visitor : (Node, Integer) => A ) : Seq[A] = NodeVisitor.map(rootNode,0,visitor)
+
 }

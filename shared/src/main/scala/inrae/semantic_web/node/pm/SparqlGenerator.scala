@@ -1,5 +1,5 @@
-package inrae.semantic_web.internal.pm
-import inrae.semantic_web.internal._
+package inrae.semantic_web.node.pm
+import inrae.semantic_web.node._
 import inrae.semantic_web.rdf.{IRI, QueryVariable}
 import wvlet.log.Logger.rootLogger._
 
