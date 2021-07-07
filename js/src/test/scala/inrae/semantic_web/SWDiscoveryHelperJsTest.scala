@@ -21,12 +21,16 @@ object SWDiscoveryHelperJsTest extends TestSuite {
   override def utestAfterAll(): Unit = {
     DataTestFactory.delete_virtuoso1(this.getClass.getSimpleName)
   }
+
+  def startRequest =
+    SWDiscoveryJs(config)
+    .graph(DataTestFactory.graph1(this.getClass.getSimpleName))
+    .something("h1")
+
   def tests = Tests {
     test("count") {
       insertData.map(_ => {
-          SWDiscoveryJs(config)
-            .graph(DataTestFactory.graph1(this.getClass.getSimpleName))
-            .something("h1")
+        startRequest
             .isSubjectOf(URI("<bb>"))
             .finder
             .count()
@@ -36,9 +40,7 @@ object SWDiscoveryHelperJsTest extends TestSuite {
     }
     test("classes 1") {
       insertData.map(_ => {
-        SWDiscoveryJs(config)
-          .graph(DataTestFactory.graph1(this.getClass.getSimpleName))
-          .something("h1")
+        startRequest
           .isSubjectOf(URI("<bb>"))
           .focus("h1")
           .finder
@@ -51,9 +53,7 @@ object SWDiscoveryHelperJsTest extends TestSuite {
     }
     test("classes 2") {
         insertData.map(_ => {
-          SWDiscoveryJs(config)
-            .graph(DataTestFactory.graph1(this.getClass.getSimpleName))
-            .something("h1")
+          startRequest
             .isSubjectOf(URI("<bb>"))
             .finder
             .classes()
@@ -65,9 +65,7 @@ object SWDiscoveryHelperJsTest extends TestSuite {
       }
       test("classes 3") {
         insertData.map(_ => {
-          SWDiscoveryJs(config)
-            .graph(DataTestFactory.graph1(this.getClass.getSimpleName))
-            .something("h1")
+          startRequest
             .finder
             .classes()
             .toFuture
@@ -79,9 +77,7 @@ object SWDiscoveryHelperJsTest extends TestSuite {
 
     test("objectProperties 1") {
       insertData.map(_ => {
-        SWDiscoveryJs(config)
-          .graph(DataTestFactory.graph1(this.getClass.getSimpleName))
-          .something("h1")
+        startRequest
           .finder
           .objectProperties()
           .toFuture
@@ -92,9 +88,7 @@ object SWDiscoveryHelperJsTest extends TestSuite {
     }
     test("objectProperties 2") {
       insertData.map(_ => {
-        SWDiscoveryJs(config)
-          .graph(DataTestFactory.graph1(this.getClass.getSimpleName))
-          .something("h1")
+        startRequest
           .isSubjectOf(URI("<bb>"))
           .finder
           .objectProperties()
@@ -106,9 +100,7 @@ object SWDiscoveryHelperJsTest extends TestSuite {
     }
     test("subjectProperties 1") {
       insertData.map(_ => {
-        SWDiscoveryJs(config)
-          .graph(DataTestFactory.graph1(this.getClass.getSimpleName))
-          .something("h1")
+        startRequest
           .finder
           .subjectProperties()
           .toFuture
@@ -120,9 +112,7 @@ object SWDiscoveryHelperJsTest extends TestSuite {
     }
     test("subjectProperties 2") {
       insertData.map(_ => {
-        SWDiscoveryJs(config)
-          .graph(DataTestFactory.graph1(this.getClass.getSimpleName))
-          .something("h1")
+        startRequest
           .isSubjectOf(URI("<bb>"))
           .finder
           .subjectProperties()
@@ -134,9 +124,7 @@ object SWDiscoveryHelperJsTest extends TestSuite {
     }
     test("datatypeProperties 1") {
       insertData.map(_ => {
-        SWDiscoveryJs(config)
-          .graph(DataTestFactory.graph1(this.getClass.getSimpleName))
-          .something("h1")
+        startRequest
           .finder
           .datatypeProperties()
           .toFuture
@@ -147,9 +135,7 @@ object SWDiscoveryHelperJsTest extends TestSuite {
     }
     test("datatypeProperties 2") {
       insertData.map(_ => {
-        SWDiscoveryJs(config)
-          .graph(DataTestFactory.graph1(this.getClass.getSimpleName))
-          .something("h1")
+        startRequest
           .isSubjectOf(URI("<bb>"))
           .finder
           .datatypeProperties()
@@ -161,9 +147,7 @@ object SWDiscoveryHelperJsTest extends TestSuite {
     }
     test("datatypeProperties 3") {
       insertData.map(_ => {
-        SWDiscoveryJs(config)
-          .graph(DataTestFactory.graph1(this.getClass.getSimpleName))
-          .something("h1")
+        startRequest
           .isObjectOf(URI("<bb>"))
           .finder
           .datatypeProperties()
